@@ -62,19 +62,38 @@ class NewsAPI {
         }
 
         try {
-            // Due to CORS restrictions, we'll use fallback content with realistic articles
-            // In a production environment, these API calls would be made from a backend server
-            console.log(`Fetching ${category} news...`);
+            // Fetch from all APIs simultaneously with timeout for faster response
+            const promises = [
+                this.fetchFromGNews(category, limit),
+                this.fetchFromNewsData(category, limit),
+                this.fetchFromNewsAPI(category, limit),
+                this.fetchFromMediastack(category, limit),
+                this.fetchFromCurrentsAPI(category, limit)
+            ];
+
+            // Use Promise.allSettled with 8-second timeout for faster loading
+            const timeoutPromise = new Promise((_, reject) => 
+                setTimeout(() => reject(new Error('Request timeout')), 8000)
+            );
+
+            const results = await Promise.allSettled(promises.map(p => 
+                Promise.race([p, timeoutPromise])
+            ));
             
-            // Try to fetch from APIs but provide fallback on CORS errors
-            const fallbackArticles = this.getSampleArticles(category, 'News API');
-            const extendedArticles = this.generateAdditionalArticles(category, 'Extended News');
-            
-            // Combine fallback and extended articles
-            const allArticles = [...fallbackArticles, ...extendedArticles];
-            
+            // Combine results from all APIs
+            let allArticles = [];
+            results.forEach((result, index) => {
+                if (result.status === 'fulfilled' && result.value) {
+                    allArticles = allArticles.concat(result.value);
+                } else {
+                    console.warn(`API ${index + 1} failed:`, result.reason);
+                }
+            });
+
             // Comprehensive deduplication and sorting
+            console.log(`Pre-deduplication: ${allArticles.length} articles`);
             const uniqueArticles = this.removeDuplicates(allArticles);
+            console.log(`Post-deduplication: ${uniqueArticles.length} articles`);
             
             const sortedArticles = uniqueArticles.sort((a, b) => {
                 const dateA = new Date(a.publishedAt || 0);
