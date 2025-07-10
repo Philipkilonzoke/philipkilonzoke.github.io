@@ -1,0 +1,208 @@
+/* Default Theme (Light) */
+:root {
+    --primary-color: #2563eb;
+    --secondary-color: #64748b;
+    --background-color: #ffffff;
+    --surface-color: #f8fafc;
+    --text-color: #1e293b;
+    --text-muted: #64748b;
+    --border-color: #e2e8f0;
+}
+
+/* Dark Theme */
+[data-theme="dark"] {
+    --primary-color: #3b82f6;
+    --secondary-color: #94a3b8;
+    --background-color: #0f172a;
+    --surface-color: #1e293b;
+    --text-color: #f1f5f9;
+    --text-muted: #94a3b8;
+    --border-color: #334155;
+}
+
+/* Ocean Blue Theme */
+[data-theme="blue"] {
+    --primary-color: #0ea5e9;
+    --secondary-color: #0284c7;
+    --background-color: #f0f9ff;
+    --surface-color: #e0f2fe;
+    --text-color: #0c4a6e;
+    --text-muted: #0369a1;
+    --border-color: #bae6fd;
+}
+
+/* Forest Green Theme */
+[data-theme="green"] {
+    --primary-color: #10b981;
+    --secondary-color: #059669;
+    --background-color: #f0fdf4;
+    --surface-color: #dcfce7;
+    --text-color: #14532d;
+    --text-muted: #166534;
+    --border-color: #bbf7d0;
+}
+
+/* Royal Purple Theme */
+[data-theme="purple"] {
+    --primary-color: #8b5cf6;
+    --secondary-color: #7c3aed;
+    --background-color: #faf5ff;
+    --surface-color: #f3e8ff;
+    --text-color: #581c87;
+    --text-muted: #6b21a8;
+    --border-color: #d8b4fe;
+}
+
+/* Sunset Orange Theme */
+[data-theme="orange"] {
+    --primary-color: #f97316;
+    --secondary-color: #ea580c;
+    --background-color: #fff7ed;
+    --surface-color: #ffedd5;
+    --text-color: #9a3412;
+    --text-muted: #c2410c;
+    --border-color: #fed7aa;
+}
+
+/* Rose Pink Theme */
+[data-theme="rose"] {
+    --primary-color: #f43f5e;
+    --secondary-color: #e11d48;
+    --background-color: #fff1f2;
+    --surface-color: #ffe4e6;
+    --text-color: #881337;
+    --text-muted: #be123c;
+    --border-color: #fda4af;
+}
+
+/* Emerald Theme */
+[data-theme="emerald"] {
+    --primary-color: #059669;
+    --secondary-color: #047857;
+    --background-color: #ecfdf5;
+    --surface-color: #d1fae5;
+    --text-color: #064e3b;
+    --text-muted: #065f46;
+    --border-color: #a7f3d0;
+}
+
+/* Indigo Theme */
+[data-theme="indigo"] {
+    --primary-color: #6366f1;
+    --secondary-color: #4f46e5;
+    --background-color: #f8faff;
+    --surface-color: #eef2ff;
+    --text-color: #312e81;
+    --text-muted: #3730a3;
+    --border-color: #c7d2fe;
+}
+
+/* Amber Theme */
+[data-theme="amber"] {
+    --primary-color: #f59e0b;
+    --secondary-color: #d97706;
+    --background-color: #fffbeb;
+    --surface-color: #fef3c7;
+    --text-color: #92400e;
+    --text-muted: #b45309;
+    --border-color: #fde68a;
+}
+
+/* Teal Theme */
+[data-theme="teal"] {
+    --primary-color: #14b8a6;
+    --secondary-color: #0f766e;
+    --background-color: #f0fdfa;
+    --surface-color: #ccfbf1;
+    --text-color: #134e4a;
+    --text-muted: #115e59;
+    --border-color: #99f6e4;
+}
+
+/* Crimson Theme */
+[data-theme="crimson"] {
+    --primary-color: #dc2626;
+    --secondary-color: #b91c1c;
+    --background-color: #fef2f2;
+    --surface-color: #fee2e2;
+    --text-color: #7f1d1d;
+    --text-muted: #991b1b;
+    --border-color: #fca5a5;
+}
+
+/* Theme transitions */
+* {
+    transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+}
+
+/* Theme-specific adjustments */
+[data-theme="dark"] .loading-screen {
+    background: linear-gradient(135deg, #1e293b, #334155);
+}
+
+[data-theme="blue"] .loading-screen {
+    background: linear-gradient(135deg, #0ea5e9, #0284c7);
+}
+
+[data-theme="green"] .loading-screen {
+    background: linear-gradient(135deg, #10b981, #059669);
+}
+
+[data-theme="purple"] .loading-screen {
+    background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+}
+
+[data-theme="orange"] .loading-screen {
+    background: linear-gradient(135deg, #f97316, #ea580c);
+}
+
+[data-theme="rose"] .loading-screen {
+    background: linear-gradient(135deg, #f43f5e, #e11d48);
+}
+
+[data-theme="emerald"] .loading-screen {
+    background: linear-gradient(135deg, #059669, #047857);
+}
+
+[data-theme="indigo"] .loading-screen {
+    background: linear-gradient(135deg, #6366f1, #4f46e5);
+}
+
+[data-theme="amber"] .loading-screen {
+    background: linear-gradient(135deg, #f59e0b, #d97706);
+}
+
+[data-theme="teal"] .loading-screen {
+    background: linear-gradient(135deg, #14b8a6, #0f766e);
+}
+
+[data-theme="crimson"] .loading-screen {
+    background: linear-gradient(135deg, #dc2626, #b91c1c);
+}
+
+/* Dark theme specific adjustments */
+[data-theme="dark"] .news-card {
+    background: var(--surface-color);
+    border-color: var(--border-color);
+}
+
+[data-theme="dark"] .news-source {
+    background: rgba(0, 0, 0, 0.9);
+}
+
+[data-theme="dark"] .theme-modal {
+    background: rgba(0, 0, 0, 0.8);
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+    :root {
+        --border-color: #000000;
+        --text-muted: #000000;
+    }
+    
+    [data-theme="dark"] {
+        --border-color: #ffffff;
+        --text-muted: #ffffff;
+    }
+}
