@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Brightlens News - Latest Breaking News & Updates</title>
+    <meta name="description" content="Stay informed with Brightlens News - your trusted source for breaking news, current events, and in-depth analysis from around the world.">
+    <meta name="keywords" content="news, breaking news, current events, world news, technology news, business news">
+    <meta name="author" content="Brightlens News">
+    
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://philipkilonzoke.github.io/Test/">
+    <meta property="og:title" content="Brightlens News - Latest Breaking News & Updates">
+    <meta property="og:description" content="Stay informed with Brightlens News - your trusted source for breaking news and current events.">
+    <meta property="og:image" content="https://philipkilonzoke.github.io/Test/assets/brightlens-og.jpg">
+
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:url" content="https://philipkilonzoke.github.io/Test/">
+    <meta property="twitter:title" content="Brightlens News - Latest Breaking News & Updates">
+    <meta property="twitter:description" content="Stay informed with Brightlens News - your trusted source for breaking news and current events.">
+    <meta property="twitter:image" content="https://philipkilonzoke.github.io/Test/assets/brightlens-twitter.jpg">
+
+    <link rel="manifest" href="manifest.json">
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📰</text></svg>">
+    
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="themes.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/feather-icons@4.28.0/font/feather.css">
+</head>
+<body>
+    <header class="header">
+        <div class="container">
+            <div class="nav-brand">
+                <h1 class="logo">
+                    <span class="logo-icon">📰</span>
+                    Brightlens News
+                </h1>
+                <p class="tagline">Your trusted source for breaking news</p>
+            </div>
+            <nav class="nav-menu">
+                <button class="theme-toggle" id="themeToggle" aria-label="Theme selector">
+                    <i data-feather="palette"></i>
+                    <span>Theme</span>
+                </button>
+                <button class="refresh-btn" id="refreshBtn" aria-label="Refresh news">
+                    <i data-feather="refresh-cw"></i>
+                    <span>Refresh</span>
+                </button>
+            </nav>
+        </div>
+    </header>
+
+    <main class="main">
+        <div class="container">
+            <!-- Loading State -->
+            <div class="loading-state" id="loadingState">
+                <div class="loading-spinner"></div>
+                <h2>Loading the latest stories...</h2>
+                <p>Fetching news from multiple sources...</p>
+            </div>
+
+            <!-- Error State -->
+            <div class="error-state" id="errorState" style="display: none;">
+                <div class="error-icon">
+                    <i data-feather="alert-triangle"></i>
+                </div>
+                <h2>Unable to Load News</h2>
+                <p id="errorMessage">We're having trouble connecting to our news sources. Please check your internet connection and try again.</p>
+                <button class="btn btn-primary" id="retryBtn">
+                    <i data-feather="refresh-cw"></i>
+                    Try Again
+                </button>
+            </div>
+
+            <!-- News Content -->
+            <div class="news-content" id="newsContent" style="display: none;">
+                <div class="news-header">
+                    <h2>Latest News</h2>
+                    <div class="news-meta">
+                        <span class="article-count">Showing <span id="articleCount">0</span> articles</span>
+                        <span class="last-updated">Last updated: <span id="lastUpdated">--:--:--</span></span>
+                    </div>
+                </div>
+
+                <div class="news-grid" id="newsGrid">
+                    <!-- News articles will be inserted here -->
+                </div>
+
+                <div class="load-more-container">
+                    <button class="btn btn-secondary" id="loadMoreBtn">
+                        <i data-feather="plus"></i>
+                        Load More Articles
+                    </button>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Theme Selection Modal -->
+    <div class="theme-modal" id="themeModal">
+        <div class="theme-modal-content">
+            <div class="theme-modal-header">
+                <h3>Choose Theme</h3>
+                <button class="theme-modal-close" id="themeModalClose">
+                    <i data-feather="x"></i>
+                </button>
+            </div>
+            <div class="theme-grid">
+                <button class="theme-option" data-theme="default">
+                    <div class="theme-preview theme-preview-default"></div>
+                    <span>Default</span>
+                </button>
+                <button class="theme-option" data-theme="dark">
+                    <div class="theme-preview theme-preview-dark"></div>
+                    <span>Dark</span>
+                </button>
+                <button class="theme-option" data-theme="ocean">
+                    <div class="theme-preview theme-preview-ocean"></div>
+                    <span>Ocean Blue</span>
+                </button>
+                <button class="theme-option" data-theme="forest">
+                    <div class="theme-preview theme-preview-forest"></div>
+                    <span>Forest Green</span>
+                </button>
+                <button class="theme-option" data-theme="royal">
+                    <div class="theme-preview theme-preview-royal"></div>
+                    <span>Royal Purple</span>
+                </button>
+                <button class="theme-option" data-theme="sunset">
+                    <div class="theme-preview theme-preview-sunset"></div>
+                    <span>Sunset Orange</span>
+                </button>
+                <button class="theme-option" data-theme="rose">
+                    <div class="theme-preview theme-preview-rose"></div>
+                    <span>Rose Pink</span>
+                </button>
+                <button class="theme-option" data-theme="emerald">
+                    <div class="theme-preview theme-preview-emerald"></div>
+                    <span>Emerald</span>
+                </button>
+                <button class="theme-option" data-theme="indigo">
+                    <div class="theme-preview theme-preview-indigo"></div>
+                    <span>Indigo</span>
+                </button>
+                <button class="theme-option" data-theme="amber">
+                    <div class="theme-preview theme-preview-amber"></div>
+                    <span>Amber</span>
+                </button>
+                <button class="theme-option" data-theme="teal">
+                    <div class="theme-preview theme-preview-teal"></div>
+                    <span>Teal</span>
+                </button>
+                <button class="theme-option" data-theme="crimson">
+                    <div class="theme-preview theme-preview-crimson"></div>
+                    <span>Crimson</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <footer class="footer">
+        <div class="container">
+            <p>&copy; 2025 Brightlens News. Stay informed, stay ahead.</p>
+            <div class="footer-links">
+                <a href="#" aria-label="About">About</a>
+                <a href="#" aria-label="Privacy Policy">Privacy</a>
+                <a href="#" aria-label="Terms of Service">Terms</a>
+                <a href="#" aria-label="Contact">Contact</a>
+            </div>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/feather-icons@4.28.0/dist/feather.min.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
