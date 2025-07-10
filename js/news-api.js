@@ -68,7 +68,7 @@ class NewsAPI {
             
             // Try to fetch from APIs but provide fallback on CORS errors
             const fallbackArticles = this.getSampleArticles(category, 'News API');
-            const extendedArticles = this.getExtendedArticles(category);
+            const extendedArticles = this.generateAdditionalArticles(category, 'Extended News');
             
             // Combine fallback and extended articles
             const allArticles = [...fallbackArticles, ...extendedArticles];

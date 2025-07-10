@@ -8,6 +8,16 @@ Brightlens News is a comprehensive multi-page web application that serves as a m
 
 Preferred communication style: Simple, everyday language.
 
+## Recent Changes
+
+**July 10, 2025**
+- Fixed critical JavaScript error in news loading functionality
+- Corrected `getExtendedArticles()` method call to use `generateAdditionalArticles()`
+- Improved image handling with proper fallback system
+- Added service worker (sw.js) for offline functionality and caching
+- Reorganized all website files properly in root directory for GitHub deployment
+- Enhanced error handling for API calls and CORS issues
+
 ## System Architecture
 
 ### Frontend Architecture
