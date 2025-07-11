@@ -357,7 +357,7 @@ class NewsAPI {
             title: article.title,
             description: article.description,
             url: article.url,
-            urlToImage: article.image,
+            urlToImage: article.image && article.image !== 'null' && article.image !== 'None' && article.image.startsWith('http') ? article.image : null,
             publishedAt: article.publishedAt,
             source: article.source?.name || 'GNews',
             category: 'general'
@@ -369,7 +369,7 @@ class NewsAPI {
             title: article.title,
             description: article.description,
             url: article.link,
-            urlToImage: article.image_url,
+            urlToImage: article.image_url && article.image_url !== 'null' && article.image_url !== 'None' && article.image_url.startsWith('http') ? article.image_url : null,
             publishedAt: article.pubDate,
             source: article.source_id || 'NewsData',
             category: article.category?.[0] || 'general'
@@ -381,7 +381,7 @@ class NewsAPI {
             title: article.title,
             description: article.description,
             url: article.url,
-            urlToImage: article.urlToImage,
+            urlToImage: article.urlToImage && article.urlToImage !== 'null' && article.urlToImage !== 'None' && article.urlToImage.startsWith('http') ? article.urlToImage : null,
             publishedAt: article.publishedAt,
             source: article.source?.name || 'NewsAPI',
             category: 'general'
@@ -393,7 +393,7 @@ class NewsAPI {
             title: article.title,
             description: article.description,
             url: article.url,
-            urlToImage: article.image,
+            urlToImage: article.image && article.image !== 'null' && article.image !== 'None' && article.image.startsWith('http') ? article.image : null,
             publishedAt: article.published_at,
             source: article.source || 'Mediastack',
             category: article.category || 'general'
@@ -405,7 +405,7 @@ class NewsAPI {
             title: article.title,
             description: article.description,
             url: article.url,
-            urlToImage: article.image,
+            urlToImage: article.image && article.image !== 'null' && article.image !== 'None' && article.image.startsWith('http') ? article.image : null,
             publishedAt: article.published,
             source: 'CurrentsAPI',
             category: article.category?.[0] || 'general'

@@ -384,8 +384,15 @@ class BrightlensNews {
         const formattedDate = this.newsAPI.formatDate(article.publishedAt);
         const description = article.description || 'No description available.';
         
+        // Validate image URL - check if it's valid and not null/None/undefined
+        const hasValidImage = imageUrl && 
+                             imageUrl !== 'null' && 
+                             imageUrl !== 'None' && 
+                             imageUrl !== 'undefined' &&
+                             imageUrl.startsWith('http');
+        
         // Only show image if article has a valid image URL, otherwise show text placeholder
-        const imageSection = imageUrl ? `
+        const imageSection = hasValidImage ? `
             <div class="news-image">
                 <img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZjNmNGY2Ii8+PC9zdmc+"
                      data-src="${imageUrl}" 
