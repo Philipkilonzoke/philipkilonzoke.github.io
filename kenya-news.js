@@ -914,8 +914,8 @@ async function loadKenyaSpecificNews() {
         );
     });
     
-    // Wait for all sources to complete with 30-second timeout
-    const timeoutPromise = new Promise(resolve => setTimeout(resolve, 30000));
+    // Wait for all sources to complete with 10-second timeout for better UX
+    const timeoutPromise = new Promise(resolve => setTimeout(resolve, 10000));
     await Promise.race([Promise.allSettled(loadPromises), timeoutPromise]);
     
     // Remove duplicates using enhanced deduplication
@@ -982,7 +982,7 @@ async function loadKenyaRSSSource(source) {
             title: cleanTitle(item.title),
             description: cleanDescription(item.contentSnippet || item.description),
             url: item.link,
-            urlToImage: extractImageFromKenyaContent(item.content) || generateKenyaPlaceholder(),
+            urlToImage: extractImageFromKenyaContent(item.content) || null,
             publishedAt: item.pubDate || item.isoDate || new Date().toISOString(),
             source: { name: source.name },
             category: 'kenya',
@@ -1036,7 +1036,7 @@ async function loadKenyaAPISource(source) {
             title: cleanTitle(item.title),
             description: cleanDescription(item.description || item.content),
             url: item.url || item.link,
-            urlToImage: item.urlToImage || item.image_url || generateKenyaPlaceholder(),
+            urlToImage: item.urlToImage || item.image_url || null,
             publishedAt: item.publishedAt || item.pubDate || new Date().toISOString(),
             source: { name: item.source?.name || source.name },
             category: 'kenya',

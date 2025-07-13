@@ -450,6 +450,7 @@
                     let articles;
                     if (this.category === 'kenya') {
                         articles = await loadKenyaSpecificNews();
+                        console.log('Kenya news loaded:', articles);
                     } else {
                         articles = await this.newsAPI.fetchNews(this.category, 50);
                     }
@@ -461,6 +462,7 @@
                         this.updateLastUpdated();
                         this.showNewsGrid();
                     } else {
+                        console.log('No articles found, showing error');
                         this.showNewsError('No articles found for this category. Please try again later.');
                     }
                 } catch (error) {
