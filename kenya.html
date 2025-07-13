@@ -446,14 +446,9 @@
                 try {
                     console.log(`Loading ${this.category} news...`);
                     
-                    // For Kenya category, use specialized Kenya news loading
-                    let articles;
-                    if (this.category === 'kenya') {
-                        articles = await loadKenyaSpecificNews();
-                        console.log('Kenya news loaded:', articles);
-                    } else {
-                        articles = await this.newsAPI.fetchNews(this.category, 50);
-                    }
+                    // Use standard API for all categories including Kenya
+                    let articles = await this.newsAPI.fetchNews(this.category, 50);
+                    console.log(`${this.category} news loaded:`, articles);
                     
                     if (articles && articles.length > 0) {
                         this.allArticles = articles;
