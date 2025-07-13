@@ -931,12 +931,8 @@ async function loadKenyaSpecificNews() {
         return new Date(b.publishedAt) - new Date(a.publishedAt);
     });
     
-    // If we have very few articles, add fallback articles
-    if (sortedArticles.length < 10) {
-        console.log('Adding fallback articles due to low article count...');
-        const fallbackArticles = generateKenyaFallbackArticles(20);
-        sortedArticles.push(...fallbackArticles);
-    }
+    // Fallback articles disabled - only real-time news should be displayed
+    // If real APIs fail, users will see appropriate error messages instead of sample content
     
     const totalSources = KENYA_NEWS_SOURCES.rss.length + KENYA_NEWS_SOURCES.apis.length + KENYA_NEWS_SOURCES.government.length + KENYA_NEWS_SOURCES.regional.length + KENYA_NEWS_SOURCES.educational.length + KENYA_NEWS_SOURCES.sports.length + KENYA_NEWS_SOURCES.health.length;
     console.log(`Total Kenya articles loaded: ${sortedArticles.length} from ${totalSources} sources`);
@@ -1293,64 +1289,9 @@ function filterKenyaNews(articles, filters = {}) {
 
 // Generate fallback Kenya articles when sources fail
 function generateKenyaFallbackArticles(count = 20) {
-    const fallbackArticles = [];
-    const kenyaTopics = [
-        'Kenyan Economy Shows Growth',
-        'Nairobi Infrastructure Development',
-        'Kenya Agricultural Sector Update',
-        'Mombasa Port Operations',
-        'Kenya Education Reforms',
-        'Renewable Energy Projects in Kenya',
-        'Kenya Tourism Recovery',
-        'Kenyan Technology Innovation',
-        'Healthcare Improvements in Kenya',
-        'Kenya Sports Achievements',
-        'Kenyan Cultural Heritage',
-        'Kenya Political Developments',
-        'Conservation Efforts in Kenya',
-        'Kenya Business Environment',
-        'Kenyan Youth Empowerment',
-        'Kenya Climate Action',
-        'Kenyan Music and Arts',
-        'Kenya Trade Relations',
-        'Transportation in Kenya',
-        'Kenya Social Programs'
-    ];
-    
-    const descriptions = [
-        'Latest developments and updates from Kenya covering various sectors and regions.',
-        'Comprehensive coverage of important events and news from across Kenya.',
-        'In-depth analysis of current affairs and developments in Kenya.',
-        'Breaking news and updates from Kenya with detailed reporting.',
-        'Expert insights and coverage of Kenya\'s latest developments.',
-        'Current news and analysis from Kenya covering multiple sectors.',
-        'Detailed reporting on Kenya\'s progress and achievements.',
-        'News updates and coverage from various regions across Kenya.',
-        'Analysis and reporting on Kenya\'s current affairs and developments.',
-        'Comprehensive news coverage from Kenya with expert analysis.'
-    ];
-    
-    for (let i = 0; i < count; i++) {
-        const topic = kenyaTopics[i % kenyaTopics.length];
-        const description = descriptions[i % descriptions.length];
-        const hoursAgo = Math.floor(Math.random() * 24) + 1;
-        const publishedAt = new Date(Date.now() - hoursAgo * 60 * 60 * 1000).toISOString();
-        
-        fallbackArticles.push({
-            title: `${topic} - ${new Date().toLocaleDateString()}`,
-            description: description,
-            url: `#kenya-news-${i + 1}`,
-            urlToImage: generateKenyaPlaceholder(),
-            publishedAt: publishedAt,
-            source: { name: 'Kenya News Network' },
-            category: 'kenya',
-            priority: 4,
-            kenyaSource: true,
-            isFallback: true
-        });
-    }
-    
-    return fallbackArticles;
+    // Function disabled - only real-time news should be displayed
+    // Return empty array to prevent showing sample articles
+    return [];
 }
 
 // Export functions for use in main script

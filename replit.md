@@ -10,6 +10,12 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
+**July 13, 2025**
+- **Sample Article Removal**: Successfully removed all sample/mock articles from all 9 news categories
+- **Real-time Only Policy**: All categories now display only authentic real-time news content
+- **Enhanced Error Handling**: When APIs fail, users see appropriate error messages instead of sample content
+- **Preserved API Functionality**: All real-time news sources remain fully functional
+
 **July 12, 2025**
 - **MAJOR ENHANCEMENT**: Significantly expanded sports news coverage with multiple real-time sports sources
   - Integrated ESPN API endpoints for NFL, NBA, MLB, NHL, college football, college basketball, and soccer
@@ -109,7 +115,7 @@ Preferred communication style: Simple, everyday language.
 - **Specialized Categories**: Educational (6), Sports (4), Health (3), Government (4), Regional (15)
 - **Advanced Deduplication**: Text similarity algorithms to prevent duplicate articles
 - **Source Health Monitoring**: Automated health checking for all news sources
-- **Fallback System**: Robust fallback article generation when sources are unavailable
+- **Sample Article Removal**: Removed all sample/mock articles from all 9 news categories to display only real-time content
 - **Performance Optimizations**: Enhanced API response handling and timeout management
 
 ### Weather Application (weather.js)

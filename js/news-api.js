@@ -865,10 +865,8 @@ class NewsAPI {
             ]
         };
 
-        // Add more variety by generating additional unique articles
-        const articles = baseArticles[category] || baseArticles.latest;
-        const additionalArticles = this.generateAdditionalArticles(category, source);
-        return [...articles, ...additionalArticles];
+        // Return empty array - only real-time news should be displayed
+        return [];
     }
 
     /**
@@ -1557,79 +1555,11 @@ class NewsAPI {
     }
 
     /**
-     * Get comprehensive lifestyle sample articles
+     * Get comprehensive lifestyle sample articles - DISABLED
      */
     getLifestyleSampleArticles(limit = 20, source = 'Lifestyle News') {
-        const lifestyleTopics = [
-            {
-                title: "Mindful Living Transforms Daily Wellness Routines",
-                description: "Mindfulness practices are revolutionizing how people approach daily wellness, with meditation apps reporting 300% user growth and wellness retreats becoming mainstream lifestyle choices. Research from Harvard Medical School shows that just 10 minutes of daily mindfulness practice can reduce stress hormones by 25% and improve sleep quality significantly. The integration of mindfulness into workplace wellness programs is helping employees manage burnout and increase productivity. Popular techniques include breathwork, body scanning, and mindful eating, which are being adopted by celebrities and wellness influencers worldwide. This wellness revolution is creating a $1.2 trillion global industry that emphasizes mental health as the foundation of overall well-being.",
-                category: "health"
-            },
-            {
-                title: "Sustainable Fashion Revolution Changes Industry Standards",
-                description: "The fashion industry undergoes a dramatic transformation as sustainable and ethical practices become the new standard, with major brands committing to zero-waste production and circular economy principles. Consumer demand for transparency in supply chains has led to innovative materials like lab-grown leather, recycled ocean plastic fabrics, and organic cotton alternatives. Fashion weeks in Paris, Milan, and New York now showcase eco-friendly collections that prove style and sustainability can coexist beautifully. Young designers are leading the charge with rental fashion platforms, upcycling workshops, and clothing swap communities that make sustainable fashion accessible to all income levels. This movement is reshaping how we think about personal style, consumption habits, and environmental responsibility.",
-                category: "fashion"
-            },
-            {
-                title: "Digital Nomad Lifestyle Reshapes Global Travel Trends",
-                description: "Remote work capabilities are transforming travel into a lifestyle choice rather than a temporary escape, with digital nomad visas now offered by over 50 countries worldwide. Co-working spaces in Bali, Lisbon, and Mexico City are becoming permanent communities for location-independent professionals who blend work and adventure seamlessly. Travel insurance companies are creating specialized packages for long-term nomads, while accommodation platforms offer monthly rates in stunning destinations. This movement is revitalizing local economies in smaller cities and creating new cultural exchange opportunities. The rise of slow travel emphasizes meaningful experiences over quick tourism, with nomads spending months in each location to deeply connect with local communities and cultures.",
-                category: "travel"
-            },
-            {
-                title: "Plant-Based Cuisine Evolution Reaches New Heights",
-                description: "Culinary innovation in plant-based cooking is reaching unprecedented levels as celebrity chefs create sophisticated alternatives that rival traditional cuisine in taste, texture, and nutritional value. Michelin-starred restaurants are dedicating entire menus to plant-based dishes, while food technology companies develop realistic meat and dairy substitutes using molecular gastronomy techniques. Home cooking enthusiasts are embracing ingredients like jackfruit, aquafaba, and nutritional yeast to create satisfying meals that support both personal health and environmental sustainability. The global plant-based food market is projected to reach $74 billion by 2027, driven by growing awareness of climate impact and health benefits. Cooking shows, social media influencers, and specialized cookbooks are making plant-based cuisine accessible and exciting for mainstream audiences.",
-                category: "food"
-            },
-            {
-                title: "Modern Relationship Dynamics Evolve with Technology",
-                description: "Contemporary relationships are adapting to digital-age realities as couples navigate online dating, social media transparency, and long-distance connections facilitated by technology. Relationship experts report that successful modern partnerships require new skills like digital communication boundaries, social media etiquette, and virtual intimacy techniques. Dating apps are incorporating compatibility algorithms, video dating features, and personality assessments to create more meaningful connections beyond superficial attraction. Couples therapy is evolving to address technology-related challenges while helping partners maintain authentic connection in an increasingly digital world. The rise of conscious dating emphasizes emotional intelligence, shared values, and genuine compatibility over traditional dating scripts and societal expectations.",
-                category: "relationships"
-            },
-            {
-                title: "Personal Development Through Lifelong Learning Accelerates",
-                description: "The pursuit of continuous learning and self-improvement is becoming a defining characteristic of modern life as online education platforms, skill-sharing communities, and personal development programs flourish globally. Professionals are investing in upskilling and reskilling to remain competitive in rapidly changing job markets, while others pursue creative passions and intellectual curiosity for personal fulfillment. Neuroscience research reveals that learning new skills at any age promotes brain plasticity and cognitive health, encouraging people to embrace challenges and growth opportunities throughout their lives. Popular development areas include emotional intelligence, financial literacy, creative arts, and technical skills, with micro-learning approaches making education more accessible and flexible. This learning revolution is creating more adaptable, confident, and purposeful individuals who view personal growth as a lifelong adventure.",
-                category: "development"
-            },
-            {
-                title: "Cultural Renaissance Celebrates Global Artistic Expression",
-                description: "A worldwide cultural renaissance is emerging as digital platforms democratize artistic expression and connect creators across geographical boundaries, fostering unprecedented collaboration and cultural exchange. Independent artists, musicians, writers, and filmmakers are bypassing traditional gatekeepers to reach global audiences through social media, streaming platforms, and crowdfunding initiatives. Local art scenes are experiencing revitalization as communities invest in creative districts, public art installations, and cultural festivals that celebrate diverse voices and perspectives. The integration of technology with traditional art forms is creating innovative hybrid expressions that blend ancient techniques with contemporary themes. This cultural movement emphasizes authenticity, diversity, and accessibility while challenging conventional definitions of art and entertainment.",
-                category: "culture"
-            },
-            {
-                title: "Home Design Trends Embrace Wellness and Sustainability",
-                description: "Interior design philosophy is shifting toward creating spaces that promote mental health, physical wellness, and environmental responsibility through thoughtful material choices and biophilic design principles. Natural lighting, air-purifying plants, and non-toxic materials are becoming standard elements in homes designed for optimal well-being and productivity. Sustainable furniture made from reclaimed wood, recycled materials, and ethically sourced components reflects growing environmental consciousness among homeowners. Multi-functional spaces that adapt to remote work, exercise, and relaxation needs are replacing traditional room designations as people spend more time at home. The psychology of color, texture, and spatial arrangement is being scientifically applied to create environments that reduce stress, enhance creativity, and improve overall quality of life.",
-                category: "home"
-            },
-            {
-                title: "Wellness Technology Integration Personalizes Health Optimization",
-                description: "Advanced wellness technology is making personalized health optimization accessible to everyone through wearable devices, health tracking apps, and AI-powered wellness coaches that provide real-time insights and recommendations. Smart home devices monitor air quality, sleep patterns, and daily activity levels to create comprehensive wellness profiles that inform lifestyle decisions. Telemedicine and virtual wellness consultations are expanding access to professional health guidance while maintaining convenience and affordability. Biometric feedback systems help individuals understand their unique physiological responses to different foods, exercises, and stress management techniques. This technology revolution is empowering people to take proactive control of their health through data-driven insights and personalized wellness strategies.",
-                category: "wellness"
-            },
-            {
-                title: "Social Connection Renaissance Rebuilds Community Bonds",
-                description: "Communities worldwide are experiencing a renaissance of social connection as people seek meaningful relationships and shared experiences that transcend digital interactions and geographic boundaries. Neighborhood initiatives, hobby groups, and volunteer organizations are flourishing as individuals prioritize face-to-face connections and collaborative activities that create lasting bonds. Intergenerational programs, cultural exchange initiatives, and community gardens are bringing diverse groups together around common interests and shared goals. The science of social connection reveals that strong community ties are essential for mental health, life satisfaction, and overall well-being. This movement toward authentic community building is creating more resilient, supportive, and inclusive social networks that enhance quality of life for all participants.",
-                category: "community"
-            }
-        ];
-
-        const timeOffsets = this.generateTimeRange(lifestyleTopics.length);
-        const articles = [];
-        
-        for (let i = 0; i < Math.min(limit, lifestyleTopics.length); i++) {
-            const topic = lifestyleTopics[i];
-            articles.push({
-                title: topic.title,
-                description: topic.description,
-                url: `https://example.com/lifestyle-${i + 1}`,
-                urlToImage: this.getLifestyleImage(topic.category),
-                publishedAt: this.getTimeFromOffset(timeOffsets[i]),
-                source: source,
-                category: "lifestyle"
-            });
-        }
-        
-        return articles;
+        // Return empty array - only real-time news should be displayed
+        return [];
     }
 
     /**
