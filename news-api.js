@@ -274,7 +274,7 @@ class NewsAPI {
             let url = `https://gnews.io/api/v4/top-headlines?token=${this.apiKeys.gnews}&lang=en&max=${Math.min(limit, 10)}`;
             
             if (category === 'kenya') {
-                url += '&country=ke&q=(Kenya OR Nairobi OR Mombasa OR Kisumu OR "East Africa" OR "Kenyan government" OR "President Ruto")';
+                url = `https://gnews.io/api/v4/search?token=${this.apiKeys.gnews}&lang=en&max=${Math.min(limit, 10)}&country=ke&q=(Kenya AND (politics OR economy OR business OR government OR "President Ruto" OR "Deputy President" OR Nairobi OR Mombasa OR Kisumu OR "East Africa" OR "Kenyan" OR "Kenya news"))`;
             } else if (category === 'latest') {
                 // No category filter for latest news
             } else if (category !== 'world') {
@@ -306,7 +306,7 @@ class NewsAPI {
             let url = `https://newsdata.io/api/1/news?apikey=${this.apiKeys.newsdata}&language=en&size=${Math.min(limit, 10)}`;
             
             if (category === 'kenya') {
-                url += '&country=ke&q=Kenya OR Nairobi OR Mombasa OR Kisumu OR "East Africa"';
+                url = `https://newsdata.io/api/1/news?apikey=${this.apiKeys.newsdata}&language=en&size=${Math.min(limit, 10)}&country=ke&q=Kenya AND (politics OR economy OR business OR government OR Nairobi OR Mombasa OR Kisumu OR "East Africa" OR "Kenyan government" OR "President Ruto")`;
             } else if (category === 'latest') {
                 // No category filter for latest news
             } else if (category !== 'world') {
@@ -332,7 +332,7 @@ class NewsAPI {
             let url = `https://newsapi.org/v2/top-headlines?apiKey=${this.apiKeys.newsapi}&pageSize=${Math.min(limit, 20)}`;
             
             if (category === 'kenya') {
-                url += '&country=ke';
+                url = `https://newsapi.org/v2/everything?apiKey=${this.apiKeys.newsapi}&q=Kenya AND (politics OR economy OR business OR government OR Nairobi OR Mombasa OR Kisumu OR "East Africa" OR "Kenyan government" OR "President Ruto")&sortBy=publishedAt&pageSize=${Math.min(limit, 20)}`;
             } else if (category === 'latest') {
                 url += '&country=us'; // Use US for general latest news
             } else if (category === 'world') {
@@ -360,7 +360,7 @@ class NewsAPI {
             let url = `http://api.mediastack.com/v1/news?access_key=${this.apiKeys.mediastack}&languages=en&limit=${Math.min(limit, 25)}`;
             
             if (category === 'kenya') {
-                url += '&countries=ke';
+                url += '&countries=ke&keywords=Kenya,Nairobi,Mombasa,Kisumu,East Africa,Kenyan government,President Ruto';
             } else if (category === 'latest') {
                 // No category filter for latest news
             } else if (category !== 'world') {
@@ -386,7 +386,7 @@ class NewsAPI {
             let url = `https://api.currentsapi.services/v1/latest-news?apiKey=${this.apiKeys.currentsapi}&language=en&page_size=${Math.min(limit, 20)}`;
             
             if (category === 'kenya') {
-                url += '&country=ke';
+                url += '&country=ke&keywords=Kenya,Nairobi,Mombasa,Kisumu,East Africa,Kenyan government,President Ruto';
             } else if (category === 'latest') {
                 // No category filter for latest news
             } else if (category !== 'world') {
