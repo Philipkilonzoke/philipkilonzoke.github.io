@@ -1,0 +1,644 @@
+/* Live TV Styles */
+:root {
+    --tv-primary: #1a73e8;
+    --tv-secondary: #34a853;
+    --tv-danger: #ea4335;
+    --tv-warning: #fbbc04;
+    --tv-dark: #202124;
+    --tv-light: #f8f9fa;
+    --tv-border: #dadce0;
+    --tv-hover: #f1f3f4;
+    --tv-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    --tv-shadow-hover: 0 4px 20px rgba(0, 0, 0, 0.15);
+    --tv-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    --tv-gradient-red: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+    --tv-gradient-green: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+    --tv-gradient-gold: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
+}
+
+/* TV Header Styles */
+.tv-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+    padding: 1rem 0;
+    border-bottom: 2px solid var(--border-color);
+}
+
+.tv-stats {
+    display: flex;
+    gap: 2rem;
+    align-items: center;
+}
+
+.stat-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    background: var(--card-bg);
+    border-radius: 20px;
+    border: 1px solid var(--border-color);
+    font-weight: 500;
+    color: var(--text-color);
+}
+
+.stat-item i {
+    color: var(--primary-color);
+}
+
+.stat-item span {
+    font-weight: 600;
+}
+
+/* Category Tabs */
+.category-tabs {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 2rem;
+    overflow-x: auto;
+    padding: 0.5rem 0;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+}
+
+.category-tabs::-webkit-scrollbar {
+    display: none;
+}
+
+.category-tab {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1.5rem;
+    border: 2px solid var(--border-color);
+    border-radius: 25px;
+    background: var(--card-bg);
+    color: var(--text-color);
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    white-space: nowrap;
+    min-width: fit-content;
+}
+
+.category-tab:hover {
+    background: var(--hover-bg);
+    transform: translateY(-2px);
+}
+
+.category-tab.active {
+    background: var(--primary-color);
+    color: white;
+    border-color: var(--primary-color);
+    box-shadow: var(--tv-shadow);
+}
+
+.category-tab i {
+    font-size: 1.1rem;
+}
+
+/* Channels Grid */
+.channels-container {
+    position: relative;
+    min-height: 400px;
+}
+
+.channels-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.channel-card {
+    background: var(--card-bg);
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: var(--tv-shadow);
+    border: 1px solid var(--border-color);
+    transition: all 0.3s ease;
+    cursor: pointer;
+    position: relative;
+}
+
+.channel-card:hover {
+    transform: translateY(-5px);
+    box-shadow: var(--tv-shadow-hover);
+}
+
+.channel-card.live {
+    border-color: var(--tv-secondary);
+}
+
+.channel-card.offline {
+    opacity: 0.7;
+}
+
+.channel-thumbnail {
+    position: relative;
+    height: 200px;
+    background: var(--tv-gradient);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 3rem;
+    overflow: hidden;
+}
+
+.channel-thumbnail.news {
+    background: var(--tv-gradient-red);
+}
+
+.channel-thumbnail.entertainment {
+    background: var(--tv-gradient-green);
+}
+
+.channel-thumbnail.religious {
+    background: var(--tv-gradient-gold);
+}
+
+.channel-thumbnail img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.channel-logo {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    width: 60px;
+    height: 60px;
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: var(--tv-dark);
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+}
+
+.live-badge {
+    position: absolute;
+    top: 1rem;
+    left: 1rem;
+    background: var(--tv-danger);
+    color: white;
+    padding: 0.3rem 0.8rem;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+    animation: pulse 2s infinite;
+}
+
+.live-badge i {
+    font-size: 0.6rem;
+}
+
+@keyframes pulse {
+    0% { opacity: 1; }
+    50% { opacity: 0.7; }
+    100% { opacity: 1; }
+}
+
+.offline-badge {
+    position: absolute;
+    top: 1rem;
+    left: 1rem;
+    background: var(--text-muted);
+    color: white;
+    padding: 0.3rem 0.8rem;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+}
+
+.channel-content {
+    padding: 1.5rem;
+}
+
+.channel-name {
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    color: var(--text-color);
+}
+
+.channel-description {
+    color: var(--text-muted);
+    margin-bottom: 1rem;
+    line-height: 1.5;
+    font-size: 0.9rem;
+}
+
+.channel-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.channel-quality {
+    background: var(--tv-primary);
+    color: white;
+    padding: 0.25rem 0.5rem;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+.channel-viewers {
+    color: var(--text-muted);
+    font-size: 0.8rem;
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+}
+
+.watch-button {
+    width: 100%;
+    padding: 0.75rem;
+    background: var(--primary-color);
+    color: white;
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+}
+
+.watch-button:hover {
+    background: var(--primary-hover);
+    transform: translateY(-2px);
+}
+
+.watch-button:disabled {
+    background: var(--text-muted);
+    cursor: not-allowed;
+    transform: none;
+}
+
+.watch-button i {
+    font-size: 1.1rem;
+}
+
+/* Video Player Modal */
+.video-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.95);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    backdrop-filter: blur(5px);
+}
+
+.video-modal.active {
+    display: flex;
+}
+
+.video-modal-content {
+    background: var(--card-bg);
+    border-radius: 16px;
+    width: 90%;
+    max-width: 1200px;
+    max-height: 90vh;
+    overflow: hidden;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+    position: relative;
+}
+
+.video-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 1.5rem;
+    border-bottom: 1px solid var(--border-color);
+    background: var(--hover-bg);
+}
+
+.video-header h3 {
+    margin: 0;
+    color: var(--text-color);
+    font-size: 1.25rem;
+}
+
+.video-controls {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.control-btn {
+    padding: 0.5rem 1rem;
+    border: none;
+    border-radius: 8px;
+    background: var(--card-bg);
+    color: var(--text-color);
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.control-btn:hover {
+    background: var(--hover-bg);
+}
+
+.control-btn.close-btn {
+    background: var(--tv-danger);
+    color: white;
+}
+
+.control-btn.close-btn:hover {
+    background: #d93025;
+}
+
+.video-container {
+    position: relative;
+    background: #000;
+    height: 60vh;
+    max-height: 600px;
+}
+
+.video-container video {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
+.video-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.8);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    z-index: 10;
+}
+
+.video-overlay.hidden {
+    display: none;
+}
+
+.loading-spinner {
+    text-align: center;
+}
+
+.loading-spinner i {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+}
+
+.loading-spinner p {
+    font-size: 1.1rem;
+    margin: 0;
+}
+
+.video-info {
+    padding: 1rem 1.5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-top: 1px solid var(--border-color);
+    background: var(--hover-bg);
+}
+
+.channel-info {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.live-indicator {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--tv-danger);
+    font-weight: 600;
+}
+
+.live-indicator i {
+    animation: pulse 2s infinite;
+}
+
+.viewer-count {
+    color: var(--text-muted);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+/* Loading States */
+.channels-loading {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 400px;
+    color: var(--text-muted);
+}
+
+.channels-loading.hidden {
+    display: none;
+}
+
+.loading-animation {
+    text-align: center;
+}
+
+.loading-animation i {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+    color: var(--primary-color);
+}
+
+.loading-animation p {
+    font-size: 1.1rem;
+    margin: 0;
+}
+
+/* Navigation Controls */
+.nav-btn {
+    padding: 0.5rem 1rem;
+    border: none;
+    border-radius: 8px;
+    background: var(--card-bg);
+    color: var(--text-color);
+    cursor: pointer;
+    transition: all 0.3s ease;
+    margin-right: 0.5rem;
+}
+
+.nav-btn:hover {
+    background: var(--hover-bg);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .tv-header {
+        flex-direction: column;
+        gap: 1rem;
+        align-items: flex-start;
+    }
+
+    .tv-stats {
+        gap: 1rem;
+    }
+
+    .category-tabs {
+        gap: 0.5rem;
+    }
+
+    .category-tab {
+        padding: 0.5rem 1rem;
+        font-size: 0.9rem;
+    }
+
+    .channels-grid {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+
+    .channel-card {
+        margin: 0;
+    }
+
+    .video-modal-content {
+        width: 95%;
+        margin: 1rem;
+    }
+
+    .video-container {
+        height: 40vh;
+    }
+
+    .video-header {
+        padding: 1rem;
+    }
+
+    .video-controls {
+        flex-wrap: wrap;
+        gap: 0.3rem;
+    }
+
+    .control-btn {
+        padding: 0.4rem 0.8rem;
+        font-size: 0.9rem;
+    }
+
+    .video-info {
+        flex-direction: column;
+        gap: 0.5rem;
+        align-items: flex-start;
+    }
+}
+
+@media (max-width: 480px) {
+    .channels-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .channel-thumbnail {
+        height: 150px;
+        font-size: 2rem;
+    }
+
+    .channel-logo {
+        width: 50px;
+        height: 50px;
+        font-size: 1.2rem;
+    }
+
+    .video-container {
+        height: 30vh;
+    }
+}
+
+/* Dark theme adjustments */
+[data-theme="dark"] .video-modal-content {
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+}
+
+[data-theme="dark"] .video-overlay {
+    background: rgba(0, 0, 0, 0.9);
+}
+
+/* Channel category specific styling */
+.channel-card[data-category="news"] .channel-thumbnail {
+    background: linear-gradient(135deg, #ff6b6b 0%, #ee5a52 100%);
+}
+
+.channel-card[data-category="entertainment"] .channel-thumbnail {
+    background: linear-gradient(135deg, #4ecdc4 0%, #44a08d 100%);
+}
+
+.channel-card[data-category="religious"] .channel-thumbnail {
+    background: linear-gradient(135deg, #ffeaa7 0%, #fdcb6e 100%);
+}
+
+.channel-card[data-category="regional"] .channel-thumbnail {
+    background: linear-gradient(135deg, #a29bfe 0%, #6c5ce7 100%);
+}
+
+/* Smooth transitions */
+* {
+    transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+}
+
+/* Performance optimizations */
+.channel-card {
+    contain: layout;
+    will-change: transform;
+}
+
+.video-modal {
+    contain: layout;
+}
+
+/* Accessibility */
+.channel-card:focus,
+.watch-button:focus,
+.control-btn:focus {
+    outline: 2px solid var(--primary-color);
+    outline-offset: 2px;
+}
+
+.channel-card:focus-visible,
+.watch-button:focus-visible,
+.control-btn:focus-visible {
+    outline: 2px solid var(--primary-color);
+    outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    * {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+}
