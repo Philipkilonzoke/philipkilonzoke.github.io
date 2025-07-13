@@ -959,7 +959,7 @@ async function loadKenyaRSSSource(source) {
         const data = await response.json();
         const feed = await parser.parseString(data.contents);
         
-        return feed.items.map(item => ({
+        return feed.items.slice(0, 20).map(item => ({
             title: cleanTitle(item.title),
             description: cleanDescription(item.contentSnippet || item.description),
             url: item.link,
@@ -1013,7 +1013,7 @@ async function loadKenyaAPISource(source) {
             articles = data;
         }
         
-        return articles.map(item => ({
+        return articles.slice(0, 30).map(item => ({
             title: cleanTitle(item.title),
             description: cleanDescription(item.description || item.content),
             url: item.url || item.link,

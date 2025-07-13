@@ -304,7 +304,9 @@
     </footer>
 
     <!-- JavaScript -->
+    <script src="https://cdn.jsdelivr.net/npm/rss-parser@3.13.0/dist/rss-parser.min.js"></script>
     <script src="js/news-api.js"></script>
+    <script src="kenya-news.js"></script>
     <script src="js/themes.js"></script>
     <script>
         // Category-specific news loading
@@ -443,7 +445,14 @@
                 
                 try {
                     console.log(`Loading ${this.category} news...`);
-                    const articles = await this.newsAPI.fetchNews(this.category, 50);
+                    
+                    // For Kenya category, use specialized Kenya news loading
+                    let articles;
+                    if (this.category === 'kenya') {
+                        articles = await loadKenyaSpecificNews();
+                    } else {
+                        articles = await this.newsAPI.fetchNews(this.category, 50);
+                    }
                     
                     if (articles && articles.length > 0) {
                         this.allArticles = articles;
