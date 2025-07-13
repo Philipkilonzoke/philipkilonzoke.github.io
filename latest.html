@@ -1,0 +1,671 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Latest News - Brightlens News</title>
+    
+    <!-- SEO Meta Tags -->
+    <meta name="description" content="Get the latest breaking news from multiple reliable sources worldwide. Stay updated with recent developments and breaking stories.">
+    <meta name="keywords" content="latest news, breaking news, recent news, current events, Brightlens">
+    <meta name="author" content="Philip Kilonzo">
+    
+    <!-- Open Graph Meta Tags -->
+    <meta property="og:title" content="Latest News - Brightlens News">
+    <meta property="og:description" content="Get the latest breaking news from multiple reliable sources worldwide.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://philipkilonzoke.github.io/latest.html">
+    
+    <!-- Critical CSS Inline for Faster Loading -->
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box}
+        :root{--primary-color:#2563eb;--background-color:#ffffff;--text-color:#1e293b;--surface-color:#f8fafc;--border-color:#e2e8f0}
+        body{font-family:'Inter',system-ui,sans-serif;background:var(--background-color);color:var(--text-color);line-height:1.6}
+        .loading-screen{position:fixed;top:0;left:0;width:100%;height:100%;background:var(--primary-color);display:flex;align-items:center;justify-content:center;z-index:9999;transition:opacity 0.3s}
+        .loading-screen.hidden{opacity:0;visibility:hidden}
+        .loading-container{text-align:center;color:white}
+        .loading-spinner{width:60px;height:60px;border:4px solid rgba(255,255,255,0.3);border-top:4px solid white;border-radius:50%;animation:spin 1s linear infinite;margin:0 auto 1rem}
+        @keyframes spin{0%{transform:rotate(0deg)}100%{transform:rotate(360deg)}}
+        .header{background:var(--surface-color);border-bottom:1px solid var(--border-color);position:sticky;top:0;z-index:100}
+    </style>
+    <!-- Non-Critical CSS Files -->
+    <link rel="preload" href="css/styles.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <link rel="preload" href="css/themes.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <noscript><link rel="stylesheet" href="css/styles.css"><link rel="stylesheet" href="css/themes.css"></noscript>
+    <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"></noscript>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preload" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"></noscript>
+</head>
+<body>
+    <!-- Loading Screen -->
+    <div id="loading-screen" class="loading-screen">
+        <div class="loading-container">
+            <div class="loading-spinner"></div>
+            <h2>Brightlens News</h2>
+            <p>Loading latest stories...</p>
+        </div>
+    </div>
+
+    <!-- Header -->
+    <header class="header">
+        <div class="container">
+            <div class="header-content">
+                <div class="logo">
+                    <h1><a href="index.html" style="color: inherit; text-decoration: none;"><i class="fas fa-newspaper"></i> Brightlens News</a></h1>
+                </div>
+                <nav class="nav">
+                    <div class="nav-links">
+                        <a href="latest.html" class="nav-link active">Latest</a>
+                        <a href="kenya.html" class="nav-link">Kenya</a>
+                        <a href="world.html" class="nav-link">World</a>
+                        <a href="entertainment.html" class="nav-link">Entertainment</a>
+                        <a href="technology.html" class="nav-link">Technology</a>
+                        <a href="business.html" class="nav-link">Business</a>
+                        <a href="sports.html" class="nav-link">Sports</a>
+                        <a href="health.html" class="nav-link">Health</a>
+                        <a href="lifestyle.html" class="nav-link">Lifestyle</a>
+                    </div>
+                    <div class="nav-controls">
+                        <button id="theme-toggle" class="theme-toggle" title="Change Theme">
+                            <i class="fas fa-palette"></i>
+                        </button>
+                    </div>
+                </nav>
+                <div class="mobile-menu-toggle">
+                    <i class="fas fa-bars"></i>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Sidebar -->
+    <aside class="sidebar">
+        <div class="sidebar-content">
+            <div class="sidebar-header">
+                <h3>Categories</h3>
+                <button class="sidebar-close">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <nav class="sidebar-nav">
+                <a href="latest.html" class="sidebar-link active">
+                    <i class="fas fa-home"></i> Latest News
+                </a>
+                <a href="kenya.html" class="sidebar-link">
+                    <i class="fas fa-flag"></i> Kenyan News
+                </a>
+                <a href="world.html" class="sidebar-link">
+                    <i class="fas fa-globe"></i> World News
+                </a>
+                <a href="entertainment.html" class="sidebar-link">
+                    <i class="fas fa-film"></i> Entertainment
+                </a>
+                <a href="technology.html" class="sidebar-link">
+                    <i class="fas fa-microchip"></i> Technology
+                </a>
+                <a href="business.html" class="sidebar-link">
+                    <i class="fas fa-chart-line"></i> Business
+                </a>
+                <a href="sports.html" class="sidebar-link">
+                    <i class="fas fa-football-ball"></i> Sports
+                </a>
+                <a href="health.html" class="sidebar-link">
+                    <i class="fas fa-heartbeat"></i> Health
+                </a>
+                <a href="lifestyle.html" class="sidebar-link">
+                    <i class="fas fa-spa"></i> Lifestyle
+                </a>
+                <div class="sidebar-divider"></div>
+                <a href="weather.html" class="sidebar-link">
+                    <i class="fas fa-cloud-sun"></i> Weather
+                </a>
+                <a href="live-tv.html" class="sidebar-link">
+                    <i class="fas fa-tv"></i> Live TV
+                </a>
+            </nav>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main">
+        <div class="container">
+            <!-- Category Title -->
+            <div class="category-header">
+                <h2 id="category-title">Latest News</h2>
+                <div class="category-meta">
+                    <span id="article-count">Loading articles...</span>
+                    <span id="last-updated"></span>
+                </div>
+            </div>
+
+            <!-- News Loading -->
+            <div id="news-loading" class="news-loading">
+                <div class="loading-spinner-small"></div>
+                <p>Fetching latest news from multiple sources...</p>
+            </div>
+
+            <!-- News Error -->
+            <div id="news-error" class="news-error" style="display: none;">
+                <div class="error-content">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <h3>Unable to Load News</h3>
+                    <p id="error-message">We're having trouble connecting to our news sources. Please check your internet connection and try again.</p>
+                    <button id="retry-button" class="retry-button">
+                        <i class="fas fa-redo"></i> Try Again
+                    </button>
+                </div>
+            </div>
+
+            <!-- News Grid -->
+            <div id="news-grid" class="news-grid" style="display: none;">
+                <!-- News articles will be populated here -->
+            </div>
+
+            <!-- Load More Button -->
+            <div class="load-more-container" style="display: none;">
+                <button id="load-more" class="load-more-button">
+                    <i class="fas fa-plus-circle"></i> Load More Articles
+                </button>
+            </div>
+        </div>
+    </main>
+
+    <!-- Theme Selector Modal -->
+    <div id="theme-modal" class="theme-modal">
+        <div class="theme-modal-content">
+            <div class="theme-modal-header">
+                <h3>Choose Theme</h3>
+                <button class="theme-modal-close">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="theme-grid">
+                <!-- Theme options will be populated by themes.js -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-wave">
+            <svg viewBox="0 0 1440 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M0,64L48,58.7C96,53,192,43,288,48C384,53,480,75,576,80C672,85,768,75,864,64C960,53,1056,43,1152,48C1248,53,1344,75,1392,85.3L1440,96L1440,0L1392,0C1344,0,1248,0,1152,0C1056,0,960,0,864,0C768,0,672,0,576,0C480,0,384,0,288,0C192,0,96,0,48,0L0,0Z" fill="var(--primary-color)"/>
+            </svg>
+        </div>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section footer-brand">
+                    <div class="footer-logo">
+                        <h4>
+                            <i class="fas fa-newspaper footer-icon"></i>
+                            Brightlens News
+                        </h4>
+                        <div class="footer-tagline">Your Gateway to Global News</div>
+                    </div>
+                    <p>Your trusted source for comprehensive news coverage from multiple reliable sources worldwide. Stay informed with real-time updates.</p>
+                    <div class="footer-stats">
+                        <div class="stat-item">
+                            <div class="stat-number">24/7</div>
+                            <div class="stat-label">Coverage</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-number">9</div>
+                            <div class="stat-label">Categories</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-number">∞</div>
+                            <div class="stat-label">Stories</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="footer-section">
+                    <h4><i class="fas fa-list-ul"></i> News Categories</h4>
+                    <div class="footer-links">
+                        <a href="latest.html" class="footer-link">
+                            <i class="fas fa-bolt"></i> Latest News
+                        </a>
+                        <a href="kenya.html" class="footer-link">
+                            <i class="fas fa-map-marker-alt"></i> Kenya
+                        </a>
+                        <a href="world.html" class="footer-link">
+                            <i class="fas fa-globe"></i> World
+                        </a>
+                        <a href="entertainment.html" class="footer-link">
+                            <i class="fas fa-film"></i> Entertainment
+                        </a>
+                        <a href="technology.html" class="footer-link">
+                            <i class="fas fa-microchip"></i> Technology
+                        </a>
+                        <a href="business.html" class="footer-link">
+                            <i class="fas fa-chart-line"></i> Business
+                        </a>
+                        <a href="sports.html" class="footer-link">
+                            <i class="fas fa-futbol"></i> Sports
+                        </a>
+                        <a href="health.html" class="footer-link">
+                            <i class="fas fa-heartbeat"></i> Health
+                        </a>
+                        <a href="lifestyle.html" class="footer-link">
+                            <i class="fas fa-spa"></i> Lifestyle
+                        </a>
+                    </div>
+                </div>
+                <div class="footer-section">
+                    <h4><i class="fas fa-share-alt"></i> Connect With Us</h4>
+                    <div class="social-links">
+                        <a href="https://instagram.com/philipkilonzo.ke" target="_blank" rel="noopener noreferrer" class="social-link instagram">
+                            <div class="social-icon">
+                                <i class="fab fa-instagram"></i>
+                            </div>
+                            <div class="social-info">
+                                <span class="social-platform">Instagram</span>
+                                <span class="social-handle">@philipkilonzo.ke</span>
+                            </div>
+                        </a>
+                        <a href="https://wa.me/254791943551" target="_blank" rel="noopener noreferrer" class="social-link whatsapp">
+                            <div class="social-icon">
+                                <i class="fab fa-whatsapp"></i>
+                            </div>
+                            <div class="social-info">
+                                <span class="social-platform">WhatsApp</span>
+                                <span class="social-handle">+254 791 943 551</span>
+                            </div>
+                        </a>
+                    </div>
+                    <div class="footer-newsletter">
+                        <h5>Stay Updated</h5>
+                        <p>Get the latest news delivered to your inbox</p>
+                        <div class="newsletter-form">
+                            <input type="email" placeholder="Enter your email">
+                            <button type="submit">
+                                <i class="fas fa-paper-plane"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <div class="footer-bottom-content">
+                    <div class="footer-copyright">
+                        <p>&copy; 2025 Brightlens News. All rights reserved.</p>
+                    </div>
+                    <div class="footer-links-bottom">
+                        <a href="#">Privacy Policy</a>
+                        <a href="#">Terms of Service</a>
+                        <a href="#">Contact</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="footer-glow"></div>
+    </footer>
+
+    <!-- JavaScript -->
+    <script src="js/news-api.js"></script>
+    <script src="js/themes.js"></script>
+    <script>
+        // Category-specific news loading
+        class CategoryNews {
+            constructor(category) {
+                this.newsAPI = new NewsAPI();
+                this.category = category;
+                this.currentPage = 1;
+                this.articlesPerPage = 30;
+                this.allArticles = [];
+                this.displayedArticles = [];
+                this.isLoading = false;
+                
+                this.init();
+            }
+
+            init() {
+                this.setupEventListeners();
+                this.showLoadingScreen();
+                
+                // Load category-specific news immediately
+                this.loadNews().then(() => {
+                    this.hideLoadingScreen();
+                }).catch((error) => {
+                    console.error('Initial load failed:', error);
+                    this.hideLoadingScreen();
+                    this.showNewsError('Initial load taking longer than expected. Please try again.');
+                });
+            }
+
+            setupEventListeners() {
+                // Mobile menu toggle
+                const mobileToggle = document.querySelector('.mobile-menu-toggle');
+                const sidebarElement = document.querySelector('.sidebar');
+                const sidebarClose = document.querySelector('.sidebar-close');
+
+                if (mobileToggle) {
+                    mobileToggle.addEventListener('click', () => {
+                        sidebarElement?.classList.add('open');
+                    });
+                }
+
+                if (sidebarClose) {
+                    sidebarClose.addEventListener('click', () => {
+                        sidebarElement?.classList.remove('open');
+                    });
+                }
+
+                // Close sidebar when clicking outside
+                document.addEventListener('click', (e) => {
+                    if (sidebarElement?.classList.contains('open') && 
+                        !sidebarElement.contains(e.target) && 
+                        !mobileToggle?.contains(e.target)) {
+                        sidebarElement.classList.remove('open');
+                    }
+                });
+
+                // Retry button
+                const retryButton = document.getElementById('retry-button');
+                if (retryButton) {
+                    retryButton.addEventListener('click', () => {
+                        this.loadNews();
+                    });
+                }
+
+                // Load more button
+                const loadMoreButton = document.getElementById('load-more');
+                if (loadMoreButton) {
+                    loadMoreButton.addEventListener('click', () => {
+                        this.loadMoreArticles();
+                    });
+                }
+
+                // Infinite scroll
+                window.addEventListener('scroll', () => {
+                    if (this.isNearBottom() && !this.isLoading && this.canLoadMore()) {
+                        this.loadMoreArticles();
+                    }
+                });
+            }
+
+            showLoadingScreen() {
+                const loadingScreen = document.getElementById('loading-screen');
+                if (loadingScreen) {
+                    loadingScreen.style.display = 'flex';
+                    loadingScreen.classList.remove('hidden');
+                }
+            }
+
+            hideLoadingScreen() {
+                const loadingScreen = document.getElementById('loading-screen');
+                if (loadingScreen) {
+                    loadingScreen.classList.add('hidden');
+                    setTimeout(() => {
+                        loadingScreen.style.display = 'none';
+                    }, 300);
+                }
+            }
+
+            showNewsLoading() {
+                const newsLoading = document.getElementById('news-loading');
+                const newsGrid = document.getElementById('news-grid');
+                const newsError = document.getElementById('news-error');
+                
+                if (newsLoading) newsLoading.style.display = 'block';
+                if (newsGrid) newsGrid.style.display = 'none';
+                if (newsError) newsError.style.display = 'none';
+            }
+
+            hideNewsLoading() {
+                const newsLoading = document.getElementById('news-loading');
+                if (newsLoading) newsLoading.style.display = 'none';
+            }
+
+            showNewsError(message) {
+                const newsError = document.getElementById('news-error');
+                const errorMessage = document.getElementById('error-message');
+                const newsLoading = document.getElementById('news-loading');
+                const newsGrid = document.getElementById('news-grid');
+                
+                if (errorMessage) errorMessage.textContent = message;
+                if (newsError) newsError.style.display = 'block';
+                if (newsLoading) newsLoading.style.display = 'none';
+                if (newsGrid) newsGrid.style.display = 'none';
+            }
+
+            showNewsGrid() {
+                const newsGrid = document.getElementById('news-grid');
+                const newsLoading = document.getElementById('news-loading');
+                const newsError = document.getElementById('news-error');
+                
+                if (newsGrid) newsGrid.style.display = 'grid';
+                if (newsLoading) newsLoading.style.display = 'none';
+                if (newsError) newsError.style.display = 'none';
+            }
+
+            async loadNews() {
+                if (this.isLoading) return;
+                
+                this.isLoading = true;
+                this.showNewsLoading();
+                
+                try {
+                    console.log(`Loading ${this.category} news...`);
+                    const articles = await this.newsAPI.fetchNews(this.category, 50);
+                    
+                    if (articles && articles.length > 0) {
+                        this.allArticles = articles;
+                        this.renderNews();
+                        this.updateArticleCount();
+                        this.updateLastUpdated();
+                        this.showNewsGrid();
+                    } else {
+                        this.showNewsError('No articles found for this category. Please try again later.');
+                    }
+                } catch (error) {
+                    console.error('Error loading news:', error);
+                    this.showNewsError('Failed to load news. Please check your internet connection and try again.');
+                } finally {
+                    this.isLoading = false;
+                }
+            }
+
+            renderNews() {
+                const newsGrid = document.getElementById('news-grid');
+                if (!newsGrid) return;
+
+                this.displayedArticles = this.allArticles;
+
+                newsGrid.innerHTML = this.displayedArticles.map(article => 
+                    this.createArticleHTML(article)
+                ).join('');
+
+                this.setupLazyLoading();
+                this.updateLoadMoreButton();
+            }
+
+            setupLazyLoading() {
+                const images = document.querySelectorAll('.lazy-image');
+                
+                if ('IntersectionObserver' in window) {
+                    const imageObserver = new IntersectionObserver((entries) => {
+                        entries.forEach(entry => {
+                            if (entry.isIntersecting) {
+                                const img = entry.target;
+                                img.src = img.dataset.src;
+                                img.classList.remove('lazy-image');
+                                imageObserver.unobserve(img);
+                            }
+                        });
+                    });
+
+                    images.forEach(img => imageObserver.observe(img));
+                } else {
+                    images.forEach(img => {
+                        img.src = img.dataset.src;
+                        img.classList.remove('lazy-image');
+                    });
+                }
+            }
+
+            createArticleHTML(article) {
+                const imageUrl = article.urlToImage;
+                const formattedDate = this.newsAPI.formatDate(article.publishedAt);
+                const description = article.description || 'No description available.';
+                
+                const hasValidImage = imageUrl && 
+                                     imageUrl !== 'null' && 
+                                     imageUrl !== 'None' && 
+                                     imageUrl !== 'undefined' &&
+                                     imageUrl.startsWith('http');
+                
+                const imageSection = hasValidImage ? `
+                    <div class="news-image">
+                        <img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZjNmNGY2Ii8+PC9zdmc+"
+                             data-src="${imageUrl}" 
+                             alt="${article.title}" 
+                             loading="lazy"
+                             class="lazy-image"
+                             onerror="this.parentElement.innerHTML='<div class=\\"text-placeholder\\">Brightlens News</div>'">
+                    </div>` : `
+                    <div class="text-placeholder">Brightlens News</div>`;
+                
+                return `
+                    <article class="news-card">
+                        ${imageSection}
+                        <div class="news-content">
+                            <h3 class="news-title">${article.title}</h3>
+                            <p class="news-description">${description}</p>
+                            <div class="news-meta">
+                                <span class="news-date">${formattedDate}</span>
+                                <span class="news-category">${this.newsAPI.getCategoryDisplayName(this.category)}</span>
+                            </div>
+                            <div class="news-actions">
+                                <a href="${article.url}" 
+                                   target="_blank" 
+                                   rel="noopener noreferrer" 
+                                   class="news-link">
+                                    Read More <i class="fas fa-external-link-alt"></i>
+                                </a>
+                                <div class="share-buttons">
+                                    <button class="share-btn" onclick="shareArticle('${encodeURIComponent(article.title)}', '${encodeURIComponent(article.url)}', 'facebook')" title="Share on Facebook">
+                                        <i class="fab fa-facebook-f"></i>
+                                    </button>
+                                    <button class="share-btn" onclick="shareArticle('${encodeURIComponent(article.title)}', '${encodeURIComponent(article.url)}', 'twitter')" title="Share on Twitter">
+                                        <i class="fab fa-twitter"></i>
+                                    </button>
+                                    <button class="share-btn" onclick="shareArticle('${encodeURIComponent(article.title)}', '${encodeURIComponent(article.url)}', 'whatsapp')" title="Share on WhatsApp">
+                                        <i class="fab fa-whatsapp"></i>
+                                    </button>
+                                    <button class="share-btn" onclick="shareArticle('${encodeURIComponent(article.title)}', '${encodeURIComponent(article.url)}', 'copy')" title="Copy Link">
+                                        <i class="fas fa-link"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </article>
+                `;
+            }
+
+            updateArticleCount() {
+                const articleCount = document.getElementById('article-count');
+                if (articleCount) {
+                    const total = this.allArticles.length;
+                    const displayed = this.displayedArticles.length;
+                    articleCount.textContent = `Showing ${displayed} of ${total} articles`;
+                }
+            }
+
+            updateLastUpdated() {
+                const lastUpdated = document.getElementById('last-updated');
+                if (lastUpdated) {
+                    const now = new Date();
+                    lastUpdated.textContent = `Last updated: ${now.toLocaleTimeString()}`;
+                }
+            }
+
+            loadMoreArticles() {
+                if (this.canLoadMore() && !this.isLoading) {
+                    this.renderNews();
+                }
+            }
+
+            canLoadMore() {
+                return this.displayedArticles.length < this.allArticles.length;
+            }
+
+            updateLoadMoreButton() {
+                const loadMoreContainer = document.querySelector('.load-more-container');
+                const loadMoreButton = document.getElementById('load-more');
+                
+                if (loadMoreContainer && loadMoreButton) {
+                    if (this.canLoadMore()) {
+                        loadMoreContainer.style.display = 'block';
+                        loadMoreButton.disabled = false;
+                        loadMoreButton.innerHTML = '<i class="fas fa-plus-circle"></i> Load More Articles';
+                    } else {
+                        loadMoreContainer.style.display = 'none';
+                    }
+                }
+            }
+
+            isNearBottom() {
+                const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+                const windowHeight = window.innerHeight;
+                const documentHeight = document.documentElement.scrollHeight;
+                
+                return scrollTop + windowHeight >= documentHeight - 1000;
+            }
+        }
+
+        // Share article functionality
+        window.shareArticle = function(title, url, platform) {
+            const decodedTitle = decodeURIComponent(title);
+            const decodedUrl = decodeURIComponent(url);
+            
+            switch(platform) {
+                case 'facebook':
+                    window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(decodedUrl)}`, '_blank', 'width=600,height=400');
+                    break;
+                case 'twitter':
+                    window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(decodedTitle)}&url=${encodeURIComponent(decodedUrl)}`, '_blank', 'width=600,height=400');
+                    break;
+                case 'whatsapp':
+                    window.open(`https://wa.me/?text=${encodeURIComponent(decodedTitle + ' ' + decodedUrl)}`, '_blank');
+                    break;
+                case 'copy':
+                    navigator.clipboard.writeText(decodedUrl).then(() => {
+                        const button = event.target.closest('.share-btn');
+                        const originalIcon = button.innerHTML;
+                        button.innerHTML = '<i class="fas fa-check"></i>';
+                        button.style.color = '#10b981';
+                        setTimeout(() => {
+                            button.innerHTML = originalIcon;
+                            button.style.color = '';
+                        }, 2000);
+                    }).catch(() => {
+                        const textArea = document.createElement('textarea');
+                        textArea.value = decodedUrl;
+                        document.body.appendChild(textArea);
+                        textArea.select();
+                        document.execCommand('copy');
+                        document.body.removeChild(textArea);
+                        
+                        const button = event.target.closest('.share-btn');
+                        const originalIcon = button.innerHTML;
+                        button.innerHTML = '<i class="fas fa-check"></i>';
+                        button.style.color = '#10b981';
+                        setTimeout(() => {
+                            button.innerHTML = originalIcon;
+                            button.style.color = '';
+                        }, 2000);
+                    });
+                    break;
+            }
+        };
+
+        // Initialize the application when DOM is loaded
+        document.addEventListener('DOMContentLoaded', () => {
+            window.categoryNews = new CategoryNews('latest');
+        });
+    </script>
+</body>
+</html>

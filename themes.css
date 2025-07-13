@@ -1,0 +1,86 @@
+/* Theme Previews */
+.theme-default {
+    background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+}
+
+.theme-dark {
+    background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+}
+
+.theme-ocean {
+    background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%);
+}
+
+.theme-forest {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+}
+
+.theme-purple {
+    background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+}
+
+.theme-orange {
+    background: linear-gradient(135deg, #f97316 0%, #ea580c 100%);
+}
+
+/* Dark Theme */
+[data-theme="dark"] {
+    --primary-color: #3b82f6;
+    --secondary-color: #94a3b8;
+    --background-color: #0f172a;
+    --surface-color: #1e293b;
+    --text-primary: #f8fafc;
+    --text-secondary: #cbd5e1;
+    --text-muted: #94a3b8;
+    --border-color: #334155;
+    --shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.3), 0 1px 2px 0 rgba(0, 0, 0, 0.2);
+    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.3), 0 4px 6px -2px rgba(0, 0, 0, 0.2);
+}
+
+/* Ocean Theme */
+[data-theme="ocean"] {
+    --primary-color: #0ea5e9;
+    --secondary-color: #0284c7;
+    --background-color: #f0f9ff;
+    --surface-color: #e0f2fe;
+    --text-primary: #0c4a6e;
+    --text-secondary: #0369a1;
+    --text-muted: #0284c7;
+    --border-color: #bae6fd;
+}
+
+/* Forest Theme */
+[data-theme="forest"] {
+    --primary-color: #10b981;
+    --secondary-color: #059669;
+    --background-color: #f0fdf4;
+    --surface-color: #dcfce7;
+    --text-primary: #064e3b;
+    --text-secondary: #065f46;
+    --text-muted: #059669;
+    --border-color: #bbf7d0;
+}
+
+/* Purple Theme */
+[data-theme="purple"] {
+    --primary-color: #8b5cf6;
+    --secondary-color: #7c3aed;
+    --background-color: #faf5ff;
+    --surface-color: #f3e8ff;
+    --text-primary: #581c87;
+    --text-secondary: #6b21a8;
+    --text-muted: #7c3aed;
+    --border-color: #d8b4fe;
+}
+
+/* Orange Theme */
+[data-theme="orange"] {
+    --primary-color: #f97316;
+    --secondary-color: #ea580c;
+    --background-color: #fff7ed;
+    --surface-color: #ffedd5;
+    --text-primary: #9a3412;
+    --text-secondary: #c2410c;
+    --text-muted: #ea580c;
+    --border-color: #fed7aa;
+}
