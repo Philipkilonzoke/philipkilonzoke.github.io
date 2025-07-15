@@ -1,6 +1,6 @@
 /**
  * News API Integration for Brightlens News
- * Handles fetching news from multiple APIs simultaneously
+ * Handles fetching news from multiple APIs simultaneously with performance optimizations
  */
 
 class NewsAPI {
@@ -16,45 +16,199 @@ class NewsAPI {
 
         // Enhanced Kenyan news sources for comprehensive coverage
         this.kenyanSources = [
-            'nation.co.ke',
-            'standardmedia.co.ke',
-            'citizen.digital',
-            'capitalfm.co.ke',
-            'tuko.co.ke',
-            'the-star.co.ke',
-            'kenyans.co.ke',
-            'nairobinews.co.ke',
-            'kbc.co.ke',
-            'businessdailyafrica.com',
-            'people.co.ke',
-            'taifa.co.ke',
-            'kahawa.co.ke',
-            'kissfm.co.ke',
-            'ktn.co.ke',
-            'hivisasa.com',
-            'pd.co.ke',
-            'ktnnews.com',
-            'citizentv.co.ke',
-            'ntv.co.ke',
-            'ke.opera.news',
-            'mauvida.org',
-            'ghafla.com',
-            'mashariki.net',
-            'kenyatoday.com',
-            'kenya-news.org',
-            'edaily.co.ke',
-            'pulselive.co.ke',
-            'kenya.news24.com',
-            'kenyanvibe.com',
-            'africanquarters.com',
-            'kenyayetu.com',
-            'kenyanews.com',
-            'quicknews.co.ke',
-            'kenyainsider.com'
+            'nation.co.ke', 'standardmedia.co.ke', 'citizen.digital',
+            'capitalfm.co.ke', 'tuko.co.ke', 'the-star.co.ke',
+            'kenyans.co.ke', 'nairobinews.co.ke', 'kbc.co.ke',
+            'businessdailyafrica.com', 'people.co.ke', 'taifa.co.ke',
+            'kahawa.co.ke', 'kissfm.co.ke', 'ktn.co.ke', 'hivisasa.com',
+            'pd.co.ke', 'ktnnews.com', 'citizentv.co.ke', 'ntv.co.ke',
+            'ke.opera.news', 'mauvida.org', 'ghafla.com', 'mashariki.net',
+            'kenyatoday.com', 'kenya-news.org', 'edaily.co.ke',
+            'pulselive.co.ke', 'kenya.news24.com', 'kenyanvibe.com',
+            'africanquarters.com', 'kenyayetu.com'
         ];
 
+        // Performance optimization settings
         this.cache = new Map();
-        this.cacheTimeout = 5 * 60 * 1000; // 5 minutes
+        this.cacheExpiry = 5 * 60 * 1000; // 5 minutes
+        this.maxConcurrentRequests = 3;
+        this.requestQueue = [];
+        this.activeRequests = 0;
+        this.requestTimeouts = new Map();
+        
+        // Request optimization
+        this.abortController = new AbortController();
+        this.lastRequestTime = 0;
+        this.requestDelay = 100; // Minimum delay between requests
+        
+        this.initializeCache();
+    }
+
+    initializeCache() {
+        // Clear expired cache entries periodically
+        setInterval(() => {
+            this.clearExpiredCache();
+        }, 60000); // Check every minute
+    }
+
+    clearExpiredCache() {
+        const now = Date.now();
+        for (const [key, entry] of this.cache.entries()) {
+            if (now > entry.expiry) {
+                this.cache.delete(key);
+            }
+        }
+    }
+
+    getCacheKey(category, source) {
+        return `${category}_${source}`;
+    }
+
+    getFromCache(key) {
+        const entry = this.cache.get(key);
+        if (entry && Date.now() < entry.expiry) {
+            return entry.data;
+        }
+        return null;
+    }
+
+    setCache(key, data) {
+        this.cache.set(key, {
+            data: data,
+            expiry: Date.now() + this.cacheExpiry
+        });
+    }
+
+    async processRequestQueue() {
+        if (this.activeRequests >= this.maxConcurrentRequests || this.requestQueue.length === 0) {
+            return;
+        }
+
+        const request = this.requestQueue.shift();
+        this.activeRequests++;
+
+        try {
+            const result = await request.execute();
+            request.resolve(result);
+        } catch (error) {
+            request.reject(error);
+        } finally {
+            this.activeRequests--;
+            this.processRequestQueue();
+        }
+    }
+
+    queueRequest(executeFunction) {
+        return new Promise((resolve, reject) => {
+            this.requestQueue.push({
+                execute: executeFunction,
+                resolve: resolve,
+                reject: reject
+            });
+            this.processRequestQueue();
+        });
+    }
+
+    async fetchWithTimeout(url, options = {}, timeout = 10000) {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), timeout);
+
+        try {
+            const response = await fetch(url, {
+                ...options,
+                signal: controller.signal
+            });
+            clearTimeout(timeoutId);
+            return response;
+        } catch (error) {
+            clearTimeout(timeoutId);
+            throw error;
+        }
+    }
+
+    validateImageUrl(url) {
+        if (!url || typeof url !== 'string') return false;
+        
+        // Check for common invalid values
+        const invalidValues = ['null', 'undefined', 'None', 'N/A', '', 'no-image'];
+        if (invalidValues.includes(url.toLowerCase())) return false;
+        
+        // Check URL format
+        try {
+            const urlObj = new URL(url);
+            if (!['http:', 'https:'].includes(urlObj.protocol)) return false;
+            
+            // Check for common image extensions or image services
+            const imageExtensions = ['.jpg', '.jpeg', '.png', '.gif', '.webp', '.svg'];
+            const imageServices = ['unsplash.com', 'pixabay.com', 'pexels.com', 'images.', 'img.'];
+            
+            const hasImageExtension = imageExtensions.some(ext => url.toLowerCase().includes(ext));
+            const hasImageService = imageServices.some(service => url.toLowerCase().includes(service));
+            
+            return hasImageExtension || hasImageService;
+        } catch {
+            return false;
+        }
+    }
+
+    formatGNewsArticles(articles) {
+        return articles.map(article => ({
+            title: article.title,
+            description: article.description,
+            url: article.url,
+            urlToImage: this.validateImageUrl(article.image) ? article.image : null,
+            publishedAt: article.publishedAt,
+            source: article.source?.name || 'GNews',
+            category: 'general'
+        }));
+    }
+
+    formatNewsDataArticles(articles) {
+        return articles.map(article => ({
+            title: article.title,
+            description: article.description,
+            url: article.link,
+            urlToImage: this.validateImageUrl(article.image_url) ? article.image_url : null,
+            publishedAt: article.pubDate,
+            source: article.source_id || 'NewsData',
+            category: article.category?.[0] || 'general'
+        }));
+    }
+
+    formatNewsAPIArticles(articles) {
+        return articles.map(article => ({
+            title: article.title,
+            description: article.description,
+            url: article.url,
+            urlToImage: this.validateImageUrl(article.urlToImage) ? article.urlToImage : null,
+            publishedAt: article.publishedAt,
+            source: article.source?.name || 'NewsAPI',
+            category: 'general'
+        }));
+    }
+
+    formatMediastackArticles(articles) {
+        return articles.map(article => ({
+            title: article.title,
+            description: article.description,
+            url: article.url,
+            urlToImage: this.validateImageUrl(article.image) ? article.image : null,
+            publishedAt: article.published_at,
+            source: article.source || 'Mediastack',
+            category: article.category || 'general'
+        }));
+    }
+
+    formatCurrentsAPIArticles(articles) {
+        return articles.map(article => ({
+            title: article.title,
+            description: article.description,
+            url: article.url,
+            urlToImage: this.validateImageUrl(article.image) ? article.image : null,
+            publishedAt: article.published,
+            source: 'CurrentsAPI',
+            category: article.category?.[0] || 'general'
+        }));
     }
 
     /**
@@ -465,69 +619,6 @@ class NewsAPI {
             'lifestyle': 'health'
         };
         return mapping[category] || 'news';
-    }
-
-    /**
-     * Format articles from different APIs to a common structure
-     */
-    formatGNewsArticles(articles) {
-        return articles.map(article => ({
-            title: article.title,
-            description: article.description,
-            url: article.url,
-            urlToImage: article.image,
-            publishedAt: article.publishedAt,
-            source: article.source?.name || 'GNews',
-            category: 'general'
-        }));
-    }
-
-    formatNewsDataArticles(articles) {
-        return articles.map(article => ({
-            title: article.title,
-            description: article.description,
-            url: article.link,
-            urlToImage: article.image_url,
-            publishedAt: article.pubDate,
-            source: article.source_id || 'NewsData',
-            category: article.category?.[0] || 'general'
-        }));
-    }
-
-    formatNewsAPIArticles(articles) {
-        return articles.map(article => ({
-            title: article.title,
-            description: article.description,
-            url: article.url,
-            urlToImage: article.urlToImage,
-            publishedAt: article.publishedAt,
-            source: article.source?.name || 'NewsAPI',
-            category: 'general'
-        }));
-    }
-
-    formatMediastackArticles(articles) {
-        return articles.map(article => ({
-            title: article.title,
-            description: article.description,
-            url: article.url,
-            urlToImage: article.image,
-            publishedAt: article.published_at,
-            source: article.source || 'Mediastack',
-            category: article.category || 'general'
-        }));
-    }
-
-    formatCurrentsAPIArticles(articles) {
-        return articles.map(article => ({
-            title: article.title,
-            description: article.description,
-            url: article.url,
-            urlToImage: article.image,
-            publishedAt: article.published,
-            source: 'CurrentsAPI',
-            category: article.category?.[0] || 'general'
-        }));
     }
 
     /**
