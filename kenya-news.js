@@ -381,6 +381,344 @@ const KENYA_NEWS_SOURCES = {
             name: 'Kenya Insurance',
             category: 'kenya',
             priority: 4
+        },
+        
+        // Tier 8: Additional Major Kenya News Sources (Priority 1-2)
+        {
+            url: 'https://www.standardmedia.co.ke/feed/',
+            name: 'Standard Media',
+            category: 'kenya',
+            priority: 1
+        },
+        {
+            url: 'https://www.nation.co.ke/kenya/feed/',
+            name: 'Nation Africa Kenya',
+            category: 'kenya',
+            priority: 1
+        },
+        {
+            url: 'https://www.edaily.co.ke/feed/',
+            name: 'E-Daily',
+            category: 'kenya',
+            priority: 1
+        },
+        {
+            url: 'https://www.kenyans.co.ke/feed/',
+            name: 'Kenyans News',
+            category: 'kenya',
+            priority: 1
+        },
+        {
+            url: 'https://www.kenya-news.com/feed/',
+            name: 'Kenya News',
+            category: 'kenya',
+            priority: 1
+        },
+        {
+            url: 'https://www.kenyamonitor.co.ke/feed/',
+            name: 'Kenya Monitor',
+            category: 'kenya',
+            priority: 1
+        },
+        {
+            url: 'https://www.pulselive.co.ke/feed/',
+            name: 'Pulse Live Kenya',
+            category: 'kenya',
+            priority: 1
+        },
+        {
+            url: 'https://www.kahawatungu.com/feed/',
+            name: 'Kahawa Tungu',
+            category: 'kenya',
+            priority: 1
+        },
+        {
+            url: 'https://www.kenyatoday.com/feeds/rss',
+            name: 'Kenya Today RSS',
+            category: 'kenya',
+            priority: 1
+        },
+        {
+            url: 'https://www.nairobimagazine.co.ke/feed/',
+            name: 'Nairobi Magazine',
+            category: 'kenya',
+            priority: 2
+        },
+        {
+            url: 'https://www.kenyainsight.com/feeds/rss',
+            name: 'Kenya Insight RSS',
+            category: 'kenya',
+            priority: 2
+        },
+        {
+            url: 'https://www.kenyawebster.com/feed/',
+            name: 'Kenya Webster',
+            category: 'kenya',
+            priority: 2
+        },
+        {
+            url: 'https://www.kenyapage.net/feed/',
+            name: 'Kenya Page',
+            category: 'kenya',
+            priority: 2
+        },
+        {
+            url: 'https://www.kenyatoday.news/feed/',
+            name: 'Kenya Today News',
+            category: 'kenya',
+            priority: 2
+        },
+        {
+            url: 'https://www.mynairobi.co.ke/feed/',
+            name: 'My Nairobi',
+            category: 'kenya',
+            priority: 2
+        },
+        {
+            url: 'https://www.kenyatvnews.com/feed/',
+            name: 'Kenya TV News',
+            category: 'kenya',
+            priority: 2
+        },
+        {
+            url: 'https://www.nairobipress.com/feed/',
+            name: 'Nairobi Press',
+            category: 'kenya',
+            priority: 2
+        },
+        {
+            url: 'https://www.kenyatimes.co.ke/feed/',
+            name: 'Kenya Times',
+            category: 'kenya',
+            priority: 2
+        },
+        {
+            url: 'https://www.kenyatalk.co.ke/feed/',
+            name: 'Kenya Talk News',
+            category: 'kenya',
+            priority: 2
+        },
+        {
+            url: 'https://www.eastafricannews.net/feed/',
+            name: 'East African News',
+            category: 'kenya',
+            priority: 2
+        },
+        {
+            url: 'https://www.kenyabroadcasting.com/feed/',
+            name: 'Kenya Broadcasting',
+            category: 'kenya',
+            priority: 2
+        },
+        {
+            url: 'https://www.kenyavoice.com/feed/',
+            name: 'Kenya Voice',
+            category: 'kenya',
+            priority: 2
+        },
+        {
+            url: 'https://www.kenyawirenews.com/feed/',
+            name: 'Kenya Wire News',
+            category: 'kenya',
+            priority: 2
+        },
+        {
+            url: 'https://www.kenyapress.com/feed/',
+            name: 'Kenya Press',
+            category: 'kenya',
+            priority: 2
+        },
+        {
+            url: 'https://www.kenyaupdate.com/feed/',
+            name: 'Kenya Update',
+            category: 'kenya',
+            priority: 2
+        },
+        {
+            url: 'https://www.kenyahub.com/feed/',
+            name: 'Kenya Hub',
+            category: 'kenya',
+            priority: 2
+        },
+        {
+            url: 'https://www.kenyagateway.com/feed/',
+            name: 'Kenya Gateway',
+            category: 'kenya',
+            priority: 2
+        },
+        {
+            url: 'https://www.kenyasun.com/feed/',
+            name: 'Kenya Sun',
+            category: 'kenya',
+            priority: 2
+        },
+        {
+            url: 'https://www.kenyaherald.com/feed/',
+            name: 'Kenya Herald',
+            category: 'kenya',
+            priority: 2
+        },
+        {
+            url: 'https://www.kenyaobserver.com/feed/',
+            name: 'Kenya Observer',
+            category: 'kenya',
+            priority: 2
+        },
+        {
+            url: 'https://www.kenyaweekly.com/feed/',
+            name: 'Kenya Weekly',
+            category: 'kenya',
+            priority: 2
+        },
+        {
+            url: 'https://www.kenyafocus.com/feed/',
+            name: 'Kenya Focus',
+            category: 'kenya',
+            priority: 2
+        },
+        {
+            url: 'https://www.kenyawatch.com/feed/',
+            name: 'Kenya Watch',
+            category: 'kenya',
+            priority: 2
+        },
+        {
+            url: 'https://www.kenyaonline.com/feed/',
+            name: 'Kenya Online',
+            category: 'kenya',
+            priority: 2
+        },
+        {
+            url: 'https://www.kenyaview.com/feed/',
+            name: 'Kenya View',
+            category: 'kenya',
+            priority: 2
+        },
+        {
+            url: 'https://www.kenyastory.com/feed/',
+            name: 'Kenya Story',
+            category: 'kenya',
+            priority: 2
+        },
+        {
+            url: 'https://www.kenyabeat.com/feed/',
+            name: 'Kenya Beat',
+            category: 'kenya',
+            priority: 2
+        },
+        {
+            url: 'https://www.kenyaflash.com/feed/',
+            name: 'Kenya Flash',
+            category: 'kenya',
+            priority: 2
+        },
+        {
+            url: 'https://www.kenyajournal.com/feed/',
+            name: 'Kenya Journal',
+            category: 'kenya',
+            priority: 2
+        },
+        {
+            url: 'https://www.kenyatrends.com/feed/',
+            name: 'Kenya Trends',
+            category: 'kenya',
+            priority: 2
+        },
+        {
+            url: 'https://www.kenyalive.com/feed/',
+            name: 'Kenya Live',
+            category: 'kenya',
+            priority: 2
+        },
+        {
+            url: 'https://www.kenyasports.com/feed/',
+            name: 'Kenya Sports',
+            category: 'kenya',
+            priority: 2
+        },
+        {
+            url: 'https://www.kenyabusiness.com/feed/',
+            name: 'Kenya Business',
+            category: 'kenya',
+            priority: 2
+        },
+        {
+            url: 'https://www.kenyaentertainment.com/feed/',
+            name: 'Kenya Entertainment',
+            category: 'kenya',
+            priority: 2
+        },
+        {
+            url: 'https://www.kenyatech.com/feed/',
+            name: 'Kenya Tech',
+            category: 'kenya',
+            priority: 2
+        },
+        {
+            url: 'https://www.kenyahealth.com/feed/',
+            name: 'Kenya Health',
+            category: 'kenya',
+            priority: 2
+        },
+        {
+            url: 'https://www.kenyaeducation.com/feed/',
+            name: 'Kenya Education',
+            category: 'kenya',
+            priority: 2
+        },
+        {
+            url: 'https://www.kenyaagriculture.com/feed/',
+            name: 'Kenya Agriculture',
+            category: 'kenya',
+            priority: 2
+        },
+        {
+            url: 'https://www.kenyatravel.com/feed/',
+            name: 'Kenya Travel',
+            category: 'kenya',
+            priority: 2
+        },
+        {
+            url: 'https://www.kenyaculture.com/feed/',
+            name: 'Kenya Culture',
+            category: 'kenya',
+            priority: 2
+        },
+        {
+            url: 'https://www.kenyapolitics.com/feed/',
+            name: 'Kenya Politics',
+            category: 'kenya',
+            priority: 2
+        },
+        {
+            url: 'https://www.kenyaeconomy.com/feed/',
+            name: 'Kenya Economy',
+            category: 'kenya',
+            priority: 2
+        },
+        {
+            url: 'https://www.kenyaweather.com/feed/',
+            name: 'Kenya Weather',
+            category: 'kenya',
+            priority: 2
+        },
+        {
+            url: 'https://www.kenyaenvironment.com/feed/',
+            name: 'Kenya Environment',
+            category: 'kenya',
+            priority: 2
+        },
+        {
+            url: 'https://www.kenyawildlife.com/feed/',
+            name: 'Kenya Wildlife',
+            category: 'kenya',
+            priority: 2
+        },
+        {
+            url: 'https://www.kenyatourism.com/feed/',
+            name: 'Kenya Tourism',
+            category: 'kenya',
+            priority: 2
         }
     ],
     apis: [
