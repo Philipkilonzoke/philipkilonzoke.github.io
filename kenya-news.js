@@ -1259,8 +1259,11 @@ async function loadKenyaSpecificNews() {
     // Remove duplicates using enhanced deduplication
     const uniqueArticles = removeDuplicateKenyaArticles(allKenyaArticles);
     
+    // Apply additional clustering for time-based duplicates
+    const clusteredArticles = clusterSimilarArticles(uniqueArticles);
+    
     // Sort by priority and date
-    const sortedArticles = uniqueArticles.sort((a, b) => {
+    const sortedArticles = clusteredArticles.sort((a, b) => {
         // First by priority (lower number = higher priority)
         if (a.priority !== b.priority) {
             return a.priority - b.priority;
@@ -1523,35 +1526,195 @@ async function checkKenyaSourcesHealth() {
 function removeDuplicateKenyaArticles(articles) {
     const seen = new Set();
     const titleWords = new Map();
-    const similarityThreshold = 0.85;
+    const contentHashes = new Set();
+    const similarityThreshold = 0.82; // Slightly lower threshold for better detection
     
     return articles.filter(article => {
         // Skip articles without essential data
         if (!article.title || !article.url) return false;
         
+        // Normalize URL for better duplicate detection
+        const normalizedUrl = normalizeUrl(article.url);
+        
         // Check for exact URL duplicates
-        if (seen.has(article.url)) return false;
+        if (seen.has(normalizedUrl)) return false;
         
         // Check for title similarity
-        const cleanTitle = article.title.toLowerCase()
-            .replace(/[^\w\s]/g, '')
-            .trim();
+        const cleanTitle = cleanTitleForComparison(article.title);
+        
+        // Generate content hash for duplicate detection
+        const contentHash = generateContentHash(article);
+        if (contentHashes.has(contentHash)) {
+            console.log(`Duplicate detected (content hash): "${article.title}"`);
+            return false;
+        }
         
         // Check against existing titles for similarity
         for (const [existingTitle, existingUrl] of titleWords) {
             const similarity = calculateTextSimilarity(cleanTitle, existingTitle);
             if (similarity > similarityThreshold) {
-                console.log(`Duplicate detected: "${article.title}" similar to existing article`);
+                console.log(`Duplicate detected (title similarity): "${article.title}" similar to existing article`);
                 return false;
             }
         }
         
         // Add to tracking sets
-        seen.add(article.url);
-        titleWords.set(cleanTitle, article.url);
+        seen.add(normalizedUrl);
+        titleWords.set(cleanTitle, normalizedUrl);
+        contentHashes.add(contentHash);
         
         return true;
     });
+}
+
+// Normalize URL for better duplicate detection
+function normalizeUrl(url) {
+    try {
+        const urlObj = new URL(url);
+        // Remove common tracking parameters
+        const trackingParams = ['utm_source', 'utm_medium', 'utm_campaign', 'utm_term', 'utm_content', 'ref', 'fbclid', 'gclid'];
+        trackingParams.forEach(param => urlObj.searchParams.delete(param));
+        
+        // Normalize domain
+        const domain = urlObj.hostname.replace(/^www\./, '');
+        
+        // Return normalized URL
+        return `${urlObj.protocol}//${domain}${urlObj.pathname}${urlObj.search}`;
+    } catch (e) {
+        // Return original URL if normalization fails
+        return url;
+    }
+}
+
+// Clean title for better comparison
+function cleanTitleForComparison(title) {
+    if (!title) return '';
+    
+    // Common words and phrases to remove for better duplicate detection
+    const stopWords = [
+        'breaking', 'news', 'report', 'update', 'latest', 'exclusive', 'video', 'photos',
+        'kenya', 'nairobi', 'mombasa', 'kisumu', 'nakuru', 'eldoret', 'thika', 'malindi',
+        'today', 'yesterday', 'now', 'just', 'in', 'live', 'watch', 'read', 'more'
+    ];
+    
+    let cleanTitle = title.toLowerCase()
+        .replace(/[^\w\s]/g, ' ')
+        .replace(/\s+/g, ' ')
+        .trim();
+    
+    // Remove stop words
+    const words = cleanTitle.split(' ');
+    const filteredWords = words.filter(word => 
+        word.length > 2 && !stopWords.includes(word)
+    );
+    
+    return filteredWords.join(' ');
+}
+
+// Generate content hash for duplicate detection
+function generateContentHash(article) {
+    const content = [
+        cleanTitleForComparison(article.title) || '',
+        article.description?.toLowerCase().replace(/[^\w\s]/g, '').trim() || '',
+        article.source?.name?.toLowerCase() || '',
+        article.publishedAt?.split('T')[0] || '' // Date only
+    ].join('|');
+    
+    return simpleHash(content);
+}
+
+// Simple hash function for content
+function simpleHash(str) {
+    let hash = 0;
+    for (let i = 0; i < str.length; i++) {
+        const char = str.charCodeAt(i);
+        hash = ((hash << 5) - hash) + char;
+        hash = hash & hash; // Convert to 32-bit integer
+    }
+    return hash.toString();
+}
+
+// Cluster similar articles that might be published at different times
+function clusterSimilarArticles(articles) {
+    const clusters = [];
+    const processed = new Set();
+    
+    articles.forEach((article, index) => {
+        if (processed.has(index)) return;
+        
+        const cluster = [article];
+        processed.add(index);
+        
+        // Find similar articles within a time window
+        for (let i = index + 1; i < articles.length; i++) {
+            if (processed.has(i)) continue;
+            
+            const otherArticle = articles[i];
+            
+            // Check if articles are within 24 hours of each other
+            const timeDiff = Math.abs(new Date(article.publishedAt) - new Date(otherArticle.publishedAt));
+            const hoursDiff = timeDiff / (1000 * 60 * 60);
+            
+            if (hoursDiff <= 24) {
+                // Check for content similarity
+                const titleSimilarity = calculateTextSimilarity(
+                    cleanTitleForComparison(article.title),
+                    cleanTitleForComparison(otherArticle.title)
+                );
+                
+                // Check for description similarity if available
+                let descSimilarity = 0;
+                if (article.description && otherArticle.description) {
+                    descSimilarity = calculateTextSimilarity(
+                        article.description.toLowerCase().replace(/[^\w\s]/g, '').trim(),
+                        otherArticle.description.toLowerCase().replace(/[^\w\s]/g, '').trim()
+                    );
+                }
+                
+                // If either title or description similarity is high, consider them duplicates
+                if (titleSimilarity > 0.7 || descSimilarity > 0.8) {
+                    cluster.push(otherArticle);
+                    processed.add(i);
+                }
+            }
+        }
+        
+        // Select the best article from the cluster
+        if (cluster.length > 1) {
+            const bestArticle = selectBestArticleFromCluster(cluster);
+            clusters.push(bestArticle);
+        } else {
+            clusters.push(article);
+        }
+    });
+    
+    return clusters;
+}
+
+// Select the best article from a cluster of similar articles
+function selectBestArticleFromCluster(cluster) {
+    // Sort by priority (lower is better), then by date (newer is better)
+    const sorted = cluster.sort((a, b) => {
+        if (a.priority !== b.priority) {
+            return a.priority - b.priority;
+        }
+        return new Date(b.publishedAt) - new Date(a.publishedAt);
+    });
+    
+    // Return the best article but with potentially enhanced metadata
+    const bestArticle = sorted[0];
+    
+    // If multiple sources reported the same story, note it
+    if (cluster.length > 1) {
+        const sources = cluster.map(article => article.source?.name).filter(Boolean);
+        const uniqueSources = [...new Set(sources)];
+        
+        // Add metadata about multiple sources
+        bestArticle.multipleSources = uniqueSources;
+        bestArticle.sourceCount = uniqueSources.length;
+    }
+    
+    return bestArticle;
 }
 
 // Calculate text similarity using multiple methods
