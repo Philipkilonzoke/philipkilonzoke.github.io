@@ -565,7 +565,7 @@ body {
     margin-bottom: 0.75rem;
     color: var(--text-color);
     display: -webkit-box;
-    -webkit-line-clamp: 2;
+    -webkit-line-clamp: 3;
     -webkit-box-orient: vertical;
     overflow: hidden;
 }
@@ -576,7 +576,7 @@ body {
     line-height: 1.5;
     margin-bottom: 1rem;
     display: -webkit-box;
-    -webkit-line-clamp: 3;
+    -webkit-line-clamp: 6;
     -webkit-box-orient: vertical;
     overflow: hidden;
 }
@@ -1374,7 +1374,7 @@ body {
     
     .news-description {
         font-size: 0.8rem;
-        -webkit-line-clamp: 2;
+        -webkit-line-clamp: 4;
     }
     
     .news-image,
