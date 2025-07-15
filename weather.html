@@ -933,6 +933,12 @@
                 </div>
             </div>
 
+            <!-- NEW 24-Hour Forecast Section -->
+            <div id="hourly-section" class="hourly-section">
+                <h2><i class="fas fa-clock"></i> 24-Hour Forecast</h2>
+                <div id="hourly-scroll" class="hourly-scroll"></div>
+            </div>
+
             <!-- 7-Day Forecast -->
             <div id="forecast-section" class="forecast-section">
                 <h2><i class="fas fa-calendar-week"></i> 7-Day Weather Forecast</h2>
@@ -1340,6 +1346,77 @@
             text-transform: capitalize;
         }
 
+        /* ---------------------- Added Hourly Forecast Styles ---------------------- */
+        .hourly-section {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            padding: 2.5rem;
+            margin-top: 2rem;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            display: none;
+        }
+
+        .hourly-section h2 {
+            text-align: center;
+            color: #1e293b;
+            margin-bottom: 2rem;
+            font-size: 2rem;
+            font-weight: 700;
+        }
+
+        .hourly-scroll {
+            display: flex;
+            overflow-x: auto;
+            gap: 1rem;
+            scroll-snap-type: x mandatory;
+            padding-bottom: 0.5rem;
+        }
+        .hourly-scroll::-webkit-scrollbar {
+            height: 8px;
+        }
+        .hourly-scroll::-webkit-scrollbar-thumb {
+            background: rgba(102, 126, 234, 0.3);
+            border-radius: 4px;
+        }
+
+        .hour-card {
+            flex: 0 0 120px;
+            background: rgba(102, 126, 234, 0.05);
+            border: 1px solid rgba(102, 126, 234, 0.1);
+            border-radius: 15px;
+            padding: 1rem;
+            text-align: center;
+            scroll-snap-align: start;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .hour-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.2);
+        }
+        .hour-time {
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: #667eea;
+            font-size: 0.9rem;
+        }
+        .hour-icon img {
+            width: 40px;
+            height: 40px;
+            margin: 0 auto 0.5rem;
+        }
+        .hour-temp {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: #1e293b;
+        }
+        .hour-desc {
+            color: #64748b;
+            font-size: 0.8rem;
+            text-transform: capitalize;
+        }
+
         @media (max-width: 768px) {
             .footer-grid {
                 grid-template-columns: 1fr;
@@ -1416,6 +1493,7 @@
                 this.hideError();
                 this.hideWeatherCard();
                 this.hideForecast();
+                this.hideHourlyForecast(); // NEW
 
                 try {
                     // Fetch current weather and 7-day forecast
@@ -1436,9 +1514,11 @@
                     
                     this.displayWeather(currentData);
                     this.displayForecast(forecastData);
+                    this.displayHourlyForecast(forecastData); // NEW
                     this.hideLoading();
                     this.showWeatherCard();
                     this.showForecast();
+                    this.showHourlyForecast(); // NEW
                 } catch (error) {
                     console.error('Weather fetch error:', error);
                     this.hideLoading();
@@ -1507,6 +1587,7 @@
                 // Update forecast temperatures
                 if (this.forecastData) {
                     this.displayForecast(this.forecastData);
+                    this.displayHourlyForecast(this.forecastData); // NEW
                 }
             }
 
@@ -1542,12 +1623,61 @@
                 });
             }
 
+            // ---------------------- NEW: Display Hourly Forecast ----------------------
+            displayHourlyForecast(data) {
+                const section = document.getElementById('hourly-section');
+                const container = document.getElementById('hourly-scroll');
+                if (!section || !container || !data) return;
+
+                container.innerHTML = '';
+
+                const now = new Date();
+                let currentHour = now.getHours();
+                const hourlyItems = [];
+                let dayIndex = 0;
+
+                while (hourlyItems.length < 24 && dayIndex < data.forecast.forecastday.length) {
+                    const day = data.forecast.forecastday[dayIndex];
+                    for (let i = currentHour; i < 24 && hourlyItems.length < 24; i++) {
+                        hourlyItems.push(day.hour[i]);
+                    }
+                    dayIndex++;
+                    currentHour = 0; // reset for subsequent days
+                }
+
+                hourlyItems.forEach(hour => {
+                    const timeObj = new Date(hour.time);
+                    const timeLabel = timeObj.toLocaleTimeString('en-US', { hour: 'numeric', hour12: true });
+                    const temp = this.currentUnit === 'C' ? Math.round(hour.temp_c) : Math.round(hour.temp_f);
+
+                    const card = document.createElement('div');
+                    card.className = 'hour-card';
+                    card.innerHTML = `
+                        <div class="hour-time">${timeLabel}</div>
+                        <div class="hour-icon"><img src="https:${hour.condition.icon}" alt="${hour.condition.text}"></div>
+                        <div class="hour-temp">${temp}°</div>
+                        <div class="hour-desc">${hour.condition.text}</div>
+                    `;
+                    container.appendChild(card);
+                });
+
+                section.style.display = 'block';
+            }
+
             showForecast() {
                 document.getElementById('forecast-section').style.display = 'block';
             }
 
             hideForecast() {
                 document.getElementById('forecast-section').style.display = 'none';
+            }
+
+            showHourlyForecast() { // NEW
+                document.getElementById('hourly-section').style.display = 'block';
+            }
+
+            hideHourlyForecast() { // NEW
+                document.getElementById('hourly-section').style.display = 'none';
             }
 
             getCountryCode(countryName) {
