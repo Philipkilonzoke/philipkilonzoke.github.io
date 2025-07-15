@@ -31,5 +31,5 @@
       "form_factor": "narrow"
     }
   ],
-  "features": ["Cross Platform", "fast", "simple"]
+  "features": ["Cross Platform", "fast", "simple", "customizable"]
 }
