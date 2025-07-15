@@ -21,17 +21,19 @@
         *{margin:0;padding:0;box-sizing:border-box}
         :root{--primary-color:#2563eb;--background-color:#ffffff;--text-color:#1e293b;--surface-color:#f8fafc;--border-color:#e2e8f0}
         body{font-family:'Inter',system-ui,sans-serif;background:var(--background-color);color:var(--text-color);line-height:1.6}
-        .loading-screen{position:fixed;top:0;left:0;width:100%;height:100%;background:var(--primary-color);display:flex;align-items:center;justify-content:center;z-index:9999;transition:opacity 0.3s}
-        .loading-screen.hidden{opacity:0;visibility:hidden}
-        .loading-container{text-align:center;color:white}
-        .loading-spinner{width:60px;height:60px;border:4px solid rgba(255,255,255,0.3);border-top:4px solid white;border-radius:50%;animation:spin 1s linear infinite;margin:0 auto 1rem}
-        @keyframes spin{0%{transform:rotate(0deg)}100%{transform:rotate(360deg)}}
         .header{background:var(--surface-color);border-bottom:1px solid var(--border-color);position:sticky;top:0;z-index:100}
+        /* Critical splash screen styles for immediate rendering */
+        .splash-screen-3d{position:fixed;top:0;left:0;width:100vw;height:100vh;background:linear-gradient(135deg,#1e3a8a 0%,#2563eb 50%,#3b82f6 100%);display:flex;align-items:center;justify-content:center;z-index:10000;perspective:1000px}
     </style>
-    <!-- Non-Critical CSS Files -->
+    <!-- Critical CSS Files -->
+    <link rel="preload" href="css/splash-screen.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
     <link rel="preload" href="css/styles.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
     <link rel="preload" href="css/themes.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
-    <noscript><link rel="stylesheet" href="css/styles.css"><link rel="stylesheet" href="css/themes.css"></noscript>
+    <noscript>
+        <link rel="stylesheet" href="css/splash-screen.css">
+        <link rel="stylesheet" href="css/styles.css">
+        <link rel="stylesheet" href="css/themes.css">
+    </noscript>
     <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
     <noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"></noscript>
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -40,14 +42,7 @@
     <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"></noscript>
 </head>
 <body>
-    <!-- Loading Screen -->
-    <div id="loading-screen" class="loading-screen">
-        <div class="loading-container">
-            <div class="loading-spinner"></div>
-            <h2>Brightlens News</h2>
-            <p>Loading business news...</p>
-        </div>
-    </div>
+    <!-- 3D Splash Screen will be created dynamically by JavaScript -->
 
     <!-- Header -->
     <header class="header">
@@ -118,12 +113,18 @@
                 <a href="lifestyle.html" class="sidebar-link">
                     <i class="fas fa-spa"></i> Lifestyle
                 </a>
+                <a href="music.html" class="sidebar-link">
+                    <i class="fas fa-music"></i> Music
+                </a>
                 <div class="sidebar-divider"></div>
                 <a href="weather.html" class="sidebar-link">
                     <i class="fas fa-cloud-sun"></i> Weather
                 </a>
                 <a href="live-tv.html" class="sidebar-link">
                     <i class="fas fa-tv"></i> Live TV
+                </a>
+                <a href="settings.html" class="sidebar-link">
+                    <i class="fas fa-cog"></i> Settings
                 </a>
             </nav>
         </div>
@@ -312,5 +313,7 @@
             window.categoryNews = new CategoryNews('business');
         });
     </script>
+    <!-- Enhanced 3D Splash Screen -->
+    <script src="js/splash-screen.js"></script>
 </body>
 </html>
