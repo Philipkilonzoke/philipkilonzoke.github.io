@@ -143,11 +143,105 @@
             <div class="category-header">
                 <h2 id="category-title">
                     <i class="fas fa-music" style="margin-right: 0.5rem; color: var(--primary-color);"></i>
-                    Music News
+                    Music Hub
                 </h2>
                 <div class="category-meta">
                     <span id="article-count">Loading articles...</span>
                     <span id="last-updated"></span>
+                </div>
+            </div>
+
+            <!-- Music Dashboard -->
+            <div class="music-dashboard">
+                <!-- Trending Songs Section -->
+                <div class="trending-section">
+                    <div class="section-header">
+                        <h3><i class="fas fa-fire"></i> Trending Now</h3>
+                        <div class="trending-tabs">
+                            <button class="trending-tab active" data-tab="global">Global</button>
+                            <button class="trending-tab" data-tab="rap">Rap/Hip-Hop</button>
+                            <button class="trending-tab" data-tab="pop">Pop</button>
+                            <button class="trending-tab" data-tab="rock">Rock</button>
+                        </div>
+                    </div>
+                    <div class="trending-content">
+                        <div class="trending-grid" id="trending-global">
+                            <!-- Trending songs will be populated here -->
+                        </div>
+                        <div class="trending-grid" id="trending-rap" style="display: none;">
+                            <!-- Rap trending songs will be populated here -->
+                        </div>
+                        <div class="trending-grid" id="trending-pop" style="display: none;">
+                            <!-- Pop trending songs will be populated here -->
+                        </div>
+                        <div class="trending-grid" id="trending-rock" style="display: none;">
+                            <!-- Rock trending songs will be populated here -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Music Stats and Charts -->
+                <div class="music-stats-section">
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <div class="stat-icon">
+                                <i class="fas fa-chart-line"></i>
+                            </div>
+                            <div class="stat-info">
+                                <div class="stat-number" id="total-streams">2.8B</div>
+                                <div class="stat-label">Total Streams Today</div>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon">
+                                <i class="fas fa-music"></i>
+                            </div>
+                            <div class="stat-info">
+                                <div class="stat-number" id="new-releases">127</div>
+                                <div class="stat-label">New Releases This Week</div>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon">
+                                <i class="fas fa-microphone"></i>
+                            </div>
+                            <div class="stat-info">
+                                <div class="stat-number" id="live-concerts">23</div>
+                                <div class="stat-label">Live Concerts Today</div>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon">
+                                <i class="fas fa-users"></i>
+                            </div>
+                            <div class="stat-info">
+                                <div class="stat-number" id="active-artists">1.2M</div>
+                                <div class="stat-label">Active Artists</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Featured Playlists -->
+                <div class="playlists-section">
+                    <div class="section-header">
+                        <h3><i class="fas fa-list"></i> Featured Playlists</h3>
+                        <button class="view-all-btn">View All</button>
+                    </div>
+                    <div class="playlists-grid" id="playlists-container">
+                        <!-- Playlists will be populated here -->
+                    </div>
+                </div>
+
+                <!-- Music Events -->
+                <div class="events-section">
+                    <div class="section-header">
+                        <h3><i class="fas fa-calendar-alt"></i> Upcoming Events</h3>
+                        <button class="view-all-btn">View All</button>
+                    </div>
+                    <div class="events-grid" id="events-container">
+                        <!-- Events will be populated here -->
+                    </div>
                 </div>
             </div>
 
@@ -442,7 +536,344 @@
     <script src="main.js"></script>
     
     <style>
-        /* Music-specific styles */
+        /* Music Dashboard Styles */
+        .music-dashboard {
+            margin-bottom: 3rem;
+        }
+
+        /* Trending Section */
+        .trending-section {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 20px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            color: white;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .trending-section::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
+            animation: trendingGlow 4s ease-in-out infinite;
+        }
+
+        @keyframes trendingGlow {
+            0%, 100% { transform: rotate(0deg); }
+            50% { transform: rotate(180deg); }
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        .section-header h3 {
+            font-size: 1.8rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .section-header h3 i {
+            color: #fbbf24;
+            animation: fireFlicker 2s ease-in-out infinite;
+        }
+
+        @keyframes fireFlicker {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        .trending-tabs {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .trending-tab {
+            padding: 0.5rem 1rem;
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            border-radius: 20px;
+            color: white;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+
+        .trending-tab.active,
+        .trending-tab:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateY(-2px);
+        }
+
+        .trending-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        .trending-song {
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(20px);
+            border-radius: 15px;
+            padding: 1rem;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .trending-song::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.5s;
+        }
+
+        .trending-song:hover::before {
+            left: 100%;
+        }
+
+        .trending-song:hover {
+            transform: translateY(-5px);
+            background: rgba(255, 255, 255, 0.25);
+        }
+
+        .song-info {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .song-artwork {
+            width: 60px;
+            height: 60px;
+            border-radius: 10px;
+            background: linear-gradient(45deg, #fbbf24, #f59e0b);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            color: white;
+            flex-shrink: 0;
+        }
+
+        .song-details {
+            flex: 1;
+        }
+
+        .song-title {
+            font-weight: 700;
+            font-size: 1rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .song-artist {
+            opacity: 0.8;
+            font-size: 0.9rem;
+        }
+
+        .song-stats {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 0.5rem;
+            font-size: 0.8rem;
+            opacity: 0.7;
+        }
+
+        /* Music Stats Section */
+        .music-stats-section {
+            margin-bottom: 2rem;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1rem;
+        }
+
+        .stat-card {
+            background: var(--surface-color);
+            border-radius: 15px;
+            padding: 1.5rem;
+            border: 1px solid var(--border-color);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 4px;
+            height: 100%;
+            background: var(--primary-color);
+            transform: scaleY(0);
+            transition: transform 0.3s ease;
+        }
+
+        .stat-card:hover::before {
+            transform: scaleY(1);
+        }
+
+        .stat-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        }
+
+        .stat-card {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .stat-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 12px;
+            background: linear-gradient(135deg, var(--primary-color), #3b82f6);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.2rem;
+        }
+
+        .stat-number {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--text-color);
+            margin-bottom: 0.25rem;
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            color: #64748b;
+        }
+
+        /* Playlists Section */
+        .playlists-section,
+        .events-section {
+            margin-bottom: 2rem;
+        }
+
+        .playlists-section .section-header,
+        .events-section .section-header {
+            margin-bottom: 1rem;
+        }
+
+        .playlists-section .section-header h3,
+        .events-section .section-header h3 {
+            color: var(--text-color);
+        }
+
+        .view-all-btn {
+            padding: 0.5rem 1rem;
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 20px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .view-all-btn:hover {
+            background: #1d4ed8;
+            transform: translateY(-2px);
+        }
+
+        .playlists-grid,
+        .events-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1rem;
+        }
+
+        .playlist-card,
+        .event-card {
+            background: var(--surface-color);
+            border-radius: 15px;
+            padding: 1.5rem;
+            border: 1px solid var(--border-color);
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .playlist-card:hover,
+        .event-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        }
+
+        .playlist-header,
+        .event-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .playlist-icon,
+        .event-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 10px;
+            background: linear-gradient(135deg, #ec4899, #db2777);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.2rem;
+        }
+
+        .event-icon {
+            background: linear-gradient(135deg, #10b981, #059669);
+        }
+
+        .playlist-title,
+        .event-title {
+            font-weight: 700;
+            font-size: 1.1rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .playlist-subtitle,
+        .event-subtitle {
+            color: #64748b;
+            font-size: 0.9rem;
+        }
+
+        .playlist-stats,
+        .event-stats {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.8rem;
+            color: #64748b;
+        }
+
+        /* Music-specific filter styles */
         .music-filters {
             display: flex;
             flex-wrap: wrap;
@@ -548,13 +979,202 @@
         .article-card[data-genre="jazz"]::before {
             background: linear-gradient(135deg, #4f46e5, #4338ca);
         }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .music-dashboard {
+                margin-bottom: 2rem;
+            }
+
+            .trending-section {
+                padding: 1.5rem;
+                margin-bottom: 1.5rem;
+            }
+
+            .section-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 1rem;
+            }
+
+            .trending-tabs {
+                width: 100%;
+                justify-content: center;
+                flex-wrap: wrap;
+            }
+
+            .trending-tab {
+                flex: 1;
+                min-width: 120px;
+                text-align: center;
+            }
+
+            .trending-grid {
+                grid-template-columns: 1fr;
+                gap: 0.75rem;
+            }
+
+            .song-info {
+                gap: 0.75rem;
+            }
+
+            .song-artwork {
+                width: 50px;
+                height: 50px;
+                font-size: 1.2rem;
+            }
+
+            .stats-grid {
+                grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+                gap: 0.75rem;
+            }
+
+            .stat-card {
+                padding: 1rem;
+                flex-direction: column;
+                text-align: center;
+                gap: 0.75rem;
+            }
+
+            .stat-icon {
+                width: 40px;
+                height: 40px;
+                font-size: 1rem;
+            }
+
+            .stat-number {
+                font-size: 1.5rem;
+            }
+
+            .playlists-grid,
+            .events-grid {
+                grid-template-columns: 1fr;
+                gap: 0.75rem;
+            }
+
+            .playlist-card,
+            .event-card {
+                padding: 1rem;
+            }
+
+            .playlist-header,
+            .event-header {
+                gap: 0.75rem;
+            }
+
+            .playlist-icon,
+            .event-icon {
+                width: 40px;
+                height: 40px;
+                font-size: 1rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .trending-section {
+                padding: 1rem;
+            }
+
+            .section-header h3 {
+                font-size: 1.5rem;
+            }
+
+            .trending-tabs {
+                gap: 0.25rem;
+            }
+
+            .trending-tab {
+                padding: 0.4rem 0.8rem;
+                font-size: 0.8rem;
+                min-width: 100px;
+            }
+
+            .song-details {
+                min-width: 0;
+            }
+
+            .song-title {
+                font-size: 0.9rem;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                white-space: nowrap;
+            }
+
+            .song-artist {
+                font-size: 0.8rem;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                white-space: nowrap;
+            }
+
+            .song-stats {
+                font-size: 0.7rem;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .stat-card {
+                flex-direction: row;
+                text-align: left;
+            }
+
+            .stat-number {
+                font-size: 1.3rem;
+            }
+
+            .view-all-btn {
+                padding: 0.4rem 0.8rem;
+                font-size: 0.8rem;
+            }
+        }
+
+        /* Loading and Error States */
+        .music-loading {
+            text-align: center;
+            padding: 2rem;
+            color: #64748b;
+        }
+
+        .music-loading i {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+            animation: spin 2s linear infinite;
+        }
+
+        /* Interactive Enhancements */
+        .trending-song:active,
+        .playlist-card:active,
+        .event-card:active {
+            transform: scale(0.95) !important;
+        }
+
+        /* Accessibility */
+        .trending-tab:focus,
+        .filter-btn:focus,
+        .view-all-btn:focus {
+            outline: 2px solid var(--primary-color);
+            outline-offset: 2px;
+        }
+
+        /* Dark mode support */
+        @media (prefers-color-scheme: dark) {
+            .trending-song {
+                background: rgba(255, 255, 255, 0.1);
+            }
+            
+            .trending-song:hover {
+                background: rgba(255, 255, 255, 0.15);
+            }
+        }
     </style>
 
     <script>
         // Music-specific JavaScript
         document.addEventListener('DOMContentLoaded', function() {
-            // Initialize music news loading
-            loadMusicNews();
+            // Initialize all music content
+            initializeMusicHub();
             
             // Handle genre filter clicks
             const filterBtns = document.querySelectorAll('.filter-btn');
@@ -572,7 +1192,239 @@
                     filterArticlesByGenre(genre);
                 });
             });
+
+            // Handle trending tab clicks
+            const trendingTabs = document.querySelectorAll('.trending-tab');
+            trendingTabs.forEach(tab => {
+                tab.addEventListener('click', function() {
+                    // Remove active class from all tabs
+                    trendingTabs.forEach(t => t.classList.remove('active'));
+                    // Add active class to clicked tab
+                    this.classList.add('active');
+                    
+                    // Hide all trending grids
+                    document.querySelectorAll('.trending-grid').forEach(grid => {
+                        grid.style.display = 'none';
+                    });
+                    
+                    // Show selected trending grid
+                    const selectedTab = this.dataset.tab;
+                    document.getElementById(`trending-${selectedTab}`).style.display = 'grid';
+                });
+            });
+
+            // Update stats periodically
+            setInterval(updateMusicStats, 30000); // Update every 30 seconds
         });
+
+        async function initializeMusicHub() {
+            // Load all music content simultaneously
+            await Promise.all([
+                loadTrendingSongs(),
+                loadFeaturedPlaylists(),
+                loadUpcomingEvents(),
+                loadMusicNews(),
+                updateMusicStats()
+            ]);
+        }
+
+        async function loadTrendingSongs() {
+            const trendingData = {
+                global: [
+                    { title: "Anti-Hero", artist: "Taylor Swift", streams: "2.1M", icon: "🎵" },
+                    { title: "As It Was", artist: "Harry Styles", streams: "1.8M", icon: "🎤" },
+                    { title: "Bad Habit", artist: "Steve Lacy", streams: "1.6M", icon: "🎶" },
+                    { title: "Flowers", artist: "Miley Cyrus", streams: "1.4M", icon: "🌸" },
+                    { title: "Unholy", artist: "Sam Smith ft. Kim Petras", streams: "1.3M", icon: "😈" },
+                    { title: "I'm Good (Blue)", artist: "David Guetta & Bebe Rexha", streams: "1.2M", icon: "💙" }
+                ],
+                rap: [
+                    { title: "First Class", artist: "Jack Harlow", streams: "980K", icon: "🎤" },
+                    { title: "Heat Waves", artist: "Glass Animals", streams: "875K", icon: "🔥" },
+                    { title: "God Is A Woman", artist: "Ariana Grande", streams: "760K", icon: "👑" },
+                    { title: "Industry Baby", artist: "Lil Nas X ft. Jack Harlow", streams: "720K", icon: "🏭" },
+                    { title: "Stay", artist: "The Kid LAROI & Justin Bieber", streams: "680K", icon: "💫" },
+                    { title: "Shivers", artist: "Ed Sheeran", streams: "650K", icon: "❄️" }
+                ],
+                pop: [
+                    { title: "Watermelon Sugar", artist: "Harry Styles", streams: "1.1M", icon: "🍉" },
+                    { title: "Levitating", artist: "Dua Lipa", streams: "950K", icon: "✨" },
+                    { title: "Good 4 U", artist: "Olivia Rodrigo", streams: "890K", icon: "💜" },
+                    { title: "Peaches", artist: "Justin Bieber", streams: "820K", icon: "🍑" },
+                    { title: "Drivers License", artist: "Olivia Rodrigo", streams: "780K", icon: "🚗" },
+                    { title: "Save Your Tears", artist: "The Weeknd", streams: "750K", icon: "💧" }
+                ],
+                rock: [
+                    { title: "Enemy", artist: "Imagine Dragons", streams: "640K", icon: "⚡" },
+                    { title: "Radioactive", artist: "Imagine Dragons", streams: "580K", icon: "☢️" },
+                    { title: "Believer", artist: "Imagine Dragons", streams: "560K", icon: "💪" },
+                    { title: "Bohemian Rhapsody", artist: "Queen", streams: "520K", icon: "👑" },
+                    { title: "Don't Stop Me Now", artist: "Queen", streams: "480K", icon: "🚀" },
+                    { title: "Sweet Child O' Mine", artist: "Guns N' Roses", streams: "460K", icon: "🌹" }
+                ]
+            };
+
+            // Populate trending grids
+            Object.keys(trendingData).forEach(genre => {
+                const container = document.getElementById(`trending-${genre}`);
+                container.innerHTML = '';
+                
+                trendingData[genre].forEach((song, index) => {
+                    const songElement = createTrendingSongElement(song, index + 1);
+                    container.appendChild(songElement);
+                });
+            });
+        }
+
+        function createTrendingSongElement(song, rank) {
+            const songDiv = document.createElement('div');
+            songDiv.className = 'trending-song';
+            
+            songDiv.innerHTML = `
+                <div class="song-info">
+                    <div class="song-artwork">${song.icon}</div>
+                    <div class="song-details">
+                        <div class="song-title">${song.title}</div>
+                        <div class="song-artist">${song.artist}</div>
+                        <div class="song-stats">
+                            <span>#${rank}</span>
+                            <span>${song.streams} streams</span>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            songDiv.addEventListener('click', () => {
+                songDiv.style.transform = 'scale(0.95)';
+                setTimeout(() => {
+                    songDiv.style.transform = '';
+                }, 150);
+            });
+
+            return songDiv;
+        }
+
+        async function loadFeaturedPlaylists() {
+            const playlists = [
+                { title: "Today's Top Hits", subtitle: "The biggest songs right now", songs: 50, icon: "🎵" },
+                { title: "RapCaviar", subtitle: "Hip-hop and rap essentials", songs: 65, icon: "🎤" },
+                { title: "Pop Rising", subtitle: "New pop music on the rise", songs: 80, icon: "⭐" },
+                { title: "Rock Classics", subtitle: "Legendary rock anthems", songs: 100, icon: "🎸" },
+                { title: "Chill Vibes", subtitle: "Relaxing tunes for any mood", songs: 75, icon: "😌" },
+                { title: "Workout Mix", subtitle: "High-energy songs for exercise", songs: 45, icon: "💪" }
+            ];
+
+            const container = document.getElementById('playlists-container');
+            container.innerHTML = '';
+
+            playlists.forEach(playlist => {
+                const playlistElement = createPlaylistElement(playlist);
+                container.appendChild(playlistElement);
+            });
+        }
+
+        function createPlaylistElement(playlist) {
+            const playlistDiv = document.createElement('div');
+            playlistDiv.className = 'playlist-card';
+            
+            playlistDiv.innerHTML = `
+                <div class="playlist-header">
+                    <div class="playlist-icon">${playlist.icon}</div>
+                    <div>
+                        <div class="playlist-title">${playlist.title}</div>
+                        <div class="playlist-subtitle">${playlist.subtitle}</div>
+                    </div>
+                </div>
+                <div class="playlist-stats">
+                    <span>${playlist.songs} songs</span>
+                    <span>2.1M followers</span>
+                </div>
+            `;
+
+            playlistDiv.addEventListener('click', () => {
+                playlistDiv.style.transform = 'scale(0.98)';
+                setTimeout(() => {
+                    playlistDiv.style.transform = '';
+                }, 150);
+            });
+
+            return playlistDiv;
+        }
+
+        async function loadUpcomingEvents() {
+            const events = [
+                { title: "Grammy Awards 2025", subtitle: "Music's biggest night", date: "Feb 15", location: "Los Angeles", icon: "🏆" },
+                { title: "Coachella Valley Music Festival", subtitle: "Desert music experience", date: "Apr 12-21", location: "California", icon: "🌵" },
+                { title: "Rolling Loud Miami", subtitle: "Hip-hop festival", date: "Jul 25-27", location: "Miami", icon: "🎤" },
+                { title: "Lollapalooza", subtitle: "Multi-genre festival", date: "Aug 1-4", location: "Chicago", icon: "🎪" },
+                { title: "Global Citizen Festival", subtitle: "Music for a cause", date: "Sep 28", location: "New York", icon: "🌍" },
+                { title: "Austin City Limits", subtitle: "Texas music festival", date: "Oct 11-13", location: "Austin", icon: "🤠" }
+            ];
+
+            const container = document.getElementById('events-container');
+            container.innerHTML = '';
+
+            events.forEach(event => {
+                const eventElement = createEventElement(event);
+                container.appendChild(eventElement);
+            });
+        }
+
+        function createEventElement(event) {
+            const eventDiv = document.createElement('div');
+            eventDiv.className = 'event-card';
+            
+            eventDiv.innerHTML = `
+                <div class="event-header">
+                    <div class="event-icon">${event.icon}</div>
+                    <div>
+                        <div class="event-title">${event.title}</div>
+                        <div class="event-subtitle">${event.subtitle}</div>
+                    </div>
+                </div>
+                <div class="event-stats">
+                    <span>${event.date}</span>
+                    <span>${event.location}</span>
+                </div>
+            `;
+
+            eventDiv.addEventListener('click', () => {
+                eventDiv.style.transform = 'scale(0.98)';
+                setTimeout(() => {
+                    eventDiv.style.transform = '';
+                }, 150);
+            });
+
+            return eventDiv;
+        }
+
+        function updateMusicStats() {
+            // Simulate real-time stats updates
+            const stats = {
+                totalStreams: (Math.random() * 0.5 + 2.5).toFixed(1) + 'B',
+                newReleases: Math.floor(Math.random() * 50) + 100,
+                liveConcerts: Math.floor(Math.random() * 20) + 15,
+                activeArtists: (Math.random() * 0.3 + 1.0).toFixed(1) + 'M'
+            };
+
+            const elements = {
+                'total-streams': stats.totalStreams,
+                'new-releases': stats.newReleases,
+                'live-concerts': stats.liveConcerts,
+                'active-artists': stats.activeArtists
+            };
+
+            Object.entries(elements).forEach(([id, value]) => {
+                const element = document.getElementById(id);
+                if (element) {
+                    element.style.transform = 'scale(1.1)';
+                    setTimeout(() => {
+                        element.textContent = value;
+                        element.style.transform = 'scale(1)';
+                    }, 200);
+                }
+            });
+        }
 
         async function loadMusicNews() {
             const newsContainer = document.getElementById('news-container');
