@@ -536,6 +536,9 @@
                             <p class="news-description">${description}</p>
                             <div class="news-meta">
                                 <span class="news-date">${formattedDate}</span>
+                                <span class="news-source" title="News Source">
+                                    <i class="fas fa-newspaper"></i> ${article.source?.name || 'Kenya News'}
+                                </span>
                                 <span class="news-category">${this.newsAPI.getCategoryDisplayName(this.category)}</span>
                             </div>
                             <div class="news-actions">
