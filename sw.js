@@ -1,11 +1,12 @@
 /**
  * BrightLens News Service Worker
- * Provides offline support and performance optimizations
+ * Enhanced offline support and performance optimizations
  */
 
-const CACHE_NAME = 'brightlens-news-v1.2';
-const STATIC_CACHE = 'brightlens-static-v1.2';
-const DYNAMIC_CACHE = 'brightlens-dynamic-v1.2';
+const CACHE_NAME = 'brightlens-news-v2.0';
+const STATIC_CACHE = 'brightlens-static-v2.0';
+const DYNAMIC_CACHE = 'brightlens-dynamic-v2.0';
+const IMAGE_CACHE = 'brightlens-images-v2.0';
 
 // Critical files to cache immediately
 const CRITICAL_ASSETS = [
@@ -16,11 +17,12 @@ const CRITICAL_ASSETS = [
     '/css/themes.css',
     '/js/splash-screen.js',
     '/js/main.js',
+    '/js/news-api.js',
+    '/js/category-news.js',
     '/js/themes.js',
     '/assets/brightlens-3d-logo.svg',
-    '/manifest.json',
-    'https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap',
-    'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css'
+    '/assets/default.svg',
+    '/manifest.json'
 ];
 
 // Dynamic resources that can be cached after first load
@@ -33,12 +35,28 @@ const DYNAMIC_ASSETS = [
     '/business.html',
     '/sports.html',
     '/health.html',
-    '/weather.html'
+    '/weather.html',
+    '/music.html',
+    '/lifestyle.html'
 ];
+
+// External resources to cache
+const EXTERNAL_ASSETS = [
+    'https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap',
+    'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css'
+];
+
+// Cache expiration times (in milliseconds)
+const CACHE_EXPIRATION = {
+    static: 24 * 60 * 60 * 1000, // 24 hours
+    dynamic: 2 * 60 * 60 * 1000, // 2 hours
+    images: 7 * 24 * 60 * 60 * 1000, // 7 days
+    api: 5 * 60 * 1000 // 5 minutes
+};
 
 // Install event - cache critical assets
 self.addEventListener('install', event => {
-    console.log('Service Worker: Installing...');
+    console.log('Service Worker: Installing v2.0...');
     
     event.waitUntil(
         Promise.all([
@@ -48,6 +66,19 @@ self.addEventListener('install', event => {
                 return cache.addAll(CRITICAL_ASSETS.map(url => {
                     return new Request(url, { cache: 'reload' });
                 }));
+            }),
+            
+            // Cache external assets
+            caches.open(STATIC_CACHE).then(cache => {
+                console.log('Service Worker: Caching external assets');
+                return Promise.allSettled(
+                    EXTERNAL_ASSETS.map(url => 
+                        cache.add(new Request(url, { 
+                            cache: 'reload',
+                            mode: 'cors'
+                        })).catch(err => console.log(`Failed to cache ${url}:`, err))
+                    )
+                );
             }),
             
             // Preload dynamic assets in background
@@ -70,7 +101,7 @@ self.addEventListener('install', event => {
 
 // Activate event - clean up old caches
 self.addEventListener('activate', event => {
-    console.log('Service Worker: Activating...');
+    console.log('Service Worker: Activating v2.0...');
     
     event.waitUntil(
         Promise.all([
@@ -80,6 +111,7 @@ self.addEventListener('activate', event => {
                     cacheNames.map(cacheName => {
                         if (cacheName !== STATIC_CACHE && 
                             cacheName !== DYNAMIC_CACHE &&
+                            cacheName !== IMAGE_CACHE &&
                             cacheName !== CACHE_NAME) {
                             console.log('Service Worker: Deleting old cache', cacheName);
                             return caches.delete(cacheName);
@@ -87,6 +119,9 @@ self.addEventListener('activate', event => {
                     })
                 );
             }),
+            
+            // Clean up expired cache entries
+            cleanupExpiredCaches(),
             
             // Take control of all clients
             self.clients.claim()
@@ -96,207 +131,350 @@ self.addEventListener('activate', event => {
     );
 });
 
-// Fetch event - serve from cache with network fallback
+// Enhanced fetch event with intelligent caching strategies
 self.addEventListener('fetch', event => {
-    const { request } = event;
-    const url = new URL(request.url);
+    const url = new URL(event.request.url);
     
-    // Skip non-GET requests
-    if (request.method !== 'GET') return;
-    
-    // Skip external APIs (let them go directly to network)
-    if (url.origin !== location.origin && 
-        !url.href.includes('fonts.googleapis.com') &&
-        !url.href.includes('fonts.gstatic.com') &&
-        !url.href.includes('cdnjs.cloudflare.com')) {
+    // Skip non-HTTP requests
+    if (!event.request.url.startsWith('http')) {
         return;
     }
     
-    event.respondWith(
-        handleFetchRequest(request)
-    );
+    // Handle different types of requests
+    if (isImageRequest(event.request)) {
+        event.respondWith(handleImageRequest(event.request));
+    } else if (isAPIRequest(event.request)) {
+        event.respondWith(handleAPIRequest(event.request));
+    } else if (isStaticAsset(event.request)) {
+        event.respondWith(handleStaticAsset(event.request));
+    } else if (isDynamicPage(event.request)) {
+        event.respondWith(handleDynamicPage(event.request));
+    } else {
+        event.respondWith(handleGenericRequest(event.request));
+    }
 });
 
-async function handleFetchRequest(request) {
-    const url = new URL(request.url);
-    
+// Helper functions for request handling
+function isImageRequest(request) {
+    return request.url.match(/\.(jpg|jpeg|png|gif|webp|svg)(\?.*)?$/i);
+}
+
+function isAPIRequest(request) {
+    return request.url.includes('/api/') || 
+           request.url.includes('newsapi.org') ||
+           request.url.includes('gnews.io') ||
+           request.url.includes('newsdata.io');
+}
+
+function isStaticAsset(request) {
+    return request.url.match(/\.(css|js|woff|woff2|ttf|ico)(\?.*)?$/i) ||
+           CRITICAL_ASSETS.includes(new URL(request.url).pathname) ||
+           EXTERNAL_ASSETS.includes(request.url);
+}
+
+function isDynamicPage(request) {
+    return request.url.match(/\.(html?)(\?.*)?$/i) ||
+           DYNAMIC_ASSETS.includes(new URL(request.url).pathname);
+}
+
+// Image request handler with long-term caching
+async function handleImageRequest(request) {
     try {
-        // Strategy: Cache First for static assets
-        if (isStaticAsset(request)) {
-            return await cacheFirst(request);
-        }
+        const cache = await caches.open(IMAGE_CACHE);
+        const cachedResponse = await cache.match(request);
         
-        // Strategy: Network First for HTML pages
-        if (isHTMLPage(request)) {
-            return await networkFirst(request);
-        }
-        
-        // Strategy: Stale While Revalidate for other resources
-        return await staleWhileRevalidate(request);
-        
-    } catch (error) {
-        console.error('Service Worker: Fetch failed', error);
-        
-        // Return cached version or offline page
-        const cachedResponse = await getCachedResponse(request);
-        if (cachedResponse) {
+        if (cachedResponse && !isExpired(cachedResponse, CACHE_EXPIRATION.images)) {
             return cachedResponse;
         }
         
-        // Return offline fallback for HTML pages
-        if (request.destination === 'document') {
-            return new Response(
-                getOfflinePage(),
-                { 
-                    headers: { 'Content-Type': 'text/html' },
-                    status: 200
-                }
-            );
-        }
-        
-        // Return network error for other resources
-        return new Response('Network Error', {
-            status: 408,
-            headers: { 'Content-Type': 'text/plain' }
-        });
-    }
-}
-
-async function cacheFirst(request) {
-    const cachedResponse = await caches.match(request);
-    if (cachedResponse) {
-        return cachedResponse;
-    }
-    
-    const networkResponse = await fetch(request);
-    await cacheResponse(request, networkResponse.clone());
-    return networkResponse;
-}
-
-async function networkFirst(request) {
-    try {
-        const networkResponse = await fetch(request, {
-            cache: 'no-cache'
-        });
+        const networkResponse = await fetch(request);
         
         if (networkResponse.ok) {
-            await cacheResponse(request, networkResponse.clone());
+            // Only cache successful responses
+            const responseClone = networkResponse.clone();
+            await cache.put(request, responseClone);
         }
         
         return networkResponse;
     } catch (error) {
-        const cachedResponse = await caches.match(request);
+        console.log('Image request failed:', error);
+        
+        // Return cached version if available
+        const cache = await caches.open(IMAGE_CACHE);
+        const cachedResponse = await cache.match(request);
+        
         if (cachedResponse) {
             return cachedResponse;
         }
+        
+        // Return fallback image
+        return new Response(
+            '<svg width="300" height="200" xmlns="http://www.w3.org/2000/svg"><rect width="100%" height="100%" fill="#f3f4f6"/><text x="50%" y="50%" fill="#9ca3af" text-anchor="middle" dy="0.3em" font-family="Arial, sans-serif" font-size="14px">Image not available</text></svg>',
+            {
+                headers: { 'Content-Type': 'image/svg+xml' }
+            }
+        );
+    }
+}
+
+// API request handler with short-term caching
+async function handleAPIRequest(request) {
+    try {
+        const cache = await caches.open(DYNAMIC_CACHE);
+        const cachedResponse = await cache.match(request);
+        
+        if (cachedResponse && !isExpired(cachedResponse, CACHE_EXPIRATION.api)) {
+            return cachedResponse;
+        }
+        
+        const networkResponse = await fetch(request);
+        
+        if (networkResponse.ok) {
+            const responseClone = networkResponse.clone();
+            await cache.put(request, responseClone);
+        }
+        
+        return networkResponse;
+    } catch (error) {
+        console.log('API request failed:', error);
+        
+        // Return cached version if available
+        const cache = await caches.open(DYNAMIC_CACHE);
+        const cachedResponse = await cache.match(request);
+        
+        if (cachedResponse) {
+            return cachedResponse;
+        }
+        
+        // Return error response
+        return new Response(
+            JSON.stringify({ error: 'Network unavailable', cached: false }),
+            {
+                headers: { 'Content-Type': 'application/json' },
+                status: 503
+            }
+        );
+    }
+}
+
+// Static asset handler with cache-first strategy
+async function handleStaticAsset(request) {
+    try {
+        const cache = await caches.open(STATIC_CACHE);
+        const cachedResponse = await cache.match(request);
+        
+        if (cachedResponse && !isExpired(cachedResponse, CACHE_EXPIRATION.static)) {
+            return cachedResponse;
+        }
+        
+        const networkResponse = await fetch(request);
+        
+        if (networkResponse.ok) {
+            const responseClone = networkResponse.clone();
+            await cache.put(request, responseClone);
+        }
+        
+        return networkResponse;
+    } catch (error) {
+        console.log('Static asset request failed:', error);
+        
+        // Return cached version if available
+        const cache = await caches.open(STATIC_CACHE);
+        const cachedResponse = await cache.match(request);
+        
+        if (cachedResponse) {
+            return cachedResponse;
+        }
+        
         throw error;
     }
 }
 
-async function staleWhileRevalidate(request) {
-    const cachedResponse = await caches.match(request);
-    
-    const networkResponsePromise = fetch(request).then(response => {
-        if (response.ok) {
-            cacheResponse(request, response.clone());
+// Dynamic page handler with network-first strategy
+async function handleDynamicPage(request) {
+    try {
+        const networkResponse = await fetch(request);
+        
+        if (networkResponse.ok) {
+            const cache = await caches.open(DYNAMIC_CACHE);
+            const responseClone = networkResponse.clone();
+            await cache.put(request, responseClone);
         }
-        return response;
-    }).catch(err => {
-        console.log('Network request failed:', err);
-        return null;
-    });
+        
+        return networkResponse;
+    } catch (error) {
+        console.log('Dynamic page request failed:', error);
+        
+        // Return cached version if available
+        const cache = await caches.open(DYNAMIC_CACHE);
+        const cachedResponse = await cache.match(request);
+        
+        if (cachedResponse) {
+            return cachedResponse;
+        }
+        
+        // Return offline page
+        return new Response(
+            `<!DOCTYPE html>
+            <html>
+            <head>
+                <title>BrightLens News - Offline</title>
+                <style>
+                    body { font-family: Arial, sans-serif; text-align: center; padding: 2rem; }
+                    .offline-msg { color: #666; }
+                </style>
+            </head>
+            <body>
+                <h1>BrightLens News</h1>
+                <p class="offline-msg">You're currently offline. Please check your internet connection.</p>
+                <button onclick="location.reload()">Try Again</button>
+            </body>
+            </html>`,
+            {
+                headers: { 'Content-Type': 'text/html' }
+            }
+        );
+    }
+}
+
+// Generic request handler
+async function handleGenericRequest(request) {
+    try {
+        return await fetch(request);
+    } catch (error) {
+        console.log('Generic request failed:', error);
+        throw error;
+    }
+}
+
+// Utility functions
+function isExpired(response, maxAge) {
+    const cacheDate = response.headers.get('sw-cache-date');
+    if (!cacheDate) return true;
     
-    return cachedResponse || await networkResponsePromise;
+    const age = Date.now() - new Date(cacheDate).getTime();
+    return age > maxAge;
 }
 
-async function cacheResponse(request, response) {
-    if (!response || response.status !== 200) return;
+async function cleanupExpiredCaches() {
+    const cacheNames = await caches.keys();
     
-    const cache = await caches.open(
-        isStaticAsset(request) ? STATIC_CACHE : DYNAMIC_CACHE
-    );
-    
-    await cache.put(request, response);
-}
-
-async function getCachedResponse(request) {
-    return await caches.match(request) || 
-           await caches.match(request, { ignoreSearch: true });
-}
-
-function isStaticAsset(request) {
-    const url = new URL(request.url);
-    return url.pathname.match(/\.(css|js|svg|png|jpg|jpeg|gif|webp|woff|woff2|ttf|eot|ico)$/);
-}
-
-function isHTMLPage(request) {
-    return request.destination === 'document' || 
-           request.headers.get('Accept')?.includes('text/html');
-}
-
-function getOfflinePage() {
-    return `
-        <!DOCTYPE html>
-        <html lang="en">
-        <head>
-            <meta charset="UTF-8">
-            <meta name="viewport" content="width=device-width, initial-scale=1.0">
-            <title>BrightLens News - Offline</title>
-            <style>
-                body { 
-                    font-family: Inter, sans-serif; 
-                    display: flex; 
-                    align-items: center; 
-                    justify-content: center; 
-                    min-height: 100vh; 
-                    margin: 0; 
-                    background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 50%, #3b82f6 100%);
-                    color: white;
-                    text-align: center;
+    for (const cacheName of cacheNames) {
+        if (cacheName.startsWith('brightlens-')) {
+            const cache = await caches.open(cacheName);
+            const requests = await cache.keys();
+            
+            for (const request of requests) {
+                const response = await cache.match(request);
+                if (response) {
+                    let maxAge = CACHE_EXPIRATION.static;
+                    
+                    if (cacheName.includes('images')) {
+                        maxAge = CACHE_EXPIRATION.images;
+                    } else if (cacheName.includes('dynamic')) {
+                        maxAge = CACHE_EXPIRATION.dynamic;
+                    }
+                    
+                    if (isExpired(response, maxAge)) {
+                        await cache.delete(request);
+                    }
                 }
-                .offline-container { max-width: 400px; padding: 2rem; }
-                .offline-logo { width: 120px; height: auto; margin-bottom: 1rem; }
-                h1 { font-size: 2rem; margin-bottom: 1rem; }
-                p { font-size: 1.1rem; opacity: 0.9; margin-bottom: 2rem; }
-                button { 
-                    background: #f59e0b; 
-                    color: white; 
-                    border: none; 
-                    padding: 0.75rem 2rem; 
-                    border-radius: 0.5rem; 
-                    font-size: 1rem;
-                    cursor: pointer;
-                    transition: background 0.3s;
-                }
-                button:hover { background: #d97706; }
-            </style>
-        </head>
-        <body>
-            <div class="offline-container">
-                <h1>You're Offline</h1>
-                <p>BrightLens News is currently unavailable. Please check your internet connection and try again.</p>
-                <button onclick="window.location.reload()">Retry</button>
-            </div>
-        </body>
-        </html>
-    `;
+            }
+        }
+    }
 }
 
-// Listen for messages from the main thread
+// Background sync for offline actions
+self.addEventListener('sync', event => {
+    console.log('Background sync triggered:', event.tag);
+    
+    if (event.tag === 'background-sync') {
+        event.waitUntil(doBackgroundSync());
+    }
+});
+
+async function doBackgroundSync() {
+    try {
+        // Implement background sync logic here
+        console.log('Performing background sync...');
+        
+        // Example: Sync offline reading history, preferences, etc.
+        const clients = await self.clients.matchAll();
+        clients.forEach(client => {
+            client.postMessage({
+                type: 'BACKGROUND_SYNC',
+                data: { status: 'completed' }
+            });
+        });
+    } catch (error) {
+        console.error('Background sync failed:', error);
+    }
+}
+
+// Message handling for cache updates
 self.addEventListener('message', event => {
     if (event.data && event.data.type === 'SKIP_WAITING') {
         self.skipWaiting();
     }
-});
-
-// Background sync for offline actions (future enhancement)
-self.addEventListener('sync', event => {
-    if (event.tag === 'background-sync') {
-        event.waitUntil(
-            // Implement background sync logic here
-            console.log('Background sync triggered')
-        );
+    
+    if (event.data && event.data.type === 'CACHE_UPDATE') {
+        event.waitUntil(updateCache(event.data.url));
     }
 });
 
-console.log('Service Worker: Script loaded successfully');
+async function updateCache(url) {
+    try {
+        const cache = await caches.open(DYNAMIC_CACHE);
+        const response = await fetch(url);
+        
+        if (response.ok) {
+            await cache.put(url, response);
+            console.log('Cache updated for:', url);
+        }
+    } catch (error) {
+        console.error('Cache update failed:', error);
+    }
+}
+
+// Performance monitoring
+self.addEventListener('message', event => {
+    if (event.data && event.data.type === 'GET_CACHE_STATS') {
+        getCacheStats().then(stats => {
+            event.source.postMessage({
+                type: 'CACHE_STATS',
+                data: stats
+            });
+        });
+    }
+});
+
+async function getCacheStats() {
+    const cacheNames = await caches.keys();
+    const stats = {};
+    
+    for (const cacheName of cacheNames) {
+        const cache = await caches.open(cacheName);
+        const requests = await cache.keys();
+        stats[cacheName] = {
+            count: requests.length,
+            size: await getCacheSize(cache)
+        };
+    }
+    
+    return stats;
+}
+
+async function getCacheSize(cache) {
+    const requests = await cache.keys();
+    let totalSize = 0;
+    
+    for (const request of requests) {
+        const response = await cache.match(request);
+        if (response) {
+            const blob = await response.blob();
+            totalSize += blob.size;
+        }
+    }
+    
+    return totalSize;
+}

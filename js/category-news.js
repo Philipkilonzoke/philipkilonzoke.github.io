@@ -180,20 +180,84 @@ class CategoryNews {
                 entries.forEach(entry => {
                     if (entry.isIntersecting) {
                         const img = entry.target;
-                        img.src = img.dataset.src;
-                        img.classList.remove('lazy-image');
+                        this.loadImageWithFallback(img);
                         imageObserver.unobserve(img);
                     }
                 });
+            }, {
+                rootMargin: '50px' // Start loading 50px before entering viewport
             });
 
             images.forEach(img => imageObserver.observe(img));
         } else {
             images.forEach(img => {
-                img.src = img.dataset.src;
-                img.classList.remove('lazy-image');
+                this.loadImageWithFallback(img);
             });
         }
+    }
+
+    loadImageWithFallback(img) {
+        const originalSrc = img.dataset.src;
+        if (!originalSrc) return;
+
+        // Create a new image element to test loading
+        const testImg = new Image();
+        
+        testImg.onload = () => {
+            // Check if browser supports WebP
+            if (this.supportsWebP() && !originalSrc.includes('.webp')) {
+                const webpSrc = this.convertToWebP(originalSrc);
+                
+                // Test WebP version first
+                const webpTest = new Image();
+                webpTest.onload = () => {
+                    img.src = webpSrc;
+                    img.classList.remove('lazy-image');
+                    img.classList.add('loaded');
+                };
+                webpTest.onerror = () => {
+                    // Fallback to original if WebP fails
+                    img.src = originalSrc;
+                    img.classList.remove('lazy-image');
+                    img.classList.add('loaded');
+                };
+                webpTest.src = webpSrc;
+            } else {
+                img.src = originalSrc;
+                img.classList.remove('lazy-image');
+                img.classList.add('loaded');
+            }
+        };
+        
+        testImg.onerror = () => {
+            // Image failed to load, show fallback
+            img.parentElement.innerHTML = `
+                <div class="image-placeholder">
+                    <i class="fas fa-image"></i>
+                    <span>Brightlens News</span>
+                </div>
+            `;
+        };
+        
+        testImg.src = originalSrc;
+    }
+
+    supportsWebP() {
+        if (this.webpSupported !== undefined) return this.webpSupported;
+        
+        const canvas = document.createElement('canvas');
+        canvas.width = 1;
+        canvas.height = 1;
+        this.webpSupported = canvas.toDataURL('image/webp').indexOf('data:image/webp') === 0;
+        return this.webpSupported;
+    }
+
+    convertToWebP(url) {
+        // Simple conversion for common image services
+        if (url.includes('unsplash.com')) {
+            return url.replace(/\.(jpg|jpeg|png)/, '.webp');
+        }
+        return url;
     }
 
     createArticleHTML(article) {
@@ -201,22 +265,29 @@ class CategoryNews {
         const formattedDate = this.newsAPI.formatDate(article.publishedAt);
         const description = article.description || 'No description available.';
         
+        // Enhanced image URL validation
         const hasValidImage = imageUrl && 
                              imageUrl !== 'null' && 
                              imageUrl !== 'None' && 
                              imageUrl !== 'undefined' &&
-                             imageUrl.startsWith('http');
+                             imageUrl !== 'N/A' &&
+                             imageUrl.length > 10 &&
+                             (imageUrl.startsWith('http://') || imageUrl.startsWith('https://')) &&
+                             !imageUrl.includes('placeholder');
         
+        // Improved image section with better fallback
         const imageSection = hasValidImage ? `
             <div class="news-image">
-                <img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZjNmNGY2Ii8+PC9zdmc+"
+                <img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZjNmNGY2Ii8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZpbGw9IiM5Y2EzYWYiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGR5PSIwLjNlbSIgZm9udC1mYW1pbHk9IkFyaWFsLCBzYW5zLXNlcmlmIiBmb250LXNpemU9IjE0cHgiPkxvYWRpbmcuLi48L3RleHQ+PC9zdmc+"
                      data-src="${imageUrl}" 
                      alt="${article.title}" 
                      loading="lazy"
-                     class="lazy-image"
-                     onerror="this.parentElement.innerHTML='<div class=\\"text-placeholder\\">Brightlens News</div>'">
+                     class="lazy-image">
             </div>` : `
-            <div class="text-placeholder">Brightlens News</div>`;
+            <div class="image-placeholder">
+                <i class="fas fa-newspaper"></i>
+                <span>Brightlens News</span>
+            </div>`;
         
         return `
             <article class="news-card">
@@ -233,22 +304,9 @@ class CategoryNews {
                            target="_blank" 
                            rel="noopener noreferrer" 
                            class="news-link">
-                            Read More <i class="fas fa-external-link-alt"></i>
+                            <i class="fas fa-external-link-alt"></i>
+                            Read More
                         </a>
-                        <div class="share-buttons">
-                            <button class="share-btn" onclick="shareArticle('${encodeURIComponent(article.title)}', '${encodeURIComponent(article.url)}', 'facebook')" title="Share on Facebook">
-                                <i class="fab fa-facebook-f"></i>
-                            </button>
-                            <button class="share-btn" onclick="shareArticle('${encodeURIComponent(article.title)}', '${encodeURIComponent(article.url)}', 'twitter')" title="Share on Twitter">
-                                <i class="fab fa-twitter"></i>
-                            </button>
-                            <button class="share-btn" onclick="shareArticle('${encodeURIComponent(article.title)}', '${encodeURIComponent(article.url)}', 'whatsapp')" title="Share on WhatsApp">
-                                <i class="fab fa-whatsapp"></i>
-                            </button>
-                            <button class="share-btn" onclick="shareArticle('${encodeURIComponent(article.title)}', '${encodeURIComponent(article.url)}', 'copy')" title="Copy Link">
-                                <i class="fas fa-link"></i>
-                            </button>
-                        </div>
                     </div>
                 </div>
             </article>
