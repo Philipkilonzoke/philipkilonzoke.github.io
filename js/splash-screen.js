@@ -3,203 +3,68 @@
  * Handles the advanced 3D logo animation and loading experience
  */
 
+// Modernized 3D Splash Screen
 class SplashScreen3D {
     constructor() {
         this.splashElement = null;
-        this.progressBar = null;
-        this.particles = [];
+        this.minDisplayTime = 2500;
         this.isAnimating = false;
-        this.loadStartTime = Date.now();
-        this.minDisplayTime = 2500; // Minimum time to show splash screen
-        this.maxDisplayTime = 5000; // Maximum time before auto-hide
-        
-        this.init();
-    }
-
-    init() {
         this.createSplashScreen();
-        this.createParticles();
-        this.startLoadingAnimation();
-        this.setupPerformanceOptimizations();
     }
-
     createSplashScreen() {
-        // Remove existing loading screen if present
-        const existingScreen = document.getElementById('loading-screen');
-        if (existingScreen) {
-            existingScreen.style.display = 'none';
+        // Remove any existing splash
+        if (document.getElementById('splash-screen-3d')) {
+            document.getElementById('splash-screen-3d').remove();
         }
-
-        // Create new 3D splash screen
         this.splashElement = document.createElement('div');
         this.splashElement.id = 'splash-screen-3d';
         this.splashElement.className = 'splash-screen-3d';
-        
         this.splashElement.innerHTML = `
             <div class="splash-logo-container">
-                <img src="assets/brightlens-3d-logo.svg" alt="BrightLens News" class="splash-logo-3d" />
+                <img src="assets/brightlens-3d-logo.svg" alt="BrightLens News" class="splash-logo-3d animated-logo" />
                 <div class="splash-text">
-                    <h1 class="splash-title">BrightLens News</h1>
+                    <h1 class="splash-title gradient-text">BrightLens News</h1>
                     <p class="splash-subtitle">Loading the latest stories...</p>
                 </div>
                 <div class="splash-progress">
                     <div class="splash-progress-bar"></div>
                 </div>
+                <div class="splash-particles"></div>
             </div>
-            <div class="splash-particles"></div>
         `;
-
         document.body.appendChild(this.splashElement);
         this.progressBar = this.splashElement.querySelector('.splash-progress-bar');
-    }
-
-    createParticles() {
+        // Add more dynamic particles
         const particlesContainer = this.splashElement.querySelector('.splash-particles');
-        const particleCount = window.innerWidth < 768 ? 15 : 25; // Fewer particles on mobile
-
-        for (let i = 0; i < particleCount; i++) {
+        for (let i = 0; i < 40; i++) {
             const particle = document.createElement('div');
-            particle.className = 'particle';
-            
-            // Random positioning
+            particle.className = 'splash-particle';
             particle.style.left = Math.random() * 100 + '%';
-            particle.style.animationDelay = Math.random() * 6 + 's';
-            particle.style.animationDuration = (6 + Math.random() * 4) + 's';
-            
+            particle.style.top = Math.random() * 100 + '%';
+            particle.style.animationDelay = (Math.random() * 2) + 's';
+            particle.style.background = `linear-gradient(135deg, #${Math.floor(Math.random()*16777215).toString(16)} 0%, #${Math.floor(Math.random()*16777215).toString(16)} 100%)`;
+            particle.style.opacity = 0.7 + Math.random() * 0.3;
+            particle.style.width = particle.style.height = (8 + Math.random() * 16) + 'px';
             particlesContainer.appendChild(particle);
-            this.particles.push(particle);
+        }
+        this.isAnimating = true;
+        setTimeout(() => this.hide(), this.minDisplayTime + 500);
+    }
+    setProgress(percent) {
+        if (this.progressBar) {
+            this.progressBar.style.width = percent + '%';
         }
     }
-
-    startLoadingAnimation() {
-        this.isAnimating = true;
-        
-        // Start progress animation
-        this.animateProgress();
-        
-        // Auto-hide after max time
-        setTimeout(() => {
-            if (this.isAnimating) {
-                this.hide();
-            }
-        }, this.maxDisplayTime);
-    }
-
-    animateProgress() {
-        let progress = 0;
-        const duration = 2000; // 2 seconds for progress
-        const startTime = Date.now();
-        
-        const updateProgress = () => {
-            const elapsed = Date.now() - startTime;
-            progress = Math.min((elapsed / duration) * 100, 100);
-            
-            if (this.progressBar) {
-                this.progressBar.style.width = progress + '%';
-            }
-            
-            if (progress < 100) {
-                requestAnimationFrame(updateProgress);
-            }
-        };
-        
-        requestAnimationFrame(updateProgress);
-    }
-
     hide() {
         if (!this.isAnimating || !this.splashElement) return;
-        
-        const elapsedTime = Date.now() - this.loadStartTime;
-        const remainingTime = Math.max(0, this.minDisplayTime - elapsedTime);
-        
+        this.splashElement.classList.add('hidden');
         setTimeout(() => {
+            if (this.splashElement && this.splashElement.parentNode) {
+                this.splashElement.parentNode.removeChild(this.splashElement);
+            }
+            this.splashElement = null;
             this.isAnimating = false;
-            this.splashElement.classList.add('hidden');
-            
-            // Remove from DOM after transition
-            setTimeout(() => {
-                if (this.splashElement && this.splashElement.parentNode) {
-                    this.splashElement.parentNode.removeChild(this.splashElement);
-                }
-                this.cleanup();
-            }, 800);
-        }, remainingTime);
-    }
-
-    cleanup() {
-        this.particles = [];
-        this.progressBar = null;
-        this.splashElement = null;
-    }
-
-    setupPerformanceOptimizations() {
-        // Preload critical resources
-        this.preloadCriticalAssets();
-        
-        // Setup intersection observer for lazy loading
-        this.setupLazyLoading();
-        
-        // Enable hardware acceleration
-        this.enableHardwareAcceleration();
-    }
-
-    preloadCriticalAssets() {
-        const criticalAssets = [
-            'css/styles.css',
-            'css/splash-screen.css',
-            'assets/brightlens-3d-logo.svg'
-        ];
-
-        criticalAssets.forEach(asset => {
-            const link = document.createElement('link');
-            link.rel = 'preload';
-            link.as = asset.endsWith('.css') ? 'style' : 'image';
-            link.href = asset;
-            document.head.appendChild(link);
-        });
-    }
-
-    setupLazyLoading() {
-        // Create intersection observer for images
-        const imageObserver = new IntersectionObserver((entries, observer) => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    const img = entry.target;
-                    if (img.dataset.src) {
-                        img.src = img.dataset.src;
-                        img.removeAttribute('data-src');
-                        observer.unobserve(img);
-                    }
-                }
-            });
-        }, {
-            rootMargin: '50px 0px',
-            threshold: 0.01
-        });
-
-        // Apply to images that haven't loaded yet
-        setTimeout(() => {
-            const lazyImages = document.querySelectorAll('img[data-src]');
-            lazyImages.forEach(img => imageObserver.observe(img));
-        }, 1000);
-    }
-
-    enableHardwareAcceleration() {
-        const acceleratedElements = [
-            '.splash-screen-3d',
-            '.splash-logo-container',
-            '.splash-logo-3d',
-            '.article-card',
-            '.header'
-        ];
-
-        acceleratedElements.forEach(selector => {
-            const elements = document.querySelectorAll(selector);
-            elements.forEach(element => {
-                element.style.transform = element.style.transform || 'translateZ(0)';
-                element.style.backfaceVisibility = 'hidden';
-            });
-        });
+        }, 700);
     }
 }
 
@@ -288,9 +153,9 @@ class PagePerformanceManager {
 /**
  * Initialize everything when DOM is ready
  */
-document.addEventListener('DOMContentLoaded', () => {
-    // Initialize 3D splash screen
-    const splashScreen = new SplashScreen3D();
+// Auto-initialize splash on every page
+window.addEventListener('DOMContentLoaded', () => {
+    window.splashScreen = new SplashScreen3D();
     
     // Initialize performance manager
     const performanceManager = new PagePerformanceManager();
@@ -311,7 +176,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Auto-hide splash screen when content is ready
     window.addEventListener('load', () => {
         setTimeout(() => {
-            splashScreen.hide();
+            window.splashScreen.hide();
         }, 500);
     });
 });
