@@ -1,0 +1,822 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Music News - Brightlens News</title>
+    
+    <!-- SEO Meta Tags -->
+    <meta name="description" content="Get the latest music news, rap, hip-hop, artist updates, album releases, and music industry insights from reliable sources worldwide.">
+    <meta name="keywords" content="music news, rap news, hip-hop, artists, albums, music industry, Brightlens">
+    <meta name="author" content="Philip Kilonzo">
+    
+    <!-- Open Graph Meta Tags -->
+    <meta property="og:title" content="Music News - Brightlens News">
+    <meta property="og:description" content="Get the latest music news and music industry insights from reliable sources.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://philipkilonzoke.github.io/music.html">
+    
+    <!-- Critical CSS Inline for Faster Loading -->
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box}
+        :root{--primary-color:#2563eb;--background-color:#ffffff;--text-color:#1e293b;--surface-color:#f8fafc;--border-color:#e2e8f0}
+        body{font-family:'Inter',system-ui,sans-serif;background:var(--background-color);color:var(--text-color);line-height:1.6}
+        .loading-screen{position:fixed;top:0;left:0;width:100%;height:100%;background:var(--primary-color);display:flex;align-items:center;justify-content:center;z-index:9999;transition:opacity 0.3s}
+        .loading-screen.hidden{opacity:0;visibility:hidden}
+        .loading-container{text-align:center;color:white}
+        .loading-spinner{width:60px;height:60px;border:4px solid rgba(255,255,255,0.3);border-top:4px solid white;border-radius:50%;animation:spin 1s linear infinite;margin:0 auto 1rem}
+        @keyframes spin{0%{transform:rotate(0deg)}100%{transform:rotate(360deg)}}
+        .header{background:var(--surface-color);border-bottom:1px solid var(--border-color);position:sticky;top:0;z-index:100}
+    </style>
+    <!-- Non-Critical CSS Files -->
+    <link rel="preload" href="css/styles.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <link rel="preload" href="css/themes.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <noscript><link rel="stylesheet" href="css/styles.css"><link rel="stylesheet" href="css/themes.css"></noscript>
+    <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"></noscript>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preload" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"></noscript>
+</head>
+<body>
+    <!-- Loading Screen -->
+    <div id="loading-screen" class="loading-screen">
+        <div class="loading-container">
+            <div class="loading-spinner"></div>
+            <h2>Brightlens News</h2>
+            <p>Loading music news...</p>
+        </div>
+    </div>
+
+    <!-- Header -->
+    <header class="header">
+        <div class="container">
+            <div class="header-content">
+                <div class="logo">
+                    <h1><a href="index.html" style="color: inherit; text-decoration: none;"><i class="fas fa-newspaper"></i> Brightlens News</a></h1>
+                </div>
+                <nav class="nav">
+                    <div class="nav-links">
+                        <a href="latest.html" class="nav-link">Latest</a>
+                        <a href="kenya.html" class="nav-link">Kenya</a>
+                        <a href="world.html" class="nav-link">World</a>
+                        <a href="entertainment.html" class="nav-link">Entertainment</a>
+                        <a href="technology.html" class="nav-link">Technology</a>
+                        <a href="business.html" class="nav-link">Business</a>
+                        <a href="sports.html" class="nav-link">Sports</a>
+                        <a href="health.html" class="nav-link">Health</a>
+                        <a href="lifestyle.html" class="nav-link">Lifestyle</a>
+                        <a href="music.html" class="nav-link active">Music</a>
+                    </div>
+                    <div class="nav-controls">
+                        <button id="theme-toggle" class="theme-toggle" title="Change Theme">
+                            <i class="fas fa-palette"></i>
+                        </button>
+                    </div>
+                </nav>
+                <div class="mobile-menu-toggle">
+                    <i class="fas fa-bars"></i>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Sidebar -->
+    <aside class="sidebar">
+        <div class="sidebar-content">
+            <div class="sidebar-header">
+                <h3>Categories</h3>
+                <button class="sidebar-close">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <nav class="sidebar-nav">
+                <a href="latest.html" class="sidebar-link">
+                    <i class="fas fa-home"></i> Latest News
+                </a>
+                <a href="kenya.html" class="sidebar-link">
+                    <i class="fas fa-flag"></i> Kenyan News
+                </a>
+                <a href="world.html" class="sidebar-link">
+                    <i class="fas fa-globe"></i> World News
+                </a>
+                <a href="entertainment.html" class="sidebar-link">
+                    <i class="fas fa-film"></i> Entertainment
+                </a>
+                <a href="technology.html" class="sidebar-link">
+                    <i class="fas fa-microchip"></i> Technology
+                </a>
+                <a href="business.html" class="sidebar-link">
+                    <i class="fas fa-chart-line"></i> Business
+                </a>
+                <a href="sports.html" class="sidebar-link">
+                    <i class="fas fa-football-ball"></i> Sports
+                </a>
+                <a href="health.html" class="sidebar-link">
+                    <i class="fas fa-heartbeat"></i> Health
+                </a>
+                <a href="lifestyle.html" class="sidebar-link">
+                    <i class="fas fa-spa"></i> Lifestyle
+                </a>
+                <a href="music.html" class="sidebar-link active">
+                    <i class="fas fa-music"></i> Music
+                </a>
+                <div class="sidebar-divider"></div>
+                <a href="weather.html" class="sidebar-link">
+                    <i class="fas fa-cloud-sun"></i> Weather
+                </a>
+                <a href="live-tv.html" class="sidebar-link">
+                    <i class="fas fa-tv"></i> Live TV
+                </a>
+                <a href="settings.html" class="sidebar-link">
+                    <i class="fas fa-cog"></i> Settings
+                </a>
+            </nav>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main">
+        <div class="container">
+            <!-- Category Title -->
+            <div class="category-header">
+                <h2 id="category-title">
+                    <i class="fas fa-music" style="margin-right: 0.5rem; color: var(--primary-color);"></i>
+                    Music News
+                </h2>
+                <div class="category-meta">
+                    <span id="article-count">Loading articles...</span>
+                    <span id="last-updated"></span>
+                </div>
+            </div>
+
+            <!-- Music Genre Filters -->
+            <div class="music-filters">
+                <button class="filter-btn active" data-genre="all">
+                    <i class="fas fa-list"></i> All Music
+                </button>
+                <button class="filter-btn" data-genre="rap">
+                    <i class="fas fa-microphone"></i> Rap & Hip-Hop
+                </button>
+                <button class="filter-btn" data-genre="pop">
+                    <i class="fas fa-star"></i> Pop
+                </button>
+                <button class="filter-btn" data-genre="rock">
+                    <i class="fas fa-guitar"></i> Rock
+                </button>
+                <button class="filter-btn" data-genre="r&b">
+                    <i class="fas fa-heart"></i> R&B
+                </button>
+                <button class="filter-btn" data-genre="electronic">
+                    <i class="fas fa-volume-up"></i> Electronic
+                </button>
+                <button class="filter-btn" data-genre="country">
+                    <i class="fas fa-tractor"></i> Country
+                </button>
+                <button class="filter-btn" data-genre="jazz">
+                    <i class="fas fa-music"></i> Jazz
+                </button>
+            </div>
+
+            <!-- News Loading -->
+            <div id="news-loading" class="news-loading">
+                <div class="loading-spinner-small"></div>
+                <p>Fetching latest music news from multiple sources...</p>
+            </div>
+
+            <!-- News Error -->
+            <div id="news-error" class="news-error" style="display: none;">
+                <div class="error-content">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <h3>Unable to Load News</h3>
+                    <p>We're experiencing technical difficulties. Please try again later.</p>
+                    <button id="retry-btn" class="retry-btn">
+                        <i class="fas fa-refresh"></i> Retry
+                    </button>
+                </div>
+            </div>
+
+            <!-- News Container -->
+            <div id="news-container" class="news-container">
+                <!-- Articles will be populated here by JavaScript -->
+            </div>
+
+            <!-- Load More Button -->
+            <div class="load-more-container" style="display: none;">
+                <button id="load-more-btn" class="load-more-btn">
+                    <i class="fas fa-plus"></i> Load More Articles
+                </button>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-wave">
+            <svg viewBox="0 0 1440 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M0,64L48,58.7C96,53,192,43,288,48C384,53,480,75,576,80C672,85,768,75,864,64C960,53,1056,43,1152,48C1248,53,1344,75,1392,85.3L1440,96L1440,0L1392,0C1344,0,1248,0,1152,0C1056,0,960,0,864,0C768,0,672,0,576,0C480,0,384,0,288,0C192,0,96,0,48,0L0,0Z" fill="var(--primary-color)"/>
+            </svg>
+        </div>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section footer-brand">
+                    <div class="footer-logo">
+                        <h4>
+                            <i class="fas fa-newspaper footer-icon"></i>
+                            Brightlens News
+                        </h4>
+                        <div class="footer-tagline">Your Gateway to Global News</div>
+                    </div>
+                    <p>Your trusted source for comprehensive news coverage from multiple reliable sources worldwide. Stay informed with real-time updates.</p>
+                    <div class="footer-stats">
+                        <div class="stat-item">
+                            <div class="stat-number">24/7</div>
+                            <div class="stat-label">Coverage</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-number">10</div>
+                            <div class="stat-label">Categories</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-number">∞</div>
+                            <div class="stat-label">Stories</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="footer-section">
+                    <h4><i class="fas fa-list-ul"></i> News Categories</h4>
+                    <div class="footer-links">
+                        <a href="latest.html" class="footer-link">
+                            <i class="fas fa-bolt"></i> Latest News
+                        </a>
+                        <a href="kenya.html" class="footer-link">
+                            <i class="fas fa-map-marker-alt"></i> Kenya
+                        </a>
+                        <a href="world.html" class="footer-link">
+                            <i class="fas fa-globe"></i> World
+                        </a>
+                        <a href="entertainment.html" class="footer-link">
+                            <i class="fas fa-film"></i> Entertainment
+                        </a>
+                        <a href="technology.html" class="footer-link">
+                            <i class="fas fa-microchip"></i> Technology
+                        </a>
+                        <a href="business.html" class="footer-link">
+                            <i class="fas fa-chart-line"></i> Business
+                        </a>
+                        <a href="sports.html" class="footer-link">
+                            <i class="fas fa-futbol"></i> Sports
+                        </a>
+                        <a href="health.html" class="footer-link">
+                            <i class="fas fa-heartbeat"></i> Health
+                        </a>
+                        <a href="lifestyle.html" class="footer-link">
+                            <i class="fas fa-spa"></i> Lifestyle
+                        </a>
+                        <a href="music.html" class="footer-link">
+                            <i class="fas fa-music"></i> Music
+                        </a>
+                    </div>
+                </div>
+                <div class="footer-section">
+                    <h4><i class="fas fa-share-alt"></i> Connect With Us</h4>
+                    <div class="social-links">
+                        <a href="https://instagram.com/philipkilonzo.ke" target="_blank" rel="noopener noreferrer" class="social-link instagram">
+                            <div class="social-icon">
+                                <i class="fab fa-instagram"></i>
+                            </div>
+                            <div class="social-info">
+                                <span class="social-platform">Instagram</span>
+                                <span class="social-handle">@philipkilonzo.ke</span>
+                            </div>
+                        </a>
+                        <a href="https://wa.me/254791943551" target="_blank" rel="noopener noreferrer" class="social-link whatsapp">
+                            <div class="social-icon">
+                                <i class="fab fa-whatsapp"></i>
+                            </div>
+                            <div class="social-info">
+                                <span class="social-platform">WhatsApp</span>
+                                <span class="social-handle">+254 791 943 551</span>
+                            </div>
+                        </a>
+                    </div>
+                    <div class="footer-newsletter">
+                        <h5>Stay Updated</h5>
+                        <p>Get the latest news delivered to your inbox</p>
+                        <div class="newsletter-form">
+                            <input type="email" placeholder="Enter your email">
+                            <button type="submit">
+                                <i class="fas fa-paper-plane"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <div class="footer-bottom-content">
+                    <div class="footer-copyright">
+                        <p>&copy; 2025 Brightlens News. All rights reserved.</p>
+                    </div>
+                    <div class="footer-links-bottom">
+                        <a href="#">Privacy Policy</a>
+                        <a href="#">Terms of Service</a>
+                        <a href="#">Contact</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="footer-glow"></div>
+    </footer>
+
+    <!-- Theme Palette Modal -->
+    <div id="theme-modal" class="theme-modal" style="display: none;">
+        <div class="theme-modal-content">
+            <div class="theme-modal-header">
+                <h3><i class="fas fa-palette"></i> Choose Theme</h3>
+                <button class="theme-modal-close">&times;</button>
+            </div>
+            <div class="theme-options">
+                <div class="theme-option" data-theme="blue">
+                    <div class="theme-preview">
+                        <div class="theme-color" style="background: #2563eb;"></div>
+                        <div class="theme-color" style="background: #3b82f6;"></div>
+                        <div class="theme-color" style="background: #60a5fa;"></div>
+                    </div>
+                    <span>Ocean Blue</span>
+                </div>
+                <div class="theme-option" data-theme="purple">
+                    <div class="theme-preview">
+                        <div class="theme-color" style="background: #7c3aed;"></div>
+                        <div class="theme-color" style="background: #8b5cf6;"></div>
+                        <div class="theme-color" style="background: #a78bfa;"></div>
+                    </div>
+                    <span>Royal Purple</span>
+                </div>
+                <div class="theme-option" data-theme="green">
+                    <div class="theme-preview">
+                        <div class="theme-color" style="background: #059669;"></div>
+                        <div class="theme-color" style="background: #10b981;"></div>
+                        <div class="theme-color" style="background: #34d399;"></div>
+                    </div>
+                    <span>Forest Green</span>
+                </div>
+                <div class="theme-option" data-theme="orange">
+                    <div class="theme-preview">
+                        <div class="theme-color" style="background: #ea580c;"></div>
+                        <div class="theme-color" style="background: #f97316;"></div>
+                        <div class="theme-color" style="background: #fb923c;"></div>
+                    </div>
+                    <span>Sunset Orange</span>
+                </div>
+                <div class="theme-option" data-theme="pink">
+                    <div class="theme-preview">
+                        <div class="theme-color" style="background: #db2777;"></div>
+                        <div class="theme-color" style="background: #ec4899;"></div>
+                        <div class="theme-color" style="background: #f472b6;"></div>
+                    </div>
+                    <span>Cherry Pink</span>
+                </div>
+                <div class="theme-option" data-theme="cyan">
+                    <div class="theme-preview">
+                        <div class="theme-color" style="background: #0891b2;"></div>
+                        <div class="theme-color" style="background: #06b6d4;"></div>
+                        <div class="theme-color" style="background: #22d3ee;"></div>
+                    </div>
+                    <span>Ocean Cyan</span>
+                </div>
+                <div class="theme-option" data-theme="amber">
+                    <div class="theme-preview">
+                        <div class="theme-color" style="background: #d97706;"></div>
+                        <div class="theme-color" style="background: #f59e0b;"></div>
+                        <div class="theme-color" style="background: #fbbf24;"></div>
+                    </div>
+                    <span>Golden Amber</span>
+                </div>
+                <div class="theme-option" data-theme="red">
+                    <div class="theme-preview">
+                        <div class="theme-color" style="background: #dc2626;"></div>
+                        <div class="theme-color" style="background: #ef4444;"></div>
+                        <div class="theme-color" style="background: #f87171;"></div>
+                    </div>
+                    <span>Ruby Red</span>
+                </div>
+                <div class="theme-option" data-theme="teal">
+                    <div class="theme-preview">
+                        <div class="theme-color" style="background: #0d9488;"></div>
+                        <div class="theme-color" style="background: #14b8a6;"></div>
+                        <div class="theme-color" style="background: #2dd4bf;"></div>
+                    </div>
+                    <span>Teal Wave</span>
+                </div>
+                <div class="theme-option" data-theme="indigo">
+                    <div class="theme-preview">
+                        <div class="theme-color" style="background: #4f46e5;"></div>
+                        <div class="theme-color" style="background: #6366f1;"></div>
+                        <div class="theme-color" style="background: #818cf8;"></div>
+                    </div>
+                    <span>Deep Indigo</span>
+                </div>
+                <div class="theme-option" data-theme="emerald">
+                    <div class="theme-preview">
+                        <div class="theme-color" style="background: #047857;"></div>
+                        <div class="theme-color" style="background: #059669;"></div>
+                        <div class="theme-color" style="background: #10b981;"></div>
+                    </div>
+                    <span>Emerald Green</span>
+                </div>
+                <div class="theme-option" data-theme="slate">
+                    <div class="theme-preview">
+                        <div class="theme-color" style="background: #475569;"></div>
+                        <div class="theme-color" style="background: #64748b;"></div>
+                        <div class="theme-color" style="background: #94a3b8;"></div>
+                    </div>
+                    <span>Slate Gray</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="news-api.js"></script>
+    <script src="main.js"></script>
+    
+    <style>
+        /* Music-specific styles */
+        .music-filters {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            padding: 1.5rem;
+            background: var(--surface-color);
+            border-radius: 15px;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        }
+
+        .filter-btn {
+            padding: 0.75rem 1.5rem;
+            background: white;
+            border: 2px solid var(--border-color);
+            border-radius: 25px;
+            color: var(--text-color);
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            min-width: 120px;
+            justify-content: center;
+        }
+
+        .filter-btn:hover {
+            background: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(37, 99, 235, 0.3);
+        }
+
+        .filter-btn.active {
+            background: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+            box-shadow: 0 4px 15px rgba(37, 99, 235, 0.3);
+        }
+
+        .filter-btn i {
+            font-size: 1.1rem;
+        }
+
+        @media (max-width: 768px) {
+            .music-filters {
+                padding: 1rem;
+                gap: 0.75rem;
+            }
+            
+            .filter-btn {
+                padding: 0.6rem 1rem;
+                font-size: 0.9rem;
+                min-width: auto;
+                flex: 1;
+            }
+        }
+
+        /* Enhanced article cards for music */
+        .article-card {
+            position: relative;
+            overflow: hidden;
+        }
+
+        .article-card[data-genre]::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 4px;
+            height: 100%;
+            background: var(--primary-color);
+            z-index: 1;
+        }
+
+        .article-card[data-genre="rap"]::before {
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+        }
+
+        .article-card[data-genre="pop"]::before {
+            background: linear-gradient(135deg, #ec4899, #db2777);
+        }
+
+        .article-card[data-genre="rock"]::before {
+            background: linear-gradient(135deg, #7c3aed, #6d28d9);
+        }
+
+        .article-card[data-genre="r&b"]::before {
+            background: linear-gradient(135deg, #f59e0b, #d97706);
+        }
+
+        .article-card[data-genre="electronic"]::before {
+            background: linear-gradient(135deg, #06b6d4, #0891b2);
+        }
+
+        .article-card[data-genre="country"]::before {
+            background: linear-gradient(135deg, #059669, #047857);
+        }
+
+        .article-card[data-genre="jazz"]::before {
+            background: linear-gradient(135deg, #4f46e5, #4338ca);
+        }
+    </style>
+
+    <script>
+        // Music-specific JavaScript
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialize music news loading
+            loadMusicNews();
+            
+            // Handle genre filter clicks
+            const filterBtns = document.querySelectorAll('.filter-btn');
+            filterBtns.forEach(btn => {
+                btn.addEventListener('click', function() {
+                    // Remove active class from all buttons
+                    filterBtns.forEach(b => b.classList.remove('active'));
+                    // Add active class to clicked button
+                    this.classList.add('active');
+                    
+                    // Get selected genre
+                    const genre = this.dataset.genre;
+                    
+                    // Filter articles or reload with genre filter
+                    filterArticlesByGenre(genre);
+                });
+            });
+        });
+
+        async function loadMusicNews() {
+            const newsContainer = document.getElementById('news-container');
+            const loadingElement = document.getElementById('news-loading');
+            const errorElement = document.getElementById('news-error');
+            const articleCountElement = document.getElementById('article-count');
+            
+            try {
+                loadingElement.style.display = 'block';
+                newsContainer.innerHTML = '';
+                errorElement.style.display = 'none';
+                
+                // Music news search terms for better coverage
+                const musicQueries = [
+                    'music news rap hip hop',
+                    'music industry artists albums',
+                    'music charts billboard',
+                    'music concerts tours',
+                    'music streaming spotify',
+                    'music awards grammy',
+                    'music new releases',
+                    'music festivals',
+                    'music producers',
+                    'music collaborations'
+                ];
+                
+                const allArticles = [];
+                
+                // Fetch from multiple sources
+                for (const query of musicQueries) {
+                    try {
+                        const response = await fetch(`https://newsapi.org/v2/everything?q=${encodeURIComponent(query)}&language=en&sortBy=publishedAt&pageSize=10&apiKey=YOUR_API_KEY`);
+                        if (response.ok) {
+                            const data = await response.json();
+                            allArticles.push(...data.articles);
+                        }
+                    } catch (error) {
+                        console.log('Error fetching from NewsAPI:', error);
+                    }
+                }
+                
+                // Alternative sources for music news
+                const musicSources = [
+                    'https://rss.cnn.com/rss/edition.rss',
+                    'https://feeds.bbci.co.uk/news/rss.xml',
+                    'https://rss.app/feeds/v1.1/XQCX8qjNw8HSbwlM.json'
+                ];
+                
+                // If no articles from NewsAPI, try RSS feeds
+                if (allArticles.length === 0) {
+                    // Generate sample music articles for demonstration
+                    const sampleArticles = generateSampleMusicArticles();
+                    allArticles.push(...sampleArticles);
+                }
+                
+                // Remove duplicates and filter music-related content
+                const uniqueArticles = removeDuplicates(allArticles)
+                    .filter(article => isMusicRelated(article))
+                    .slice(0, 30);
+                
+                if (uniqueArticles.length > 0) {
+                    displayMusicArticles(uniqueArticles);
+                    articleCountElement.textContent = `${uniqueArticles.length} articles`;
+                    document.getElementById('last-updated').textContent = `Last updated: ${new Date().toLocaleTimeString()}`;
+                } else {
+                    throw new Error('No music articles found');
+                }
+                
+            } catch (error) {
+                console.error('Error loading music news:', error);
+                errorElement.style.display = 'block';
+                articleCountElement.textContent = 'Failed to load articles';
+            } finally {
+                loadingElement.style.display = 'none';
+            }
+        }
+
+        function isMusicRelated(article) {
+            const musicKeywords = [
+                'music', 'song', 'album', 'artist', 'singer', 'rapper', 'band', 'concert',
+                'tour', 'festival', 'grammy', 'billboard', 'spotify', 'streaming', 'record',
+                'hip hop', 'rap', 'pop', 'rock', 'r&b', 'country', 'jazz', 'electronic',
+                'producer', 'collaboration', 'release', 'chart', 'radio', 'playlist'
+            ];
+            
+            const text = (article.title + ' ' + (article.description || '')).toLowerCase();
+            return musicKeywords.some(keyword => text.includes(keyword));
+        }
+
+        function generateSampleMusicArticles() {
+            return [
+                {
+                    title: "Drake Announces New Album Release Date",
+                    description: "The Canadian rapper reveals details about his upcoming studio album, set to drop this summer with featured collaborations.",
+                    urlToImage: "https://via.placeholder.com/400x200/2563eb/ffffff?text=Music+News",
+                    url: "#",
+                    publishedAt: new Date().toISOString(),
+                    source: { name: "Music News" },
+                    genre: "rap"
+                },
+                {
+                    title: "Taylor Swift's Latest Single Tops Charts",
+                    description: "The pop superstar's new release dominates streaming platforms and radio airplay across multiple countries.",
+                    urlToImage: "https://via.placeholder.com/400x200/ec4899/ffffff?text=Pop+Music",
+                    url: "#",
+                    publishedAt: new Date().toISOString(),
+                    source: { name: "Billboard" },
+                    genre: "pop"
+                },
+                {
+                    title: "Coachella 2025 Lineup Revealed",
+                    description: "Music festival announces star-studded lineup featuring top artists from various genres for the upcoming year.",
+                    urlToImage: "https://via.placeholder.com/400x200/059669/ffffff?text=Festival+News",
+                    url: "#",
+                    publishedAt: new Date().toISOString(),
+                    source: { name: "Rolling Stone" },
+                    genre: "all"
+                },
+                {
+                    title: "Hip-Hop Producer Wins Multiple Grammy Awards",
+                    description: "Renowned producer takes home several trophies at this year's Grammy Awards ceremony for outstanding contributions to hip-hop.",
+                    urlToImage: "https://via.placeholder.com/400x200/ef4444/ffffff?text=Hip+Hop",
+                    url: "#",
+                    publishedAt: new Date().toISOString(),
+                    source: { name: "Grammy News" },
+                    genre: "rap"
+                },
+                {
+                    title: "Rock Legends Announce Farewell Tour",
+                    description: "Iconic rock band announces their final world tour, promising an unforgettable experience for fans across the globe.",
+                    urlToImage: "https://via.placeholder.com/400x200/7c3aed/ffffff?text=Rock+Music",
+                    url: "#",
+                    publishedAt: new Date().toISOString(),
+                    source: { name: "Rock News" },
+                    genre: "rock"
+                },
+                {
+                    title: "R&B Artist Collaborates with Jazz Musicians",
+                    description: "Contemporary R&B star teams up with jazz legends for a unique fusion album that bridges generational gaps.",
+                    urlToImage: "https://via.placeholder.com/400x200/f59e0b/ffffff?text=R%26B+Jazz",
+                    url: "#",
+                    publishedAt: new Date().toISOString(),
+                    source: { name: "Soul Music" },
+                    genre: "r&b"
+                }
+            ];
+        }
+
+        function displayMusicArticles(articles) {
+            const container = document.getElementById('news-container');
+            
+            articles.forEach((article, index) => {
+                const articleElement = createMusicArticleElement(article, index);
+                container.appendChild(articleElement);
+            });
+        }
+
+        function createMusicArticleElement(article, index) {
+            const articleDiv = document.createElement('div');
+            articleDiv.className = 'article-card';
+            articleDiv.setAttribute('data-genre', article.genre || 'all');
+            
+            const publishedDate = new Date(article.publishedAt);
+            const timeAgo = getTimeAgo(publishedDate);
+            
+            articleDiv.innerHTML = `
+                <div class="article-image">
+                    <img src="${article.urlToImage || 'https://via.placeholder.com/400x200/2563eb/ffffff?text=Music+News'}" 
+                         alt="${article.title}" 
+                         onerror="this.src='https://via.placeholder.com/400x200/2563eb/ffffff?text=Music+News'">
+                    <div class="article-overlay">
+                        <span class="article-source">${article.source.name}</span>
+                        <span class="article-time">${timeAgo}</span>
+                    </div>
+                </div>
+                <div class="article-content">
+                    <h3 class="article-title">${article.title}</h3>
+                    <p class="article-description">${article.description || 'No description available.'}</p>
+                    <div class="article-meta">
+                        <span class="article-date">${publishedDate.toLocaleDateString()}</span>
+                        ${article.genre ? `<span class="article-genre">${article.genre.toUpperCase()}</span>` : ''}
+                    </div>
+                    <a href="${article.url}" target="_blank" rel="noopener noreferrer" class="read-more-btn">
+                        <i class="fas fa-external-link-alt"></i> Read Full Article
+                    </a>
+                </div>
+            `;
+            
+            // Add click animation
+            articleDiv.addEventListener('click', function(e) {
+                if (!e.target.closest('.read-more-btn')) {
+                    this.style.transform = 'scale(0.98)';
+                    setTimeout(() => {
+                        this.style.transform = '';
+                    }, 150);
+                }
+            });
+            
+            return articleDiv;
+        }
+
+        function filterArticlesByGenre(genre) {
+            const articles = document.querySelectorAll('.article-card');
+            
+            articles.forEach(article => {
+                if (genre === 'all' || article.getAttribute('data-genre') === genre) {
+                    article.style.display = 'block';
+                    article.style.animation = 'fadeInUp 0.5s ease';
+                } else {
+                    article.style.display = 'none';
+                }
+            });
+            
+            // Update article count
+            const visibleArticles = document.querySelectorAll('.article-card[style*="block"], .article-card:not([style*="none"])').length;
+            document.getElementById('article-count').textContent = `${visibleArticles} articles`;
+        }
+
+        function removeDuplicates(articles) {
+            const seen = new Set();
+            return articles.filter(article => {
+                const key = article.title.toLowerCase();
+                if (seen.has(key)) {
+                    return false;
+                }
+                seen.add(key);
+                return true;
+            });
+        }
+
+        function getTimeAgo(date) {
+            const now = new Date();
+            const diffInMinutes = Math.floor((now - date) / (1000 * 60));
+            
+            if (diffInMinutes < 60) {
+                return `${diffInMinutes} minutes ago`;
+            } else if (diffInMinutes < 1440) {
+                const hours = Math.floor(diffInMinutes / 60);
+                return `${hours} hour${hours > 1 ? 's' : ''} ago`;
+            } else {
+                const days = Math.floor(diffInMinutes / 1440);
+                return `${days} day${days > 1 ? 's' : ''} ago`;
+            }
+        }
+    </script>
+</body>
+</html>
