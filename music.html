@@ -29,6 +29,7 @@
     <link rel="preload" href="css/splash-screen.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
     <link rel="preload" href="css/styles.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
     <link rel="preload" href="css/themes.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <link rel="preload" href="css/music-dashboard.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
     <noscript>
         <link rel="stylesheet" href="css/splash-screen.css">
         <link rel="stylesheet" href="css/styles.css">
@@ -170,168 +171,59 @@
     <!-- Main Content -->
     <main class="main">
         <div class="container">
-            <!-- Category Title -->
-            <div class="category-header">
-                <h2 id="category-title">
-                    <i class="fas fa-music" style="margin-right: 0.5rem; color: var(--primary-color);"></i>
-                    Music Hub
-                </h2>
-                <div class="category-meta">
-                    <span id="article-count">Loading articles...</span>
-                    <span id="last-updated"></span>
+            <div class="loading-screen">
+                <div class="loading-container">
+                    <div class="loading-spinner"></div>
+                    <h2>Brightlens News</h2>
+                    <p>Loading music news...</p>
                 </div>
             </div>
 
-            <!-- Music Dashboard -->
-            <div class="music-dashboard">
-                <!-- Trending Songs Section -->
-                <div class="trending-section">
-                    <div class="section-header">
-                        <h3><i class="fas fa-fire"></i> Trending Now</h3>
-                        <div class="trending-tabs">
-                            <button class="trending-tab active" data-tab="global">Global</button>
-                            <button class="trending-tab" data-tab="rap">Rap/Hip-Hop</button>
-                            <button class="trending-tab" data-tab="pop">Pop</button>
-                            <button class="trending-tab" data-tab="rock">Rock</button>
-                        </div>
-                    </div>
-                    <div class="trending-content">
-                        <div class="trending-grid" id="trending-global">
-                            <!-- Trending songs will be populated here -->
-                        </div>
-                        <div class="trending-grid" id="trending-rap" style="display: none;">
-                            <!-- Rap trending songs will be populated here -->
-                        </div>
-                        <div class="trending-grid" id="trending-pop" style="display: none;">
-                            <!-- Pop trending songs will be populated here -->
-                        </div>
-                        <div class="trending-grid" id="trending-rock" style="display: none;">
-                            <!-- Rock trending songs will be populated here -->
-                        </div>
+            <!-- Real-Time Music Dashboard -->
+            <section class="music-dashboard">
+                <div class="dashboard-header">
+                    <h1 class="page-title">
+                        <i class="fas fa-music"></i>
+                        Music Hub
+                        <span class="live-indicator">
+                            <span class="pulse-dot"></span>
+                            LIVE
+                        </span>
+                    </h1>
+                    <div class="dashboard-controls">
+                        <div class="last-updated">Last updated: --:--:--</div>
+                        <button class="refresh-music-btn" title="Refresh Music Data">
+                            <i class="fas fa-sync-alt"></i>
+                        </button>
                     </div>
                 </div>
 
-                <!-- Music Stats and Charts -->
-                <div class="music-stats-section">
-                    <div class="stats-grid">
-                        <div class="stat-card">
-                            <div class="stat-icon">
-                                <i class="fas fa-chart-line"></i>
-                            </div>
-                            <div class="stat-info">
-                                <div class="stat-number" id="total-streams">2.8B</div>
-                                <div class="stat-label">Total Streams Today</div>
-                            </div>
-                        </div>
-                        <div class="stat-card">
-                            <div class="stat-icon">
-                                <i class="fas fa-music"></i>
-                            </div>
-                            <div class="stat-info">
-                                <div class="stat-number" id="new-releases">127</div>
-                                <div class="stat-label">New Releases This Week</div>
-                            </div>
-                        </div>
-                        <div class="stat-card">
-                            <div class="stat-icon">
-                                <i class="fas fa-microphone"></i>
-                            </div>
-                            <div class="stat-info">
-                                <div class="stat-number" id="live-concerts">23</div>
-                                <div class="stat-label">Live Concerts Today</div>
-                            </div>
-                        </div>
-                        <div class="stat-card">
-                            <div class="stat-icon">
-                                <i class="fas fa-users"></i>
-                            </div>
-                            <div class="stat-info">
-                                <div class="stat-number" id="active-artists">1.2M</div>
-                                <div class="stat-label">Active Artists</div>
-                            </div>
+                <!-- Trending Tracks Section -->
+                <section class="music-section trending-section">
+                    <div id="trending-tracks-container">
+                        <!-- Trending tracks will be populated by music-api.js -->
+                        <div class="loading-placeholder">
+                            <div class="placeholder-shimmer"></div>
+                            <p>Loading trending tracks...</p>
                         </div>
                     </div>
-                </div>
+                </section>
 
-                <!-- Featured Playlists -->
-                <div class="playlists-section">
-                    <div class="section-header">
-                        <h3><i class="fas fa-list"></i> Featured Playlists</h3>
-                        <button class="view-all-btn">View All</button>
+                <!-- Music News Section -->
+                <section class="music-section news-section">
+                    <div id="music-news-container">
+                        <!-- Music news will be populated by music-api.js -->
+                        <div class="loading-placeholder">
+                            <div class="placeholder-shimmer"></div>
+                            <p>Loading music news...</p>
+                        </div>
                     </div>
-                    <div class="playlists-grid" id="playlists-container">
-                        <!-- Playlists will be populated here -->
-                    </div>
-                </div>
+                </section>
+            </section>
 
-                <!-- Music Events -->
-                <div class="events-section">
-                    <div class="section-header">
-                        <h3><i class="fas fa-calendar-alt"></i> Upcoming Events</h3>
-                        <button class="view-all-btn">View All</button>
-                    </div>
-                    <div class="events-grid" id="events-container">
-                        <!-- Events will be populated here -->
-                    </div>
-                </div>
-            </div>
-
-            <!-- Music Genre Filters -->
-            <div class="music-filters">
-                <button class="filter-btn active" data-genre="all">
-                    <i class="fas fa-list"></i> All Music
-                </button>
-                <button class="filter-btn" data-genre="rap">
-                    <i class="fas fa-microphone"></i> Rap & Hip-Hop
-                </button>
-                <button class="filter-btn" data-genre="pop">
-                    <i class="fas fa-star"></i> Pop
-                </button>
-                <button class="filter-btn" data-genre="rock">
-                    <i class="fas fa-guitar"></i> Rock
-                </button>
-                <button class="filter-btn" data-genre="r&b">
-                    <i class="fas fa-heart"></i> R&B
-                </button>
-                <button class="filter-btn" data-genre="electronic">
-                    <i class="fas fa-volume-up"></i> Electronic
-                </button>
-                <button class="filter-btn" data-genre="country">
-                    <i class="fas fa-tractor"></i> Country
-                </button>
-                <button class="filter-btn" data-genre="jazz">
-                    <i class="fas fa-music"></i> Jazz
-                </button>
-            </div>
-
-            <!-- News Loading -->
-            <div id="news-loading" class="news-loading">
-                <div class="loading-spinner-small"></div>
-                <p>Fetching latest music news from multiple sources...</p>
-            </div>
-
-            <!-- News Error -->
-            <div id="news-error" class="news-error" style="display: none;">
-                <div class="error-content">
-                    <i class="fas fa-exclamation-triangle"></i>
-                    <h3>Unable to Load News</h3>
-                    <p>We're experiencing technical difficulties. Please try again later.</p>
-                    <button id="retry-btn" class="retry-btn">
-                        <i class="fas fa-refresh"></i> Retry
-                    </button>
-                </div>
-            </div>
-
-            <!-- News Container -->
-            <div id="news-container" class="news-container">
-                <!-- Articles will be populated here by JavaScript -->
-            </div>
-
-            <!-- Load More Button -->
-            <div class="load-more-container" style="display: none;">
-                <button id="load-more-btn" class="load-more-btn">
-                    <i class="fas fa-plus"></i> Load More Articles
-                </button>
+            <!-- News Articles Grid -->
+            <div class="news-grid">
+                <!-- News articles will continue to be populated by existing scripts -->
             </div>
         </div>
     </main>
@@ -1701,6 +1593,9 @@
             }
         }
     </script>
+    <!-- Enhanced Music API Integration -->
+    <script src="js/music-api.js"></script>
+    
     <!-- Enhanced 3D Splash Screen -->
     <script src="js/splash-screen.js"></script>
 </body>
