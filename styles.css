@@ -417,7 +417,7 @@ body {
     margin-bottom: 0.75rem;
     color: var(--text-color);
     display: -webkit-box;
-    -webkit-line-clamp: 2;
+    -webkit-line-clamp: 3;
     -webkit-box-orient: vertical;
     overflow: hidden;
 }
@@ -428,7 +428,7 @@ body {
     line-height: 1.6;
     margin-bottom: 1rem;
     display: -webkit-box;
-    -webkit-line-clamp: 4;
+    -webkit-line-clamp: 8;
     -webkit-box-orient: vertical;
     overflow: hidden;
     opacity: 0.9;
