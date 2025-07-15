@@ -248,6 +248,71 @@
     }
 }
 
+/* ===================== Added Modern Enhancements ===================== */
+
+/* 1. Subtle hue rotation for ever-changing gradient colours */
+.splash-screen-3d {
+    animation: hueShift 12s linear infinite;
+}
+
+@keyframes hueShift {
+    0%   { filter: hue-rotate(0deg);   }
+    50%  { filter: hue-rotate(180deg); }
+    100% { filter: hue-rotate(360deg);} 
+}
+
+/* 2. Dynamic sweeping light overlay */
+.splash-screen-3d::after {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: linear-gradient(60deg, rgba(255,255,255,0.05) 25%, rgba(255,255,255,0.15) 50%, rgba(255,255,255,0.05) 75%);
+    transform: translate3d(0,0,0) rotate(0deg);
+    pointer-events: none;
+    mix-blend-mode: overlay;
+    animation: sweep 8s ease-in-out infinite;
+}
+
+@keyframes sweep {
+    0%   { transform: translate3d(0,0,0) rotate(0deg);   }
+    50%  { transform: translate3d(25%,25%,0) rotate(180deg); }
+    100% { transform: translate3d(0,0,0) rotate(360deg);  }
+}
+
+/* 3. Depth wobble for the entire logo container */
+.splash-logo-container {
+    animation: logoEntrance 1.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards,
+               logoWobble 4s ease-in-out 1.6s infinite;
+}
+
+@keyframes logoWobble {
+    0%   { transform: translateZ(0) rotateX(0deg) rotateY(0deg); }
+    25%  { transform: translateZ(20px) rotateX(6deg) rotateY(-6deg); }
+    50%  { transform: translateZ(0) rotateX(0deg) rotateY(0deg); }
+    75%  { transform: translateZ(20px) rotateX(-6deg) rotateY(6deg); }
+    100% { transform: translateZ(0) rotateX(0deg) rotateY(0deg); }
+}
+
+/* 4. Variations in particle size for richer depth */
+.particle {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+}
+
+.particle:nth-child(4n) {
+    width: 8px;
+    height: 8px;
+}
+
+.particle:nth-child(5n) {
+    width: 3px;
+    height: 3px;
+}
+
 /* Responsive Design */
 @media (max-width: 768px) {
     .splash-logo-3d {
