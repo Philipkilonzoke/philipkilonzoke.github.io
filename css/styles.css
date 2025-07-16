@@ -466,7 +466,7 @@ body {
 .news-image {
     position: relative;
     width: 100%;
-    height: 200px;
+    height: 240px;
     overflow: hidden;
     border-radius: 8px;
     background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
@@ -491,7 +491,7 @@ body {
 
 .image-placeholder {
     width: 100%;
-    height: 200px;
+    height: 240px;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -1315,7 +1315,7 @@ body {
     }
     
     .news-image {
-        height: 180px;
+        height: 220px;
     }
     
     .container {
