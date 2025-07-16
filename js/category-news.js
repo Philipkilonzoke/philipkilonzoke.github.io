@@ -437,7 +437,9 @@ class CategoryNews {
         
         try {
             console.log(`Loading ${this.category} news...`);
-            const articles = await this.newsAPI.fetchNews(this.category, 50);
+            // Request more articles for sports category for comprehensive coverage
+            const articleLimit = this.category === 'sports' ? 250 : 50;
+            const articles = await this.newsAPI.fetchNews(this.category, articleLimit);
             
             if (articles && articles.length > 0) {
                 this.allArticles = articles;
@@ -445,6 +447,7 @@ class CategoryNews {
                 this.updateArticleCount();
                 this.updateLastUpdated();
                 this.showNewsGrid();
+                console.log(`${this.category} news loaded successfully:`, articles.length, 'articles');
             } else {
                 this.showNewsError('No articles found for this category. Please try again later.');
             }
@@ -680,7 +683,9 @@ class CategoryNews {
         
         try {
             console.log('Refreshing sports news...');
-            const articles = await this.newsAPI.fetchNews(this.category, 50);
+            // Request more articles for sports category for comprehensive coverage
+            const articleLimit = this.category === 'sports' ? 250 : 50;
+            const articles = await this.newsAPI.fetchNews(this.category, articleLimit);
             
             if (articles && articles.length > 0) {
                 this.allArticles = articles;

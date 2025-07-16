@@ -291,20 +291,33 @@ class NewsAPI {
         }
 
         try {
+            // For comprehensive coverage, increase per-source limits when requesting many articles
+            const isLargeRequest = limit >= 150;
+            const primaryLimit = isLargeRequest ? Math.ceil(limit * 0.15) : Math.ceil(limit * 0.4);
+            const secondaryLimit = isLargeRequest ? Math.ceil(limit * 0.1) : Math.ceil(limit * 0.2);
+            const footballLimit = isLargeRequest ? Math.ceil(limit * 0.2) : Math.ceil(limit * 0.4);
+            
+            console.log(`Fetching sports news with limits - Primary: ${primaryLimit}, Secondary: ${secondaryLimit}, Football: ${footballLimit}`);
+
             // Optimized approach: Use only the most reliable and fast APIs first
             const primaryPromises = [
                 // Primary reliable news APIs with sports category
-                this.fetchFromGNews('sports', Math.ceil(limit * 0.4)),
-                this.fetchFromNewsData('sports', Math.ceil(limit * 0.3)),
-                this.fetchFromNewsAPI('sports', Math.ceil(limit * 0.3))
+                this.fetchFromGNews('sports', primaryLimit),
+                this.fetchFromNewsData('sports', primaryLimit),
+                this.fetchFromNewsAPI('sports', primaryLimit)
             ];
 
             // Secondary APIs (optional, with timeout)
             const secondaryPromises = [
-                this.fetchFromMediastack('sports', Math.ceil(limit * 0.2)),
-                this.fetchFromCurrentsAPI('sports', Math.ceil(limit * 0.2)),
+                this.fetchFromMediastack('sports', secondaryLimit),
+                this.fetchFromCurrentsAPI('sports', secondaryLimit),
                 this.fetchFastESPNNews(), // Optimized ESPN fetcher
-                this.fetchFootballNews(Math.ceil(limit * 0.4)) // Enhanced football coverage
+                this.fetchFootballNews(footballLimit), // Enhanced football coverage
+                
+                // Add more sports-specific sources for comprehensive coverage
+                this.fetchFromSportsAPIs(),
+                this.fetchFromSportsNewsAPI(),
+                this.fetchAdditionalSportsContent(limit)
             ];
 
             // First, get primary sources with a 5-second timeout
@@ -338,6 +351,7 @@ class NewsAPI {
             primaryResults.forEach((result, index) => {
                 if (result.status === 'fulfilled' && result.value) {
                     allArticles = allArticles.concat(result.value);
+                    console.log(`Primary Sports API ${index + 1} contributed:`, result.value.length, 'articles');
                 } else {
                     console.warn(`Primary Sports API ${index + 1} failed:`, result.reason?.message || 'Unknown error');
                 }
@@ -347,14 +361,16 @@ class NewsAPI {
             secondaryResults.forEach((result, index) => {
                 if (result.status === 'fulfilled' && result.value) {
                     allArticles = allArticles.concat(result.value);
+                    console.log(`Secondary Sports API ${index + 1} contributed:`, result.value.length, 'articles');
                 } else {
                     console.warn(`Secondary Sports API ${index + 1} failed:`, result.reason?.message || 'Unknown error');
                 }
             });
 
-            // If we have very few articles, add some reliable sports content
-            if (allArticles.length < 10) {
-                const fallbackArticles = this.getFallbackSportsNews();
+            // If we still don't have enough articles, add comprehensive fallback content
+            if (allArticles.length < Math.min(limit * 0.6, 150)) {
+                console.log('Adding comprehensive fallback sports content...');
+                const fallbackArticles = this.getComprehensiveSportsNews(limit);
                 allArticles = allArticles.concat(fallbackArticles);
             }
 
@@ -363,6 +379,8 @@ class NewsAPI {
             const sortedArticles = uniqueArticles.sort((a, b) => 
                 new Date(b.publishedAt) - new Date(a.publishedAt)
             );
+
+            console.log(`Total sports articles collected: ${sortedArticles.length} (requested: ${limit})`);
 
             // Cache the results
             this.cache.set(cacheKey, {
@@ -373,8 +391,8 @@ class NewsAPI {
             return sortedArticles;
         } catch (error) {
             console.error('Error fetching sports news:', error);
-            // Return fallback content if all APIs fail
-            const fallbackArticles = this.getFallbackSportsNews();
+            // Return comprehensive fallback content if all APIs fail
+            const fallbackArticles = this.getComprehensiveSportsNews(limit);
             return fallbackArticles;
         }
     }
