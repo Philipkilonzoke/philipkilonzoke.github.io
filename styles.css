@@ -367,7 +367,7 @@ body {
 
 .news-image {
     position: relative;
-    height: 200px;
+    height: 320px;
     overflow: hidden;
 }
 
@@ -395,7 +395,7 @@ body {
 }
 
 .text-placeholder {
-    height: 200px;
+    height: 320px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -1144,7 +1144,7 @@ body {
     }
     
     .news-image {
-        height: 180px;
+        height: 280px;
     }
     
     .news-meta {
