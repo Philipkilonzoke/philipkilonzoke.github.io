@@ -17,7 +17,7 @@ class CategoryNews {
         // Sports subcategory support
         this.currentSport = 'all';
         this.sportsKeywords = {
-            football: [
+            'american-football': [
                 'nfl', 'american football', 'gridiron', 'quarterback', 'touchdown', 'super bowl',
                 'nfl draft', 'nfl playoffs', 'college football', 'ncaa football', 'football game',
                 'nfl news', 'nfl teams', 'nfl players', 'football league', 'football season',
@@ -31,12 +31,18 @@ class CategoryNews {
                 'lakers', 'warriors', 'celtics', 'heat', 'bulls', 'knicks', 'nets', 'sixers',
                 'lebron', 'curry', 'durant', 'giannis', 'jokic', 'tatum', 'doncic', 'embiid'
             ],
-            soccer: [
-                'soccer', 'fifa', 'world cup', 'premier league', 'champions league', 'goal',
+            football: [
+                'soccer', 'football', 'fifa', 'world cup', 'premier league', 'champions league', 'goal',
                 'penalty', 'uefa', 'mls', 'la liga', 'serie a', 'bundesliga', 'ligue 1',
-                'soccer game', 'soccer player', 'soccer news', 'soccer teams', 'soccer league',
-                'messi', 'ronaldo', 'mbappe', 'haaland', 'benzema', 'modric', 'neymar',
-                'manchester united', 'real madrid', 'barcelona', 'liverpool', 'chelsea', 'arsenal'
+                'soccer game', 'football game', 'soccer player', 'football player', 'soccer news', 'football news',
+                'soccer teams', 'football teams', 'soccer league', 'football league', 'el clasico',
+                'messi', 'ronaldo', 'mbappe', 'haaland', 'benzema', 'modric', 'neymar', 'lewandowski',
+                'manchester united', 'real madrid', 'barcelona', 'liverpool', 'chelsea', 'arsenal',
+                'manchester city', 'tottenham', 'psg', 'bayern munich', 'juventus', 'ac milan',
+                'inter milan', 'atletico madrid', 'valencia', 'sevilla', 'napoli', 'roma',
+                'borussia dortmund', 'ajax', 'porto', 'benfica', 'celtic', 'rangers',
+                'epl', 'ucl', 'europa league', 'fa cup', 'carabao cup', 'copa del rey',
+                'coppa italia', 'dfb pokal', 'ligue des champions', 'coupe de france'
             ],
             golf: [
                 'golf', 'pga', 'masters', 'golfer', 'tournament', 'birdie', 'eagle', 'putting',
@@ -207,6 +213,10 @@ class CategoryNews {
         if (categoryTitle) {
             if (sport === 'all') {
                 categoryTitle.textContent = 'Sports News';
+            } else if (sport === 'american-football') {
+                categoryTitle.textContent = 'American Football News';
+            } else if (sport === 'football') {
+                categoryTitle.textContent = 'Football News';
             } else {
                 const sportName = sport.charAt(0).toUpperCase() + sport.slice(1);
                 categoryTitle.textContent = `${sportName} News`;
@@ -221,10 +231,41 @@ class CategoryNews {
             this.displayedArticles = this.allArticles.filter(article => 
                 this.isArticleRelatedToSport(article, this.currentSport)
             );
+            
+            // If we have very few football articles and user selected football, try to fetch more
+            if (this.currentSport === 'football' && this.displayedArticles.length < 5) {
+                this.fetchAdditionalFootballNews();
+            }
         }
         
         this.renderFilteredNews();
         this.updateArticleCount();
+    }
+
+    // Fetch additional football news when needed
+    async fetchAdditionalFootballNews() {
+        try {
+            console.log('Fetching additional football news...');
+            const footballArticles = await this.newsAPI.fetchFootballNews(20);
+            
+            if (footballArticles && footballArticles.length > 0) {
+                // Add to our main articles array and remove duplicates
+                const combinedArticles = [...this.allArticles, ...footballArticles];
+                this.allArticles = this.newsAPI.removeDuplicates(combinedArticles);
+                
+                // Re-filter for football
+                this.displayedArticles = this.allArticles.filter(article => 
+                    this.isArticleRelatedToSport(article, 'football')
+                );
+                
+                this.renderFilteredNews();
+                this.updateArticleCount();
+                
+                console.log('Additional football news fetched:', footballArticles.length, 'articles');
+            }
+        } catch (error) {
+            console.warn('Failed to fetch additional football news:', error);
+        }
     }
 
     isArticleRelatedToSport(article, sport) {
@@ -257,7 +298,7 @@ class CategoryNews {
         }
         
         // Special handling for football vs soccer disambiguation
-        if (sport === 'football') {
+        if (sport === 'american-football') {
             // If article mentions soccer-specific terms, reduce score for American football
             const soccerTerms = ['fifa', 'premier league', 'champions league', 'messi', 'ronaldo', 'uefa'];
             const hasSoccerTerms = soccerTerms.some(term => searchText.includes(term));
@@ -271,7 +312,7 @@ class CategoryNews {
             if (hasAmericanFootballTerms) {
                 matchScore += 2;
             }
-        } else if (sport === 'soccer') {
+        } else if (sport === 'football') {
             // If article mentions American football terms, reduce score for soccer
             const americanFootballTerms = ['nfl', 'quarterback', 'touchdown', 'super bowl'];
             const hasAmericanFootballTerms = americanFootballTerms.some(term => searchText.includes(term));
@@ -282,11 +323,11 @@ class CategoryNews {
         
         // Source-based scoring boost
         const source = article.source || '';
-        if (sport === 'football' && (source.toLowerCase().includes('nfl') || source.toLowerCase().includes('espn'))) {
+        if (sport === 'american-football' && (source.toLowerCase().includes('nfl') || source.toLowerCase().includes('espn'))) {
             matchScore += 1;
         } else if (sport === 'basketball' && (source.toLowerCase().includes('nba') || source.toLowerCase().includes('espn'))) {
             matchScore += 1;
-        } else if (sport === 'soccer' && (source.toLowerCase().includes('fifa') || source.toLowerCase().includes('uefa'))) {
+        } else if (sport === 'football' && (source.toLowerCase().includes('fifa') || source.toLowerCase().includes('uefa'))) {
             matchScore += 1;
         }
         
