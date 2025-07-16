@@ -14,6 +14,18 @@ class CategoryNews {
         this.displayedArticles = [];
         this.isLoading = false;
         
+        // Sports subcategory support
+        this.currentSport = 'all';
+        this.sportsKeywords = {
+            football: ['football', 'nfl', 'super bowl', 'quarterback', 'touchdown', 'american football', 'gridiron'],
+            basketball: ['basketball', 'nba', 'basketball game', 'dunk', 'three-pointer', 'basketball player', 'hoops'],
+            soccer: ['soccer', 'football', 'fifa', 'world cup', 'premier league', 'champions league', 'goal', 'penalty'],
+            golf: ['golf', 'pga', 'masters', 'golfer', 'tournament', 'birdie', 'eagle', 'putting'],
+            tennis: ['tennis', 'wimbledon', 'us open', 'french open', 'australian open', 'tennis player', 'serve', 'ace'],
+            baseball: ['baseball', 'mlb', 'world series', 'home run', 'pitcher', 'baseball game', 'innings'],
+            hockey: ['hockey', 'nhl', 'ice hockey', 'stanley cup', 'puck', 'hockey game', 'power play']
+        };
+        
         this.init();
     }
 
@@ -74,6 +86,128 @@ class CategoryNews {
                 this.loadMoreArticles();
             }
         });
+        
+        // Sports subcategory tab event listeners
+        if (this.category === 'sports') {
+            this.setupSportsSubcategories();
+        }
+    }
+
+    setupSportsSubcategories() {
+        const subcategoryTabs = document.querySelectorAll('.subcategory-tab');
+        const indicatorLine = document.querySelector('.indicator-line');
+        
+        subcategoryTabs.forEach((tab, index) => {
+            tab.addEventListener('click', () => {
+                const sport = tab.getAttribute('data-sport');
+                this.switchSport(sport, index);
+            });
+        });
+        
+        // Initialize indicator position
+        this.updateIndicatorPosition(0);
+    }
+
+    switchSport(sport, tabIndex) {
+        if (this.currentSport === sport || this.isLoading) return;
+        
+        this.currentSport = sport;
+        
+        // Update active tab
+        document.querySelectorAll('.subcategory-tab').forEach(tab => {
+            tab.classList.remove('active');
+        });
+        document.querySelector(`[data-sport="${sport}"]`).classList.add('active');
+        
+        // Update indicator position
+        this.updateIndicatorPosition(tabIndex);
+        
+        // Add switching animation
+        const mainContainer = document.querySelector('.main');
+        mainContainer.classList.add('subcategory-tab-switching');
+        
+        // Filter and display articles
+        setTimeout(() => {
+            this.filterArticlesBySport();
+            mainContainer.classList.remove('subcategory-tab-switching');
+            mainContainer.classList.add('subcategory-tab-switched');
+            
+            // Remove switched class after animation
+            setTimeout(() => {
+                mainContainer.classList.remove('subcategory-tab-switched');
+            }, 300);
+        }, 150);
+        
+        // Update category title
+        this.updateCategoryTitle(sport);
+    }
+
+    updateIndicatorPosition(index) {
+        const indicatorLine = document.querySelector('.indicator-line');
+        if (indicatorLine) {
+            const leftPosition = (index * 12.5); // 100% / 8 tabs = 12.5%
+            indicatorLine.style.left = `${leftPosition}%`;
+        }
+    }
+
+    updateCategoryTitle(sport) {
+        const categoryTitle = document.getElementById('category-title');
+        if (categoryTitle) {
+            if (sport === 'all') {
+                categoryTitle.textContent = 'Sports News';
+            } else {
+                const sportName = sport.charAt(0).toUpperCase() + sport.slice(1);
+                categoryTitle.textContent = `${sportName} News`;
+            }
+        }
+    }
+
+    filterArticlesBySport() {
+        if (this.currentSport === 'all') {
+            this.displayedArticles = [...this.allArticles];
+        } else {
+            this.displayedArticles = this.allArticles.filter(article => 
+                this.isArticleRelatedToSport(article, this.currentSport)
+            );
+        }
+        
+        this.renderFilteredNews();
+        this.updateArticleCount();
+    }
+
+    isArticleRelatedToSport(article, sport) {
+        const keywords = this.sportsKeywords[sport] || [];
+        const searchText = `${article.title} ${article.description || ''} ${article.content || ''}`.toLowerCase();
+        
+        return keywords.some(keyword => searchText.includes(keyword.toLowerCase()));
+    }
+
+    renderFilteredNews() {
+        const newsGrid = document.getElementById('news-grid');
+        if (!newsGrid) return;
+
+        if (this.displayedArticles.length === 0) {
+            newsGrid.innerHTML = `
+                <div class="no-articles-message">
+                    <div class="no-articles-content">
+                        <i class="fas fa-search"></i>
+                        <h3>No Articles Found</h3>
+                        <p>We couldn't find any articles for this sport category. Try selecting a different sport or check back later.</p>
+                        <button onclick="window.categoryNews.switchSport('all', 0)" class="back-to-all-btn">
+                            <i class="fas fa-arrow-left"></i> View All Sports
+                        </button>
+                    </div>
+                </div>
+            `;
+        } else {
+            newsGrid.innerHTML = this.displayedArticles.map(article => 
+                this.createArticleHTML(article)
+            ).join('');
+            
+            this.setupLazyLoading();
+        }
+        
+        this.updateLoadMoreButton();
     }
 
     showLoadingScreen() {
@@ -162,6 +296,13 @@ class CategoryNews {
         const newsGrid = document.getElementById('news-grid');
         if (!newsGrid) return;
 
+        // For sports category with subcategory filtering
+        if (this.category === 'sports') {
+            this.filterArticlesBySport();
+            return;
+        }
+
+        // For other categories, show all articles
         this.displayedArticles = this.allArticles;
 
         newsGrid.innerHTML = this.displayedArticles.map(article => 
