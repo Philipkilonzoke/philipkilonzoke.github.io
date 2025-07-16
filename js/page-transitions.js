@@ -1,131 +1,96 @@
 /**
- * Page Transitions with 3D Splash Screen
- * Provides smooth navigation experience between pages
+ * Page Transitions with Splash Screen
+ * Ensures splash screen appears when navigating between pages
  */
 
 class PageTransitions {
     constructor() {
-        this.isTransitioning = false;
-        this.prefetchedPages = new Set();
-        
         this.init();
     }
 
     init() {
-        this.setupPageTransitions();
-        this.setupPagePrefetching();
-        this.setupBrowserNavigation();
+        this.setupNavigationInterception();
+        this.setupInternalLinkHandling();
     }
 
-    setupPageTransitions() {
-        // Intercept internal navigation links
-        document.addEventListener('click', (event) => {
-            const link = event.target.closest('a');
+    setupNavigationInterception() {
+        // Override navigation for internal links
+        document.addEventListener('click', (e) => {
+            const link = e.target.closest('a');
             
-            if (!link || this.isTransitioning) return;
-            
-            const href = link.getAttribute('href');
-            
-            // Only handle internal links
-            if (this.isInternalLink(href)) {
-                event.preventDefault();
-                this.navigateWithTransition(href);
+            if (link && this.isInternalLink(link)) {
+                e.preventDefault();
+                this.navigateWithSplash(link.href);
             }
         });
     }
 
-    setupPagePrefetching() {
-        // Prefetch pages on hover for instant loading
-        document.addEventListener('mouseenter', (event) => {
-            const link = event.target.closest('a');
-            
-            if (!link) return;
-            
-            const href = link.getAttribute('href');
-            
-            if (this.isInternalLink(href) && !this.prefetchedPages.has(href)) {
-                this.prefetchPage(href);
-            }
-        }, true);
-    }
-
-    setupBrowserNavigation() {
-        // Handle browser back/forward buttons
-        window.addEventListener('popstate', (event) => {
-            if (event.state && event.state.page) {
-                this.navigateWithTransition(event.state.page, false);
-            }
-        });
-        
-        // Store initial state
-        history.replaceState({ page: window.location.pathname }, document.title, window.location.pathname);
-    }
-
-    async navigateWithTransition(href, updateHistory = true) {
-        if (this.isTransitioning) return;
-        
-        this.isTransitioning = true;
-        
-        try {
-            // Show splash screen
-            const splashScreen = new SplashScreen3D();
-            
-            // Prefetch the page if not already done
-            if (!this.prefetchedPages.has(href)) {
-                await this.prefetchPage(href);
-            }
-            
-            // Wait for minimum splash duration for smooth UX
-            await new Promise(resolve => setTimeout(resolve, 800));
-            
-            // Navigate to the new page
-            if (updateHistory) {
-                history.pushState({ page: href }, '', href);
-            }
-            
-            window.location.href = href;
-            
-        } catch (error) {
-            console.error('Navigation failed:', error);
-            // Fallback to normal navigation
-            window.location.href = href;
-        } finally {
-            this.isTransitioning = false;
-        }
-    }
-
-    async prefetchPage(href) {
-        try {
-            const link = document.createElement('link');
-            link.rel = 'prefetch';
-            link.href = href;
-            document.head.appendChild(link);
-            
-            this.prefetchedPages.add(href);
-            
-            console.log(`Prefetched: ${href}`);
-        } catch (error) {
-            console.error(`Failed to prefetch ${href}:`, error);
-        }
-    }
-
-    isInternalLink(href) {
+    isInternalLink(link) {
+        // Check if link is internal to the website
+        const href = link.getAttribute('href');
         if (!href) return false;
         
-        // Skip external links, anchors, and special protocols
-        if (href.startsWith('#') || 
-            href.startsWith('mailto:') || 
-            href.startsWith('tel:') ||
-            href.startsWith('http://') ||
-            href.startsWith('https://')) {
+        // Skip external links, anchors, and certain file types
+        if (href.startsWith('http') && !href.includes(window.location.hostname)) {
             return false;
         }
         
-        // Include relative links and absolute paths on same origin
-        return href.startsWith('/') || 
-               href.startsWith('./') || 
-               href.startsWith('../') ||
-               href.endsWith('.html');
+        if (href.startsWith('#') || href.startsWith('mailto:') || href.startsWith('tel:')) {
+            return false;
+        }
+        
+        if (href.match(/\.(pdf|jpg|jpeg|png|gif|svg|mp4|mp3|zip|doc|docx)$/i)) {
+            return false;
+        }
+        
+        // Check if it's a page navigation
+        const pageLinks = [
+            'index.html', 'technology.html', 'business.html', 'sports.html',
+            'entertainment.html', 'health.html', 'lifestyle.html', 'weather.html',
+            'settings.html', 'live-tv.html', 'world.html', 'kenya.html',
+            'latest.html', 'music.html'
+        ];
+        
+        return pageLinks.some(page => href.includes(page)) || href === '/';
+    }
+
+    navigateWithSplash(url) {
+        // Show splash screen before navigation
+        if (window.showSplashScreen) {
+            window.showSplashScreen();
+        }
+        
+        // Navigate after a brief delay to ensure splash screen shows
+        setTimeout(() => {
+            window.location.href = url;
+        }, 100);
+    }
+
+    setupInternalLinkHandling() {
+        // Handle programmatic navigation
+        const originalPushState = history.pushState;
+        const originalReplaceState = history.replaceState;
+        
+        history.pushState = function(state, title, url) {
+            if (url && window.showSplashScreen) {
+                window.showSplashScreen();
+            }
+            return originalPushState.apply(history, arguments);
+        };
+        
+        history.replaceState = function(state, title, url) {
+            if (url && window.showSplashScreen) {
+                window.showSplashScreen();
+            }
+            return originalReplaceState.apply(history, arguments);
+        };
+        
+        // Handle back/forward navigation
+        window.addEventListener('popstate', () => {
+            if (window.showSplashScreen) {
+                window.showSplashScreen();
+            }
+        });
     }
 }
 
@@ -259,17 +224,17 @@ class PerformanceMonitor {
     }
 }
 
-// Initialize when DOM is ready
-document.addEventListener('DOMContentLoaded', () => {
-    // Initialize page transitions only if we have splash screen support
-    if (typeof SplashScreen3D !== 'undefined') {
-        window.pageTransitions = new PageTransitions();
-    }
-    
-    // Initialize performance optimizations
-    window.loadingPerformance = new LoadingPerformance();
-    window.performanceMonitor = new PerformanceMonitor();
-});
+// Initialize page transitions when DOM is ready
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', () => {
+        new PageTransitions();
+    });
+} else {
+    new PageTransitions();
+}
+
+// Export for manual use
+window.PageTransitions = PageTransitions;
 
 // Export for module usage
 if (typeof module !== 'undefined' && module.exports) {

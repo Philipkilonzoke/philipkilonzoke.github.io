@@ -1,0 +1,87 @@
+<svg width="400" height="200" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 200">
+  <defs>
+    <!-- Gradients for the magnifying glass -->
+    <linearGradient id="magnifierGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#f8f9fa;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#e9ecef;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#dee2e6;stop-opacity:1" />
+    </linearGradient>
+    
+    <!-- Sun gradient -->
+    <radialGradient id="sunGradient" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" style="stop-color:#ffd43b;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#fab005;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#fd7e14;stop-opacity:1" />
+    </radialGradient>
+    
+    <!-- Handle gradient -->
+    <linearGradient id="handleGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#fd7e14;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#e8590c;stop-opacity:1" />
+    </linearGradient>
+    
+    <!-- Text gradients -->
+    <linearGradient id="textGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#ffffff;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#f8f9fa;stop-opacity:1" />
+    </linearGradient>
+    
+    <!-- Shadow filter -->
+    <filter id="dropshadow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur in="SourceAlpha" stdDeviation="4"/>
+      <feOffset dx="3" dy="5" result="offset"/>
+      <feComponentTransfer>
+        <feFuncA type="linear" slope="0.3"/>
+      </feComponentTransfer>
+      <feMerge> 
+        <feMergeNode/>
+        <feMergeNode in="SourceGraphic"/> 
+      </feMerge>
+    </filter>
+    
+    <!-- Glow effect -->
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
+      <feMerge>
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+  
+  <!-- Magnifying glass lens (outer circle) -->
+  <circle cx="80" cy="100" r="45" fill="url(#magnifierGradient)" stroke="#adb5bd" stroke-width="3" filter="url(#dropshadow)"/>
+  
+  <!-- Sun design inside the lens -->
+  <!-- Sun center -->
+  <circle cx="80" cy="100" r="18" fill="url(#sunGradient)" filter="url(#glow)"/>
+  
+  <!-- Sun rays -->
+  <g transform="translate(80, 100)" filter="url(#glow)">
+    <!-- 8 sun rays positioned around the center -->
+    <polygon points="0,-35 -4,-20 4,-20" fill="url(#sunGradient)" transform="rotate(0)"/>
+    <polygon points="0,-35 -4,-20 4,-20" fill="url(#sunGradient)" transform="rotate(45)"/>
+    <polygon points="0,-35 -4,-20 4,-20" fill="url(#sunGradient)" transform="rotate(90)"/>
+    <polygon points="0,-35 -4,-20 4,-20" fill="url(#sunGradient)" transform="rotate(135)"/>
+    <polygon points="0,-35 -4,-20 4,-20" fill="url(#sunGradient)" transform="rotate(180)"/>
+    <polygon points="0,-35 -4,-20 4,-20" fill="url(#sunGradient)" transform="rotate(225)"/>
+    <polygon points="0,-35 -4,-20 4,-20" fill="url(#sunGradient)" transform="rotate(270)"/>
+    <polygon points="0,-35 -4,-20 4,-20" fill="url(#sunGradient)" transform="rotate(315)"/>
+  </g>
+  
+  <!-- Magnifying glass handle -->
+  <rect x="115" y="135" width="12" height="35" rx="6" fill="url(#handleGradient)" filter="url(#dropshadow)" transform="rotate(45 121 152)"/>
+  
+  <!-- Text: BRIGHTLENS -->
+  <text x="170" y="95" font-family="Arial Black, Arial, sans-serif" font-size="32" font-weight="900" fill="url(#textGradient)" filter="url(#dropshadow)">
+    BRIGHTLENS
+  </text>
+  
+  <!-- Text: NEWS -->
+  <text x="170" y="125" font-family="Arial Black, Arial, sans-serif" font-size="28" font-weight="900" fill="url(#textGradient)" filter="url(#dropshadow)">
+    NEWS
+  </text>
+  
+  <!-- Decorative underline -->
+  <rect x="170" y="135" width="180" height="4" rx="2" fill="url(#handleGradient)" opacity="0.8" filter="url(#glow)"/>
+</svg>
