@@ -17,13 +17,52 @@ class CategoryNews {
         // Sports subcategory support
         this.currentSport = 'all';
         this.sportsKeywords = {
-            football: ['football', 'nfl', 'super bowl', 'quarterback', 'touchdown', 'american football', 'gridiron'],
-            basketball: ['basketball', 'nba', 'basketball game', 'dunk', 'three-pointer', 'basketball player', 'hoops'],
-            soccer: ['soccer', 'football', 'fifa', 'world cup', 'premier league', 'champions league', 'goal', 'penalty'],
-            golf: ['golf', 'pga', 'masters', 'golfer', 'tournament', 'birdie', 'eagle', 'putting'],
-            tennis: ['tennis', 'wimbledon', 'us open', 'french open', 'australian open', 'tennis player', 'serve', 'ace'],
-            baseball: ['baseball', 'mlb', 'world series', 'home run', 'pitcher', 'baseball game', 'innings'],
-            hockey: ['hockey', 'nhl', 'ice hockey', 'stanley cup', 'puck', 'hockey game', 'power play']
+            football: [
+                'nfl', 'american football', 'gridiron', 'quarterback', 'touchdown', 'super bowl',
+                'nfl draft', 'nfl playoffs', 'college football', 'ncaa football', 'football game',
+                'nfl news', 'nfl teams', 'nfl players', 'football league', 'football season',
+                'patriots', 'cowboys', 'steelers', 'packers', 'giants', 'eagles', 'chiefs',
+                '49ers', 'rams', 'saints', 'ravens', 'bengals', 'browns', 'bills', 'dolphins'
+            ],
+            basketball: [
+                'nba', 'basketball', 'basketball game', 'dunk', 'three-pointer', 'basketball player',
+                'hoops', 'nba draft', 'nba playoffs', 'basketball league', 'basketball season',
+                'ncaa basketball', 'college basketball', 'basketball news', 'basketball teams',
+                'lakers', 'warriors', 'celtics', 'heat', 'bulls', 'knicks', 'nets', 'sixers',
+                'lebron', 'curry', 'durant', 'giannis', 'jokic', 'tatum', 'doncic', 'embiid'
+            ],
+            soccer: [
+                'soccer', 'fifa', 'world cup', 'premier league', 'champions league', 'goal',
+                'penalty', 'uefa', 'mls', 'la liga', 'serie a', 'bundesliga', 'ligue 1',
+                'soccer game', 'soccer player', 'soccer news', 'soccer teams', 'soccer league',
+                'messi', 'ronaldo', 'mbappe', 'haaland', 'benzema', 'modric', 'neymar',
+                'manchester united', 'real madrid', 'barcelona', 'liverpool', 'chelsea', 'arsenal'
+            ],
+            golf: [
+                'golf', 'pga', 'masters', 'golfer', 'tournament', 'birdie', 'eagle', 'putting',
+                'pga tour', 'golf course', 'golf news', 'golf championship', 'golf player',
+                'tiger woods', 'rory mcilroy', 'jon rahm', 'scottie scheffler', 'jordan spieth',
+                'us open golf', 'british open', 'pga championship', 'masters tournament'
+            ],
+            tennis: [
+                'tennis', 'wimbledon', 'us open tennis', 'french open', 'australian open',
+                'tennis player', 'serve', 'ace', 'tennis match', 'tennis news', 'tennis tournament',
+                'atp', 'wta', 'grand slam', 'roland garros', 'tennis championship',
+                'djokovic', 'nadal', 'federer', 'alcaraz', 'medvedev', 'tsitsipas', 'zverev',
+                'serena williams', 'osaka', 'swiatek', 'sabalenka', 'rybakina'
+            ],
+            baseball: [
+                'baseball', 'mlb', 'world series', 'home run', 'pitcher', 'baseball game',
+                'innings', 'baseball news', 'baseball teams', 'baseball league', 'baseball season',
+                'yankees', 'dodgers', 'red sox', 'astros', 'cardinals', 'cubs', 'giants',
+                'angels', 'mets', 'phillies', 'braves', 'marlins', 'nationals', 'orioles'
+            ],
+            hockey: [
+                'hockey', 'nhl', 'ice hockey', 'stanley cup', 'puck', 'hockey game', 'power play',
+                'hockey news', 'hockey teams', 'hockey league', 'hockey season', 'nhl playoffs',
+                'rangers', 'bruins', 'blackhawks', 'penguins', 'flyers', 'devils', 'islanders',
+                'capitals', 'lightning', 'panthers', 'maple leafs', 'canadiens', 'senators'
+            ]
         };
         
         this.init();
@@ -122,6 +161,10 @@ class CategoryNews {
         // Update indicator position
         this.updateIndicatorPosition(tabIndex);
         
+        // Add loading state to the active tab
+        const activeTab = document.querySelector(`[data-sport="${sport}"]`);
+        activeTab.classList.add('subcategory-loading');
+        
         // Add switching animation
         const mainContainer = document.querySelector('.main');
         mainContainer.classList.add('subcategory-tab-switching');
@@ -131,6 +174,15 @@ class CategoryNews {
             this.filterArticlesBySport();
             mainContainer.classList.remove('subcategory-tab-switching');
             mainContainer.classList.add('subcategory-tab-switched');
+            activeTab.classList.remove('subcategory-loading');
+            
+            // Log filtering stats for debugging
+            console.log(`Filtered for ${sport}:`, {
+                totalArticles: this.allArticles.length,
+                filteredArticles: this.displayedArticles.length,
+                sport: sport,
+                filteringEnabled: sport !== 'all'
+            });
             
             // Remove switched class after animation
             setTimeout(() => {
@@ -179,7 +231,67 @@ class CategoryNews {
         const keywords = this.sportsKeywords[sport] || [];
         const searchText = `${article.title} ${article.description || ''} ${article.content || ''}`.toLowerCase();
         
-        return keywords.some(keyword => searchText.includes(keyword.toLowerCase()));
+        // Enhanced matching with confidence scoring
+        let matchScore = 0;
+        let matchedKeywords = [];
+        
+        // Check for keyword matches
+        for (const keyword of keywords) {
+            const keywordLower = keyword.toLowerCase();
+            
+            // Title matches get higher weight
+            if (article.title.toLowerCase().includes(keywordLower)) {
+                matchScore += 3;
+                matchedKeywords.push(keyword);
+            }
+            // Description matches get medium weight
+            else if ((article.description || '').toLowerCase().includes(keywordLower)) {
+                matchScore += 2;
+                matchedKeywords.push(keyword);
+            }
+            // Content matches get lower weight
+            else if ((article.content || '').toLowerCase().includes(keywordLower)) {
+                matchScore += 1;
+                matchedKeywords.push(keyword);
+            }
+        }
+        
+        // Special handling for football vs soccer disambiguation
+        if (sport === 'football') {
+            // If article mentions soccer-specific terms, reduce score for American football
+            const soccerTerms = ['fifa', 'premier league', 'champions league', 'messi', 'ronaldo', 'uefa'];
+            const hasSoccerTerms = soccerTerms.some(term => searchText.includes(term));
+            if (hasSoccerTerms) {
+                matchScore = Math.max(0, matchScore - 5);
+            }
+            
+            // Boost score for American football specific terms
+            const americanFootballTerms = ['nfl', 'quarterback', 'touchdown', 'super bowl'];
+            const hasAmericanFootballTerms = americanFootballTerms.some(term => searchText.includes(term));
+            if (hasAmericanFootballTerms) {
+                matchScore += 2;
+            }
+        } else if (sport === 'soccer') {
+            // If article mentions American football terms, reduce score for soccer
+            const americanFootballTerms = ['nfl', 'quarterback', 'touchdown', 'super bowl'];
+            const hasAmericanFootballTerms = americanFootballTerms.some(term => searchText.includes(term));
+            if (hasAmericanFootballTerms) {
+                matchScore = Math.max(0, matchScore - 5);
+            }
+        }
+        
+        // Source-based scoring boost
+        const source = article.source || '';
+        if (sport === 'football' && (source.toLowerCase().includes('nfl') || source.toLowerCase().includes('espn'))) {
+            matchScore += 1;
+        } else if (sport === 'basketball' && (source.toLowerCase().includes('nba') || source.toLowerCase().includes('espn'))) {
+            matchScore += 1;
+        } else if (sport === 'soccer' && (source.toLowerCase().includes('fifa') || source.toLowerCase().includes('uefa'))) {
+            matchScore += 1;
+        }
+        
+        // Return true if we have a confident match (score >= 2)
+        return matchScore >= 2;
     }
 
     renderFilteredNews() {
@@ -187,15 +299,26 @@ class CategoryNews {
         if (!newsGrid) return;
 
         if (this.displayedArticles.length === 0) {
+            const sportName = this.currentSport.charAt(0).toUpperCase() + this.currentSport.slice(1);
             newsGrid.innerHTML = `
                 <div class="no-articles-message">
                     <div class="no-articles-content">
                         <i class="fas fa-search"></i>
-                        <h3>No Articles Found</h3>
-                        <p>We couldn't find any articles for this sport category. Try selecting a different sport or check back later.</p>
-                        <button onclick="window.categoryNews.switchSport('all', 0)" class="back-to-all-btn">
-                            <i class="fas fa-arrow-left"></i> View All Sports
-                        </button>
+                        <h3>No ${sportName} Articles Found</h3>
+                        <p>We couldn't find any recent ${sportName.toLowerCase()} articles. This might be because:</p>
+                        <ul style="text-align: left; margin: 1rem 0; padding-left: 1.5rem;">
+                            <li>Limited ${sportName.toLowerCase()} news coverage today</li>
+                            <li>No recent updates from sports sources</li>
+                            <li>API sources might be temporarily unavailable</li>
+                        </ul>
+                        <div style="display: flex; gap: 1rem; justify-content: center; margin-top: 1.5rem;">
+                            <button onclick="window.categoryNews.switchSport('all', 0)" class="back-to-all-btn">
+                                <i class="fas fa-arrow-left"></i> View All Sports
+                            </button>
+                            <button onclick="window.categoryNews.refreshSportsNews()" class="refresh-btn">
+                                <i class="fas fa-sync-alt"></i> Refresh News
+                            </button>
+                        </div>
                     </div>
                 </div>
             `;
@@ -502,6 +625,36 @@ class CategoryNews {
         const documentHeight = document.documentElement.scrollHeight;
         
         return scrollTop + windowHeight >= documentHeight - 1000;
+    }
+    
+    // Refresh sports news method
+    async refreshSportsNews() {
+        if (this.isLoading) return;
+        
+        // Clear cache to force fresh data
+        this.newsAPI.cache.clear();
+        
+        // Show loading state
+        this.showNewsLoading();
+        
+        try {
+            console.log('Refreshing sports news...');
+            const articles = await this.newsAPI.fetchNews(this.category, 50);
+            
+            if (articles && articles.length > 0) {
+                this.allArticles = articles;
+                this.renderNews();
+                this.updateArticleCount();
+                this.updateLastUpdated();
+                this.showNewsGrid();
+                console.log('Sports news refreshed successfully:', articles.length, 'articles');
+            } else {
+                this.showNewsError('No articles found after refresh. Please try again later.');
+            }
+        } catch (error) {
+            console.error('Error refreshing sports news:', error);
+            this.showNewsError('Failed to refresh news. Please check your internet connection and try again.');
+        }
     }
 }
 
