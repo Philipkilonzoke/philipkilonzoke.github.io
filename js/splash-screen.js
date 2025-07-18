@@ -45,12 +45,14 @@ class BrightLensModernSplash {
         // Check if splash was already shown in this session
         const hasShown = sessionStorage.getItem(this.sessionKey);
         
-        // Also check if user is navigating back/forward (don't show splash)
+        // Always show splash on first visit to any page
+        // Only skip if user is navigating back/forward
         const navigationType = performance.getEntriesByType('navigation')[0]?.type;
         if (navigationType === 'back_forward') {
             return false;
         }
         
+        // Show splash if it hasn't been shown in this session
         return !hasShown;
     }
 
@@ -145,12 +147,36 @@ class BrightLensModernSplash {
     startAutoHide() {
         if (this.isDestroyed) return;
         
-        // Auto-hide after display duration
+        // Auto-hide after display duration and redirect to homepage
         setTimeout(() => {
             if (!this.isDestroyed) {
-                this.hideSplash();
+                this.hideSplashAndRedirect();
             }
         }, this.displayDuration);
+    }
+
+    hideSplashAndRedirect() {
+        if (this.isDestroyed || !this.splashElement) return;
+        
+        console.log('🎭 Hiding modern splash and redirecting to homepage');
+        
+        // Clear any ongoing animations
+        if (this.loadingInterval) {
+            clearInterval(this.loadingInterval);
+        }
+        
+        // Add hidden class for CSS transition
+        this.splashElement.classList.add('hidden');
+        
+        // Remove from DOM after transition and redirect to homepage
+        setTimeout(() => {
+            this.destroySplash();
+            // Always redirect to homepage after splash
+            if (window.location.pathname !== '/' && window.location.pathname !== '/index.html') {
+                console.log('🏠 Redirecting to homepage after splash');
+                window.location.href = '/index.html';
+            }
+        }, 1200); // Match CSS transition duration
     }
 
     hideSplash() {
@@ -280,22 +306,9 @@ class BrightLensNavigationManager {
     }
 
     setupInternalNavigation() {
-        document.addEventListener('click', (event) => {
-            const link = event.target.closest('a');
-            if (!link || !this.isInternalLink(link)) return;
-            
-            const href = link.getAttribute('href');
-            if (!href || href.startsWith('#')) return;
-            
-            // For same-domain navigation, show splash for different pages
-            const currentPath = window.location.pathname;
-            const targetPath = this.getTargetPath(href);
-            
-            if (currentPath !== targetPath && this.shouldShowSplashForNavigation()) {
-                event.preventDefault();
-                this.navigateWithSplash(href);
-            }
-        });
+        // Navigation is handled normally after splash
+        // Splash only appears on first website visit and redirects to homepage
+        console.log('🧭 Internal navigation setup completed - normal navigation enabled');
     }
 
     isInternalLink(link) {
@@ -375,10 +388,11 @@ class BrightLensSessionManager {
     
     static resetOnNewSession() {
         // Clear splash session for new browser sessions
+        // This ensures splash shows on first visit to website
         if (!sessionStorage.getItem('brightlens_session_id')) {
             sessionStorage.setItem('brightlens_session_id', Date.now().toString());
             sessionStorage.removeItem('brightlens_modern_splash_shown');
-            console.log('🆕 New session detected, splash reset');
+            console.log('🆕 New session detected, splash will show on first visit');
         }
     }
 }
