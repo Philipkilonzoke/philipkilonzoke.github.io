@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Navigation Test - BrightLens News</title>
+    
+    <!-- Load splash screen CSS immediately -->
+    <link rel="stylesheet" href="css/splash-screen.css">
+    
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #0f0f23 0%, #1a1a2e 50%, #16213e 100%);
+            color: white;
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+        }
+        
+        .test-container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+            padding: 40px;
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .test-title {
+            font-size: 2.5rem;
+            font-weight: 900;
+            text-align: center;
+            margin-bottom: 2rem;
+            background: linear-gradient(45deg, #ff006e, #00bcd4, #00e676);
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .nav-links {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 2rem;
+        }
+        
+        .nav-link {
+            display: block;
+            padding: 15px 20px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+            color: white;
+            text-decoration: none;
+            text-align: center;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        
+        .nav-link:hover {
+            background: rgba(255, 255, 255, 0.2);
+            border-color: rgba(0, 188, 212, 0.5);
+            transform: translateY(-2px);
+        }
+        
+        .current-page {
+            background: rgba(0, 188, 212, 0.3);
+            border-color: rgba(0, 188, 212, 0.8);
+        }
+        
+        .status {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 2rem;
+        }
+        
+        .status h3 {
+            color: #00e676;
+            margin-bottom: 10px;
+        }
+        
+        .status pre {
+            background: rgba(0, 0, 0, 0.5);
+            padding: 15px;
+            border-radius: 8px;
+            color: #00bcd4;
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1 class="test-title">🧪 Navigation Test</h1>
+        
+        <div class="nav-links">
+            <a href="index.html" class="nav-link">🏠 Homepage</a>
+            <a href="latest.html" class="nav-link">⚡ Latest News</a>
+            <a href="kenya.html" class="nav-link">🇰🇪 Kenya News</a>
+            <a href="world.html" class="nav-link">🌍 World News</a>
+            <a href="technology.html" class="nav-link">💻 Technology</a>
+            <a href="business.html" class="nav-link">💼 Business</a>
+            <a href="sports.html" class="nav-link">⚽ Sports</a>
+            <a href="entertainment.html" class="nav-link">🎭 Entertainment</a>
+            <a href="music.html" class="nav-link">🎵 Music</a>
+            <a href="lifestyle.html" class="nav-link">🌟 Lifestyle</a>
+            <a href="health.html" class="nav-link">🏥 Health</a>
+            <a href="weather.html" class="nav-link">🌤️ Weather</a>
+            <a href="settings.html" class="nav-link">⚙️ Settings</a>
+            <a href="live-tv.html" class="nav-link">📺 Live TV</a>
+        </div>
+        
+        <div class="status">
+            <h3>📊 Current Page Status</h3>
+            <pre id="statusOutput">Loading...</pre>
+        </div>
+    </div>
+
+    <!-- Load splash screen system -->
+    <script src="js/splash-screen.js"></script>
+    
+    <script>
+        // Update status
+        function updateStatus() {
+            const hasShown = window.BrightLensSplash ? 
+                window.BrightLensSplash.hasShown() : 
+                !!sessionStorage.getItem('brightlens_modern_splash_shown');
+            
+            const status = [
+                `🌐 Current Page: ${window.location.pathname}`,
+                `🔗 Current URL: ${window.location.href}`,
+                `🎭 Splash Status: ${hasShown ? 'Already shown this session' : 'Ready to show'}`,
+                `💾 Session Data: ${sessionStorage.getItem('brightlens_modern_splash_shown') || 'null'}`,
+                `⏰ Current Time: ${new Date().toLocaleTimeString()}`,
+                `🔄 Page Load Time: ${performance.now().toFixed(2)}ms`,
+                '',
+                '✅ This page should NOT redirect anywhere',
+                '✅ Clicking links should go to the correct pages',
+                '✅ Splash should only appear on first visit',
+                '✅ Each page should stay on its intended content'
+            ];
+            
+            document.getElementById('statusOutput').textContent = status.join('\n');
+        }
+        
+        // Highlight current page
+        function highlightCurrentPage() {
+            const currentPath = window.location.pathname;
+            const links = document.querySelectorAll('.nav-link');
+            
+            links.forEach(link => {
+                const href = link.getAttribute('href');
+                if (currentPath.endsWith(href) || (currentPath === '/' && href === 'index.html')) {
+                    link.classList.add('current-page');
+                }
+            });
+        }
+        
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('🧪 Navigation Test Page loaded');
+            highlightCurrentPage();
+            updateStatus();
+            
+            // Update status every 2 seconds
+            setInterval(updateStatus, 2000);
+        });
+        
+        // Log navigation attempts
+        document.addEventListener('click', function(e) {
+            if (e.target.classList.contains('nav-link')) {
+                const href = e.target.getAttribute('href');
+                console.log(`🔗 Navigation test: clicking ${href}`);
+                updateStatus();
+            }
+        });
+        
+        // Listen for splash completion
+        document.addEventListener('brightlensSplashComplete', function(event) {
+            console.log('🎉 Splash completed on test page:', event.detail);
+        });
+    </script>
+</body>
+</html>
