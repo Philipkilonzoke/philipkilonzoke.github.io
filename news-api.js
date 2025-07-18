@@ -15,10 +15,11 @@ class NewsAPI {
             currentsapi: '9tI-4kOmMlJdgcosDUBsYYZDAnkLnuuL4Hrgc5TKlHmN_AMH'
         };
 
-        // OPTIMIZED cache configuration for ultra-fast loading
+        // ENHANCED cache configuration for maximum speed and real-time freshness
         this.cache = new Map();
-        this.cacheTimeout = 90000; // 1.5 minutes for balance of freshness and speed
-        this.maxCacheSize = 50; // Increased cache size for better hit rate
+        this.cacheTimeout = 120000; // 2 minutes for better balance of speed and freshness
+        this.maxCacheSize = 100; // Larger cache for all 10 categories
+        this.backgroundRefreshInterval = 60000; // Background refresh every minute
         
         // Performance monitoring
         this.performanceMetrics = {
@@ -124,24 +125,71 @@ class NewsAPI {
     }
     
     /**
-     * Preload critical categories for instant loading
+     * Preload ALL categories for instant loading across the entire application
      */
     async preloadCriticalCategories() {
-        const criticalCategories = ['latest', 'sports', 'world'];
+        const allCategories = ['latest', 'kenya', 'world', 'sports', 'technology', 'business', 'health', 'lifestyle', 'entertainment', 'music'];
         
-        console.log('🚀 Preloading critical categories...');
+        console.log('🚀 ENHANCED: Preloading ALL 10 categories for instant access...');
         
-        criticalCategories.forEach(async (category) => {
-            try {
-                // Preload in background without blocking
-                setTimeout(async () => {
-                    await this.fetchNewsNoCache(category, 20);
-                    console.log(`✅ Preloaded ${category} category`);
-                }, Math.random() * 2000); // Stagger requests
-            } catch (error) {
-                console.warn(`⚠️ Failed to preload ${category}:`, error.message);
-            }
+        // Preload high-priority categories first
+        const highPriority = ['latest', 'sports', 'world', 'kenya'];
+        const mediumPriority = ['technology', 'business', 'entertainment'];
+        const lowPriority = ['health', 'lifestyle', 'music'];
+        
+        // High priority - immediate load
+        highPriority.forEach(async (category, index) => {
+            setTimeout(async () => {
+                try {
+                    await this.fetchNewsNoCache(category, 25);
+                    console.log(`✅ HIGH PRIORITY: Preloaded ${category} category`);
+                } catch (error) {
+                    console.warn(`⚠️ Failed to preload ${category}:`, error.message);
+                }
+            }, index * 500); // 500ms stagger
         });
+        
+        // Medium priority - 2 second delay
+        mediumPriority.forEach(async (category, index) => {
+            setTimeout(async () => {
+                try {
+                    await this.fetchNewsNoCache(category, 20);
+                    console.log(`✅ MEDIUM PRIORITY: Preloaded ${category} category`);
+                } catch (error) {
+                    console.warn(`⚠️ Failed to preload ${category}:`, error.message);
+                }
+            }, 2000 + (index * 800)); // Start after 2s, 800ms stagger
+        });
+        
+        // Low priority - 5 second delay
+        lowPriority.forEach(async (category, index) => {
+            setTimeout(async () => {
+                try {
+                    await this.fetchNewsNoCache(category, 15);
+                    console.log(`✅ LOW PRIORITY: Preloaded ${category} category`);
+                } catch (error) {
+                    console.warn(`⚠️ Failed to preload ${category}:`, error.message);
+                }
+            }, 5000 + (index * 1000)); // Start after 5s, 1s stagger
+        });
+
+        // Start continuous background refresh for all categories
+        this.startBackgroundRefresh();
+    }
+
+    /**
+     * Start continuous background refresh for real-time updates
+     */
+    startBackgroundRefresh() {
+        const allCategories = ['latest', 'kenya', 'world', 'sports', 'technology', 'business', 'health', 'lifestyle', 'entertainment', 'music'];
+        
+        setInterval(() => {
+            // Refresh categories in rotation to maintain freshness
+            const categoryToRefresh = allCategories[Math.floor(Math.random() * allCategories.length)];
+            this.backgroundRefresh(categoryToRefresh, 20);
+        }, this.backgroundRefreshInterval);
+        
+        console.log(`🔄 Started background refresh system for all categories (${this.backgroundRefreshInterval/1000}s interval)`);
     }
     
     /**
@@ -1755,6 +1803,141 @@ class NewsAPI {
             }
         } catch (error) {
             console.warn('AP RSS fetch failed:', error.message);
+        }
+        return [];
+    }
+
+    /**
+     * Fetch from Associated Press RSS feeds (real-time)
+     */
+    async fetchFromAssociatedPress(category, keywords) {
+        try {
+            let rssUrl = '';
+            switch(category) {
+                case 'world':
+                    rssUrl = 'https://feeds.apnews.com/rss/apf-intlnews.rss';
+                    break;
+                case 'technology':
+                    rssUrl = 'https://feeds.apnews.com/rss/apf-technology.rss';
+                    break;
+                case 'business':
+                    rssUrl = 'https://feeds.apnews.com/rss/apf-business.rss';
+                    break;
+                case 'sports':
+                    rssUrl = 'https://feeds.apnews.com/rss/apf-sports.rss';
+                    break;
+                case 'health':
+                    rssUrl = 'https://feeds.apnews.com/rss/apf-Health.rss';
+                    break;
+                case 'entertainment':
+                    rssUrl = 'https://feeds.apnews.com/rss/apf-entertainment.rss';
+                    break;
+                default:
+                    rssUrl = 'https://feeds.apnews.com/rss/apf-topnews.rss';
+            }
+
+            const response = await this.corsProxyFetch(`https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(rssUrl)}`);
+            if (!response.ok) throw new Error('AP RSS fetch failed');
+            
+            const data = await response.json();
+            if (data.items) {
+                return data.items.slice(0, 10).map(item => ({
+                    title: item.title,
+                    description: this.enhanceDescription(item.description || item.content, item.title, 'Associated Press'),
+                    url: item.link,
+                    urlToImage: item.enclosure?.link || item.thumbnail || 'https://images.unsplash.com/photo-1504711434969-e33886168f5c?w=400',
+                    publishedAt: item.pubDate,
+                    source: 'Associated Press',
+                    category: category
+                })).filter(article => article.title && article.url);
+            }
+        } catch (error) {
+            console.warn('AP RSS fetch failed:', error.message);
+        }
+        return [];
+    }
+
+    /**
+     * Fetch from Bloomberg RSS feeds (real-time)
+     */
+    async fetchFromBloomberg(category, keywords) {
+        try {
+            let rssUrl = '';
+            switch(category) {
+                case 'business':
+                    rssUrl = 'https://feeds.bloomberg.com/markets/news.rss';
+                    break;
+                case 'technology':
+                    rssUrl = 'https://feeds.bloomberg.com/technology/news.rss';
+                    break;
+                case 'world':
+                    rssUrl = 'https://feeds.bloomberg.com/politics/news.rss';
+                    break;
+                default:
+                    rssUrl = 'https://feeds.bloomberg.com/news.rss';
+            }
+
+            const response = await this.corsProxyFetch(`https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(rssUrl)}`);
+            if (!response.ok) throw new Error('Bloomberg RSS fetch failed');
+            
+            const data = await response.json();
+            if (data.items) {
+                return data.items.slice(0, 8).map(item => ({
+                    title: item.title,
+                    description: this.enhanceDescription(item.description || item.content, item.title, 'Bloomberg'),
+                    url: item.link,
+                    urlToImage: item.enclosure?.link || item.thumbnail || 'https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?w=400',
+                    publishedAt: item.pubDate,
+                    source: 'Bloomberg',
+                    category: category
+                })).filter(article => article.title && article.url);
+            }
+        } catch (error) {
+            console.warn('Bloomberg RSS fetch failed:', error.message);
+        }
+        return [];
+    }
+
+    /**
+     * Fetch from Al Jazeera RSS feeds (real-time)
+     */
+    async fetchFromAljazeeraRSS(category, keywords) {
+        try {
+            let rssUrl = '';
+            switch(category) {
+                case 'world':
+                    rssUrl = 'https://www.aljazeera.com/xml/rss/all.xml';
+                    break;
+                case 'business':
+                    rssUrl = 'https://www.aljazeera.com/xml/rss/economy.xml';
+                    break;
+                case 'sports':
+                    rssUrl = 'https://www.aljazeera.com/xml/rss/sport.xml';
+                    break;
+                case 'kenya':
+                    rssUrl = 'https://www.aljazeera.com/xml/rss/africa.xml';
+                    break;
+                default:
+                    rssUrl = 'https://www.aljazeera.com/xml/rss/all.xml';
+            }
+
+            const response = await this.corsProxyFetch(`https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(rssUrl)}`);
+            if (!response.ok) throw new Error('Al Jazeera RSS fetch failed');
+            
+            const data = await response.json();
+            if (data.items) {
+                return data.items.slice(0, 8).map(item => ({
+                    title: item.title,
+                    description: this.enhanceDescription(item.description || item.content, item.title, 'Al Jazeera'),
+                    url: item.link,
+                    urlToImage: item.enclosure?.link || item.thumbnail || 'https://images.unsplash.com/photo-1504711434969-e33886168f5c?w=400',
+                    publishedAt: item.pubDate,
+                    source: 'Al Jazeera',
+                    category: category
+                })).filter(article => article.title && article.url);
+            }
+        } catch (error) {
+            console.warn('Al Jazeera RSS fetch failed:', error.message);
         }
         return [];
     }
