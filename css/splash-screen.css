@@ -18,7 +18,13 @@
     z-index: 99999;
     overflow: hidden;
     perspective: 1200px;
-    transition: opacity 1s ease-out, transform 0.8s ease-out;
+    transition: opacity 1s cubic-bezier(0.25, 0.46, 0.45, 0.94), transform 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    /* Performance optimizations */
+    will-change: opacity, transform;
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+    transform-style: preserve-3d;
+    -webkit-transform-style: preserve-3d;
 }
 
 /* Hidden state for fade-out effect */
@@ -38,8 +44,12 @@
         radial-gradient(circle at 20% 80%, rgba(120, 119, 198, 0.3) 0%, transparent 50%),
         radial-gradient(circle at 80% 20%, rgba(255, 255, 255, 0.1) 0%, transparent 50%),
         radial-gradient(circle at 40% 40%, rgba(120, 119, 198, 0.2) 0%, transparent 50%);
-    animation: backgroundFloat 8s ease-in-out infinite;
+    animation: backgroundFloat 8s cubic-bezier(0.4, 0.0, 0.6, 1) infinite;
     opacity: 0.6;
+    /* Performance optimizations */
+    will-change: transform;
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
 }
 
 @keyframes backgroundFloat {
@@ -52,7 +62,12 @@
     position: relative;
     text-align: center;
     transform-style: preserve-3d;
-    animation: logoEntrance 2s ease-out forwards;
+    -webkit-transform-style: preserve-3d;
+    animation: logoEntrance 2s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+    /* Performance optimizations */
+    will-change: transform, opacity;
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
 }
 
 @keyframes logoEntrance {
@@ -84,13 +99,20 @@
     letter-spacing: 0.1em;
     margin: 0;
     transform-style: preserve-3d;
-    animation: logoFloat 3s ease-in-out infinite;
+    -webkit-transform-style: preserve-3d;
     background: linear-gradient(45deg, #ffffff, #f0f9ff, #dbeafe, #93c5fd);
     background-clip: text;
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-size: 300% 300%;
-    animation: logoFloat 3s ease-in-out infinite, gradientShift 4s ease-in-out infinite;
+    animation: logoFloat 3s cubic-bezier(0.4, 0.0, 0.6, 1) infinite, gradientShift 4s cubic-bezier(0.4, 0.0, 0.6, 1) infinite;
+    /* Performance optimizations */
+    will-change: transform, background-position;
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+    /* GPU acceleration */
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
 }
 
 @keyframes logoFloat {

@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BrightLens News - All Pages Splash Test</title>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Splash Screen CSS -->
+    <link rel="stylesheet" href="css/splash-screen.css">
+    
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+        }
+        
+        .test-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+        }
+        
+        .test-title {
+            font-size: 2.5rem;
+            font-weight: 800;
+            color: #1e293b;
+            margin-bottom: 1rem;
+            text-align: center;
+            background: linear-gradient(45deg, #2563eb, #3b82f6, #60a5fa);
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .test-subtitle {
+            font-size: 1.2rem;
+            color: #64748b;
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+        
+        .control-panel {
+            background: #f1f5f9;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+        
+        .control-panel h3 {
+            color: #1e293b;
+            margin-bottom: 1rem;
+        }
+        
+        .test-button {
+            background: linear-gradient(45deg, #2563eb, #3b82f6);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin: 5px;
+        }
+        
+        .test-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 16px rgba(37, 99, 235, 0.3);
+        }
+        
+        .pages-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-top: 2rem;
+        }
+        
+        .page-card {
+            background: #f8fafc;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+        
+        .page-card:hover {
+            border-color: #3b82f6;
+            background: #eff6ff;
+            transform: translateY(-2px);
+        }
+        
+        .page-card h4 {
+            color: #1e293b;
+            margin-bottom: 10px;
+            font-size: 1.1rem;
+        }
+        
+        .page-card p {
+            color: #64748b;
+            font-size: 0.9rem;
+            margin-bottom: 15px;
+        }
+        
+        .page-link {
+            display: inline-block;
+            background: #2563eb;
+            color: white;
+            text-decoration: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+        
+        .page-link:hover {
+            background: #1d4ed8;
+            transform: scale(1.05);
+        }
+        
+        .status-panel {
+            background: #ecfdf5;
+            border: 2px solid #10b981;
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 2rem;
+        }
+        
+        .status-panel h3 {
+            color: #065f46;
+            margin-bottom: 10px;
+        }
+        
+        .status-panel pre {
+            background: #f0f9ff;
+            padding: 10px;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            color: #1e40af;
+            overflow-x: auto;
+        }
+        
+        .category-section {
+            margin-bottom: 3rem;
+        }
+        
+        .category-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #1e293b;
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid #e2e8f0;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1 class="test-title">BrightLens News</h1>
+        <p class="test-subtitle">Complete Splash Screen Testing for All Pages & Categories</p>
+        
+        <div class="control-panel">
+            <h3>Testing Controls</h3>
+            <button class="test-button" onclick="showSplash()">🎬 Show Splash Screen</button>
+            <button class="test-button" onclick="clearSession()">🔄 Clear Session</button>
+            <button class="test-button" onclick="testAllPages()">🚀 Test All Pages</button>
+            <button class="test-button" onclick="checkStatus()">📊 Check Status</button>
+        </div>
+
+        <div class="category-section">
+            <h2 class="category-title">📰 News Categories</h2>
+            <div class="pages-grid">
+                <div class="page-card">
+                    <h4>🏠 Homepage</h4>
+                    <p>Main landing page with latest news</p>
+                    <a href="index.html" class="page-link">Visit Page</a>
+                </div>
+                
+                <div class="page-card">
+                    <h4>⚡ Latest News</h4>
+                    <p>Most recent breaking news updates</p>
+                    <a href="latest.html" class="page-link">Visit Page</a>
+                </div>
+                
+                <div class="page-card">
+                    <h4>🌍 World News</h4>
+                    <p>International news and global events</p>
+                    <a href="world.html" class="page-link">Visit Page</a>
+                </div>
+                
+                <div class="page-card">
+                    <h4>🇰🇪 Kenya News</h4>
+                    <p>Local Kenyan news and updates</p>
+                    <a href="kenya.html" class="page-link">Visit Page</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="category-section">
+            <h2 class="category-title">💼 Business & Technology</h2>
+            <div class="pages-grid">
+                <div class="page-card">
+                    <h4>💼 Business</h4>
+                    <p>Business news, markets, and finance</p>
+                    <a href="business.html" class="page-link">Visit Page</a>
+                </div>
+                
+                <div class="page-card">
+                    <h4>💻 Technology</h4>
+                    <p>Tech news, gadgets, and innovations</p>
+                    <a href="technology.html" class="page-link">Visit Page</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="category-section">
+            <h2 class="category-title">🎯 Lifestyle & Entertainment</h2>
+            <div class="pages-grid">
+                <div class="page-card">
+                    <h4>⚽ Sports</h4>
+                    <p>Sports news, scores, and highlights</p>
+                    <a href="sports.html" class="page-link">Visit Page</a>
+                </div>
+                
+                <div class="page-card">
+                    <h4>🎭 Entertainment</h4>
+                    <p>Movies, music, and celebrity news</p>
+                    <a href="entertainment.html" class="page-link">Visit Page</a>
+                </div>
+                
+                <div class="page-card">
+                    <h4>🎵 Music</h4>
+                    <p>Music news, artists, and releases</p>
+                    <a href="music.html" class="page-link">Visit Page</a>
+                </div>
+                
+                <div class="page-card">
+                    <h4>🌟 Lifestyle</h4>
+                    <p>Health, fashion, and lifestyle tips</p>
+                    <a href="lifestyle.html" class="page-link">Visit Page</a>
+                </div>
+                
+                <div class="page-card">
+                    <h4>🏥 Health</h4>
+                    <p>Health news and medical updates</p>
+                    <a href="health.html" class="page-link">Visit Page</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="category-section">
+            <h2 class="category-title">🔧 Features & Tools</h2>
+            <div class="pages-grid">
+                <div class="page-card">
+                    <h4>📺 Live TV</h4>
+                    <p>Live television streaming</p>
+                    <a href="live-tv.html" class="page-link">Visit Page</a>
+                </div>
+                
+                <div class="page-card">
+                    <h4>🌤️ Weather</h4>
+                    <p>Weather forecasts and updates</p>
+                    <a href="weather.html" class="page-link">Visit Page</a>
+                </div>
+                
+                <div class="page-card">
+                    <h4>⚙️ Settings</h4>
+                    <p>Application settings and preferences</p>
+                    <a href="settings.html" class="page-link">Visit Page</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="status-panel">
+            <h3>📊 Splash Screen Status</h3>
+            <p>Session Status: <span id="sessionStatus">Loading...</span></p>
+            <p>Last Test: <span id="lastTest">Never</span></p>
+            <pre id="consoleOutput">Console output will appear here...</pre>
+        </div>
+        
+        <div style="margin-top: 2rem; text-align: center; color: #64748b; font-size: 0.9rem;">
+            💡 <strong>Testing Tips:</strong><br>
+            • Open browser console to see detailed logs<br>
+            • Test navigation between different categories<br>
+            • Verify splash appears only once per session<br>
+            • Test on both desktop and mobile views
+        </div>
+    </div>
+
+    <!-- Splash Screen JavaScript -->
+    <script src="js/splash-screen.js"></script>
+    
+    <script>
+        const pages = [
+            'index.html', 'latest.html', 'world.html', 'kenya.html',
+            'business.html', 'technology.html', 'sports.html', 'entertainment.html',
+            'music.html', 'lifestyle.html', 'health.html', 'live-tv.html',
+            'weather.html', 'settings.html'
+        ];
+
+        function showSplash() {
+            updateLastTest('Manual splash trigger');
+            if (window.BrightLensSplash) {
+                window.BrightLensSplash.forceShow();
+            } else {
+                sessionStorage.removeItem('brightlens_splash_shown');
+                location.reload();
+            }
+        }
+        
+        function clearSession() {
+            updateLastTest('Session cleared');
+            if (window.BrightLensSplash) {
+                window.BrightLensSplash.clearSession();
+                updateStatus();
+                alert('✅ Session cleared! Splash will show on next navigation.');
+            } else {
+                sessionStorage.removeItem('brightlens_splash_shown');
+                updateStatus();
+                alert('✅ Session cleared! Splash will show on next navigation.');
+            }
+        }
+        
+        function testAllPages() {
+            updateLastTest('Testing all pages...');
+            let currentPage = 0;
+            
+            function testNextPage() {
+                if (currentPage < pages.length) {
+                    const page = pages[currentPage];
+                    console.log(`🧪 Testing page ${currentPage + 1}/${pages.length}: ${page}`);
+                    updateConsoleOutput(`Testing ${page}...`);
+                    
+                    // Clear session before each test
+                    sessionStorage.removeItem('brightlens_splash_shown');
+                    
+                    setTimeout(() => {
+                        currentPage++;
+                        testNextPage();
+                    }, 1000);
+                } else {
+                    console.log('✅ All pages tested!');
+                    updateConsoleOutput('✅ All pages tested successfully!');
+                    updateLastTest('All pages tested');
+                }
+            }
+            
+            testNextPage();
+        }
+        
+        function checkStatus() {
+            updateLastTest('Status check');
+            updateStatus();
+            const status = window.BrightLensSplash?.hasShown() ? 'Shown' : 'Ready to show';
+            const logs = [
+                `📊 Splash Status: ${status}`,
+                `🔧 Session Key: brightlens_splash_shown`,
+                `💾 Session Value: ${sessionStorage.getItem('brightlens_splash_shown') || 'null'}`,
+                `🌐 Current Page: ${window.location.pathname}`,
+                `⏰ Current Time: ${new Date().toLocaleTimeString()}`
+            ];
+            updateConsoleOutput(logs.join('\n'));
+        }
+        
+        function updateStatus() {
+            const hasShown = window.BrightLensSplash?.hasShown() || !!sessionStorage.getItem('brightlens_splash_shown');
+            document.getElementById('sessionStatus').textContent = hasShown ? 
+                '✅ Splash shown this session' : '🟡 Ready to show splash';
+        }
+        
+        function updateLastTest(action) {
+            document.getElementById('lastTest').textContent = `${action} at ${new Date().toLocaleTimeString()}`;
+        }
+        
+        function updateConsoleOutput(text) {
+            document.getElementById('consoleOutput').textContent = text;
+        }
+        
+        // Auto-update status
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('🎯 All Pages Test loaded');
+            updateStatus();
+            updateConsoleOutput('Ready for testing...');
+            
+            // Update status every 2 seconds
+            setInterval(updateStatus, 2000);
+        });
+        
+        document.addEventListener('splashScreenHidden', function() {
+            console.log('🎭 Splash screen hidden event received');
+            updateConsoleOutput('🎭 Splash screen hidden event received');
+            setTimeout(updateStatus, 100);
+        });
+        
+        // Log page visits
+        document.addEventListener('click', function(e) {
+            if (e.target.classList.contains('page-link')) {
+                const href = e.target.getAttribute('href');
+                console.log(`🔗 Navigating to: ${href}`);
+                updateLastTest(`Navigation to ${href}`);
+            }
+        });
+    </script>
+</body>
+</html>

@@ -48,6 +48,13 @@ class BrightLensSplashScreen {
         this.splashElement = document.createElement('div');
         this.splashElement.className = 'splash-screen';
         
+        // Optimize for smooth animations
+        this.splashElement.style.cssText += `
+            will-change: opacity, transform;
+            backface-visibility: hidden;
+            -webkit-backface-visibility: hidden;
+        `;
+        
         // Create splash content
         this.splashElement.innerHTML = `
             <div class="splash-decoration"></div>
@@ -63,11 +70,14 @@ class BrightLensSplashScreen {
             </div>
         `;
 
-        // Add to DOM
+        // Add to DOM with smooth entry
         document.body.appendChild(this.splashElement);
         
         // Prevent scrolling while splash is visible
         document.body.style.overflow = 'hidden';
+        
+        // Force a reflow to ensure smooth animation start
+        this.splashElement.offsetHeight;
         
         console.log('✨ Splash screen created and displayed');
     }
@@ -86,8 +96,14 @@ class BrightLensSplashScreen {
         
         console.log('🎭 Hiding splash screen with fade-out effect');
         
-        // Add hidden class for smooth fade-out
-        this.splashElement.classList.add('hidden');
+        // Prepare for smooth fade-out
+        this.splashElement.style.willChange = 'opacity, transform';
+        
+        // Use requestAnimationFrame for smooth animation
+        requestAnimationFrame(() => {
+            // Add hidden class for smooth fade-out
+            this.splashElement.classList.add('hidden');
+        });
         
         // Remove splash screen from DOM after transition
         setTimeout(() => {
@@ -100,6 +116,8 @@ class BrightLensSplashScreen {
         
         try {
             if (this.splashElement && this.splashElement.parentNode) {
+                // Clean up will-change property before removal
+                this.splashElement.style.willChange = 'auto';
                 this.splashElement.parentNode.removeChild(this.splashElement);
             }
             
@@ -182,13 +200,21 @@ class PageNavigationManager {
         if (currentPath !== targetPath) {
             console.log(`🌊 Navigating with splash to: ${url}`);
             
-            // Create and show splash screen
-            const splash = new BrightLensSplashScreen();
+            // Clear session to show splash on navigation
+            sessionStorage.removeItem('brightlens_splash_shown');
             
-            // Navigate after a brief delay to ensure splash shows
-            setTimeout(() => {
-                window.location.href = url;
-            }, 100);
+            // Use requestAnimationFrame for smooth navigation
+            requestAnimationFrame(() => {
+                // Create and show splash screen
+                const splash = new BrightLensSplashScreen();
+                
+                // Navigate after ensuring splash is rendered
+                requestAnimationFrame(() => {
+                    setTimeout(() => {
+                        window.location.href = url;
+                    }, 200); // Slight delay for smooth transition
+                });
+            });
         } else {
             // Same page, navigate directly
             window.location.href = url;
