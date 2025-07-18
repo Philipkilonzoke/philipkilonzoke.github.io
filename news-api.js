@@ -14,6 +14,20 @@ class NewsAPI {
             currentsapi: '9tI-4kOmMlJdgcosDUBsYYZDAnkLnuuL4Hrgc5TKlHmN_AMH'
         };
 
+        // OPTIMIZED cache configuration for ultra-fast loading
+        this.cache = new Map();
+        this.cacheTimeout = 90000; // 1.5 minutes for balance of freshness and speed
+        this.maxCacheSize = 50; // Increased cache size for better hit rate
+        
+        // Performance monitoring
+        this.performanceMetrics = {
+            totalRequests: 0,
+            cacheHits: 0,
+            averageLoadTime: 0,
+            fastestLoadTime: Infinity,
+            slowestLoadTime: 0
+        };
+
         // CORS proxy services
         this.corsProxies = [
             'https://api.allorigins.win/raw?url=',
@@ -34,131 +48,298 @@ class NewsAPI {
             'entertainment': ['entertainment', 'movies', 'celebrities', 'shows', 'awards', 'cinema'],
             'music': ['music', 'artist', 'album', 'concert', 'song', 'musician', 'band', 'recording']
         };
-
-        this.cache = new Map();
-        this.cacheTimeout = 3 * 60 * 1000; // 3 minutes for fresh content
+        
+        // Preload critical categories for instant access
+        this.preloadCriticalCategories();
+        
+        // Performance monitoring interval
+        setInterval(() => {
+            this.logPerformanceMetrics();
+        }, 30000); // Log every 30 seconds
+    }
+    
+    /**
+     * Preload critical categories for instant loading
+     */
+    async preloadCriticalCategories() {
+        const criticalCategories = ['latest', 'sports', 'world'];
+        
+        console.log('🚀 Preloading critical categories...');
+        
+        criticalCategories.forEach(async (category) => {
+            try {
+                // Preload in background without blocking
+                setTimeout(async () => {
+                    await this.fetchNewsNoCache(category, 20);
+                    console.log(`✅ Preloaded ${category} category`);
+                }, Math.random() * 2000); // Stagger requests
+            } catch (error) {
+                console.warn(`⚠️ Failed to preload ${category}:`, error.message);
+            }
+        });
+    }
+    
+    /**
+     * Log performance metrics for monitoring
+     */
+    logPerformanceMetrics() {
+        const metrics = this.performanceMetrics;
+        const cacheHitRate = metrics.totalRequests > 0 ? 
+            ((metrics.cacheHits / metrics.totalRequests) * 100).toFixed(1) : 0;
+        
+        console.log(`📊 PERFORMANCE METRICS:
+        📈 Cache Hit Rate: ${cacheHitRate}%
+        ⚡ Avg Load Time: ${metrics.averageLoadTime.toFixed(2)}ms
+        🚀 Fastest Load: ${metrics.fastestLoadTime === Infinity ? 'N/A' : metrics.fastestLoadTime.toFixed(2)}ms
+        🐌 Slowest Load: ${metrics.slowestLoadTime.toFixed(2)}ms
+        📊 Total Requests: ${metrics.totalRequests}
+        💾 Cache Size: ${this.cache.size}/${this.maxCacheSize}`);
+    }
+    
+    /**
+     * Enhanced cache management with automatic cleanup
+     */
+    manageCacheSize() {
+        if (this.cache.size >= this.maxCacheSize) {
+            // Remove oldest entries
+            const entries = Array.from(this.cache.entries())
+                .sort((a, b) => a[1].timestamp - b[1].timestamp);
+            
+            const entriesToRemove = entries.slice(0, Math.floor(this.maxCacheSize / 4));
+            entriesToRemove.forEach(([key]) => {
+                this.cache.delete(key);
+            });
+            
+            console.log(`🧹 Cache cleanup: Removed ${entriesToRemove.length} old entries`);
+        }
+    }
+    
+    /**
+     * Update performance metrics
+     */
+    updatePerformanceMetrics(loadTime, wasCacheHit) {
+        const metrics = this.performanceMetrics;
+        
+        metrics.totalRequests++;
+        if (wasCacheHit) {
+            metrics.cacheHits++;
+        }
+        
+        if (!wasCacheHit) {
+            metrics.averageLoadTime = (metrics.averageLoadTime * (metrics.totalRequests - 1) + loadTime) / metrics.totalRequests;
+            metrics.fastestLoadTime = Math.min(metrics.fastestLoadTime, loadTime);
+            metrics.slowestLoadTime = Math.max(metrics.slowestLoadTime, loadTime);
+        }
     }
 
     /**
-     * Make CORS-enabled API request using proxy
+     * ULTRA-FAST CORS proxy with optimized fallback chain
      */
     async corsProxyFetch(url, options = {}) {
-        for (let i = 0; i < this.corsProxies.length; i++) {
+        // Try direct request first for fastest response
+        try {
+            const response = await fetch(url, {
+                ...options,
+                headers: {
+                    ...options.headers,
+                    'User-Agent': 'BrightlensNews/1.0'
+                }
+            });
+            
+            if (response.ok) {
+                return response;
+            }
+        } catch (error) {
+            console.log('Direct request failed, trying proxies...');
+        }
+        
+        // Fast proxy fallback with timeout
+        const fastProxies = [
+            'https://api.allorigins.win/raw?url=',
+            'https://corsproxy.io/?'
+        ];
+        
+        for (let i = 0; i < fastProxies.length; i++) {
             try {
-                const proxyUrl = this.corsProxies[i] + encodeURIComponent(url);
-                const response = await this.corsProxyFetch(proxyUrl, {
-                    ...options,
-                    headers: {
-                        ...options.headers,
-                        'User-Agent': 'BrightlensNews/1.0'
-                    }
-                });
+                const proxyUrl = fastProxies[i] + encodeURIComponent(url);
+                const response = await Promise.race([
+                    fetch(proxyUrl, {
+                        ...options,
+                        headers: {
+                            ...options.headers,
+                            'User-Agent': 'BrightlensNews/1.0'
+                        }
+                    }),
+                    new Promise((_, reject) => 
+                        setTimeout(() => reject(new Error('Proxy timeout')), 2000)
+                    )
+                ]);
                 
                 if (response.ok) {
                     return response;
                 }
-                
-                // If this proxy fails, try the next one
-                console.warn(`CORS proxy ${i + 1} failed, trying next...`);
-                continue;
             } catch (error) {
-                console.warn(`CORS proxy ${i + 1} error:`, error.message);
+                console.warn(`Proxy ${i + 1} failed:`, error.message);
                 continue;
             }
         }
         
-        // If all proxies fail, try direct request as last resort
-        try {
-            return await this.corsProxyFetch(url, options);
-        } catch (error) {
-            throw new Error(`All CORS proxies failed and direct request failed: ${error.message}`);
+        throw new Error('All requests failed');
+    }
+    
+    /**
+     * Create image hash for duplicate detection
+     */
+    createImageHash(imageUrl) {
+        if (!imageUrl || imageUrl === 'null' || imageUrl === 'undefined') return null;
+        
+        // Normalize image URL by removing parameters and fragments
+        const normalizedUrl = imageUrl.toLowerCase()
+            .replace(/[?&](w|h|width|height|q|quality|format|crop|resize)[^&]*&?/g, '')
+            .replace(/[?&#].*$/, '')
+            .replace(/\/$/, '');
+        
+        // Create simple hash from normalized URL
+        let hash = 0;
+        for (let i = 0; i < normalizedUrl.length; i++) {
+            const char = normalizedUrl.charCodeAt(i);
+            hash = ((hash << 5) - hash) + char;
+            hash = hash & hash; // Convert to 32-bit integer
         }
+        
+        return hash.toString();
     }
 
     /**
-     * Fetch news for a specific category from all APIs with performance monitoring
+     * ULTRA-FAST news fetching with parallel processing and aggressive caching
      */
     async fetchNews(category, limit = 30) {
         const startTime = performance.now();
         const cacheKey = `${category}_${limit}`;
         
-        // Check cache first
+        // Check cache first with aggressive caching
         if (this.cache.has(cacheKey)) {
             const cached = this.cache.get(cacheKey);
+            // Reduced cache timeout for fresher content but faster loading
             if (Date.now() - cached.timestamp < this.cacheTimeout) {
-                console.log(`Cache hit for ${category}: ${(performance.now() - startTime).toFixed(2)}ms`);
+                const loadTime = performance.now() - startTime;
+                this.updatePerformanceMetrics(loadTime, true);
+                console.log(`⚡ CACHE HIT for ${category}: ${loadTime.toFixed(2)}ms`);
                 return cached.data;
             }
         }
 
         try {
-            console.log(`Fetching real-time ${category} news from all APIs...`);
+            console.log(`⚡ ULTRA-FAST fetching ${category} news from multiple APIs...`);
             
             // Get category-specific keywords
             const categoryKeywords = this.categoryMappings[category] || [category];
             
-            // Fetch from all APIs + additional real-time sources in parallel
-            const promises = [
-                // Main API sources with your keys
-                this.fetchFromGNews(category, categoryKeywords, limit),
-                this.fetchFromNewsData(category, categoryKeywords, limit),
-                this.fetchFromNewsAPI(category, categoryKeywords, limit),
-                this.fetchFromMediastack(category, categoryKeywords, limit),
-                this.fetchFromCurrentsAPI(category, categoryKeywords, limit),
+            // PARALLEL PROCESSING: All APIs called simultaneously with reduced timeouts
+            const apiPromises = [
+                this.fetchWithTimeout(
+                    this.fetchFromGNews(category, categoryKeywords, Math.min(limit, 8)),
+                    3000, 'GNews'
+                ),
+                this.fetchWithTimeout(
+                    this.fetchFromNewsData(category, categoryKeywords, Math.min(limit, 8)),
+                    3000, 'NewsData'
+                ),
+                this.fetchWithTimeout(
+                    this.fetchFromNewsAPI(category, categoryKeywords, Math.min(limit, 10)),
+                    3000, 'NewsAPI'
+                ),
+                this.fetchWithTimeout(
+                    this.fetchFromMediastack(category, categoryKeywords, Math.min(limit, 8)),
+                    3000, 'Mediastack'
+                ),
+                this.fetchWithTimeout(
+                    this.fetchFromCurrentsAPI(category, categoryKeywords, Math.min(limit, 8)),
+                    3000, 'CurrentsAPI'
+                ),
                 
-                // Additional real-time sources for more articles
-                this.fetchFromBBC(category, categoryKeywords),
-                this.fetchFromReuters(category, categoryKeywords),
-                this.fetchFromCNN(category, categoryKeywords),
-                this.fetchFromGuardian(category, categoryKeywords),
-                this.fetchFromAP(category, categoryKeywords),
-                this.fetchFromCategorySpecificSources(category, categoryKeywords)
+                // Faster RSS feeds for immediate content
+                this.fetchWithTimeout(
+                    this.fetchFromBBC(category, categoryKeywords),
+                    2000, 'BBC'
+                ),
+                this.fetchWithTimeout(
+                    this.fetchFromReuters(category, categoryKeywords),
+                    2000, 'Reuters'
+                ),
+                this.fetchWithTimeout(
+                    this.fetchFromCNN(category, categoryKeywords),
+                    2000, 'CNN'
+                )
             ];
 
-            const results = await Promise.allSettled(promises);
+            // Wait for ALL APIs with aggressive timeout
+            const results = await Promise.allSettled(apiPromises);
             
-            // Combine results from all APIs
+            // ULTRA-FAST processing: Combine and process articles immediately
             let allArticles = [];
             let successfulAPIs = 0;
+            const apiNames = ['GNews', 'NewsData', 'NewsAPI', 'Mediastack', 'CurrentsAPI', 'BBC', 'Reuters', 'CNN'];
             
             results.forEach((result, index) => {
-                const apiNames = ['GNews', 'NewsData', 'NewsAPI', 'Mediastack', 'CurrentsAPI'];
                 if (result.status === 'fulfilled' && result.value && Array.isArray(result.value)) {
                     allArticles = allArticles.concat(result.value);
                     successfulAPIs++;
-                    console.log(`✓ ${apiNames[index]}: ${result.value.length} articles`);
+                    console.log(`✅ ${apiNames[index]}: ${result.value.length} articles`);
                 } else {
-                    console.warn(`✗ ${apiNames[index]} failed:`, result.reason?.message || 'Unknown error');
+                    console.warn(`⚠️ ${apiNames[index]} failed:`, result.reason?.message || 'Timeout/Error');
                 }
             });
 
-            console.log(`Fetched from ${successfulAPIs}/${results.length} sources for ${category}`);
+            console.log(`⚡ PARALLEL FETCH: ${successfulAPIs}/${results.length} APIs succeeded`);
 
-            // Enhanced duplicate removal and sorting
-            const uniqueArticles = this.removeDuplicates(allArticles);
+            // OPTIMIZED duplicate removal with performance monitoring
+            const filterStartTime = performance.now();
+            const uniqueArticles = this.removeDuplicatesFast(allArticles);
+            const filterTime = (performance.now() - filterStartTime).toFixed(2);
+            console.log(`⚡ FAST filtering completed: ${filterTime}ms`);
+            
+            // Fast category filtering
             const categoryFilteredArticles = this.filterByCategory(uniqueArticles, category, categoryKeywords);
-            const sortedArticles = categoryFilteredArticles.sort((a, b) => 
-                new Date(b.publishedAt) - new Date(a.publishedAt)
-            );
+            
+            // Sort by recency (most important articles first)
+            const sortedArticles = categoryFilteredArticles
+                .sort((a, b) => new Date(b.publishedAt) - new Date(a.publishedAt))
+                .slice(0, limit); // Limit results for faster processing
 
-            // Cache the results
+            // AGGRESSIVE caching with background refresh and cache management
+            this.manageCacheSize();
             this.cache.set(cacheKey, {
                 data: sortedArticles,
                 timestamp: Date.now()
             });
+            
+            // Background refresh for next request
+            setTimeout(() => {
+                this.backgroundRefresh(category, limit);
+            }, 30000); // Refresh in 30 seconds
 
-            const totalTime = (performance.now() - startTime).toFixed(2);
-            console.log(`${category} fetch completed: ${totalTime}ms - ${sortedArticles.length} unique articles`);
+            const totalTime = (performance.now() - startTime);
+            this.updatePerformanceMetrics(totalTime, false);
+            console.log(`🚀 ULTRA-FAST ${category} fetch: ${totalTime.toFixed(2)}ms - ${sortedArticles.length} articles`);
 
             return sortedArticles;
         } catch (error) {
-            console.error(`Error fetching ${category} news:`, error);
-            const totalTime = (performance.now() - startTime).toFixed(2);
-            console.log(`${category} fetch failed after: ${totalTime}ms`);
-            return []; // Return empty array instead of sample articles
+            console.error(`❌ FAST fetch failed for ${category}:`, error);
+            const totalTime = (performance.now() - startTime);
+            this.updatePerformanceMetrics(totalTime, false);
+            console.log(`⚠️ ${category} fetch failed after: ${totalTime.toFixed(2)}ms`);
+            
+            // Return cached data if available, even if expired
+            if (this.cache.has(cacheKey)) {
+                console.log('📦 Returning expired cache as fallback');
+                return this.cache.get(cacheKey).data;
+            }
+            
+            return [];
         }
     }
-
+    
     /**
      * Fetch from GNews API with category-specific queries
      */
@@ -398,7 +579,7 @@ class NewsAPI {
     }
 
     /**
-     * ULTRA-ENHANCED duplicate removal - ZERO duplicates guaranteed
+     * ULTRA-ENHANCED duplicate removal - ZERO duplicates guaranteed with image-based detection
      */
     removeDuplicates(articles) {
         if (!articles || articles.length === 0) return [];
@@ -408,19 +589,23 @@ class NewsAPI {
         const seenTitles = new Set();
         const seenContent = new Set();
         const seenImages = new Set();
+        const seenImageHashes = new Set();
+        const titleTokens = new Map(); // Store tokenized titles for advanced comparison
         
         articles.forEach(article => {
             // Skip invalid articles
             if (!article.title || !article.url || 
                 article.title.trim().length < 10 || 
                 article.url.includes('example.com') ||
-                article.url.includes('placeholder')) {
+                article.url.includes('placeholder') ||
+                article.title.toLowerCase().includes('sample') ||
+                article.title.toLowerCase().includes('test article')) {
                 return;
             }
             
             // Normalize URL - remove all tracking parameters and fragments
             let normalizedUrl = article.url.toLowerCase().trim()
-                .replace(/[?&](utm_|fbclid|gclid|ref|source|medium|campaign)[^&]*&?/g, '')
+                .replace(/[?&](utm_|fbclid|gclid|ref|source|medium|campaign|si|feature)[^&]*&?/g, '')
                 .replace(/[?&#].*$/, '')
                 .replace(/\/$/, '');
             
@@ -428,11 +613,18 @@ class NewsAPI {
             const normalizedTitle = article.title.toLowerCase()
                 .replace(/[^\w\s]/g, ' ')
                 .replace(/\s+/g, ' ')
-                .trim()
-                .substring(0, 50); // First 50 chars for comparison
+                .trim();
             
-            // Create content fingerprint
-            const contentFingerprint = this.createContentFingerprint(article);
+            // Create enhanced content fingerprint
+            const contentFingerprint = this.createAdvancedContentFingerprint(article);
+            
+            // Create image hash for duplicate image detection
+            const imageHash = this.createImageHash(article.urlToImage);
+            
+            // Tokenize title for advanced similarity detection
+            const titleWords = normalizedTitle.split(' ').filter(word => 
+                word.length > 2 && !['the', 'and', 'or', 'but', 'in', 'on', 'at', 'to', 'for', 'of', 'with', 'by'].includes(word)
+            );
             
             // Multiple duplicate checks
             if (seenUrls.has(normalizedUrl)) {
@@ -450,50 +642,310 @@ class NewsAPI {
                 return;
             }
             
-            // Check for similar titles with higher precision
+            // NEW: Image-based duplicate detection
+            if (imageHash && seenImageHashes.has(imageHash)) {
+                console.log(`🔄 Duplicate image filtered: ${article.title}`);
+                return;
+            }
+            
+            // Advanced similarity check using title tokens
             let isSimilar = false;
-            for (const existingTitle of seenTitles) {
-                if (this.calculateAdvancedSimilarity(normalizedTitle, existingTitle) > 0.80) {
-                    console.log(`🔄 Similar title filtered: ${article.title}`);
-                    isSimilar = true;
-                    break;
+            for (const [existingTokens, existingArticle] of titleTokens.entries()) {
+                const similarity = this.calculateAdvancedTokenSimilarity(titleWords, existingTokens);
+                
+                // Extra strict similarity for sports content
+                const similarityThreshold = article.category === 'sports' ? 0.65 : 0.75;
+                
+                if (similarity > similarityThreshold) {
+                    console.log(`🔄 Similar content filtered (${(similarity * 100).toFixed(1)}% similar): ${article.title}`);
+                    
+                    // Keep the article from more authoritative source or more recent
+                    const currentSourceScore = this.getSourceAuthorityScore(article.source);
+                    const existingSourceScore = this.getSourceAuthorityScore(existingArticle.source);
+                    
+                    if (currentSourceScore > existingSourceScore || 
+                        (currentSourceScore === existingSourceScore && 
+                         new Date(article.publishedAt) > new Date(existingArticle.publishedAt))) {
+                        // Remove existing and continue with current
+                        titleTokens.delete(existingTokens);
+                        const existingIndex = filtered.findIndex(a => a.url === existingArticle.url);
+                        if (existingIndex > -1) {
+                            filtered.splice(existingIndex, 1);
+                            console.log(`🔄 Replaced lower quality duplicate: ${existingArticle.title}`);
+                        }
+                        break;
+                    } else {
+                        isSimilar = true;
+                        break;
+                    }
+                }
+            }
+            
+            // Special sports content validation for sports category
+            if (article.category === 'sports') {
+                if (!this.isValidSportsContent(article)) {
+                    console.log(`🔄 Invalid sports content filtered: ${article.title}`);
+                    return;
+                }
+                
+                // Extra sports duplicate check - check for similar sports events
+                if (this.isDuplicateSportsEvent(article, filtered)) {
+                    console.log(`🔄 Duplicate sports event filtered: ${article.title}`);
+                    return;
                 }
             }
             
             if (!isSimilar) {
-                // Validate and enhance image URL
+                // Validate and enhance image URL for high quality
                 article.urlToImage = this.validateAndEnhanceImageUrl(article.urlToImage);
                 
+                // Store for duplicate detection
                 seenUrls.add(normalizedUrl);
                 seenTitles.add(normalizedTitle);
                 seenContent.add(contentFingerprint);
+                if (imageHash) seenImageHashes.add(imageHash);
+                titleTokens.set(titleWords, article);
+                
                 filtered.push(article);
             }
         });
         
-        console.log(`🔥 ZERO-DUPLICATE FILTERING: ${articles.length} → ${filtered.length} articles (${articles.length - filtered.length} duplicates removed)`);
+        console.log(`🔥 ULTRA-STRICT FILTERING: ${articles.length} → ${filtered.length} articles (${articles.length - filtered.length} duplicates/invalid removed)`);
         return filtered;
     }
     
     /**
-     * Create unique content fingerprint for advanced duplicate detection
+     * OPTIMIZED duplicate removal for speed
      */
-    createContentFingerprint(article) {
+    removeDuplicatesFast(articles) {
+        if (!articles || articles.length === 0) return [];
+        
+        const seenUrls = new Set();
+        const seenTitleHashes = new Set();
+        const filtered = [];
+        
+        for (const article of articles) {
+            // Skip invalid articles quickly
+            if (!article.title || !article.url || article.title.length < 10) continue;
+            
+            // Fast URL normalization
+            const normalizedUrl = article.url.toLowerCase()
+                .replace(/[?&](utm_|fbclid|gclid|ref|source|medium|campaign)[^&]*&?/g, '')
+                .replace(/[?&#].*$/, '');
+            
+            if (seenUrls.has(normalizedUrl)) continue;
+            
+            // Fast title hash for duplicate detection
+            const titleHash = this.fastHash(article.title.toLowerCase().replace(/[^\w\s]/g, ''));
+            if (seenTitleHashes.has(titleHash)) continue;
+            
+            // Quick image validation and enhancement
+            article.urlToImage = this.validateAndEnhanceImageUrl(article.urlToImage);
+            
+            seenUrls.add(normalizedUrl);
+            seenTitleHashes.add(titleHash);
+            filtered.push(article);
+        }
+        
+        return filtered;
+    }
+    
+    /**
+     * Fast hash function for title comparison
+     */
+    fastHash(str) {
+        let hash = 0;
+        for (let i = 0; i < str.length; i++) {
+            const char = str.charCodeAt(i);
+            hash = ((hash << 5) - hash) + char;
+            hash = hash & hash; // Convert to 32-bit integer
+        }
+        return hash;
+    }
+    
+    /**
+     * Check for duplicate sports events (same game/match reported multiple times)
+     */
+    isDuplicateSportsEvent(article, existingArticles) {
+        const title = article.title.toLowerCase();
+        
+        // Extract team names and scores if present
+        const teamMatches = title.match(/(\w+)\s+(?:vs?\.?|v\.?|against|beat|defeat)\s+(\w+)/g);
+        const scoreMatches = title.match(/\d+[-–]\d+|\d+\s*-\s*\d+/g);
+        
+        if (!teamMatches && !scoreMatches) return false;
+        
+        // Check against existing sports articles
+        for (const existing of existingArticles.filter(a => a.category === 'sports')) {
+            const existingTitle = existing.title.toLowerCase();
+            
+            // Check for same team matchup
+            if (teamMatches) {
+                for (const match of teamMatches) {
+                    if (existingTitle.includes(match.toLowerCase()) || 
+                        this.containsReversedTeams(match, existingTitle)) {
+                        return true;
+                    }
+                }
+            }
+            
+            // Check for same score
+            if (scoreMatches) {
+                for (const score of scoreMatches) {
+                    if (existingTitle.includes(score)) {
+                        return true;
+                    }
+                }
+            }
+            
+            // Check for similar sports event keywords within 24 hours
+            const timeDiff = Math.abs(new Date(article.publishedAt) - new Date(existing.publishedAt));
+            if (timeDiff < 24 * 60 * 60 * 1000) { // Within 24 hours
+                const commonSportsTerms = ['final', 'championship', 'playoff', 'semifinal', 'quarter', 'league'];
+                const titleTerms = commonSportsTerms.filter(term => title.includes(term));
+                const existingTerms = commonSportsTerms.filter(term => existingTitle.includes(term));
+                
+                if (titleTerms.length > 0 && titleTerms.some(term => existingTerms.includes(term))) {
+                    // Check if they're about the same league/competition
+                    const competitions = ['premier league', 'champions league', 'nfl', 'nba', 'mlb', 'nhl', 'la liga', 'serie a'];
+                    const titleCompetitions = competitions.filter(comp => title.includes(comp));
+                    const existingCompetitions = competitions.filter(comp => existingTitle.includes(comp));
+                    
+                    if (titleCompetitions.length > 0 && 
+                        titleCompetitions.some(comp => existingCompetitions.includes(comp))) {
+                        return true;
+                    }
+                }
+            }
+        }
+        
+        return false;
+    }
+    
+    /**
+     * Check if teams are mentioned in reverse order
+     */
+    containsReversedTeams(match, title) {
+        const teamMatch = match.match(/(\w+)\s+(?:vs?\.?|v\.?|against|beat|defeat)\s+(\w+)/);
+        if (!teamMatch) return false;
+        
+        const team1 = teamMatch[1];
+        const team2 = teamMatch[2];
+        
+        // Check for reversed team order
+        const reversedPattern = new RegExp(`${team2}\\s+(?:vs?\\.?|v\\.?|against|beat|defeat)\\s+${team1}`, 'i');
+        return reversedPattern.test(title);
+    }
+
+    /**
+     * Create advanced content fingerprint for duplicate detection
+     */
+    createAdvancedContentFingerprint(article) {
         const titleWords = (article.title || '').toLowerCase()
             .replace(/[^\w\s]/g, ' ')
             .split(' ')
-            .filter(word => word.length > 3)
-            .slice(0, 10)
+            .filter(word => word.length > 3 && !['news', 'breaking', 'update', 'report'].includes(word))
+            .slice(0, 12)
             .sort();
             
         const descWords = (article.description || '').toLowerCase()
             .replace(/[^\w\s]/g, ' ')
             .split(' ')
             .filter(word => word.length > 4)
-            .slice(0, 8)
+            .slice(0, 10)
             .sort();
-            
-        return `${titleWords.join('|')}::${descWords.join('|')}`;
+        
+        const sourceFingerprint = (article.source || '').toLowerCase().replace(/[^\w]/g, '');
+        
+        return `${titleWords.join('|')}::${descWords.join('|')}::${sourceFingerprint}`;
+    }
+    
+    /**
+     * Calculate advanced token-based similarity
+     */
+    calculateAdvancedTokenSimilarity(tokens1, tokens2) {
+        if (tokens1.length === 0 || tokens2.length === 0) return 0;
+        
+        const set1 = new Set(tokens1);
+        const set2 = new Set(tokens2);
+        const intersection = new Set([...set1].filter(x => set2.has(x)));
+        const union = new Set([...set1, ...set2]);
+        
+        // Jaccard similarity with length penalty for very different sized titles
+        const jaccard = intersection.size / union.size;
+        const lengthPenalty = Math.abs(tokens1.length - tokens2.length) / Math.max(tokens1.length, tokens2.length);
+        
+        return jaccard * (1 - lengthPenalty * 0.3);
+    }
+    
+    /**
+     * Validate sports content authenticity
+     */
+    isValidSportsContent(article) {
+        const text = `${article.title} ${article.description || ''}`.toLowerCase();
+        
+        // Must contain sports-related keywords
+        const sportsKeywords = [
+            'game', 'match', 'score', 'team', 'player', 'win', 'loss', 'championship',
+            'league', 'tournament', 'season', 'coach', 'athlete', 'sport', 'play',
+            'goal', 'point', 'victory', 'defeat', 'competition', 'olympic', 'final'
+        ];
+        
+        const hasValidSportsKeywords = sportsKeywords.some(keyword => text.includes(keyword));
+        
+        // Should not contain non-sports content indicators
+        const invalidKeywords = [
+            'politics', 'election', 'government', 'policy', 'bitcoin', 'crypto',
+            'stock market', 'economy', 'business deal', 'merger', 'acquisition',
+            'movie', 'film', 'album', 'song', 'concert', 'celebrity gossip'
+        ];
+        
+        const hasInvalidContent = invalidKeywords.some(keyword => text.includes(keyword));
+        
+        return hasValidSportsKeywords && !hasInvalidContent;
+    }
+    
+    /**
+     * Get enhanced source authority scores for sports
+     */
+    getSourceAuthorityScore(source) {
+        if (!source) return 1;
+        
+        const sourceStr = source.toLowerCase();
+        const sportsSourceScores = {
+            'espn': 10,
+            'bbc sport': 10,
+            'sky sports': 9,
+            'reuters': 9,
+            'associated press': 9,
+            'ap news': 9,
+            'fox sports': 8,
+            'cbs sports': 8,
+            'nbc sports': 8,
+            'the athletic': 8,
+            'bleacher report': 7,
+            'sports illustrated': 7,
+            'yahoo sports': 6,
+            'cnn': 6,
+            'bbc': 6,
+            'guardian': 6,
+            'independent': 5,
+            'daily mail': 4,
+            'goal.com': 7,
+            'uefa.com': 9,
+            'fifa.com': 9,
+            'nfl.com': 9,
+            'nba.com': 9,
+            'mlb.com': 9
+        };
+        
+        for (const [source_name, score] of Object.entries(sportsSourceScores)) {
+            if (sourceStr.includes(source_name)) {
+                return score;
+            }
+        }
+        
+        return 3; // Default score for unknown sources
     }
     
     /**
@@ -534,7 +986,7 @@ class NewsAPI {
     }
     
     /**
-     * Validate and enhance image URLs - NO broken images
+     * ENHANCED: Validate and optimize image URLs for high quality and fast loading
      */
     validateAndEnhanceImageUrl(imageUrl) {
         if (!imageUrl || 
@@ -551,9 +1003,41 @@ class NewsAPI {
             imageUrl = imageUrl.replace('http://', 'https://');
         }
         
-        // Add image optimization parameters where possible
+        // Enhanced image optimization parameters for different services
         if (imageUrl.includes('unsplash.com')) {
-            imageUrl = imageUrl.includes('?') ? imageUrl + '&w=400&q=80' : imageUrl + '?w=400&q=80';
+            // High quality Unsplash optimization
+            imageUrl = imageUrl.includes('?') ? 
+                imageUrl + '&w=800&h=450&q=85&fit=crop&crop=entropy&auto=format' : 
+                imageUrl + '?w=800&h=450&q=85&fit=crop&crop=entropy&auto=format';
+        }
+        else if (imageUrl.includes('cloudinary.com')) {
+            // Cloudinary optimization
+            imageUrl = imageUrl.replace('/upload/', '/upload/c_fill,w_800,h_450,q_85,f_auto/');
+        }
+        else if (imageUrl.includes('amazonaws.com') || imageUrl.includes('s3.')) {
+            // AWS S3 optimization (if using image processing service)
+            imageUrl += imageUrl.includes('?') ? '&w=800&h=450&q=85' : '?w=800&h=450&q=85';
+        }
+        else if (imageUrl.includes('googleusercontent.com')) {
+            // Google Images optimization
+            imageUrl += imageUrl.includes('=') ? '-w800-h450-c' : '=w800-h450-c';
+        }
+        else if (imageUrl.includes('wp.com') || imageUrl.includes('wordpress.com')) {
+            // WordPress.com image optimization
+            imageUrl += imageUrl.includes('?') ? '&w=800&h=450&quality=85' : '?w=800&h=450&quality=85';
+        }
+        else if (imageUrl.includes('imgur.com')) {
+            // Imgur optimization
+            imageUrl = imageUrl.replace(/\.(jpg|jpeg|png|gif)$/, 'h.$1');
+        }
+        else if (imageUrl.includes('cdn.')) {
+            // Generic CDN optimization
+            imageUrl += imageUrl.includes('?') ? '&w=800&h=450&q=85' : '?w=800&h=450&q=85';
+        }
+        
+        // For other image services, try adding standard optimization parameters
+        else if (!imageUrl.includes('?')) {
+            imageUrl += '?w=800&h=450&q=85&format=auto';
         }
         
         return imageUrl;
@@ -1208,6 +1692,73 @@ class NewsAPI {
             }
         }
         return articles;
+    }
+
+    /**
+     * Background refresh for proactive caching
+     */
+    async backgroundRefresh(category, limit) {
+        try {
+            console.log(`🔄 Background refresh for ${category}...`);
+            // Fetch fresh data in background
+            const fresh = await this.fetchNewsNoCache(category, limit);
+            if (fresh && fresh.length > 0) {
+                const cacheKey = `${category}_${limit}`;
+                this.cache.set(cacheKey, {
+                    data: fresh,
+                    timestamp: Date.now()
+                });
+                console.log(`✅ Background refresh completed for ${category}`);
+            }
+        } catch (error) {
+            console.warn(`⚠️ Background refresh failed for ${category}:`, error.message);
+        }
+    }
+    
+    /**
+     * Fetch news without cache (for background refresh)
+     */
+    async fetchNewsNoCache(category, limit) {
+        const categoryKeywords = this.categoryMappings[category] || [category];
+        
+        const promises = [
+            this.fetchFromGNews(category, categoryKeywords, 5),
+            this.fetchFromNewsAPI(category, categoryKeywords, 5),
+            this.fetchFromBBC(category, categoryKeywords)
+        ];
+
+        const results = await Promise.allSettled(promises);
+        let articles = [];
+        
+        results.forEach(result => {
+            if (result.status === 'fulfilled' && result.value) {
+                articles = articles.concat(result.value);
+            }
+        });
+
+        return this.removeDuplicatesFast(articles).slice(0, limit);
+    }
+    
+    /**
+     * ULTRA-FAST timeout wrapper with performance monitoring
+     */
+    async fetchWithTimeout(promise, timeoutMs, apiName) {
+        const startTime = performance.now();
+        
+        return Promise.race([
+            promise.then(result => {
+                const elapsed = (performance.now() - startTime).toFixed(2);
+                console.log(`⚡ ${apiName} completed: ${elapsed}ms`);
+                return result;
+            }),
+            new Promise((_, reject) => 
+                setTimeout(() => {
+                    const elapsed = (performance.now() - startTime).toFixed(2);
+                    console.warn(`⏱️ ${apiName} timeout: ${elapsed}ms`);
+                    reject(new Error(`${apiName} timeout after ${timeoutMs}ms`));
+                }, timeoutMs)
+            )
+        ]);
     }
 
     /**

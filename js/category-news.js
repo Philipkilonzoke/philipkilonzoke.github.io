@@ -430,54 +430,238 @@ class CategoryNews {
     }
 
     async loadNews() {
-        if (this.isLoading) return;
+        this.showNewsLoading();
+        this.hideNewsError();
         
         this.isLoading = true;
-        this.showNewsLoading();
         
         try {
-            console.log(`Loading ${this.category} news...`);
-            // Request more articles for sports category for comprehensive coverage
-            const articleLimit = this.category === 'sports' ? 250 : 50;
-            const articles = await this.newsAPI.fetchNews(this.category, articleLimit);
+            const startTime = performance.now();
+            console.log(`⚡ FAST loading ${this.category} news...`);
+            
+            // Optimized article limits for faster processing
+            const limit = this.category === 'sports' ? 40 : 25;
+            
+            // ULTRA-FAST parallel loading
+            const articles = await this.newsAPI.fetchNews(this.category, limit);
             
             if (articles && articles.length > 0) {
-                this.allArticles = articles;
-                this.renderNews();
-                this.updateArticleCount();
-                this.updateLastUpdated();
-                this.showNewsGrid();
-                console.log(`${this.category} news loaded successfully:`, articles.length, 'articles');
+                // Immediate rendering without waiting for all processing
+                if (this.category === 'sports') {
+                    // FAST sports filtering
+                    this.allArticles = this.filterSportsArticlesFast(articles);
+                } else {
+                    this.allArticles = articles; // Skip extra processing for speed
+                }
+                
+                // Fast display with immediate rendering
+                this.displayedArticles = this.allArticles.slice(0, this.articlesPerPage);
+                
+                // Render immediately for instant display
+                this.renderNewsFast();
+                this.hideNewsLoading();
+                
+                // Post-process in background for better experience
+                setTimeout(() => {
+                    if (this.category === 'sports') {
+                        this.filterArticlesBySport();
+                    }
+                    this.updateArticleCount();
+                }, 100);
+                
+                const loadTime = (performance.now() - startTime).toFixed(2);
+                console.log(`🚀 ${this.category} news loaded: ${loadTime}ms - ${this.allArticles.length} articles`);
             } else {
-                this.showNewsError('No articles found for this category. Please try again later.');
+                throw new Error('No articles found');
             }
         } catch (error) {
-            console.error('Error loading news:', error);
-            this.showNewsError('Failed to load news. Please check your internet connection and try again.');
+            console.error(`❌ Error loading ${this.category} news:`, error);
+            this.hideNewsLoading();
+            this.showNewsError(`Unable to load ${this.category} news. Please try again.`);
         } finally {
             this.isLoading = false;
         }
     }
-
-    renderNews() {
+    
+    /**
+     * ULTRA-FAST sports filtering with minimal processing
+     */
+    filterSportsArticlesFast(articles) {
+        const startTime = performance.now();
+        
+        // Quick filter with essential checks only
+        const filtered = articles.filter(article => {
+            const text = `${article.title} ${article.description || ''}`.toLowerCase();
+            
+            // Fast sports keyword check
+            const hasSports = /\b(game|match|score|team|player|win|loss|sport|football|soccer|basketball|baseball|tennis|golf|hockey|nfl|nba|mlb|nhl)\b/.test(text);
+            
+            // Fast exclude check
+            const hasExcluded = /\b(politics|election|crypto|bitcoin|movie|film|album|song)\b/.test(text);
+            
+            return hasSports && !hasExcluded;
+        });
+        
+        // Fast image duplicate removal
+        const seenImages = new Set();
+        const uniqueFiltered = filtered.filter(article => {
+            if (!article.urlToImage) return true;
+            
+            const imageKey = article.urlToImage.split('?')[0]; // Simple image comparison
+            if (seenImages.has(imageKey)) {
+                return false;
+            }
+            seenImages.add(imageKey);
+            return true;
+        });
+        
+        const filterTime = (performance.now() - startTime).toFixed(2);
+        console.log(`⚡ FAST sports filter: ${filterTime}ms - ${articles.length} → ${uniqueFiltered.length}`);
+        
+        return uniqueFiltered;
+    }
+    
+    /**
+     * FAST rendering with minimal DOM operations
+     */
+    renderNewsFast() {
         const newsGrid = document.getElementById('news-grid');
         if (!newsGrid) return;
-
-        // For sports category with subcategory filtering
-        if (this.category === 'sports') {
-            this.filterArticlesBySport();
-            return;
+        
+        const startTime = performance.now();
+        
+        // Use DocumentFragment for fast DOM insertion
+        const fragment = document.createDocumentFragment();
+        
+        // Render only visible articles first for instant display
+        const articlesToRender = this.displayedArticles.slice(0, 12);
+        
+        articlesToRender.forEach(article => {
+            const articleElement = this.createArticleElementFast(article);
+            fragment.appendChild(articleElement);
+        });
+        
+        // Single DOM update for maximum performance
+        newsGrid.innerHTML = '';
+        newsGrid.appendChild(fragment);
+        
+        // Show grid immediately
+        newsGrid.style.display = 'grid';
+        
+        // Render remaining articles in background
+        if (this.displayedArticles.length > 12) {
+            setTimeout(() => {
+                this.renderRemainingArticles(12);
+            }, 50);
         }
-
-        // For other categories, show all articles
-        this.displayedArticles = this.allArticles;
-
-        newsGrid.innerHTML = this.displayedArticles.map(article => 
-            this.createArticleHTML(article)
-        ).join('');
-
-        this.setupLazyLoading();
-        this.updateLoadMoreButton();
+        
+        const renderTime = (performance.now() - startTime).toFixed(2);
+        console.log(`⚡ FAST render: ${renderTime}ms - ${articlesToRender.length} articles`);
+    }
+    
+    /**
+     * Render remaining articles in background for smooth experience
+     */
+    renderRemainingArticles(startIndex) {
+        const newsGrid = document.getElementById('news-grid');
+        if (!newsGrid) return;
+        
+        const remaining = this.displayedArticles.slice(startIndex);
+        const batchSize = 6; // Render in small batches
+        
+        let currentIndex = 0;
+        
+        const renderBatch = () => {
+            const batch = remaining.slice(currentIndex, currentIndex + batchSize);
+            
+            batch.forEach(article => {
+                const articleElement = this.createArticleElementFast(article);
+                newsGrid.appendChild(articleElement);
+            });
+            
+            currentIndex += batchSize;
+            
+            if (currentIndex < remaining.length) {
+                setTimeout(renderBatch, 10); // Small delay between batches
+            }
+        };
+        
+        renderBatch();
+    }
+    
+    /**
+     * FAST article element creation with minimal processing
+     */
+    createArticleElementFast(article) {
+        const articleEl = document.createElement('article');
+        articleEl.className = 'news-card';
+        articleEl.dataset.category = article.category;
+        
+        const imageUrl = article.urlToImage;
+        const hasValidImage = imageUrl && 
+                             imageUrl !== 'null' && 
+                             imageUrl.startsWith('http') &&
+                             !imageUrl.includes('placeholder');
+        
+        // Fast HTML template without complex processing
+        articleEl.innerHTML = `
+            ${hasValidImage ? `
+                <div class="news-image">
+                    <img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iODAwIiBoZWlnaHQ9IjQ1MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZjNmNGY2Ii8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSIyMCIgZmlsbD0iIzk0YTNiOCIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9IjAuM2VtIj5Mb2FkaW5nLi4uPC90ZXh0Pjwvc3ZnPg=="
+                         data-src="${imageUrl}" 
+                         alt="${article.title.substring(0, 100)}" 
+                         loading="lazy"
+                         class="lazy-image"
+                         onload="this.classList.add('loaded'); this.style.opacity='1';">
+                </div>` : `
+                <div class="text-placeholder">
+                    <div class="placeholder-content">
+                        <div class="placeholder-icon">📰</div>
+                        <div class="placeholder-text">Brightlens News</div>
+                    </div>
+                </div>`}
+            <div class="news-content">
+                <div class="news-meta">
+                    <span class="news-source">${article.source || 'News'}</span>
+                    <span class="news-date">${this.formatDateFast(article.publishedAt)}</span>
+                </div>
+                <h3 class="news-title">
+                    <a href="${article.url}" target="_blank" rel="noopener noreferrer">
+                        ${article.title}
+                    </a>
+                </h3>
+                <p class="news-description">${(article.description || '').substring(0, 150)}${article.description && article.description.length > 150 ? '...' : ''}</p>
+                <div class="news-actions">
+                    <a href="${article.url}" target="_blank" rel="noopener noreferrer" class="read-more-btn">
+                        <i class="fas fa-external-link-alt"></i> Read More
+                    </a>
+                    <div class="article-tags">
+                        <span class="tag category-tag">${article.category.charAt(0).toUpperCase() + article.category.slice(1)}</span>
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        return articleEl;
+    }
+    
+    /**
+     * Fast date formatting without complex calculations
+     */
+    formatDateFast(dateString) {
+        try {
+            const date = new Date(dateString);
+            const now = new Date();
+            const diffHours = Math.floor((now - date) / (1000 * 60 * 60));
+            
+            if (diffHours < 1) return 'Just now';
+            if (diffHours < 24) return `${diffHours}h ago`;
+            if (diffHours < 48) return 'Yesterday';
+            
+            return date.toLocaleDateString();
+        } catch (error) {
+            return 'Recent';
+        }
     }
 
     setupLazyLoading() {

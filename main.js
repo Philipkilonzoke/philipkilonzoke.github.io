@@ -405,67 +405,156 @@ class BrightlensNews {
                 entries.forEach(entry => {
                     if (entry.isIntersecting) {
                         const img = entry.target;
-                        this.loadImageWithFallback(img);
+                        this.loadImageWithOptimization(img);
                         imageObserver.unobserve(img);
                     }
                 });
             }, {
-                rootMargin: '50px 0px', // Start loading 50px before image comes into view
-                threshold: 0.1
+                rootMargin: '100px 0px', // Increased preload distance for faster perceived loading
+                threshold: 0.01
             });
 
             images.forEach(img => imageObserver.observe(img));
         } else {
             // Fallback for older browsers
             images.forEach(img => {
-                this.loadImageWithFallback(img);
+                this.loadImageWithOptimization(img);
             });
+        }
+        
+        // Preload first 3 images for instant display
+        const firstImages = Array.from(images).slice(0, 3);
+        firstImages.forEach(img => {
+            if (img.dataset.src) {
+                this.preloadImage(img.dataset.src);
+            }
+        });
+    }
+    
+    /**
+     * Preload critical images for instant display
+     */
+    preloadImage(src) {
+        const link = document.createElement('link');
+        link.rel = 'preload';
+        link.as = 'image';
+        link.href = src;
+        document.head.appendChild(link);
+    }
+    
+    /**
+     * ENHANCED: Load image with WebP support and advanced optimization
+     */
+    loadImageWithOptimization(img) {
+        if (!img.dataset.src) return;
+        
+        const originalSrc = img.dataset.src;
+        
+        // Check for WebP support and optimize accordingly
+        if (this.supportsWebP()) {
+            const webpSrc = this.convertToWebP(originalSrc);
+            this.loadImageWithFallbackChain(img, [webpSrc, originalSrc]);
+        } else {
+            this.loadImageWithFallbackChain(img, [originalSrc]);
         }
     }
     
     /**
-     * Load image with optimized fallback and error handling
+     * Check if browser supports WebP format
      */
-    loadImageWithFallback(img) {
-        if (!img.dataset.src) return;
+    supportsWebP() {
+        if (this.webpSupport !== undefined) return this.webpSupport;
         
-        // Create a new image element to test loading
-        const testImg = new Image();
+        const canvas = document.createElement('canvas');
+        canvas.width = 1;
+        canvas.height = 1;
+        this.webpSupport = canvas.toDataURL('image/webp').indexOf('data:image/webp') === 0;
+        return this.webpSupport;
+    }
+    
+    /**
+     * Convert image URL to WebP if possible
+     */
+    convertToWebP(url) {
+        // For services that support WebP conversion
+        if (url.includes('unsplash.com')) {
+            return url.includes('&fm=') ? url.replace(/&fm=[^&]*/, '&fm=webp') : url + '&fm=webp';
+        }
+        if (url.includes('cloudinary.com')) {
+            return url.replace('/upload/', '/upload/f_webp/');
+        }
+        if (url.includes('wp.com') || url.includes('wordpress.com')) {
+            return url + (url.includes('?') ? '&format=webp' : '?format=webp');
+        }
         
-        testImg.onload = () => {
-            img.src = img.dataset.src;
-            img.classList.remove('lazy-image');
-            img.classList.add('loaded');
-            img.style.opacity = '1';
-        };
+        return url; // Return original if no WebP conversion available
+    }
+    
+    /**
+     * Load image with fallback chain for maximum compatibility
+     */
+    loadImageWithFallbackChain(img, urlChain) {
+        let currentIndex = 0;
         
-        testImg.onerror = () => {
-            // Try to fix common image URL issues
-            let fallbackUrl = img.dataset.src;
-            
-            // Convert http to https
-            if (fallbackUrl.startsWith('http://')) {
-                fallbackUrl = fallbackUrl.replace('http://', 'https://');
-                
-                const retryImg = new Image();
-                retryImg.onload = () => {
-                    img.src = fallbackUrl;
-                    img.classList.remove('lazy-image');
-                    img.classList.add('loaded');
-                    img.style.opacity = '1';
-                };
-                retryImg.onerror = () => {
-                    // Final fallback to placeholder
-                    img.parentElement.innerHTML = '<div class="text-placeholder">Brightlens News</div>';
-                };
-                retryImg.src = fallbackUrl;
-            } else {
-                // Final fallback to placeholder
-                img.parentElement.innerHTML = '<div class="text-placeholder">Brightlens News</div>';
+        const tryNextUrl = () => {
+            if (currentIndex >= urlChain.length) {
+                // All URLs failed, show optimized placeholder
+                this.showOptimizedPlaceholder(img);
+                return;
             }
+            
+            const currentUrl = urlChain[currentIndex];
+            const testImg = new Image();
+            
+            // Add loading performance tracking
+            const startTime = performance.now();
+            
+            testImg.onload = () => {
+                const loadTime = (performance.now() - startTime).toFixed(2);
+                console.log(`✅ Image loaded in ${loadTime}ms: ${currentUrl.substring(0, 50)}...`);
+                
+                img.src = currentUrl;
+                img.classList.remove('lazy-image');
+                img.classList.add('loaded');
+                img.style.opacity = '1';
+                
+                // Add fade-in animation for smooth appearance
+                img.style.transition = 'opacity 0.3s ease-in-out';
+            };
+            
+            testImg.onerror = () => {
+                console.warn(`❌ Image failed to load: ${currentUrl.substring(0, 50)}...`);
+                currentIndex++;
+                
+                // Try HTTPS conversion as fallback
+                if (currentUrl.startsWith('http://')) {
+                    urlChain.splice(currentIndex, 0, currentUrl.replace('http://', 'https://'));
+                }
+                
+                tryNextUrl();
+            };
+            
+            // Set a timeout for slow-loading images
+            setTimeout(() => {
+                if (!testImg.complete) {
+                    testImg.onerror(); // Trigger fallback for slow images
+                }
+            }, 8000); // 8 second timeout
+            
+            testImg.src = currentUrl;
         };
         
-        testImg.src = img.dataset.src;
+        tryNextUrl();
+    }
+    
+    /**
+     * Show optimized branded placeholder for failed images
+     */
+    showOptimizedPlaceholder(img) {
+        img.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iODAwIiBoZWlnaHQ9IjQ1MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZGVmcz48bGluZWFyR3JhZGllbnQgaWQ9ImciIHgxPSIwJSIgeTE9IjAlIiB4Mj0iMTAwJSIgeTI9IjEwMCUiPjxzdG9wIG9mZnNldD0iMCUiIHN0b3AtY29sb3I9IiMyNTYzZWIiLz48c3RvcCBvZmZzZXQ9IjEwMCUiIHN0b3AtY29sb3I9IiMxZDRlZGQiLz48L2xpbmVhckdyYWRpZW50PjwvZGVmcz48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSJ1cmwoI2cpIi8+PGNpcmNsZSBjeD0iNDAwIiBjeT0iMjI1IiByPSI2MCIgZmlsbD0icmdiYSgyNTUsMjU1LDI1NSwwLjIpIi8+PHRleHQgeD0iNDAwIiB5PSIyNDAiIGZvbnQtZmFtaWx5PSJBcmlhbCwgc2Fucy1zZXJpZiIgZm9udC1zaXplPSIyNCIgZm9udC13ZWlnaHQ9ImJvbGQiIGZpbGw9IndoaXRlIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIj5CcmlnaHRsZW5zIE5ld3M8L3RleHQ+PHRleHQgeD0iNDAwIiB5PSIyNzAiIGZvbnQtZmFtaWx5PSJBcmlhbCwgc2Fucy1zZXJpZiIgZm9udC1zaXplPSIxNiIgZmlsbD0icmdiYSgyNTUsMjU1LDI1NSwwLjgpIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIj5IaWdoIFF1YWxpdHkgTmV3czwvdGV4dD48L3N2Zz4=';
+        img.classList.remove('lazy-image');
+        img.classList.add('loaded', 'placeholder');
+        img.style.opacity = '1';
     }
     
     /**
@@ -514,7 +603,7 @@ class BrightlensNews {
         const formattedDate = this.newsAPI.formatDate(article.publishedAt);
         const description = article.description || 'Read the full article for complete details.';
         
-        // ULTRA-STRICT image validation - NO broken images allowed
+        // ULTRA-STRICT image validation with enhanced quality checks
         const hasValidImage = imageUrl && 
                              imageUrl !== 'null' && 
                              imageUrl !== 'None' && 
@@ -523,63 +612,55 @@ class BrightlensNews {
                              imageUrl.startsWith('http') &&
                              !imageUrl.includes('placeholder') &&
                              !imageUrl.includes('example.com') &&
+                             !imageUrl.includes('sample') &&
                              this.isValidImageUrl(imageUrl);
         
-        // Smart image section with triple fallback protection
+        // Smart image section with WebP support and high-quality optimization
         const imageSection = hasValidImage ? `
             <div class="news-image">
-                <img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZGVmcz48bGluZWFyR3JhZGllbnQgaWQ9ImciIHgxPSIwJSIgeTE9IjAlIiB4Mj0iMTAwJSIgeTI9IjEwMCUiPjxzdG9wIG9mZnNldD0iMCUiIHN0b3AtY29sb3I9IiMxNmEzNGEiLz48c3RvcCBvZmZzZXQ9IjEwMCUiIHN0b3AtY29sb3I9IiMxNTgwM2QiLz48L2xpbmVhckdyYWRpZW50PjwvZGVmcz48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSJ1cmwoI2cpIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSIxNiIgZmlsbD0id2hpdGUiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGR5PSIwLjNlbSI+TG9hZGluZy4uLjwvdGV4dD48L3N2Zz4="
+                <img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iODAwIiBoZWlnaHQ9IjQ1MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZGVmcz48bGluZWFyR3JhZGllbnQgaWQ9ImciIHgxPSIwJSIgeTE9IjAlIiB4Mj0iMTAwJSIgeTI9IjEwMCUiPjxzdG9wIG9mZnNldD0iMCUiIHN0b3AtY29sb3I9IiNmM2Y0ZjYiLz48c3RvcCBvZmZzZXQ9IjEwMCUiIHN0b3AtY29sb3I9IiNlNWU3ZWIiLz48L2xpbmVhckdyYWRpZW50PjwvZGVmcz48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSJ1cmwoI2cpIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSIyMCIgZmlsbD0iIzk0YTNiOCIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9IjAuM2VtIj5Mb2FkaW5nLi4uPC90ZXh0Pjwvc3ZnPg=="
                      data-src="${imageUrl}" 
-                     alt="${article.title}" 
+                     alt="${this.sanitizeText(article.title)}" 
                      loading="lazy"
                      class="lazy-image"
-                     onload="this.classList.add('loaded')"
-                     onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZGVmcz48bGluZWFyR3JhZGllbnQgaWQ9ImciIHgxPSIwJSIgeTE9IjAlIiB4Mj0iMTAwJSIgeTI9IjEwMCUiPjxzdG9wIG9mZnNldD0iMCUiIHN0b3AtY29sb3I9IiMxNmEzNGEiLz48c3RvcCBvZmZzZXQ9IjEwMCUiIHN0b3AtY29sb3I9IiMxNTgwM2QiLz48L2xpbmVhckdyYWRpZW50PjwvZGVmcz48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSJ1cmwoI2cpIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSIxNiIgZmlsbD0id2hpdGUiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGR5PSIwLjNlbSI+QnJpZ2h0bGVucyBOZXdzPC90ZXh0Pjwvc3ZnPg=='; this.classList.add('loaded');">
+                     width="800"
+                     height="450"
+                     style="aspect-ratio: 16/9; object-fit: cover;"
+                     onload="this.classList.add('loaded'); this.style.opacity='1';"
+                     onerror="this.parentElement.innerHTML='<div class=\\"text-placeholder\\"><div class=\\"placeholder-content\\"><div class=\\"placeholder-icon\\">📰</div><div class=\\"placeholder-text\\">Brightlens News</div></div></div>';">
             </div>` : `
             <div class="text-placeholder">
                 <div class="placeholder-content">
                     <div class="placeholder-icon">📰</div>
                     <div class="placeholder-text">Brightlens News</div>
+                    <div class="placeholder-subtext">High Quality News</div>
                 </div>
             </div>`;
         
         return `
-            <article class="news-card" data-category="${article.category}">
+            <article class="news-card" data-category="${article.category}" data-source="${this.sanitizeText(article.source)}">
                 ${imageSection}
                 <div class="news-content">
-                    <h3 class="news-title">${this.sanitizeText(article.title)}</h3>
-                    <p class="news-description">${this.sanitizeText(description)}</p>
                     <div class="news-meta">
+                        <span class="news-source">${this.sanitizeText(article.source)}</span>
                         <span class="news-date">${formattedDate}</span>
-                        <span class="news-source">${this.sanitizeText(article.source || 'News Source')}</span>
-                        <span class="news-category">${article.category}</span>
                     </div>
-                    <div class="news-actions">
-                        <a href="${article.url}" 
-                           target="_blank" 
-                           rel="noopener noreferrer" 
-                           class="news-link"
-                           onclick="this.style.opacity='0.7'"
-                            Read More <i class="fas fa-external-link-alt"></i>
+                    <h3 class="news-title">
+                        <a href="${article.url}" target="_blank" rel="noopener noreferrer">
+                            ${this.sanitizeText(article.title)}
                         </a>
-                        <div class="share-buttons">
-                            <button class="share-btn" onclick="shareArticle('${encodeURIComponent(article.title)}', '${encodeURIComponent(article.url)}', 'facebook')" title="Share on Facebook">
-                                <i class="fab fa-facebook-f"></i>
-                            </button>
-                            <button class="share-btn" onclick="shareArticle('${encodeURIComponent(article.title)}', '${encodeURIComponent(article.url)}', 'twitter')" title="Share on Twitter">
-                                <i class="fab fa-twitter"></i>
-                            </button>
-                            <button class="share-btn" onclick="shareArticle('${encodeURIComponent(article.title)}', '${encodeURIComponent(article.url)}', 'whatsapp')" title="Share on WhatsApp">
-                                <i class="fab fa-whatsapp"></i>
-                            </button>
-                            <button class="share-btn" onclick="shareArticle('${encodeURIComponent(article.title)}', '${encodeURIComponent(article.url)}', 'copy')" title="Copy Link">
-                                <i class="fas fa-link"></i>
-                            </button>
+                    </h3>
+                    <p class="news-description">${this.sanitizeText(description)}</p>
+                    <div class="news-actions">
+                        <a href="${article.url}" target="_blank" rel="noopener noreferrer" class="read-more-btn">
+                            <i class="fas fa-external-link-alt"></i> Read Full Article
+                        </a>
+                        <div class="article-tags">
+                            <span class="tag category-tag">${article.category.charAt(0).toUpperCase() + article.category.slice(1)}</span>
                         </div>
                     </div>
                 </div>
-            </article>
-        `;
+            </article>`;
     }
 
     updateArticleCount() {
