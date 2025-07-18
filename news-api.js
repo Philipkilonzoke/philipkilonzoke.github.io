@@ -58,15 +58,17 @@ class NewsAPI {
     }
 
     /**
-     * Fetch news for a specific category from all APIs
+     * Fetch news for a specific category from all APIs with performance monitoring
      */
     async fetchNews(category, limit = 20) {
+        const startTime = performance.now();
         const cacheKey = `${category}_${limit}`;
         
         // Check cache first
         if (this.cache.has(cacheKey)) {
             const cached = this.cache.get(cacheKey);
             if (Date.now() - cached.timestamp < this.cacheTimeout) {
+                console.log(`Cache hit for ${category}: ${(performance.now() - startTime).toFixed(2)}ms`);
                 return cached.data;
             }
         }
@@ -74,34 +76,44 @@ class NewsAPI {
         try {
             // Enhanced sports coverage with specialized APIs
             if (category === 'sports') {
-                return await this.fetchSportsNews(limit);
+                const result = await this.fetchSportsNews(limit);
+                console.log(`Sports fetch completed: ${(performance.now() - startTime).toFixed(2)}ms`);
+                return result;
             }
 
             // Enhanced lifestyle coverage with specialized content
             if (category === 'lifestyle') {
-                return await this.fetchLifestyleNews(limit);
+                const result = await this.fetchLifestyleNews(limit);
+                console.log(`Lifestyle fetch completed: ${(performance.now() - startTime).toFixed(2)}ms`);
+                return result;
             }
 
-            // Fetch from all APIs simultaneously
+            // Fetch from all APIs simultaneously with timeout
+            const timeout = 8000; // 8 second timeout per API
             const promises = [
-                this.fetchFromGNews(category, limit),
-                this.fetchFromNewsData(category, limit),
-                this.fetchFromNewsAPI(category, limit),
-                this.fetchFromMediastack(category, limit),
-                this.fetchFromCurrentsAPI(category, limit)
+                this.fetchWithTimeout(this.fetchFromGNews(category, limit), timeout, 'GNews'),
+                this.fetchWithTimeout(this.fetchFromNewsData(category, limit), timeout, 'NewsData'),
+                this.fetchWithTimeout(this.fetchFromNewsAPI(category, limit), timeout, 'NewsAPI'),
+                this.fetchWithTimeout(this.fetchFromMediastack(category, limit), timeout, 'Mediastack'),
+                this.fetchWithTimeout(this.fetchFromCurrentsAPI(category, limit), timeout, 'CurrentsAPI')
             ];
 
             const results = await Promise.allSettled(promises);
             
             // Combine results from all APIs
             let allArticles = [];
+            let successfulAPIs = 0;
+            
             results.forEach((result, index) => {
-                if (result.status === 'fulfilled' && result.value) {
+                if (result.status === 'fulfilled' && result.value && Array.isArray(result.value)) {
                     allArticles = allArticles.concat(result.value);
+                    successfulAPIs++;
                 } else {
-                    console.warn(`API ${index + 1} failed:`, result.reason);
+                    console.warn(`API ${index + 1} failed:`, result.reason?.message || result.reason);
                 }
             });
+
+            console.log(`Fetched from ${successfulAPIs}/${results.length} APIs for ${category}`);
 
             // Remove duplicates and sort by date
             const uniqueArticles = this.removeDuplicates(allArticles);
@@ -115,11 +127,37 @@ class NewsAPI {
                 timestamp: Date.now()
             });
 
+            const totalTime = (performance.now() - startTime).toFixed(2);
+            console.log(`${category} fetch completed: ${totalTime}ms - ${sortedArticles.length} unique articles`);
+
             return sortedArticles;
         } catch (error) {
             console.error('Error fetching news:', error);
-            throw new Error('Failed to fetch news from all sources');
+            const totalTime = (performance.now() - startTime).toFixed(2);
+            console.log(`${category} fetch failed after: ${totalTime}ms`);
+            throw new Error(`Failed to fetch news for ${category}: ${error.message}`);
         }
+    }
+    
+    /**
+     * Fetch with timeout wrapper for better performance
+     */
+    async fetchWithTimeout(promise, timeoutMs, apiName) {
+        return new Promise((resolve, reject) => {
+            const timeoutId = setTimeout(() => {
+                reject(new Error(`${apiName} timeout after ${timeoutMs}ms`));
+            }, timeoutMs);
+            
+            promise
+                .then(result => {
+                    clearTimeout(timeoutId);
+                    resolve(result);
+                })
+                .catch(error => {
+                    clearTimeout(timeoutId);
+                    reject(error);
+                });
+        });
     }
 
     /**
@@ -531,19 +569,97 @@ class NewsAPI {
     }
 
     /**
-     * Remove duplicate articles based on title and URL
+     * Enhanced duplicate removal with fuzzy matching and content analysis
      */
     removeDuplicates(articles) {
-        const seen = new Set();
-        return articles.filter(article => {
-            if (!article.title || !article.url) return false;
+        if (!articles || articles.length === 0) return [];
+        
+        const filtered = [];
+        const seenUrls = new Set();
+        const seenTitles = new Set();
+        const titleWords = new Map(); // Track title word frequency for similarity detection
+        
+        // First pass: remove exact URL duplicates
+        articles.forEach(article => {
+            if (!article.title || !article.url) return;
             
-            const key = `${article.title.toLowerCase().trim()}-${article.url}`;
-            if (seen.has(key)) return false;
+            const normalizedUrl = article.url.toLowerCase().trim().replace(/[?&]utm_[^&]*&?/g, '').replace(/[?&]$/, '');
+            if (seenUrls.has(normalizedUrl)) return;
             
-            seen.add(key);
-            return true;
+            seenUrls.add(normalizedUrl);
+            filtered.push(article);
         });
+        
+        // Second pass: remove title duplicates and similar articles
+        const uniqueFiltered = [];
+        
+        filtered.forEach(article => {
+            const normalizedTitle = article.title.toLowerCase()
+                .replace(/[^\w\s]/g, ' ')
+                .replace(/\s+/g, ' ')
+                .trim();
+            
+            // Check for exact title match
+            if (seenTitles.has(normalizedTitle)) return;
+            
+            // Check for similar titles (>85% similarity)
+            let isSimilar = false;
+            for (const existingTitle of seenTitles) {
+                if (this.calculateTitleSimilarity(normalizedTitle, existingTitle) > 0.85) {
+                    isSimilar = true;
+                    break;
+                }
+            }
+            
+            if (!isSimilar) {
+                seenTitles.add(normalizedTitle);
+                uniqueFiltered.push(article);
+            }
+        });
+        
+        // Third pass: remove articles with similar content but different titles
+        const finalFiltered = [];
+        const contentHashes = new Set();
+        
+        uniqueFiltered.forEach(article => {
+            const contentHash = this.generateContentHash(article);
+            if (!contentHashes.has(contentHash)) {
+                contentHashes.add(contentHash);
+                finalFiltered.push(article);
+            }
+        });
+        
+        console.log(`Duplicate removal: ${articles.length} → ${finalFiltered.length} articles`);
+        return finalFiltered;
+    }
+    
+    /**
+     * Calculate similarity between two titles
+     */
+    calculateTitleSimilarity(title1, title2) {
+        const words1 = new Set(title1.split(' ').filter(word => word.length > 2));
+        const words2 = new Set(title2.split(' ').filter(word => word.length > 2));
+        
+        const intersection = new Set([...words1].filter(word => words2.has(word)));
+        const union = new Set([...words1, ...words2]);
+        
+        return intersection.size / union.size;
+    }
+    
+    /**
+     * Generate content hash for duplicate detection
+     */
+    generateContentHash(article) {
+        const content = `${article.title || ''} ${article.description || ''}`.toLowerCase()
+            .replace(/[^\w\s]/g, ' ')
+            .replace(/\s+/g, ' ')
+            .trim();
+        
+        const words = content.split(' ')
+            .filter(word => word.length > 3)
+            .slice(0, 20); // Use first 20 significant words
+            
+        return words.sort().join('|');
     }
 
     /**
@@ -590,62 +706,64 @@ class NewsAPI {
     }
 
     /**
-     * Get sample articles for fallback when APIs fail
+     * Get sample articles for fallback when APIs fail - DISABLED
+     * Only real-time articles should be displayed
      */
     getSampleArticles(category, source = 'News API') {
-        // Use extended articles database for comprehensive fallback
-        if (typeof ExtendedArticlesDB !== 'undefined') {
-            const extendedDB = new ExtendedArticlesDB();
-            switch(category) {
-                case 'latest':
-                    return extendedDB.getExtendedLatestNews(source);
-                case 'kenya':
-                    return extendedDB.getExtendedKenyaNews(source);
-                case 'world':
-                    return extendedDB.getExtendedWorldNews(source);
-                case 'entertainment':
-                    return extendedDB.getExtendedEntertainmentNews(source);
-                case 'technology':
-                    return extendedDB.getExtendedTechnologyNews(source);
-                case 'business':
-                    return extendedDB.getExtendedBusinessNews(source);
-                case 'sports':
-                    return extendedDB.getExtendedSportsNews(source);
-                case 'health':
-                    return extendedDB.getExtendedHealthNews(source);
-                case 'lifestyle':
-                    return extendedDB.getExtendedLifestyleNews(source);
-                default:
-                    return extendedDB.getExtendedLatestNews(source);
+        console.log(`Sample articles disabled for ${category} - only real-time news will be displayed`);
+        return [];
+    }
+
+    /**
+     * Fetch from ESPN API (unofficial/hidden API)
+     */
+    async fetchFromESPN() {
+        try {
+            const endpoints = [
+                'https://site.api.espn.com/apis/site/v2/sports/football/nfl/news',
+                'https://site.api.espn.com/apis/site/v2/sports/basketball/nba/news',
+                'https://site.api.espn.com/apis/site/v2/sports/football/college-football/news',
+                'https://site.api.espn.com/apis/site/v2/sports/basketball/college-basketball/news',
+                'https://site.api.espn.com/apis/site/v2/sports/baseball/mlb/news'
+            ];
+
+            let articles = [];
+            
+            for (const endpoint of endpoints) {
+                const response = await fetch(endpoint);
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data.articles && Array.isArray(data.articles)) {
+                        const espnArticles = data.articles.slice(0, 10).map(article => ({
+                            title: article.headline || article.title,
+                            description: article.description || article.story,
+                            url: article.links?.web?.href || article.url,
+                            urlToImage: article.images?.[0]?.url || 'https://images.unsplash.com/photo-1461896836934-ffe607ba8211?w=400',
+                            publishedAt: article.published || new Date().toISOString(),
+                            source: 'ESPN',
+                            category: 'sports'
+                        })).filter(article => article.title && article.url);
+                        
+                        articles = articles.concat(espnArticles);
+                    }
+                }
             }
+            
+            return articles.slice(0, 20); // Return up to 20 articles
+        } catch (error) {
+            console.error('ESPN API error:', error);
+            return [];
         }
-        
-        // Fallback to basic articles if extended DB not available
-        const baseArticles = {
-            latest: [
-                {
-                    title: "Global Climate Summit Reaches Historic Agreement",
-                    description: "World leaders from 195 countries have reached a groundbreaking climate agreement at the COP30 summit, committing to ambitious carbon reduction targets for 2030. The comprehensive deal includes unprecedented funding for renewable energy transition in developing nations, with $500 billion pledged over the next decade. Key provisions include mandatory carbon pricing, accelerated phase-out of fossil fuels, and innovative carbon capture technologies. Environmental scientists praise the agreement as the most significant climate action since the Paris Accord, with potential to limit global warming to 1.5°C above pre-industrial levels.",
-                    url: "https://example.com/climate-summit",
-                    urlToImage: "https://images.unsplash.com/photo-1611273426858-450d8e3c9fce?w=400",
-                    publishedAt: new Date().toISOString(),
-                    source: source,
-                    category: "general"
-                },
-                {
-                    title: "Tech Innovation Breakthrough in Quantum Computing",
-                    description: "Researchers at MIT and Google have achieved a revolutionary breakthrough in quantum computing, successfully demonstrating quantum supremacy in practical applications. The new quantum processor can solve complex problems in minutes that would take classical computers thousands of years. This advancement has immediate implications for cryptography, drug discovery, financial modeling, and artificial intelligence. The team overcame previous limitations in quantum coherence and error correction, making quantum computers more stable and practical for real-world use. Industry experts predict this could accelerate the development of quantum internet and transform multiple sectors including healthcare, finance, and cybersecurity.",
-                    url: "https://example.com/quantum-computing",
-                    urlToImage: "https://images.unsplash.com/photo-1518709268805-4e9042af2176?w=400",
-                    publishedAt: new Date(Date.now() - 3600000).toISOString(),
-                    source: source,
-                    category: "technology"
-                },
-                {
-                    title: "International Trade Relations Show Positive Trends",
-                    description: "Global trade relationships are showing remarkable improvement as major economies report increased cooperation and reduced trade barriers. Recent data indicates a 15% increase in international trade volumes compared to last year, with emerging markets leading the growth. The World Trade Organization highlights successful resolution of several long-standing trade disputes, including breakthrough agreements between the US and China, EU and Asia-Pacific nations. New bilateral trade agreements have simplified customs procedures, reduced tariffs on essential goods, and established stronger supply chain partnerships. Economic analysts project continued growth momentum, with particular strength in technology exports, renewable energy equipment, and sustainable manufacturing goods.",
-                    url: "https://example.com/trade-relations",
-                    urlToImage: "https://images.unsplash.com/photo-1590283603385-17ffb3a7f29f?w=400",
+    }
+
+    /**
+     * Fetch from Sports APIs (TheSportsDB, etc.)
+     */
+    async fetchFromSportsAPIs() {
+        try {
+            const articles = [];
+            
+            // Generate comprehensive sports articles for major leagues
                     publishedAt: new Date(Date.now() - 7200000).toISOString(),
                     source: source,
                     category: "business"

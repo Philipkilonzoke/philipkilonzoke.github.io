@@ -5,11 +5,13 @@
 class CacheManager {
     constructor() {
         this.storageKey = 'brightlens_news_cache';
-        this.defaultTTL = 5 * 60 * 1000; // 5 minutes
-        this.maxCacheSize = 10 * 1024 * 1024; // 10MB
-        this.cleanupInterval = 60 * 1000; // 1 minute
+        this.defaultTTL = 3 * 60 * 1000; // 3 minutes for faster updates
+        this.maxCacheSize = 15 * 1024 * 1024; // 15MB for more cache
+        this.cleanupInterval = 30 * 1000; // 30 seconds for more frequent cleanup
+        this.compressionEnabled = true;
         
         this.startCleanupTimer();
+        this.preloadCriticalCategories();
     }
 
     /**
@@ -244,6 +246,64 @@ class CacheManager {
     generateNewsKey(category, page = 1, filters = {}) {
         const keyData = { category, page, filters };
         return `news_${btoa(JSON.stringify(keyData))}`;
+    }
+    
+    /**
+     * Preload critical categories for faster initial load
+     */
+    preloadCriticalCategories() {
+        // List of categories to preload
+        const criticalCategories = ['latest', 'kenya', 'world', 'technology', 'sports'];
+        
+        setTimeout(() => {
+            criticalCategories.forEach(category => {
+                if (!this.get(`${category}_30`)) {
+                    // Trigger background fetch for critical categories
+                    this.triggerBackgroundFetch(category);
+                }
+            });
+        }, 2000); // Wait 2 seconds after init to avoid blocking initial load
+    }
+    
+    /**
+     * Trigger background fetch for a category
+     */
+    triggerBackgroundFetch(category) {
+        if (typeof window.NewsAPI !== 'undefined') {
+            const newsAPI = new window.NewsAPI();
+            newsAPI.fetchNews(category, 30).then(articles => {
+                console.log(`Background preloaded ${articles.length} articles for ${category}`);
+            }).catch(error => {
+                console.log(`Background preload failed for ${category}:`, error.message);
+            });
+        }
+    }
+    
+    /**
+     * Compress data before storing (basic compression)
+     */
+    compressData(data) {
+        if (!this.compressionEnabled) return data;
+        
+        try {
+            // Simple compression by removing whitespace from JSON
+            return JSON.stringify(data).replace(/\s/g, '');
+        } catch (error) {
+            return data;
+        }
+    }
+    
+    /**
+     * Decompress data after retrieving
+     */
+    decompressData(data) {
+        if (!this.compressionEnabled) return data;
+        
+        try {
+            return JSON.parse(data);
+        } catch (error) {
+            return data;
+        }
     }
 }
 

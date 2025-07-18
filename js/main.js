@@ -232,8 +232,9 @@ class BrightlensNews {
                 articles = await this.newsAPI.fetchNews(category, this.articlesPerPage);
             } catch (apiError) {
                 console.warn('Primary API failed, trying fallback:', apiError);
-                // Try to get cached articles or sample articles
-                articles = await this.newsAPI.getSampleArticles(category, 'Fallback Source');
+                // Sample articles disabled - only real-time news
+                console.log('Sample articles disabled - attempting to reload real-time news');
+                articles = [];
             }
             
             // Ensure we have valid articles array
@@ -257,8 +258,9 @@ class BrightlensNews {
 
             // Always ensure we have some content
             if (this.allArticles.length === 0) {
-                // Get sample articles as absolute fallback
-                this.allArticles = await this.newsAPI.getSampleArticles(category, 'Brightlens News');
+                            // Sample articles disabled - only real-time news
+            console.log('Sample articles disabled - only real-time news will be displayed');
+            this.allArticles = [];
             }
 
             // Sort articles by date (newest first)
@@ -274,9 +276,10 @@ class BrightlensNews {
 
         } catch (error) {
             console.error('Critical error loading news:', error);
-            // Emergency fallback - load sample articles
+            // Emergency fallback - sample articles disabled
             try {
-                this.allArticles = await this.newsAPI.getSampleArticles(category, 'Emergency Fallback');
+                console.log('Emergency fallback triggered - only real-time news available');
+                this.allArticles = [];
                 this.sortArticlesByDate();
                 this.renderNews();
                 this.updateArticleCount();

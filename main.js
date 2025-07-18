@@ -232,8 +232,9 @@ class BrightlensNews {
                 articles = await this.newsAPI.fetchNews(category, this.articlesPerPage);
             } catch (apiError) {
                 console.warn('Primary API failed, trying fallback:', apiError);
-                // Try to get cached articles or sample articles
-                articles = await this.newsAPI.getSampleArticles(category, 'Fallback Source');
+                        // Sample articles disabled - only real-time news
+        console.log('Sample articles disabled - attempting to reload real-time news');
+        articles = [];
             }
             
             // Ensure we have valid articles array
@@ -257,8 +258,9 @@ class BrightlensNews {
 
             // Always ensure we have some content
             if (this.allArticles.length === 0) {
-                // Get sample articles as absolute fallback
-                this.allArticles = await this.newsAPI.getSampleArticles(category, 'Brightlens News');
+                            // Sample articles disabled - only real-time news
+            console.log('Sample articles disabled - only real-time news will be displayed');
+            this.allArticles = [];
             }
 
             // Sort articles by date (newest first)
@@ -274,9 +276,10 @@ class BrightlensNews {
 
         } catch (error) {
             console.error('Critical error loading news:', error);
-            // Emergency fallback - load sample articles
+            // Emergency fallback - sample articles disabled
             try {
-                this.allArticles = await this.newsAPI.getSampleArticles(category, 'Emergency Fallback');
+                console.log('Emergency fallback triggered - only real-time news available');
+                this.allArticles = [];
                 this.sortArticlesByDate();
                 this.renderNews();
                 this.updateArticleCount();
@@ -362,21 +365,67 @@ class BrightlensNews {
                 entries.forEach(entry => {
                     if (entry.isIntersecting) {
                         const img = entry.target;
-                        img.src = img.dataset.src;
-                        img.classList.remove('lazy-image');
+                        this.loadImageWithFallback(img);
                         imageObserver.unobserve(img);
                     }
                 });
+            }, {
+                rootMargin: '50px 0px', // Start loading 50px before image comes into view
+                threshold: 0.1
             });
 
             images.forEach(img => imageObserver.observe(img));
         } else {
             // Fallback for older browsers
             images.forEach(img => {
-                img.src = img.dataset.src;
-                img.classList.remove('lazy-image');
+                this.loadImageWithFallback(img);
             });
         }
+    }
+    
+    /**
+     * Load image with optimized fallback and error handling
+     */
+    loadImageWithFallback(img) {
+        if (!img.dataset.src) return;
+        
+        // Create a new image element to test loading
+        const testImg = new Image();
+        
+        testImg.onload = () => {
+            img.src = img.dataset.src;
+            img.classList.remove('lazy-image');
+            img.classList.add('loaded');
+            img.style.opacity = '1';
+        };
+        
+        testImg.onerror = () => {
+            // Try to fix common image URL issues
+            let fallbackUrl = img.dataset.src;
+            
+            // Convert http to https
+            if (fallbackUrl.startsWith('http://')) {
+                fallbackUrl = fallbackUrl.replace('http://', 'https://');
+                
+                const retryImg = new Image();
+                retryImg.onload = () => {
+                    img.src = fallbackUrl;
+                    img.classList.remove('lazy-image');
+                    img.classList.add('loaded');
+                    img.style.opacity = '1';
+                };
+                retryImg.onerror = () => {
+                    // Final fallback to placeholder
+                    img.parentElement.innerHTML = '<div class="text-placeholder">Brightlens News</div>';
+                };
+                retryImg.src = fallbackUrl;
+            } else {
+                // Final fallback to placeholder
+                img.parentElement.innerHTML = '<div class="text-placeholder">Brightlens News</div>';
+            }
+        };
+        
+        testImg.src = img.dataset.src;
     }
 
     createArticleHTML(article) {

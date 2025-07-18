@@ -536,7 +536,8 @@ class NewsAPI {
         } catch (error) {
             console.error('GNews fetch error:', error);
             // Return sample data for demonstration
-            return this.getSampleArticles(category, 'GNews');
+            console.log('Sample articles disabled for GNews API');
+            return [];
         }
     }
 
@@ -562,7 +563,8 @@ class NewsAPI {
             return this.formatNewsDataArticles(data.results || []);
         } catch (error) {
             console.error('NewsData fetch error:', error);
-            return this.getSampleArticles(category, 'NewsData');
+            console.log('Sample articles disabled for NewsData API');
+            return [];
         }
     }
 
@@ -590,7 +592,8 @@ class NewsAPI {
             return this.formatNewsAPIArticles(data.articles || []);
         } catch (error) {
             console.error('NewsAPI fetch error:', error);
-            return this.getSampleArticles(category, 'NewsAPI');
+            console.log('Sample articles disabled for NewsAPI');
+            return [];
         }
     }
 
@@ -616,7 +619,8 @@ class NewsAPI {
             return this.formatMediastackArticles(data.data || []);
         } catch (error) {
             console.error('Mediastack fetch error:', error);
-            return this.getSampleArticles(category, 'Mediastack');
+            console.log('Sample articles disabled for Mediastack API');
+            return [];
         }
     }
 
@@ -642,7 +646,8 @@ class NewsAPI {
             return this.formatCurrentsAPIArticles(data.news || []);
         } catch (error) {
             console.error('CurrentsAPI fetch error:', error);
-            return this.getSampleArticles(category, 'CurrentsAPI');
+            console.log('Sample articles disabled for CurrentsAPI');
+            return [];
         }
     }
 
