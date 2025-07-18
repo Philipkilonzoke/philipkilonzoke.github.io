@@ -360,18 +360,34 @@ class NewsAPI {
                 );
             }
                 
-                // Faster RSS feeds for immediate content
+                // Enhanced RSS and real-time feeds for immediate content
                 this.fetchWithTimeout(
                     this.fetchFromBBC(category, categoryKeywords),
-                    2000, 'BBC'
+                    2500, 'BBC'
                 ),
                 this.fetchWithTimeout(
                     this.fetchFromReuters(category, categoryKeywords),
-                    2000, 'Reuters'
+                    2500, 'Reuters'
                 ),
                 this.fetchWithTimeout(
                     this.fetchFromCNN(category, categoryKeywords),
-                    2000, 'CNN'
+                    2500, 'CNN'
+                ),
+                this.fetchWithTimeout(
+                    this.fetchFromAssociatedPress(category, categoryKeywords),
+                    2500, 'AP'
+                ),
+                this.fetchWithTimeout(
+                    this.fetchFromBloomberg(category, categoryKeywords),
+                    2500, 'Bloomberg'
+                ),
+                this.fetchWithTimeout(
+                    this.fetchFromGuardian(category, categoryKeywords),
+                    2500, 'Guardian'
+                ),
+                this.fetchWithTimeout(
+                    this.fetchFromAljazeeraRSS(category, categoryKeywords),
+                    2500, 'AlJazeera'
                 )
             ];
 
@@ -381,7 +397,7 @@ class NewsAPI {
             // ULTRA-FAST processing: Combine and process articles immediately
             let allArticles = [];
             let successfulAPIs = 0;
-            const apiNames = ['GNews', 'NewsData', 'NewsAPI', 'Mediastack', 'CurrentsAPI', 'BBC', 'Reuters', 'CNN'];
+            const apiNames = ['GNews-1', 'GNews-2', 'GNews-3', 'NewsData-1', 'NewsData-2', 'NewsAPI', 'Mediastack', 'CurrentsAPI', 'BBC', 'Reuters', 'CNN', 'AP', 'Bloomberg', 'Guardian', 'AlJazeera'];
             
             results.forEach((result, index) => {
                 if (result.status === 'fulfilled' && result.value && Array.isArray(result.value)) {
@@ -395,11 +411,11 @@ class NewsAPI {
 
             console.log(`⚡ PARALLEL FETCH: ${successfulAPIs}/${results.length} APIs succeeded`);
 
-            // OPTIMIZED duplicate removal with performance monitoring
+            // ULTRA-FAST duplicate removal with advanced algorithms
             const filterStartTime = performance.now();
-            const uniqueArticles = this.removeDuplicatesFast(allArticles);
+            const uniqueArticles = this.removeDuplicatesUltraFast(allArticles);
             const filterTime = (performance.now() - filterStartTime).toFixed(2);
-            console.log(`⚡ FAST filtering completed: ${filterTime}ms`);
+            console.log(`🚀 ULTRA-FAST filtering completed: ${filterTime}ms - Removed ${allArticles.length - uniqueArticles.length} duplicates`);
             
             // Fast category filtering
             const categoryFilteredArticles = this.filterByCategory(uniqueArticles, category, categoryKeywords);
@@ -492,7 +508,7 @@ class NewsAPI {
     }
 
     /**
-     * Fetch from NewsAPI.org with category-specific queries
+     * Fetch from NewsAPI.org with enhanced category-specific queries
      */
     async fetchFromNewsAPI(category, keywords, limit) {
         try {
@@ -500,11 +516,11 @@ class NewsAPI {
             
             if (['business', 'entertainment', 'health', 'science', 'sports', 'technology'].includes(category)) {
                 // Use category endpoint for supported categories
-                url = `https://newsapi.org/v2/top-headlines?category=${category}&language=en&pageSize=${Math.min(limit, 20)}&apiKey=${this.apiKeys.newsapi}`;
+                url = `https://newsapi.org/v2/top-headlines?category=${category}&language=en&pageSize=${Math.min(limit, 25)}&apiKey=${this.apiKeys.newsapi}`;
             } else {
                 // Use everything endpoint with query for other categories
-                const query = this.buildCategoryQuery(keywords);
-                url = `https://newsapi.org/v2/everything?q=${encodeURIComponent(query)}&language=en&sortBy=publishedAt&pageSize=${Math.min(limit, 20)}&apiKey=${this.apiKeys.newsapi}`;
+                const query = typeof keywords === 'string' ? keywords : this.buildCategoryQuery(keywords);
+                url = `https://newsapi.org/v2/everything?q=${encodeURIComponent(query)}&language=en&sortBy=publishedAt&pageSize=${Math.min(limit, 25)}&apiKey=${this.apiKeys.newsapi}`;
             }
             
             const response = await this.corsProxyFetch(url);
@@ -521,12 +537,12 @@ class NewsAPI {
     }
 
     /**
-     * Fetch from Mediastack API with category-specific queries
+     * Fetch from Mediastack API with enhanced category-specific queries
      */
     async fetchFromMediastack(category, keywords, limit) {
         try {
-            const query = this.buildCategoryQuery(keywords);
-            let url = `https://api.mediastack.com/v1/news?access_key=${this.apiKeys.mediastack}&keywords=${encodeURIComponent(query)}&languages=en&limit=${Math.min(limit, 25)}`;
+            const query = typeof keywords === 'string' ? keywords : this.buildCategoryQuery(keywords);
+            let url = `https://api.mediastack.com/v1/news?access_key=${this.apiKeys.mediastack}&keywords=${encodeURIComponent(query)}&languages=en&limit=${Math.min(limit, 25)}&sort=published_desc`;
             
             // Add category filter if supported
             const validCategories = ['business', 'entertainment', 'health', 'science', 'sports', 'technology'];
@@ -543,6 +559,27 @@ class NewsAPI {
             return this.formatMediastackArticles(data.data || [], category);
         } catch (error) {
             console.error('Mediastack fetch error:', error);
+            return [];
+        }
+    }
+
+    /**
+     * Fetch from CurrentsAPI with enhanced category-specific queries
+     */
+    async fetchFromCurrentsAPI(category, keywords, limit) {
+        try {
+            const query = typeof keywords === 'string' ? keywords : this.buildCategoryQuery(keywords);
+            let url = `https://api.currentsapi.services/v1/search?apiKey=${this.apiKeys.currentsapi}&keywords=${encodeURIComponent(query)}&language=en&page_size=${Math.min(limit, 20)}`;
+            
+            const response = await this.corsProxyFetch(url);
+            if (!response.ok) {
+                throw new Error(`CurrentsAPI error: ${response.status}`);
+            }
+            
+            const data = await response.json();
+            return this.formatCurrentsAPIArticles(data.news || [], category);
+        } catch (error) {
+            console.error('CurrentsAPI fetch error:', error);
             return [];
         }
     }
@@ -909,39 +946,154 @@ class NewsAPI {
     }
     
     /**
-     * OPTIMIZED duplicate removal for speed
+     * ULTRA-FAST duplicate removal with advanced algorithms
      */
-    removeDuplicatesFast(articles) {
+    removeDuplicatesUltraFast(articles) {
         if (!articles || articles.length === 0) return [];
         
         const seenUrls = new Set();
         const seenTitleHashes = new Set();
+        const seenContentFingerprints = new Set();
         const filtered = [];
+        const now = Date.now();
         
-        for (const article of articles) {
+        // Sort by publication date first (newest first) for better relevance
+        const sortedArticles = articles.sort((a, b) => {
+            const dateA = new Date(a.publishedAt || a.pubDate || now);
+            const dateB = new Date(b.publishedAt || b.pubDate || now);
+            return dateB - dateA;
+        });
+        
+        for (const article of sortedArticles) {
             // Skip invalid articles quickly
-            if (!article.title || !article.url || article.title.length < 10) continue;
+            if (!article.title || !article.url || article.title.length < 15) continue;
             
-            // Fast URL normalization
-            const normalizedUrl = article.url.toLowerCase()
-                .replace(/[?&](utm_|fbclid|gclid|ref|source|medium|campaign)[^&]*&?/g, '')
-                .replace(/[?&#].*$/, '');
+            // Skip articles older than 7 days for real-time focus
+            const articleDate = new Date(article.publishedAt || article.pubDate || now);
+            const daysDiff = (now - articleDate.getTime()) / (1000 * 60 * 60 * 24);
+            if (daysDiff > 7) continue;
             
+            // Ultra-fast URL normalization
+            const normalizedUrl = this.ultraFastUrlNormalize(article.url);
             if (seenUrls.has(normalizedUrl)) continue;
             
-            // Fast title hash for duplicate detection
-            const titleHash = this.fastHash(article.title.toLowerCase().replace(/[^\w\s]/g, ''));
-            if (seenTitleHashes.has(titleHash)) continue;
+            // Advanced title similarity detection
+            const titleFingerprint = this.createTitleFingerprint(article.title);
+            if (seenTitleHashes.has(titleFingerprint)) continue;
             
-            // Quick image validation and enhancement
+            // Content-based duplicate detection
+            const contentFingerprint = this.createContentFingerprint(article);
+            if (seenContentFingerprints.has(contentFingerprint)) continue;
+            
+            // Real-time image validation and enhancement
             article.urlToImage = this.validateAndEnhanceImageUrl(article.urlToImage);
             
+            // Ensure proper description length (50-150 words)
+            if (article.description) {
+                const words = article.description.split(' ');
+                if (words.length < 10) {
+                    // Generate from title if description too short
+                    article.description = this.generateDescriptionFromTitle(article.title);
+                } else if (words.length > 150) {
+                    // Trim if too long
+                    article.description = words.slice(0, 150).join(' ') + '...';
+                }
+            } else {
+                article.description = this.generateDescriptionFromTitle(article.title);
+            }
+            
             seenUrls.add(normalizedUrl);
-            seenTitleHashes.add(titleHash);
+            seenTitleHashes.add(titleFingerprint);
+            seenContentFingerprints.add(contentFingerprint);
             filtered.push(article);
         }
         
         return filtered;
+    }
+
+    /**
+     * Ultra-fast URL normalization
+     */
+    ultraFastUrlNormalize(url) {
+        return url.toLowerCase()
+            .replace(/[?&](utm_|fbclid|gclid|ref=|source=|medium=|campaign=|_hsenc|_hsmi)[^&]*&?/g, '')
+            .replace(/[?&#].*$/, '')
+            .replace(/\/$/, '');
+    }
+
+    /**
+     * Create advanced title fingerprint for similarity detection
+     */
+    createTitleFingerprint(title) {
+        // Remove common words and create semantic fingerprint
+        const stopWords = new Set(['the', 'a', 'an', 'and', 'or', 'but', 'in', 'on', 'at', 'to', 'for', 'of', 'with', 'by', 'as', 'is', 'was', 'are', 'were', 'be', 'been', 'have', 'has', 'had', 'do', 'does', 'did', 'will', 'would', 'could', 'should']);
+        
+        const words = title.toLowerCase()
+            .replace(/[^\w\s]/g, ' ')
+            .split(/\s+/)
+            .filter(word => word.length > 3 && !stopWords.has(word))
+            .sort();
+            
+        return this.fastHash(words.slice(0, 8).join('|'));
+    }
+
+    /**
+     * Create content-based fingerprint
+     */
+    createContentFingerprint(article) {
+        const content = `${article.title || ''} ${article.description || ''}`.toLowerCase();
+        const words = content.replace(/[^\w\s]/g, ' ')
+            .split(/\s+/)
+            .filter(word => word.length > 4)
+            .slice(0, 12)
+            .sort();
+            
+        return this.fastHash(words.join('|'));
+    }
+
+    /**
+     * Generate meaningful description from title
+     */
+    generateDescriptionFromTitle(title) {
+        const baseDescription = `${title}. `;
+        const category = this.detectCategoryFromTitle(title);
+        
+        const templates = {
+            sports: 'Get the latest updates on this sports story with detailed coverage and analysis of the events.',
+            technology: 'Discover the latest developments in technology and how they impact our digital world.',
+            business: 'Explore this business story with comprehensive market analysis and industry insights.',
+            health: 'Learn about this health-related development and its implications for public wellness.',
+            world: 'Stay informed about this international news story and its global significance.',
+            entertainment: 'Catch up on the latest entertainment news and celebrity updates from the industry.',
+            music: 'Dive into the latest music news, artist updates, and industry developments.',
+            default: 'Read the full story with detailed coverage and expert analysis of this developing news.'
+        };
+        
+        return baseDescription + (templates[category] || templates.default);
+    }
+
+    /**
+     * Detect category from title for better description generation
+     */
+    detectCategoryFromTitle(title) {
+        const lowerTitle = title.toLowerCase();
+        
+        const categoryKeywords = {
+            sports: ['game', 'match', 'player', 'team', 'score', 'win', 'championship', 'league', 'tournament'],
+            technology: ['tech', 'ai', 'artificial intelligence', 'app', 'software', 'digital', 'cyber', 'data'],
+            business: ['business', 'company', 'market', 'stock', 'economy', 'financial', 'investment', 'ceo'],
+            health: ['health', 'medical', 'medicine', 'doctor', 'hospital', 'disease', 'treatment', 'vaccine'],
+            entertainment: ['movie', 'film', 'actor', 'actress', 'celebrity', 'show', 'television', 'hollywood'],
+            music: ['music', 'song', 'album', 'artist', 'singer', 'band', 'concert', 'tour', 'grammy']
+        };
+        
+        for (const [category, keywords] of Object.entries(categoryKeywords)) {
+            if (keywords.some(keyword => lowerTitle.includes(keyword))) {
+                return category;
+            }
+        }
+        
+        return 'default';
     }
     
     /**
