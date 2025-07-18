@@ -3,6 +3,11 @@
  * This version will definitely show up and work immediately
  */
 
+// Hide page content immediately to prevent flash
+if (!sessionStorage.getItem('brightlens_splash_shown_simple')) {
+    document.write('<style>body{visibility:hidden;opacity:0;transition:opacity 0.3s;}</style>');
+}
+
 // Create splash screen immediately when script loads
 (function() {
     'use strict';
@@ -11,6 +16,11 @@
     const hasShown = sessionStorage.getItem('brightlens_splash_shown_simple');
     if (hasShown) {
         console.log('Splash already shown this session');
+        // Show page content if splash already shown
+        if (document.body) {
+            document.body.style.visibility = 'visible';
+            document.body.style.opacity = '1';
+        }
         return;
     }
     
@@ -65,19 +75,7 @@
                     transform-style: preserve-3d;
                 ">BRIGHTLENS NEWS</h1>
                 
-                <!-- Subtitle -->
-                <p style="
-                    font-size: clamp(1rem, 3vw, 1.8rem);
-                    color: rgba(255, 255, 255, 0.9);
-                    margin-top: 2rem;
-                    background: rgba(255, 255, 255, 0.1);
-                    backdrop-filter: blur(20px);
-                    padding: 1rem 2rem;
-                    border-radius: 50px;
-                    border: 1px solid rgba(255, 255, 255, 0.2);
-                    animation: subtitleFade 2s ease-out 1s forwards;
-                    opacity: 0;
-                ">Your Window to the World</p>
+
                 
                 <!-- Loading indicator -->
                 <div style="
@@ -135,10 +133,7 @@
                     50% { background-position: 100% 50%; }
                 }
                 
-                @keyframes subtitleFade {
-                    0% { opacity: 0; transform: translateY(30px); }
-                    100% { opacity: 1; transform: translateY(0); }
-                }
+
                 
                 @keyframes loadingFade {
                     0% { opacity: 0; transform: translateY(20px); }
@@ -168,15 +163,26 @@
         </div>
     `;
     
-    // Insert splash screen immediately
-    document.addEventListener('DOMContentLoaded', function() {
+    // Show splash function
+    const showSplash = function() {
+        // Ensure body exists
+        if (!document.body) {
+            setTimeout(showSplash, 10);
+            return;
+        }
+        
+        // Insert splash screen
         document.body.insertAdjacentHTML('afterbegin', splashHTML);
         console.log('✨ Guaranteed splash screen created');
+        
+        // Show body with splash on top
+        document.body.style.visibility = 'visible';
+        document.body.style.opacity = '1';
         
         // Mark as shown
         sessionStorage.setItem('brightlens_splash_shown_simple', Date.now().toString());
         
-        // Hide after 4 seconds
+        // Hide splash after 4 seconds
         setTimeout(function() {
             const splash = document.getElementById('brightlens-guaranteed-splash');
             if (splash) {
@@ -189,30 +195,13 @@
                 }, 1000);
             }
         }, 4000);
-    });
+    };
     
-    // If DOM is already loaded, run immediately
+    // Execute immediately if possible, otherwise wait for DOM
     if (document.readyState === 'loading') {
-        // DOM not ready, wait for it
+        document.addEventListener('DOMContentLoaded', showSplash);
     } else {
-        // DOM is ready, execute now
-        document.body.insertAdjacentHTML('afterbegin', splashHTML);
-        console.log('✨ Guaranteed splash screen created (immediate)');
-        
-        sessionStorage.setItem('brightlens_splash_shown_simple', Date.now().toString());
-        
-        setTimeout(function() {
-            const splash = document.getElementById('brightlens-guaranteed-splash');
-            if (splash) {
-                splash.style.transition = 'opacity 1s ease-out';
-                splash.style.opacity = '0';
-                
-                setTimeout(function() {
-                    splash.remove();
-                    console.log('✅ Splash screen completed');
-                }, 1000);
-            }
-        }, 4000);
+        showSplash();
     }
     
 })();
