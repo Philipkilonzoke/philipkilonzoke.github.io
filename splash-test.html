@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BrightLens News - Ultra Modern Splash Test</title>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    
+    <!-- New Ultra Modern Splash Screen CSS -->
+    <link rel="stylesheet" href="css/splash-screen.css">
+    
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+            margin: 0;
+            padding: 40px 20px;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .test-container {
+            max-width: 800px;
+            background: white;
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+        
+        .test-title {
+            font-size: 3rem;
+            font-weight: 900;
+            color: #1e293b;
+            margin-bottom: 1rem;
+            background: linear-gradient(45deg, #ff006e, #00bcd4, #00e676);
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .test-subtitle {
+            font-size: 1.3rem;
+            color: #64748b;
+            margin-bottom: 2rem;
+        }
+        
+        .test-button {
+            background: linear-gradient(45deg, #ff006e, #00bcd4);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 50px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin: 10px;
+            box-shadow: 0 10px 20px rgba(255, 0, 110, 0.3);
+        }
+        
+        .test-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 30px rgba(255, 0, 110, 0.4);
+        }
+        
+        .test-info {
+            background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%);
+            padding: 30px;
+            border-radius: 15px;
+            margin-top: 2rem;
+            text-align: left;
+        }
+        
+        .test-info h3 {
+            color: #1e293b;
+            margin-bottom: 1rem;
+            font-size: 1.5rem;
+        }
+        
+        .test-info ul {
+            color: #475569;
+            line-height: 1.8;
+            font-size: 1.1rem;
+        }
+        
+        .navigation-links {
+            margin-top: 2rem;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            justify-content: center;
+        }
+        
+        .navigation-links a {
+            display: inline-block;
+            padding: 12px 25px;
+            background: linear-gradient(45deg, #2563eb, #3b82f6);
+            color: white;
+            text-decoration: none;
+            border-radius: 25px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(37, 99, 235, 0.3);
+        }
+        
+        .navigation-links a:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(37, 99, 235, 0.4);
+        }
+        
+        .status-display {
+            background: linear-gradient(45deg, #ecfdf5, #d1fae5);
+            border: 2px solid #10b981;
+            border-radius: 15px;
+            padding: 20px;
+            margin-top: 2rem;
+            font-family: 'Inter', monospace;
+        }
+        
+        .status-display h4 {
+            color: #065f46;
+            margin-bottom: 10px;
+        }
+        
+        .status-display pre {
+            background: rgba(255, 255, 255, 0.7);
+            padding: 15px;
+            border-radius: 10px;
+            font-size: 0.9rem;
+            color: #1e40af;
+            overflow-x: auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1 class="test-title">🚀 Ultra Modern Splash Test</h1>
+        <p class="test-subtitle">Experience the Revolutionary 3D Animated Splash Screen</p>
+        
+        <button class="test-button" onclick="showSplash()">🎬 Show Splash Screen</button>
+        <button class="test-button" onclick="clearSession()">🔄 Clear Session</button>
+        <button class="test-button" onclick="checkStatus()">📊 Check Status</button>
+        
+        <div class="test-info">
+            <h3>🌟 New Ultra Modern Features:</h3>
+            <ul>
+                <li><strong>🎨 Holographic Text:</strong> Revolutionary gradient text with multiple color transitions</li>
+                <li><strong>⭐ Cosmic Background:</strong> Animated starfield with particle effects</li>
+                <li><strong>🔮 3D Orbital Rings:</strong> Rotating geometric elements for depth</li>
+                <li><strong>💎 Glassmorphism UI:</strong> Modern frosted glass effects</li>
+                <li><strong>⚡ GPU Acceleration:</strong> Optimized for smooth 60fps animations</li>
+                <li><strong>📱 Responsive Design:</strong> Perfect on all devices and screen sizes</li>
+                <li><strong>♿ Accessibility:</strong> Respects reduced motion preferences</li>
+                <li><strong>🎯 Smart Session:</strong> Shows only when needed, not repeatedly</li>
+            </ul>
+        </div>
+        
+        <div class="navigation-links">
+            <a href="index.html">🏠 Home</a>
+            <a href="technology.html">💻 Technology</a>
+            <a href="business.html">💼 Business</a>
+            <a href="world.html">🌍 World</a>
+            <a href="latest.html">⚡ Latest</a>
+            <a href="sports.html">⚽ Sports</a>
+        </div>
+        
+        <div class="status-display">
+            <h4>📊 Splash Screen Status</h4>
+            <pre id="statusOutput">Loading status...</pre>
+        </div>
+        
+        <div style="margin-top: 2rem; font-size: 0.9rem; color: #64748b;">
+            💡 <strong>Tip:</strong> Open browser console to see detailed logs and performance metrics
+        </div>
+    </div>
+
+    <!-- Load the new ultra modern splash screen system -->
+    <script src="js/splash-screen.js"></script>
+    
+    <script>
+        function showSplash() {
+            updateStatus('Manual splash trigger initiated');
+            if (window.BrightLensSplash && window.BrightLensSplash.instance) {
+                window.BrightLensSplash.forceShow();
+            } else {
+                // Fallback - clear session and reload
+                sessionStorage.removeItem('brightlens_modern_splash_shown');
+                location.reload();
+            }
+        }
+        
+        function clearSession() {
+            updateStatus('Session cleared manually');
+            if (window.BrightLensSplash) {
+                window.BrightLensSplash.clearSession();
+            } else {
+                sessionStorage.removeItem('brightlens_modern_splash_shown');
+            }
+            checkStatus();
+            alert('✅ Session cleared! Splash will show on next navigation or refresh.');
+        }
+        
+        function checkStatus() {
+            const hasShown = window.BrightLensSplash ? 
+                window.BrightLensSplash.hasShown() : 
+                !!sessionStorage.getItem('brightlens_modern_splash_shown');
+            
+            const lastShown = window.BrightLensSplash ? 
+                window.BrightLensSplash.getLastShown() : null;
+            
+            const status = [
+                `🎭 Splash Status: ${hasShown ? 'Already shown this session' : 'Ready to show'}`,
+                `🕒 Last Shown: ${lastShown ? lastShown.toLocaleString() : 'Never this session'}`,
+                `🔧 Session Key: brightlens_modern_splash_shown`,
+                `💾 Session Value: ${sessionStorage.getItem('brightlens_modern_splash_shown') || 'null'}`,
+                `🌐 Current Page: ${window.location.pathname}`,
+                `⚡ Performance: ${performance.now().toFixed(2)}ms since page load`,
+                `📱 GPU Support: ${checkGPUSupport() ? 'Available' : 'Not available'}`,
+                `♿ Reduced Motion: ${window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'Enabled' : 'Disabled'}`
+            ];
+            
+            updateStatus(status.join('\n'));
+        }
+        
+        function updateStatus(text) {
+            document.getElementById('statusOutput').textContent = text;
+        }
+        
+        function checkGPUSupport() {
+            const canvas = document.createElement('canvas');
+            const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
+            return !!gl;
+        }
+        
+        // Auto-update status on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('🎯 Ultra Modern Splash Test Page loaded');
+            setTimeout(checkStatus, 500); // Wait for splash system to initialize
+            
+            // Update status every 3 seconds
+            setInterval(checkStatus, 3000);
+        });
+        
+        // Listen for splash completion events
+        document.addEventListener('brightlensSplashComplete', function(event) {
+            console.log('🎉 Splash screen completed:', event.detail);
+            updateStatus('🎉 Splash screen completed successfully!\nDuration: ' + event.detail.duration + 'ms');
+            setTimeout(checkStatus, 1000);
+        });
+        
+        // Log navigation clicks
+        document.addEventListener('click', function(e) {
+            if (e.target.tagName === 'A' && e.target.href) {
+                const href = e.target.getAttribute('href');
+                console.log(`🔗 Navigation to: ${href}`);
+                updateStatus(`🔗 Navigating to: ${href}\nSplash may appear based on session state...`);
+            }
+        });
+    </script>
+</body>
+</html>

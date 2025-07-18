@@ -22,8 +22,7 @@
         :root{--primary-color:#2563eb;--background-color:#ffffff;--text-color:#1e293b;--surface-color:#f8fafc;--border-color:#e2e8f0}
         body{font-family:'Inter',system-ui,sans-serif;background:var(--background-color);color:var(--text-color);line-height:1.6}
         .header{background:var(--surface-color);border-bottom:1px solid var(--border-color);position:sticky;top:0;z-index:100}
-        /* Critical splash screen styles for immediate rendering */
-        .splash-screen{position:fixed;top:0;left:0;width:100vw;height:100vh;background:linear-gradient(135deg,#0f0f23 0%,#1a1a2e 25%,#16213e 50%,#0f3460 75%,#533483 100%);display:flex;align-items:center;justify-content:center;z-index:99999;overflow:hidden;perspective:1200px;will-change:opacity,transform;backface-visibility:hidden}
+
     </style>
     <!-- Critical CSS Files -->
     <link rel="preload" href="css/splash-screen.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
@@ -350,7 +349,6 @@
             window.categoryNews = new CategoryNews('technology');
         });
     </script>
-    <!-- Enhanced 3D Splash Screen -->
     <script src="js/splash-screen.js"></script>
 </body>
 </html>
