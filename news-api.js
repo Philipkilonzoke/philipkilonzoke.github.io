@@ -89,7 +89,7 @@ class NewsAPI {
                 }
             });
 
-            console.log(`Fetched from ${successfulAPIs}/5 APIs for ${category}`);
+            console.log(`Fetched from ${successfulAPIs}/${results.length} sources for ${category}`);
 
             // Enhanced duplicate removal and sorting
             const uniqueArticles = this.removeDuplicates(allArticles);
@@ -529,6 +529,532 @@ class NewsAPI {
         ];
         
         return templates[Math.floor(Math.random() * templates.length)];
+    }
+
+    /**
+     * Fetch from BBC RSS feeds (real-time)
+     */
+    async fetchFromBBC(category, keywords) {
+        try {
+            let rssUrl = '';
+            switch(category) {
+                case 'world':
+                    rssUrl = 'https://feeds.bbci.co.uk/news/world/rss.xml';
+                    break;
+                case 'technology':
+                    rssUrl = 'https://feeds.bbci.co.uk/news/technology/rss.xml';
+                    break;
+                case 'business':
+                    rssUrl = 'https://feeds.bbci.co.uk/news/business/rss.xml';
+                    break;
+                case 'health':
+                    rssUrl = 'https://feeds.bbci.co.uk/news/health/rss.xml';
+                    break;
+                case 'entertainment':
+                    rssUrl = 'https://feeds.bbci.co.uk/news/entertainment_and_arts/rss.xml';
+                    break;
+                case 'kenya':
+                case 'latest':
+                    rssUrl = 'https://feeds.bbci.co.uk/news/world/africa/rss.xml';
+                    break;
+                default:
+                    rssUrl = 'https://feeds.bbci.co.uk/news/rss.xml';
+            }
+
+            const response = await fetch(`https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(rssUrl)}`);
+            if (!response.ok) throw new Error('BBC RSS fetch failed');
+            
+            const data = await response.json();
+            if (data.items) {
+                return data.items.slice(0, 8).map(item => ({
+                    title: item.title,
+                    description: this.enhanceDescription(item.description || item.content, item.title, 'BBC'),
+                    url: item.link,
+                    urlToImage: item.enclosure?.link || item.thumbnail || 'https://images.unsplash.com/photo-1504711434969-e33886168f5c?w=400',
+                    publishedAt: item.pubDate,
+                    source: 'BBC',
+                    category: category
+                })).filter(article => article.title && article.url);
+            }
+        } catch (error) {
+            console.warn('BBC RSS fetch failed:', error.message);
+        }
+        return [];
+    }
+
+    /**
+     * Fetch from Reuters RSS feeds (real-time)
+     */
+    async fetchFromReuters(category, keywords) {
+        try {
+            let rssUrl = '';
+            switch(category) {
+                case 'world':
+                    rssUrl = 'https://www.reuters.com/rssFeed/worldNews';
+                    break;
+                case 'technology':
+                    rssUrl = 'https://www.reuters.com/rssFeed/technologyNews';
+                    break;
+                case 'business':
+                    rssUrl = 'https://www.reuters.com/rssFeed/businessNews';
+                    break;
+                case 'sports':
+                    rssUrl = 'https://www.reuters.com/rssFeed/sportsNews';
+                    break;
+                case 'entertainment':
+                    rssUrl = 'https://www.reuters.com/rssFeed/entertainmentNews';
+                    break;
+                default:
+                    rssUrl = 'https://www.reuters.com/rssFeed/topNews';
+            }
+
+            const response = await fetch(`https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(rssUrl)}`);
+            if (!response.ok) throw new Error('Reuters RSS fetch failed');
+            
+            const data = await response.json();
+            if (data.items) {
+                return data.items.slice(0, 8).map(item => ({
+                    title: item.title,
+                    description: this.enhanceDescription(item.description || item.content, item.title, 'Reuters'),
+                    url: item.link,
+                    urlToImage: item.enclosure?.link || item.thumbnail || 'https://images.unsplash.com/photo-1495020689067-958852a7765e?w=400',
+                    publishedAt: item.pubDate,
+                    source: 'Reuters',
+                    category: category
+                })).filter(article => article.title && article.url);
+            }
+        } catch (error) {
+            console.warn('Reuters RSS fetch failed:', error.message);
+        }
+        return [];
+    }
+
+    /**
+     * Fetch from CNN RSS feeds (real-time)
+     */
+    async fetchFromCNN(category, keywords) {
+        try {
+            let rssUrl = '';
+            switch(category) {
+                case 'world':
+                    rssUrl = 'http://rss.cnn.com/rss/edition_world.rss';
+                    break;
+                case 'technology':
+                    rssUrl = 'http://rss.cnn.com/rss/edition_technology.rss';
+                    break;
+                case 'business':
+                    rssUrl = 'http://rss.cnn.com/rss/money_latest.rss';
+                    break;
+                case 'sports':
+                    rssUrl = 'http://rss.cnn.com/rss/edition_sport.rss';
+                    break;
+                case 'entertainment':
+                    rssUrl = 'http://rss.cnn.com/rss/edition_entertainment.rss';
+                    break;
+                default:
+                    rssUrl = 'http://rss.cnn.com/rss/edition.rss';
+            }
+
+            const response = await fetch(`https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(rssUrl)}`);
+            if (!response.ok) throw new Error('CNN RSS fetch failed');
+            
+            const data = await response.json();
+            if (data.items) {
+                return data.items.slice(0, 8).map(item => ({
+                    title: item.title,
+                    description: this.enhanceDescription(item.description || item.content, item.title, 'CNN'),
+                    url: item.link,
+                    urlToImage: item.enclosure?.link || item.thumbnail || 'https://images.unsplash.com/photo-1504384308090-c894fdcc538d?w=400',
+                    publishedAt: item.pubDate,
+                    source: 'CNN',
+                    category: category
+                })).filter(article => article.title && article.url);
+            }
+        } catch (error) {
+            console.warn('CNN RSS fetch failed:', error.message);
+        }
+        return [];
+    }
+
+    /**
+     * Fetch from The Guardian RSS feeds (real-time)
+     */
+    async fetchFromGuardian(category, keywords) {
+        try {
+            let rssUrl = '';
+            switch(category) {
+                case 'world':
+                    rssUrl = 'https://www.theguardian.com/world/rss';
+                    break;
+                case 'technology':
+                    rssUrl = 'https://www.theguardian.com/technology/rss';
+                    break;
+                case 'business':
+                    rssUrl = 'https://www.theguardian.com/business/rss';
+                    break;
+                case 'sports':
+                    rssUrl = 'https://www.theguardian.com/sport/rss';
+                    break;
+                case 'lifestyle':
+                    rssUrl = 'https://www.theguardian.com/lifeandstyle/rss';
+                    break;
+                case 'music':
+                    rssUrl = 'https://www.theguardian.com/music/rss';
+                    break;
+                default:
+                    rssUrl = 'https://www.theguardian.com/international/rss';
+            }
+
+            const response = await fetch(`https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(rssUrl)}`);
+            if (!response.ok) throw new Error('Guardian RSS fetch failed');
+            
+            const data = await response.json();
+            if (data.items) {
+                return data.items.slice(0, 8).map(item => ({
+                    title: item.title,
+                    description: this.enhanceDescription(item.description || item.content, item.title, 'The Guardian'),
+                    url: item.link,
+                    urlToImage: item.enclosure?.link || item.thumbnail || 'https://images.unsplash.com/photo-1526304640581-d334cdbbf45e?w=400',
+                    publishedAt: item.pubDate,
+                    source: 'The Guardian',
+                    category: category
+                })).filter(article => article.title && article.url);
+            }
+        } catch (error) {
+            console.warn('Guardian RSS fetch failed:', error.message);
+        }
+        return [];
+    }
+
+    /**
+     * Fetch from Associated Press RSS feeds (real-time)
+     */
+    async fetchFromAP(category, keywords) {
+        try {
+            let rssUrl = '';
+            switch(category) {
+                case 'world':
+                    rssUrl = 'https://apnews.com/apf-International';
+                    break;
+                case 'technology':
+                    rssUrl = 'https://apnews.com/apf-Technology';
+                    break;
+                case 'business':
+                    rssUrl = 'https://apnews.com/apf-business';
+                    break;
+                case 'sports':
+                    rssUrl = 'https://apnews.com/apf-sports';
+                    break;
+                case 'entertainment':
+                    rssUrl = 'https://apnews.com/apf-entertainment';
+                    break;
+                case 'health':
+                    rssUrl = 'https://apnews.com/apf-Health';
+                    break;
+                default:
+                    rssUrl = 'https://apnews.com/index.rss';
+            }
+
+            const response = await fetch(`https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(rssUrl)}`);
+            if (!response.ok) throw new Error('AP RSS fetch failed');
+            
+            const data = await response.json();
+            if (data.items) {
+                return data.items.slice(0, 8).map(item => ({
+                    title: item.title,
+                    description: this.enhanceDescription(item.description || item.content, item.title, 'Associated Press'),
+                    url: item.link,
+                    urlToImage: item.enclosure?.link || item.thumbnail || 'https://images.unsplash.com/photo-1585829365295-ab7cd400c167?w=400',
+                    publishedAt: item.pubDate,
+                    source: 'Associated Press',
+                    category: category
+                })).filter(article => article.title && article.url);
+            }
+        } catch (error) {
+            console.warn('AP RSS fetch failed:', error.message);
+        }
+        return [];
+    }
+
+    /**
+     * Fetch from category-specific sources (real-time)
+     */
+    async fetchFromCategorySpecificSources(category, keywords) {
+        try {
+            switch(category) {
+                case 'kenya':
+                    return await this.fetchKenyanSources();
+                case 'technology':
+                    return await this.fetchTechSources();
+                case 'business':
+                    return await this.fetchBusinessSources();
+                case 'sports':
+                    return await this.fetchSportsSources();
+                case 'music':
+                    return await this.fetchMusicSources();
+                case 'health':
+                    return await this.fetchHealthSources();
+                case 'lifestyle':
+                    return await this.fetchLifestyleSources();
+                default:
+                    return [];
+            }
+        } catch (error) {
+            console.warn(`Category-specific sources failed for ${category}:`, error.message);
+        }
+        return [];
+    }
+
+    /**
+     * Fetch from Kenyan news sources (real-time)
+     */
+    async fetchKenyanSources() {
+        const kenyanRSSFeeds = [
+            'https://www.nation.co.ke/kenya/rss',
+            'https://www.standardmedia.co.ke/rss/headlines.php',
+            'https://www.citizen.digital/rss'
+        ];
+
+        const articles = [];
+        for (const rssUrl of kenyanRSSFeeds) {
+            try {
+                const response = await fetch(`https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(rssUrl)}`);
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data.items) {
+                        const sourceArticles = data.items.slice(0, 5).map(item => ({
+                            title: item.title,
+                            description: this.enhanceDescription(item.description || item.content, item.title, 'Kenyan Media'),
+                            url: item.link,
+                            urlToImage: item.enclosure?.link || item.thumbnail || 'https://images.unsplash.com/photo-1609198092458-38a293c7ac4b?w=400',
+                            publishedAt: item.pubDate,
+                            source: 'Kenyan News',
+                            category: 'kenya'
+                        })).filter(article => article.title && article.url);
+                        articles.push(...sourceArticles);
+                    }
+                }
+            } catch (error) {
+                console.warn('Kenyan RSS source failed:', error.message);
+            }
+        }
+        return articles;
+    }
+
+    /**
+     * Fetch from technology sources (real-time)
+     */
+    async fetchTechSources() {
+        const techRSSFeeds = [
+            'https://techcrunch.com/feed/',
+            'https://www.wired.com/feed/rss',
+            'https://www.theverge.com/rss/index.xml'
+        ];
+
+        const articles = [];
+        for (const rssUrl of techRSSFeeds) {
+            try {
+                const response = await fetch(`https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(rssUrl)}`);
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data.items) {
+                        const sourceArticles = data.items.slice(0, 5).map(item => ({
+                            title: item.title,
+                            description: this.enhanceDescription(item.description || item.content, item.title, 'Tech Media'),
+                            url: item.link,
+                            urlToImage: item.enclosure?.link || item.thumbnail || 'https://images.unsplash.com/photo-1518709268805-4e9042af2176?w=400',
+                            publishedAt: item.pubDate,
+                            source: 'Tech News',
+                            category: 'technology'
+                        })).filter(article => article.title && article.url);
+                        articles.push(...sourceArticles);
+                    }
+                }
+            } catch (error) {
+                console.warn('Tech RSS source failed:', error.message);
+            }
+        }
+        return articles;
+    }
+
+    /**
+     * Fetch from business sources (real-time)
+     */
+    async fetchBusinessSources() {
+        const businessRSSFeeds = [
+            'https://feeds.bloomberg.com/markets/news.rss',
+            'https://www.ft.com/rss/home/uk',
+            'https://feeds.fortune.com/fortune/headlines'
+        ];
+
+        const articles = [];
+        for (const rssUrl of businessRSSFeeds) {
+            try {
+                const response = await fetch(`https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(rssUrl)}`);
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data.items) {
+                        const sourceArticles = data.items.slice(0, 5).map(item => ({
+                            title: item.title,
+                            description: this.enhanceDescription(item.description || item.content, item.title, 'Business Media'),
+                            url: item.link,
+                            urlToImage: item.enclosure?.link || item.thumbnail || 'https://images.unsplash.com/photo-1611224923853-80b023f02d71?w=400',
+                            publishedAt: item.pubDate,
+                            source: 'Business News',
+                            category: 'business'
+                        })).filter(article => article.title && article.url);
+                        articles.push(...sourceArticles);
+                    }
+                }
+            } catch (error) {
+                console.warn('Business RSS source failed:', error.message);
+            }
+        }
+        return articles;
+    }
+
+    /**
+     * Fetch from sports sources (real-time)
+     */
+    async fetchSportsSources() {
+        const sportsRSSFeeds = [
+            'https://www.espn.com/espn/rss/news',
+            'https://sports.yahoo.com/rss/',
+            'https://www.skysports.com/rss/12040'
+        ];
+
+        const articles = [];
+        for (const rssUrl of sportsRSSFeeds) {
+            try {
+                const response = await fetch(`https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(rssUrl)}`);
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data.items) {
+                        const sourceArticles = data.items.slice(0, 5).map(item => ({
+                            title: item.title,
+                            description: this.enhanceDescription(item.description || item.content, item.title, 'Sports Media'),
+                            url: item.link,
+                            urlToImage: item.enclosure?.link || item.thumbnail || 'https://images.unsplash.com/photo-1461896836934-ffe607ba8211?w=400',
+                            publishedAt: item.pubDate,
+                            source: 'Sports News',
+                            category: 'sports'
+                        })).filter(article => article.title && article.url);
+                        articles.push(...sourceArticles);
+                    }
+                }
+            } catch (error) {
+                console.warn('Sports RSS source failed:', error.message);
+            }
+        }
+        return articles;
+    }
+
+    /**
+     * Fetch from music sources (real-time)
+     */
+    async fetchMusicSources() {
+        const musicRSSFeeds = [
+            'https://pitchfork.com/rss/reviews/albums/',
+            'https://www.rollingstone.com/music/rss/',
+            'https://www.billboard.com/feed/'
+        ];
+
+        const articles = [];
+        for (const rssUrl of musicRSSFeeds) {
+            try {
+                const response = await fetch(`https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(rssUrl)}`);
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data.items) {
+                        const sourceArticles = data.items.slice(0, 5).map(item => ({
+                            title: item.title,
+                            description: this.enhanceDescription(item.description || item.content, item.title, 'Music Media'),
+                            url: item.link,
+                            urlToImage: item.enclosure?.link || item.thumbnail || 'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=400',
+                            publishedAt: item.pubDate,
+                            source: 'Music News',
+                            category: 'music'
+                        })).filter(article => article.title && article.url);
+                        articles.push(...sourceArticles);
+                    }
+                }
+            } catch (error) {
+                console.warn('Music RSS source failed:', error.message);
+            }
+        }
+        return articles;
+    }
+
+    /**
+     * Fetch from health sources (real-time)
+     */
+    async fetchHealthSources() {
+        const healthRSSFeeds = [
+            'https://www.webmd.com/rss/rss.aspx?RSSSource=RSS_PUBLIC',
+            'https://www.healthline.com/rss',
+            'https://feeds.medicalnewstoday.com/medicalnewstoday'
+        ];
+
+        const articles = [];
+        for (const rssUrl of healthRSSFeeds) {
+            try {
+                const response = await fetch(`https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(rssUrl)}`);
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data.items) {
+                        const sourceArticles = data.items.slice(0, 5).map(item => ({
+                            title: item.title,
+                            description: this.enhanceDescription(item.description || item.content, item.title, 'Health Media'),
+                            url: item.link,
+                            urlToImage: item.enclosure?.link || item.thumbnail || 'https://images.unsplash.com/photo-1559757175-0eb30cd8c063?w=400',
+                            publishedAt: item.pubDate,
+                            source: 'Health News',
+                            category: 'health'
+                        })).filter(article => article.title && article.url);
+                        articles.push(...sourceArticles);
+                    }
+                }
+            } catch (error) {
+                console.warn('Health RSS source failed:', error.message);
+            }
+        }
+        return articles;
+    }
+
+    /**
+     * Fetch from lifestyle sources (real-time)
+     */
+    async fetchLifestyleSources() {
+        const lifestyleRSSFeeds = [
+            'https://www.vogue.com/feed/rss',
+            'https://www.elle.com/rss/all.xml/',
+            'https://www.cosmopolitan.com/rss/all.xml/'
+        ];
+
+        const articles = [];
+        for (const rssUrl of lifestyleRSSFeeds) {
+            try {
+                const response = await fetch(`https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(rssUrl)}`);
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data.items) {
+                        const sourceArticles = data.items.slice(0, 5).map(item => ({
+                            title: item.title,
+                            description: this.enhanceDescription(item.description || item.content, item.title, 'Lifestyle Media'),
+                            url: item.link,
+                            urlToImage: item.enclosure?.link || item.thumbnail || 'https://images.unsplash.com/photo-1445205170230-053b83016050?w=400',
+                            publishedAt: item.pubDate,
+                            source: 'Lifestyle News',
+                            category: 'lifestyle'
+                        })).filter(article => article.title && article.url);
+                        articles.push(...sourceArticles);
+                    }
+                }
+            } catch (error) {
+                console.warn('Lifestyle RSS source failed:', error.message);
+            }
+        }
+        return articles;
     }
 
     /**
