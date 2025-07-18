@@ -430,33 +430,133 @@ class CategoryNews {
     }
 
     async loadNews() {
-        if (this.isLoading) return;
+        this.showNewsLoading();
+        this.hideNewsError();
         
         this.isLoading = true;
-        this.showNewsLoading();
         
         try {
+            const startTime = performance.now();
             console.log(`Loading ${this.category} news...`);
-            // Request more articles for sports category for comprehensive coverage
-            const articleLimit = this.category === 'sports' ? 250 : 50;
-            const articles = await this.newsAPI.fetchNews(this.category, articleLimit);
+            
+            // Fetch articles with enhanced parameters for sports
+            const limit = this.category === 'sports' ? 50 : 30; // More articles for sports to account for filtering
+            const articles = await this.newsAPI.fetchNews(this.category, limit);
             
             if (articles && articles.length > 0) {
-                this.allArticles = articles;
+                // Enhanced duplicate removal for sports category
+                if (this.category === 'sports') {
+                    // Apply additional sports-specific filtering
+                    this.allArticles = this.filterSportsArticles(articles);
+                } else {
+                    this.allArticles = this.newsAPI.removeDuplicates(articles);
+                }
+                
+                // For sports, apply subcategory filtering if needed
+                if (this.category === 'sports') {
+                    this.filterArticlesBySport();
+                } else {
+                    this.displayedArticles = this.allArticles.slice(0, this.articlesPerPage);
+                }
+                
                 this.renderNews();
-                this.updateArticleCount();
-                this.updateLastUpdated();
-                this.showNewsGrid();
-                console.log(`${this.category} news loaded successfully:`, articles.length, 'articles');
+                this.hideNewsLoading();
+                
+                const loadTime = (performance.now() - startTime).toFixed(2);
+                console.log(`✅ ${this.category} news loaded: ${loadTime}ms - ${this.allArticles.length} unique articles`);
             } else {
-                this.showNewsError('No articles found for this category. Please try again later.');
+                throw new Error('No articles found');
             }
         } catch (error) {
-            console.error('Error loading news:', error);
-            this.showNewsError('Failed to load news. Please check your internet connection and try again.');
+            console.error(`Error loading ${this.category} news:`, error);
+            this.hideNewsLoading();
+            this.showNewsError(`Unable to load ${this.category} news. Please try again.`);
         } finally {
             this.isLoading = false;
         }
+    }
+    
+    /**
+     * Enhanced sports articles filtering with strict duplicate removal
+     */
+    filterSportsArticles(articles) {
+        // First apply the standard duplicate removal
+        let filtered = this.newsAPI.removeDuplicates(articles);
+        
+        // Additional sports-specific filtering
+        filtered = filtered.filter(article => {
+            const title = article.title.toLowerCase();
+            const description = (article.description || '').toLowerCase();
+            const text = `${title} ${description}`;
+            
+            // Must contain sports-specific content
+            const sportsKeywords = [
+                'game', 'match', 'score', 'team', 'player', 'win', 'loss', 'championship',
+                'league', 'tournament', 'season', 'coach', 'athlete', 'sport', 'play',
+                'goal', 'point', 'victory', 'defeat', 'competition', 'olympic', 'final',
+                'football', 'soccer', 'basketball', 'baseball', 'tennis', 'golf', 'hockey',
+                'nfl', 'nba', 'mlb', 'nhl', 'fifa', 'uefa', 'premier league', 'champions league'
+            ];
+            
+            const hasValidSportsContent = sportsKeywords.some(keyword => text.includes(keyword));
+            
+            // Exclude non-sports content
+            const excludeKeywords = [
+                'politics', 'election', 'government', 'policy', 'stock market', 'business deal',
+                'crypto', 'bitcoin', 'economy', 'merger', 'acquisition', 'movie', 'film',
+                'album', 'song', 'concert', 'celebrity gossip', 'fashion', 'beauty'
+            ];
+            
+            const hasExcludedContent = excludeKeywords.some(keyword => text.includes(keyword));
+            
+            return hasValidSportsContent && !hasExcludedContent;
+        });
+        
+        // Remove articles with duplicate images (common in sports reporting)
+        const seenImageHashes = new Set();
+        filtered = filtered.filter(article => {
+            if (!article.urlToImage) return true;
+            
+            const imageHash = this.createImageHash(article.urlToImage);
+            if (seenImageHashes.has(imageHash)) {
+                console.log(`🔄 Sports article with duplicate image filtered: ${article.title}`);
+                return false;
+            }
+            
+            seenImageHashes.add(imageHash);
+            return true;
+        });
+        
+        // Sort by recency and relevance
+        filtered.sort((a, b) => {
+            const aDate = new Date(a.publishedAt);
+            const bDate = new Date(b.publishedAt);
+            return bDate - aDate; // Most recent first
+        });
+        
+        console.log(`🏆 Sports filtering: ${articles.length} → ${filtered.length} unique sports articles`);
+        return filtered;
+    }
+    
+    /**
+     * Create image hash for duplicate detection (same as in news-api.js)
+     */
+    createImageHash(imageUrl) {
+        if (!imageUrl || imageUrl === 'null' || imageUrl === 'undefined') return null;
+        
+        const normalizedUrl = imageUrl.toLowerCase()
+            .replace(/[?&](w|h|width|height|q|quality|format|crop|resize)[^&]*&?/g, '')
+            .replace(/[?&#].*$/, '')
+            .replace(/\/$/, '');
+        
+        let hash = 0;
+        for (let i = 0; i < normalizedUrl.length; i++) {
+            const char = normalizedUrl.charCodeAt(i);
+            hash = ((hash << 5) - hash) + char;
+            hash = hash & hash;
+        }
+        
+        return hash.toString();
     }
 
     renderNews() {

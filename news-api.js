@@ -398,7 +398,7 @@ class NewsAPI {
     }
 
     /**
-     * ULTRA-ENHANCED duplicate removal - ZERO duplicates guaranteed with advanced sports filtering
+     * ULTRA-ENHANCED duplicate removal - ZERO duplicates guaranteed with image-based detection
      */
     removeDuplicates(articles) {
         if (!articles || articles.length === 0) return [];
@@ -408,6 +408,7 @@ class NewsAPI {
         const seenTitles = new Set();
         const seenContent = new Set();
         const seenImages = new Set();
+        const seenImageHashes = new Set();
         const titleTokens = new Map(); // Store tokenized titles for advanced comparison
         
         articles.forEach(article => {
@@ -436,6 +437,9 @@ class NewsAPI {
             // Create enhanced content fingerprint
             const contentFingerprint = this.createAdvancedContentFingerprint(article);
             
+            // Create image hash for duplicate image detection
+            const imageHash = this.createImageHash(article.urlToImage);
+            
             // Tokenize title for advanced similarity detection
             const titleWords = normalizedTitle.split(' ').filter(word => 
                 word.length > 2 && !['the', 'and', 'or', 'but', 'in', 'on', 'at', 'to', 'for', 'of', 'with', 'by'].includes(word)
@@ -457,11 +461,21 @@ class NewsAPI {
                 return;
             }
             
+            // NEW: Image-based duplicate detection
+            if (imageHash && seenImageHashes.has(imageHash)) {
+                console.log(`🔄 Duplicate image filtered: ${article.title}`);
+                return;
+            }
+            
             // Advanced similarity check using title tokens
             let isSimilar = false;
             for (const [existingTokens, existingArticle] of titleTokens.entries()) {
                 const similarity = this.calculateAdvancedTokenSimilarity(titleWords, existingTokens);
-                if (similarity > 0.75) { // Very strict similarity threshold
+                
+                // Extra strict similarity for sports content
+                const similarityThreshold = article.category === 'sports' ? 0.65 : 0.75;
+                
+                if (similarity > similarityThreshold) {
                     console.log(`🔄 Similar content filtered (${(similarity * 100).toFixed(1)}% similar): ${article.title}`);
                     
                     // Keep the article from more authoritative source or more recent
@@ -487,9 +501,17 @@ class NewsAPI {
             }
             
             // Special sports content validation for sports category
-            if (article.category === 'sports' && !this.isValidSportsContent(article)) {
-                console.log(`🔄 Invalid sports content filtered: ${article.title}`);
-                return;
+            if (article.category === 'sports') {
+                if (!this.isValidSportsContent(article)) {
+                    console.log(`🔄 Invalid sports content filtered: ${article.title}`);
+                    return;
+                }
+                
+                // Extra sports duplicate check - check for similar sports events
+                if (this.isDuplicateSportsEvent(article, filtered)) {
+                    console.log(`🔄 Duplicate sports event filtered: ${article.title}`);
+                    return;
+                }
             }
             
             if (!isSimilar) {
@@ -500,6 +522,7 @@ class NewsAPI {
                 seenUrls.add(normalizedUrl);
                 seenTitles.add(normalizedTitle);
                 seenContent.add(contentFingerprint);
+                if (imageHash) seenImageHashes.add(imageHash);
                 titleTokens.set(titleWords, article);
                 
                 filtered.push(article);
@@ -510,6 +533,103 @@ class NewsAPI {
         return filtered;
     }
     
+    /**
+     * Create image hash for duplicate detection
+     */
+    createImageHash(imageUrl) {
+        if (!imageUrl || imageUrl === 'null' || imageUrl === 'undefined') return null;
+        
+        // Normalize image URL by removing parameters and fragments
+        const normalizedUrl = imageUrl.toLowerCase()
+            .replace(/[?&](w|h|width|height|q|quality|format|crop|resize)[^&]*&?/g, '')
+            .replace(/[?&#].*$/, '')
+            .replace(/\/$/, '');
+        
+        // Create simple hash from normalized URL
+        let hash = 0;
+        for (let i = 0; i < normalizedUrl.length; i++) {
+            const char = normalizedUrl.charCodeAt(i);
+            hash = ((hash << 5) - hash) + char;
+            hash = hash & hash; // Convert to 32-bit integer
+        }
+        
+        return hash.toString();
+    }
+    
+    /**
+     * Check for duplicate sports events (same game/match reported multiple times)
+     */
+    isDuplicateSportsEvent(article, existingArticles) {
+        const title = article.title.toLowerCase();
+        
+        // Extract team names and scores if present
+        const teamMatches = title.match(/(\w+)\s+(?:vs?\.?|v\.?|against|beat|defeat)\s+(\w+)/g);
+        const scoreMatches = title.match(/\d+[-–]\d+|\d+\s*-\s*\d+/g);
+        
+        if (!teamMatches && !scoreMatches) return false;
+        
+        // Check against existing sports articles
+        for (const existing of existingArticles.filter(a => a.category === 'sports')) {
+            const existingTitle = existing.title.toLowerCase();
+            
+            // Check for same team matchup
+            if (teamMatches) {
+                for (const match of teamMatches) {
+                    if (existingTitle.includes(match.toLowerCase()) || 
+                        this.containsReversedTeams(match, existingTitle)) {
+                        return true;
+                    }
+                }
+            }
+            
+            // Check for same score
+            if (scoreMatches) {
+                for (const score of scoreMatches) {
+                    if (existingTitle.includes(score)) {
+                        return true;
+                    }
+                }
+            }
+            
+            // Check for similar sports event keywords within 24 hours
+            const timeDiff = Math.abs(new Date(article.publishedAt) - new Date(existing.publishedAt));
+            if (timeDiff < 24 * 60 * 60 * 1000) { // Within 24 hours
+                const commonSportsTerms = ['final', 'championship', 'playoff', 'semifinal', 'quarter', 'league'];
+                const titleTerms = commonSportsTerms.filter(term => title.includes(term));
+                const existingTerms = commonSportsTerms.filter(term => existingTitle.includes(term));
+                
+                if (titleTerms.length > 0 && titleTerms.some(term => existingTerms.includes(term))) {
+                    // Check if they're about the same league/competition
+                    const competitions = ['premier league', 'champions league', 'nfl', 'nba', 'mlb', 'nhl', 'la liga', 'serie a'];
+                    const titleCompetitions = competitions.filter(comp => title.includes(comp));
+                    const existingCompetitions = competitions.filter(comp => existingTitle.includes(comp));
+                    
+                    if (titleCompetitions.length > 0 && 
+                        titleCompetitions.some(comp => existingCompetitions.includes(comp))) {
+                        return true;
+                    }
+                }
+            }
+        }
+        
+        return false;
+    }
+    
+    /**
+     * Check if teams are mentioned in reverse order
+     */
+    containsReversedTeams(match, title) {
+        const teamMatch = match.match(/(\w+)\s+(?:vs?\.?|v\.?|against|beat|defeat)\s+(\w+)/);
+        if (!teamMatch) return false;
+        
+        const team1 = teamMatch[1];
+        const team2 = teamMatch[2];
+        
+        // Check for reversed team order
+        const reversedPattern = new RegExp(`${team2}\\s+(?:vs?\\.?|v\\.?|against|beat|defeat)\\s+${team1}`, 'i');
+        return reversedPattern.test(title);
+    }
+
     /**
      * Create advanced content fingerprint for duplicate detection
      */
