@@ -54,13 +54,22 @@ class NewsAPI {
             // Get category-specific keywords
             const categoryKeywords = this.categoryMappings[category] || [category];
             
-            // Fetch from all APIs in parallel with category-specific queries
+            // Fetch from all APIs + additional real-time sources in parallel
             const promises = [
+                // Main API sources with your keys
                 this.fetchFromGNews(category, categoryKeywords, limit),
                 this.fetchFromNewsData(category, categoryKeywords, limit),
                 this.fetchFromNewsAPI(category, categoryKeywords, limit),
                 this.fetchFromMediastack(category, categoryKeywords, limit),
-                this.fetchFromCurrentsAPI(category, categoryKeywords, limit)
+                this.fetchFromCurrentsAPI(category, categoryKeywords, limit),
+                
+                // Additional real-time sources for more articles
+                this.fetchFromBBC(category, categoryKeywords),
+                this.fetchFromReuters(category, categoryKeywords),
+                this.fetchFromCNN(category, categoryKeywords),
+                this.fetchFromGuardian(category, categoryKeywords),
+                this.fetchFromAP(category, categoryKeywords),
+                this.fetchFromCategorySpecificSources(category, categoryKeywords)
             ];
 
             const results = await Promise.allSettled(promises);
