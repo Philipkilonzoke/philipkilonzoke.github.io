@@ -507,7 +507,31 @@
             text-transform: capitalize;
             position: relative;
             z-index: 1;
+            margin-bottom: 0.5rem;
+        }
+
+        .main-time {
+            font-size: 1.3rem;
+            color: var(--accent-green);
+            font-weight: 600;
+            position: relative;
+            z-index: 1;
             margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 0.5rem;
+            padding: 0.8rem 1.2rem;
+            background: rgba(76, 175, 80, 0.1);
+            border: 1px solid rgba(76, 175, 80, 0.3);
+            border-radius: 12px;
+            backdrop-filter: blur(10px);
+        }
+
+        .main-time::before {
+            content: "🕐";
+            font-size: 1.1rem;
+            margin-right: 0.3rem;
         }
 
         .weather-icon-main {
@@ -1416,6 +1440,7 @@
                         <div class="main-location" id="main-location">Search for a city</div>
                         <div class="main-temp" id="main-temp">--°</div>
                         <div class="main-condition" id="main-condition">Enter a location to get started</div>
+                        <div class="main-time" id="main-time">--</div>
                         <img id="main-icon" class="weather-icon-main" src="" alt="">
                     </div>
                     
@@ -1826,6 +1851,66 @@
             return COUNTRY_NAMES[countryCode] || countryCode;
         }
 
+        function formatLocalTime(localTime) {
+            const options = {
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit',
+                hour12: true,
+                weekday: 'short',
+                day: 'numeric',
+                month: 'short'
+            };
+            return localTime.toLocaleString('en-US', options);
+        }
+
+        function getTimezoneString(timezoneOffset) {
+            const hours = Math.floor(Math.abs(timezoneOffset) / 3600);
+            const minutes = Math.floor((Math.abs(timezoneOffset) % 3600) / 60);
+            const sign = timezoneOffset >= 0 ? '+' : '-';
+            return `UTC${sign}${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
+        }
+
+        // Live time update variables
+        let timeUpdateInterval = null;
+
+        function updateLocalTime(weatherData) {
+            if (!weatherData || !weatherData.timezone) return;
+            
+            const currentUTC = new Date();
+            const localTime = new Date(currentUTC.getTime() + (weatherData.timezone * 1000));
+            const timeString = formatLocalTime(localTime);
+            const timezoneString = getTimezoneString(weatherData.timezone);
+            
+            document.getElementById('main-time').innerHTML = `
+                <span>${timeString}</span>
+                <span style="font-size: 0.9rem; color: var(--text-muted); margin-left: auto;">${timezoneString}</span>
+            `;
+        }
+
+        function startLiveTimeUpdates(weatherData) {
+            // Clear any existing interval
+            if (timeUpdateInterval) {
+                clearInterval(timeUpdateInterval);
+            }
+            
+            // Update time every second
+            timeUpdateInterval = setInterval(() => {
+                updateLocalTime(weatherData);
+                // Also update weather cards times every 30 seconds
+                if (new Date().getSeconds() % 30 === 0) {
+                    renderWeatherCards();
+                }
+            }, 1000);
+        }
+
+        function stopLiveTimeUpdates() {
+            if (timeUpdateInterval) {
+                clearInterval(timeUpdateInterval);
+                timeUpdateInterval = null;
+            }
+        }
+
         // Initialize the app
         document.addEventListener('DOMContentLoaded', function() {
             setupEventListeners();
@@ -2095,6 +2180,11 @@
 
                 const data = await response.json();
                 
+                // Calculate local time using timezone offset
+                const timezoneOffset = data.timezone; // seconds from UTC
+                const currentUTC = new Date();
+                const localTime = new Date(currentUTC.getTime() + (timezoneOffset * 1000));
+                
                 return {
                     id: data.id,
                     name: data.name,
@@ -2113,6 +2203,8 @@
                     visibility: Math.round((data.visibility || 10000) / 1000),
                     sunrise: data.sys.sunrise,
                     sunset: data.sys.sunset,
+                    timezone: timezoneOffset,
+                    localTime: localTime,
                     timestamp: new Date()
                 };
             } catch (error) {
@@ -2141,6 +2233,7 @@
                 document.getElementById('main-location').textContent = 'Search for a city';
                 document.getElementById('main-temp').textContent = '--°';
                 document.getElementById('main-condition').textContent = 'Enter a location to get started';
+                document.getElementById('main-time').textContent = '--';
                 document.getElementById('main-icon').src = '';
                 return;
             }
@@ -2150,6 +2243,12 @@
             document.getElementById('main-temp').textContent = `${latest.temp}°C`;
             document.getElementById('main-condition').textContent = latest.description;
             document.getElementById('main-icon').src = `https://openweathermap.org/img/wn/${latest.icon}@4x.png`;
+            
+            // Update local time
+            updateLocalTime(latest);
+            
+            // Start live time updates
+            startLiveTimeUpdates(latest);
 
             // Update weather stats
             const statsHTML = `
@@ -2210,12 +2309,18 @@
                 return;
             }
 
-            const cardsHTML = weatherData.slice(0, 6).map(weather => `
+            const cardsHTML = weatherData.slice(0, 6).map(weather => {
+                // Calculate current local time for this city
+                const currentUTC = new Date();
+                const localTime = new Date(currentUTC.getTime() + (weather.timezone * 1000));
+                const timeDisplay = formatLocalTime(localTime);
+                
+                return `
                 <div class="weather-card">
                     <div class="card-header">
                         <div class="location-info">
                             <h3>${weather.name}</h3>
-                            <p>${weather.country} • ${weather.timestamp.toLocaleTimeString()}</p>
+                            <p>${weather.country} • <span style="color: var(--accent-green); font-weight: 600;">${timeDisplay}</span></p>
                         </div>
                         <img class="weather-icon" src="https://openweathermap.org/img/wn/${weather.icon}@2x.png" alt="${weather.description}">
                     </div>
@@ -2244,7 +2349,8 @@
                         </div>
                     </div>
                 </div>
-            `).join('');
+                `;
+            }).join('');
             
             container.innerHTML = cardsHTML;
         }
