@@ -407,6 +407,43 @@ body {
     font-size: 16px;
     border-radius: 8px;
     text-align: center;
+    position: relative;
+    overflow: hidden;
+}
+
+.placeholder-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    z-index: 2;
+}
+
+.placeholder-icon {
+    font-size: 24px;
+    opacity: 0.9;
+}
+
+.placeholder-text {
+    font-size: 14px;
+    font-weight: 600;
+    opacity: 0.95;
+}
+
+.text-placeholder::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+    animation: shimmerPlaceholder 2s infinite;
+}
+
+@keyframes shimmerPlaceholder {
+    0% { left: -100%; }
+    100% { left: 100%; }
 }
 
 .news-card:hover .news-image img {

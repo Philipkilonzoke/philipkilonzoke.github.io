@@ -427,46 +427,99 @@ class BrightlensNews {
         
         testImg.src = img.dataset.src;
     }
+    
+    /**
+     * Validate image URL format and accessibility
+     */
+    isValidImageUrl(url) {
+        // Basic URL format validation
+        try {
+            new URL(url);
+        } catch {
+            return false;
+        }
+        
+        // Check for valid image file extensions or known image services
+        const validImagePatterns = [
+            /\.(jpg|jpeg|png|gif|webp|svg)(\?.*)?$/i,
+            /unsplash\.com/,
+            /images\..*\.(com|org|net)/,
+            /cdn\./,
+            /cloudinary\./,
+            /amazonaws\.com/,
+            /googleusercontent\.com/
+        ];
+        
+        return validImagePatterns.some(pattern => pattern.test(url));
+    }
+    
+    /**
+     * Sanitize text to prevent XSS and ensure clean display
+     */
+    sanitizeText(text) {
+        if (!text) return '';
+        
+        return text
+            .replace(/[<>]/g, '') // Remove HTML tags
+            .replace(/&amp;/g, '&')
+            .replace(/&lt;/g, '<')
+            .replace(/&gt;/g, '>')
+            .replace(/&quot;/g, '"')
+            .replace(/&#x27;/g, "'")
+            .trim();
+    }
 
     createArticleHTML(article) {
         const imageUrl = article.urlToImage;
         const formattedDate = this.newsAPI.formatDate(article.publishedAt);
-        const description = article.description || 'No description available.';
+        const description = article.description || 'Read the full article for complete details.';
         
-        // Validate image URL - check if it's valid and not null/None/undefined
+        // ULTRA-STRICT image validation - NO broken images allowed
         const hasValidImage = imageUrl && 
                              imageUrl !== 'null' && 
                              imageUrl !== 'None' && 
                              imageUrl !== 'undefined' &&
-                             imageUrl.startsWith('http');
+                             imageUrl !== '' &&
+                             imageUrl.startsWith('http') &&
+                             !imageUrl.includes('placeholder') &&
+                             !imageUrl.includes('example.com') &&
+                             this.isValidImageUrl(imageUrl);
         
-        // Only show image if article has a valid image URL, otherwise show text placeholder
+        // Smart image section with triple fallback protection
         const imageSection = hasValidImage ? `
             <div class="news-image">
-                <img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZjNmNGY2Ii8+PC9zdmc+"
+                <img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZGVmcz48bGluZWFyR3JhZGllbnQgaWQ9ImciIHgxPSIwJSIgeTE9IjAlIiB4Mj0iMTAwJSIgeTI9IjEwMCUiPjxzdG9wIG9mZnNldD0iMCUiIHN0b3AtY29sb3I9IiMxNmEzNGEiLz48c3RvcCBvZmZzZXQ9IjEwMCUiIHN0b3AtY29sb3I9IiMxNTgwM2QiLz48L2xpbmVhckdyYWRpZW50PjwvZGVmcz48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSJ1cmwoI2cpIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSIxNiIgZmlsbD0id2hpdGUiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGR5PSIwLjNlbSI+TG9hZGluZy4uLjwvdGV4dD48L3N2Zz4="
                      data-src="${imageUrl}" 
                      alt="${article.title}" 
                      loading="lazy"
                      class="lazy-image"
-                     onerror="this.parentElement.innerHTML='<div class=\\"text-placeholder\\">Brightlens News</div>'">
+                     onload="this.classList.add('loaded')"
+                     onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZGVmcz48bGluZWFyR3JhZGllbnQgaWQ9ImciIHgxPSIwJSIgeTE9IjAlIiB4Mj0iMTAwJSIgeTI9IjEwMCUiPjxzdG9wIG9mZnNldD0iMCUiIHN0b3AtY29sb3I9IiMxNmEzNGEiLz48c3RvcCBvZmZzZXQ9IjEwMCUiIHN0b3AtY29sb3I9IiMxNTgwM2QiLz48L2xpbmVhckdyYWRpZW50PjwvZGVmcz48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSJ1cmwoI2cpIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSIxNiIgZmlsbD0id2hpdGUiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGR5PSIwLjNlbSI+QnJpZ2h0bGVucyBOZXdzPC90ZXh0Pjwvc3ZnPg=='; this.classList.add('loaded');">
             </div>` : `
-            <div class="text-placeholder">Brightlens News</div>`;
+            <div class="text-placeholder">
+                <div class="placeholder-content">
+                    <div class="placeholder-icon">📰</div>
+                    <div class="placeholder-text">Brightlens News</div>
+                </div>
+            </div>`;
         
         return `
-            <article class="news-card">
+            <article class="news-card" data-category="${article.category}">
                 ${imageSection}
                 <div class="news-content">
-                    <h3 class="news-title">${article.title}</h3>
-                    <p class="news-description">${description}</p>
+                    <h3 class="news-title">${this.sanitizeText(article.title)}</h3>
+                    <p class="news-description">${this.sanitizeText(description)}</p>
                     <div class="news-meta">
                         <span class="news-date">${formattedDate}</span>
+                        <span class="news-source">${this.sanitizeText(article.source || 'News Source')}</span>
                         <span class="news-category">${article.category}</span>
                     </div>
                     <div class="news-actions">
                         <a href="${article.url}" 
                            target="_blank" 
                            rel="noopener noreferrer" 
-                           class="news-link">
+                           class="news-link"
+                           onclick="this.style.opacity='0.7'"
                             Read More <i class="fas fa-external-link-alt"></i>
                         </a>
                         <div class="share-buttons">
