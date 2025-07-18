@@ -715,12 +715,127 @@
             return cities;
         }
 
-        function getZoomLevelName(altitude) {
-            if (altitude >= 2.5) return "World";
-            if (altitude >= 2.0) return "Continental";
-            if (altitude >= 1.0) return "Regional";
-            return "Local";
-        }
+                 function getZoomLevelName(altitude) {
+             if (altitude >= 2.5) return "World";
+             if (altitude >= 2.0) return "Continental";
+             if (altitude >= 1.0) return "Regional";
+             return "Local";
+         }
+
+         function loadGeographicalBoundaries(altitude) {
+             if (!globe) return;
+
+             let borderData = [];
+             let polygonData = [];
+             let labelData = [];
+
+             if (altitude >= 2.5) {
+                 // World view - show continent outlines
+                 borderData = countryBorders.map(continent => ({
+                     coords: continent.coords.map(coord => [coord[0], coord[1]]),
+                     name: continent.name
+                 }));
+                 
+                 // Add continent labels
+                 labelData = [
+                     { lat: 0, lng: 20, name: "AFRICA" },
+                     { lat: 45, lng: 10, name: "EUROPE" },
+                     { lat: 30, lng: 100, name: "ASIA" },
+                     { lat: 45, lng: -100, name: "N. AMERICA" },
+                     { lat: -15, lng: -60, name: "S. AMERICA" },
+                     { lat: -25, lng: 135, name: "AUSTRALIA" }
+                 ];
+                 
+             } else if (altitude >= 2.0) {
+                 // Continental view - show country borders
+                 borderData = countryBoundaries.map(country => ({
+                     coords: country.coords.map(coord => [coord[0], coord[1]]),
+                     name: country.name
+                 }));
+                 
+                 // Add country labels
+                 labelData = countryBoundaries.map(country => {
+                     const centerLat = (Math.max(...country.coords.map(c => c[1])) + Math.min(...country.coords.map(c => c[1]))) / 2;
+                     const centerLng = (Math.max(...country.coords.map(c => c[0])) + Math.min(...country.coords.map(c => c[0]))) / 2;
+                     return { lat: centerLat, lng: centerLng, name: country.name.toUpperCase() };
+                 });
+                 
+             } else if (altitude >= 1.0) {
+                 // Regional view - show state/province borders (for specific regions)
+                 borderData = countryBoundaries.map(country => ({
+                     coords: country.coords.map(coord => [coord[0], coord[1]]),
+                     name: country.name
+                 }));
+                 
+                 // Add detailed country labels
+                 labelData = countryBoundaries.map(country => {
+                     const centerLat = (Math.max(...country.coords.map(c => c[1])) + Math.min(...country.coords.map(c => c[1]))) / 2;
+                     const centerLng = (Math.max(...country.coords.map(c => c[0])) + Math.min(...country.coords.map(c => c[0]))) / 2;
+                     return { lat: centerLat, lng: centerLng, name: country.name };
+                 });
+                 
+             } else {
+                 // Local view - show county/district borders (Kenya example)
+                 borderData = kenyaCounties.map(county => ({
+                     coords: county.coords.map(coord => [coord[0], coord[1]]),
+                     name: county.name
+                 }));
+                 
+                 // Add county labels for Kenya
+                 labelData = kenyaCounties.map(county => {
+                     const centerLat = (Math.max(...county.coords.map(c => c[1])) + Math.min(...county.coords.map(c => c[1]))) / 2;
+                     const centerLng = (Math.max(...county.coords.map(c => c[0])) + Math.min(...county.coords.map(c => c[0]))) / 2;
+                     return { lat: centerLat, lng: centerLng, name: county.name };
+                 });
+                 
+                 // Also show other country subdivisions
+                 const usStates = [
+                     { name: "California", coords: [[-124, 42], [-114, 42], [-114, 32], [-124, 32], [-124, 42]] },
+                     { name: "Texas", coords: [[-106, 36], [-93, 36], [-93, 25], [-106, 25], [-106, 36]] },
+                     { name: "Florida", coords: [[-87, 31], [-80, 31], [-80, 24], [-87, 24], [-87, 31]] },
+                     { name: "New York", coords: [[-79, 45], [-71, 45], [-71, 40], [-79, 40], [-79, 45]] }
+                 ];
+                 
+                 borderData = borderData.concat(usStates.map(state => ({
+                     coords: state.coords.map(coord => [coord[0], coord[1]]),
+                     name: state.name
+                 })));
+                 
+                 labelData = labelData.concat(usStates.map(state => {
+                     const centerLat = (Math.max(...state.coords.map(c => c[1])) + Math.min(...state.coords.map(c => c[1]))) / 2;
+                     const centerLng = (Math.max(...state.coords.map(c => c[0])) + Math.min(...state.coords.map(c => c[0]))) / 2;
+                     return { lat: centerLat, lng: centerLng, name: state.name };
+                 }));
+             }
+
+             // Apply border lines
+             globe.pathsData(borderData);
+             
+             // Create polygon areas with subtle fill
+             polygonData = borderData.map(border => ({
+                 coords: border.coords,
+                 name: border.name
+             }));
+             
+             globe.hexPolygonsData(polygonData);
+             
+             // Add geographical labels
+             const geoLabels = labelData.map(label => ({
+                 lat: label.lat,
+                 lng: label.lng,
+                 name: label.name,
+                 type: 'geo-label'
+             }));
+             
+             // Combine city labels with geographical labels
+             const cities = getCitiesForZoom(altitude);
+             const cityLabels = showLabels ? cities.slice(0, 40) : [];
+             const allLabels = [...cityLabels, ...geoLabels];
+             
+             globe.labelsData(allLabels);
+             
+             updateStatus(`${getZoomLevelName(altitude)}: ${borderData.length} boundaries, ${labelData.length} labels`);
+         }
 
         function updateStatus(message) {
             document.getElementById('status').textContent = message;
@@ -758,9 +873,9 @@
                      .pointAltitude(0.01)
                      .pointRadius(getLocationSize)
                      .labelText(d => d.name)
-                     .labelColor(() => '#ffffff')
-                     .labelSize(1.2)
-                     .labelDotRadius(0.4)
+                     .labelColor(d => d.type === 'geo-label' ? '#4CAF50' : '#ffffff')
+                     .labelSize(d => d.type === 'geo-label' ? 1.8 : 1.2)
+                     .labelDotRadius(d => d.type === 'geo-label' ? 0 : 0.4)
                      .labelAltitude(0.01)
                      .onPointClick(handleLocationClick)
                      .onLabelClick(handleLocationClick)
@@ -772,14 +887,14 @@
                      // Add geographical boundaries
                      .hexPolygonsData([]) // Will be populated with country/region boundaries
                      .hexPolygonResolution(3)
-                     .hexPolygonMargin(0.3)
-                     .hexPolygonColor(() => 'rgba(255, 255, 255, 0.1)')
+                     .hexPolygonMargin(0.2)
+                     .hexPolygonColor(d => d.name ? 'rgba(76, 175, 80, 0.15)' : 'rgba(255, 255, 255, 0.05)')
                      .hexPolygonAltitude(0.001)
                      // Add country borders
                      .pathsData([]) // Will be populated with border lines
-                     .pathColor(() => '#4CAF50')
-                     .pathStroke(1.5)
-                     .pathAltitude(0.002)
+                     .pathColor(d => d.name ? '#4CAF50' : '#2196F3')
+                     .pathStroke(2)
+                     .pathAltitude(0.003)
                      (document.getElementById('globe'));
 
                  // Load geographical boundaries based on zoom level
@@ -788,22 +903,20 @@
                 // Set initial view
                 globe.pointOfView({ lat: 20, lng: 0, altitude: 2.5 });
 
-                // Handle zoom changes
-                globe.onZoom((coords) => {
-                    currentAltitude = coords.altitude;
-                    updateZoomLevel(coords.altitude);
-                    
-                    // Update cities based on zoom level
-                    const cities = getCitiesForZoom(coords.altitude);
-                    globe.pointsData(cities);
-                    
-                    // Update labels if they're enabled
-                    if (showLabels) {
-                        globe.labelsData(cities.slice(0, 60)); // Limit labels for performance
-                    }
-                    
-                    updateLocationCount(cities.length);
-                });
+                                 // Handle zoom changes
+                 globe.onZoom((coords) => {
+                     currentAltitude = coords.altitude;
+                     updateZoomLevel(coords.altitude);
+                     
+                     // Update cities based on zoom level
+                     const cities = getCitiesForZoom(coords.altitude);
+                     globe.pointsData(cities);
+                     
+                     // Update geographical boundaries and labels
+                     loadGeographicalBoundaries(coords.altitude);
+                     
+                     updateLocationCount(cities.length);
+                 });
 
                 updateStatus('Ready!');
                 updateLocationCount(worldCities.length);
@@ -918,25 +1031,25 @@
             }
         }
 
-        function toggleLabels() {
-            showLabels = !showLabels;
-            const btn = document.getElementById('labels-btn');
-            
-            if (globe) {
-                if (showLabels) {
-                    const cities = getCitiesForZoom(currentAltitude);
-                    globe.labelsData(cities.slice(0, 60));
-                    btn.textContent = '🏷️ Hide Labels';
-                    btn.classList.add('active');
-                    updateStatus('Labels enabled');
-                } else {
-                    globe.labelsData([]);
-                    btn.textContent = '🏷️ Show Labels';
-                    btn.classList.remove('active');
-                    updateStatus('Labels disabled');
-                }
-            }
-        }
+                 function toggleLabels() {
+             showLabels = !showLabels;
+             const btn = document.getElementById('labels-btn');
+             
+             if (globe) {
+                 if (showLabels) {
+                     // Reload boundaries which will include both geographical and city labels
+                     loadGeographicalBoundaries(currentAltitude);
+                     btn.textContent = '🏷️ Hide Labels';
+                     btn.classList.add('active');
+                     updateStatus('Labels enabled');
+                 } else {
+                     globe.labelsData([]);
+                     btn.textContent = '🏷️ Show Labels';
+                     btn.classList.remove('active');
+                     updateStatus('Labels disabled');
+                 }
+             }
+         }
 
         // Search functionality
         function setupSearch() {
