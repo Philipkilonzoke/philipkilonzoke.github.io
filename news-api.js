@@ -1,11 +1,12 @@
 /**
  * Enhanced News API Integration for Brightlens News
- * Category-specific real-time news fetching with no sample content
+ * Category-specific real-time news fetching with maximum article coverage
+ * Enhanced for all 10 categories with optimized API distribution
  */
 
 class NewsAPI {
     constructor() {
-        // Real API Keys - Updated with provided keys
+        // Real API Keys - All provided keys integrated
         this.apiKeys = {
             gnews: '9db0da87512446db08b82d4f63a4ba8d',
             newsdata: 'pub_d74b96fd4a9041d59212493d969368cd',
@@ -35,20 +36,84 @@ class NewsAPI {
             'https://api.codetabs.com/v1/proxy?quest='
         ];
 
-        // Category-specific API mappings for optimal relevance
+        // ENHANCED Category-specific API mappings for maximum real-time coverage
         this.categoryMappings = {
-            'latest': ['breaking', 'news', 'current'], // Latest from all categories
-            'kenya': ['kenya', 'nairobi', 'mombasa', 'kisumu', 'kenyan', 'east africa'],
-            'world': ['international', 'global', 'africa', 'europe', 'america', 'asia', 'middle east'],
-            'sports': ['sports', 'football', 'soccer', 'basketball', 'athletics', 'rugby', 'cricket'],
-            'technology': ['technology', 'tech', 'AI', 'artificial intelligence', 'gadgets', 'apps', 'innovation'],
-            'business': ['business', 'finance', 'economy', 'stock market', 'entrepreneurship', 'companies'],
-            'health': ['health', 'medicine', 'fitness', 'disease', 'mental health', 'wellness', 'medical'],
-            'lifestyle': ['lifestyle', 'fashion', 'food', 'travel', 'family', 'culture', 'personal'],
-            'entertainment': ['entertainment', 'movies', 'celebrities', 'shows', 'awards', 'cinema'],
-            'music': ['music', 'artist', 'album', 'concert', 'song', 'musician', 'band', 'recording']
+            'latest': {
+                primary: ['breaking news', 'latest news', 'top stories', 'news today', 'current events'],
+                secondary: ['headlines', 'news update', 'live news', 'trending news', 'hot news'],
+                sources: ['all'] // Use all APIs for latest news
+            },
+            'kenya': {
+                primary: ['kenya', 'kenyan', 'nairobi', 'mombasa', 'kisumu', 'nakuru', 'eldoret'],
+                secondary: ['east africa', 'kenya news', 'kenyan politics', 'kenya economy', 'kenya business', 'uhuru', 'ruto', 'raila', 'kenya government'],
+                sources: ['gnews', 'newsdata', 'newsapi', 'mediastack', 'currentsapi'],
+                regions: ['nairobi', 'mombasa', 'kisumu', 'nakuru', 'eldoret', 'machakos', 'thika']
+            },
+            'world': {
+                primary: ['international', 'global news', 'world news', 'international politics', 'global economy'],
+                secondary: ['africa', 'europe', 'america', 'asia', 'middle east', 'australia', 'south america', 'united states', 'china', 'russia', 'uk', 'france', 'germany'],
+                sources: ['all'],
+                regions: ['usa', 'uk', 'china', 'russia', 'france', 'germany', 'japan', 'india', 'brazil']
+            },
+            'sports': {
+                primary: ['sports', 'football', 'soccer', 'basketball', 'athletics', 'rugby', 'cricket', 'tennis'],
+                secondary: ['nfl', 'nba', 'premier league', 'champions league', 'fifa', 'olympics', 'sports news', 'match results', 'tournament', 'league', 'championship'],
+                sources: ['all'],
+                leagues: ['premier league', 'champions league', 'nfl', 'nba', 'mlb', 'nhl', 'la liga', 'serie a', 'bundesliga']
+            },
+            'technology': {
+                primary: ['technology', 'tech', 'artificial intelligence', 'AI', 'gadgets', 'smartphones', 'apps'],
+                secondary: ['innovation', 'startup', 'software', 'hardware', 'cybersecurity', 'data privacy', 'machine learning', 'blockchain', 'cryptocurrency', 'metaverse', 'virtual reality'],
+                sources: ['all'],
+                companies: ['apple', 'google', 'microsoft', 'meta', 'tesla', 'amazon', 'netflix', 'nvidia', 'samsung']
+            },
+            'business': {
+                primary: ['business', 'finance', 'economy', 'stock market', 'investment', 'banking', 'trade'],
+                secondary: ['entrepreneurship', 'companies', 'merger', 'acquisition', 'earnings', 'financial', 'markets', 'inflation', 'gdp', 'economic growth', 'startup funding'],
+                sources: ['all'],
+                sectors: ['technology', 'healthcare', 'energy', 'banking', 'retail', 'automotive', 'real estate']
+            },
+            'health': {
+                primary: ['health', 'medicine', 'medical', 'healthcare', 'disease', 'wellness', 'fitness'],
+                secondary: ['mental health', 'nutrition', 'vaccine', 'covid', 'pandemic', 'medical research', 'drug', 'hospital', 'doctor', 'treatment', 'therapy'],
+                sources: ['all'],
+                specialties: ['cardiology', 'oncology', 'neurology', 'pediatrics', 'mental health', 'nutrition']
+            },
+            'lifestyle': {
+                primary: ['lifestyle', 'fashion', 'food', 'travel', 'family', 'culture', 'personal development'],
+                secondary: ['home', 'relationships', 'parenting', 'cooking', 'recipe', 'beauty', 'style', 'vacation', 'tourism', 'wellness', 'self-care'],
+                sources: ['gnews', 'newsdata', 'newsapi', 'currentsapi'],
+                topics: ['fashion trends', 'travel destinations', 'food recipes', 'home decor', 'relationships']
+            },
+            'entertainment': {
+                primary: ['entertainment', 'movies', 'celebrities', 'shows', 'television', 'streaming', 'awards'],
+                secondary: ['hollywood', 'bollywood', 'netflix', 'disney', 'cinema', 'film', 'tv series', 'reality show', 'oscar', 'emmy', 'golden globe'],
+                sources: ['all'],
+                platforms: ['netflix', 'disney', 'hbo', 'amazon prime', 'apple tv', 'hulu']
+            },
+            'music': {
+                primary: ['music', 'artist', 'album', 'song', 'concert', 'musician', 'band', 'recording'],
+                secondary: ['music industry', 'record label', 'music festival', 'tour', 'charts', 'streaming', 'spotify', 'apple music', 'grammy', 'music video', 'single release'],
+                sources: ['all'],
+                genres: ['pop', 'rock', 'hip hop', 'country', 'jazz', 'classical', 'electronic', 'r&b'],
+                platforms: ['spotify', 'apple music', 'youtube music', 'soundcloud']
+            }
         };
         
+        // Enhanced source reliability mapping
+        this.sourceReliability = {
+            'bbc': 0.95,
+            'reuters': 0.94,
+            'cnn': 0.88,
+            'associated press': 0.93,
+            'bloomberg': 0.92,
+            'the guardian': 0.89,
+            'washington post': 0.87,
+            'new york times': 0.86,
+            'wall street journal': 0.91,
+            'financial times': 0.90
+        };
+
         // Preload critical categories for instant access
         this.preloadCriticalCategories();
         
@@ -211,7 +276,7 @@ class NewsAPI {
     }
 
     /**
-     * ULTRA-FAST news fetching with parallel processing and aggressive caching
+     * ENHANCED news fetching with maximum real-time coverage and smart API distribution
      */
     async fetchNews(category, limit = 30) {
         const startTime = performance.now();
@@ -230,33 +295,70 @@ class NewsAPI {
         }
 
         try {
-            console.log(`⚡ ULTRA-FAST fetching ${category} news from multiple APIs...`);
+            console.log(`🚀 ENHANCED fetching ${category} news with maximum real-time coverage...`);
             
-            // Get category-specific keywords
-            const categoryKeywords = this.categoryMappings[category] || [category];
+            // Get enhanced category configuration
+            const categoryConfig = this.categoryMappings[category];
+            const categoryKeywords = this.getCategoryKeywords(category);
             
-            // PARALLEL PROCESSING: All APIs called simultaneously with reduced timeouts
-            const apiPromises = [
-                this.fetchWithTimeout(
-                    this.fetchFromGNews(category, categoryKeywords, Math.min(limit, 8)),
-                    3000, 'GNews'
-                ),
-                this.fetchWithTimeout(
-                    this.fetchFromNewsData(category, categoryKeywords, Math.min(limit, 8)),
-                    3000, 'NewsData'
-                ),
-                this.fetchWithTimeout(
-                    this.fetchFromNewsAPI(category, categoryKeywords, Math.min(limit, 10)),
-                    3000, 'NewsAPI'
-                ),
-                this.fetchWithTimeout(
-                    this.fetchFromMediastack(category, categoryKeywords, Math.min(limit, 8)),
-                    3000, 'Mediastack'
-                ),
-                this.fetchWithTimeout(
-                    this.fetchFromCurrentsAPI(category, categoryKeywords, Math.min(limit, 8)),
-                    3000, 'CurrentsAPI'
-                ),
+            // Smart API distribution based on category
+            const activeAPIs = this.getOptimalAPIsForCategory(category, categoryConfig);
+            
+            // Create multiple search queries for comprehensive coverage
+            const searchQueries = this.createMultipleQueries(category, categoryConfig);
+            
+            // ENHANCED PARALLEL PROCESSING: Optimized API calls with multiple queries
+            const apiPromises = [];
+            
+            // Dynamically build API promises based on category configuration
+            if (activeAPIs.includes('gnews')) {
+                for (let query of searchQueries) {
+                    apiPromises.push(
+                        this.fetchWithTimeout(
+                            this.fetchFromGNews(category, query, Math.min(limit, 12)),
+                            3500, 'GNews'
+                        )
+                    );
+                }
+            }
+            
+            if (activeAPIs.includes('newsdata')) {
+                for (let query of searchQueries.slice(0, 2)) { // Limit to 2 queries for newsdata
+                    apiPromises.push(
+                        this.fetchWithTimeout(
+                            this.fetchFromNewsData(category, query, Math.min(limit, 12)),
+                            3500, 'NewsData'
+                        )
+                    );
+                }
+            }
+            
+            if (activeAPIs.includes('newsapi')) {
+                apiPromises.push(
+                    this.fetchWithTimeout(
+                        this.fetchFromNewsAPI(category, categoryKeywords, Math.min(limit, 15)),
+                        3500, 'NewsAPI'
+                    )
+                );
+            }
+            
+            if (activeAPIs.includes('mediastack')) {
+                apiPromises.push(
+                    this.fetchWithTimeout(
+                        this.fetchFromMediastack(category, categoryKeywords, Math.min(limit, 12)),
+                        3500, 'Mediastack'
+                    )
+                );
+            }
+            
+            if (activeAPIs.includes('currentsapi')) {
+                apiPromises.push(
+                    this.fetchWithTimeout(
+                        this.fetchFromCurrentsAPI(category, categoryKeywords, Math.min(limit, 12)),
+                        3500, 'CurrentsAPI'
+                    )
+                );
+            }
                 
                 // Faster RSS feeds for immediate content
                 this.fetchWithTimeout(
@@ -341,12 +443,13 @@ class NewsAPI {
     }
     
     /**
-     * Fetch from GNews API with category-specific queries
+     * Fetch from GNews API with enhanced category-specific queries
      */
     async fetchFromGNews(category, keywords, limit) {
         try {
-            const query = this.buildCategoryQuery(keywords);
-            const url = `https://gnews.io/api/v4/search?q=${encodeURIComponent(query)}&lang=en&country=any&max=${Math.min(limit, 10)}&apikey=${this.apiKeys.gnews}`;
+            // Handle both string queries and keyword arrays
+            const query = typeof keywords === 'string' ? keywords : this.buildCategoryQuery(keywords);
+            const url = `https://gnews.io/api/v4/search?q=${encodeURIComponent(query)}&lang=en&country=any&max=${Math.min(limit, 15)}&apikey=${this.apiKeys.gnews}`;
             
             const response = await this.corsProxyFetch(url);
             if (!response.ok) {
@@ -362,12 +465,13 @@ class NewsAPI {
     }
 
     /**
-     * Fetch from NewsData.io API with category-specific queries
+     * Fetch from NewsData.io API with enhanced category-specific queries
      */
     async fetchFromNewsData(category, keywords, limit) {
         try {
-            const query = this.buildCategoryQuery(keywords);
-            let url = `https://newsdata.io/api/1/news?apikey=${this.apiKeys.newsdata}&q=${encodeURIComponent(query)}&language=en&size=${Math.min(limit, 10)}`;
+            // Handle both string queries and keyword arrays
+            const query = typeof keywords === 'string' ? keywords : this.buildCategoryQuery(keywords);
+            let url = `https://newsdata.io/api/1/news?apikey=${this.apiKeys.newsdata}&q=${encodeURIComponent(query)}&language=en&size=${Math.min(limit, 15)}`;
             
             // Add category filter if supported
             if (['business', 'entertainment', 'health', 'science', 'sports', 'technology', 'world'].includes(category)) {
@@ -471,14 +575,104 @@ class NewsAPI {
     }
 
     /**
-     * Build category-specific search query
+     * Build enhanced category-specific search query with priority keywords
      */
-    buildCategoryQuery(keywords) {
+    buildCategoryQuery(categoryConfig, useSecondary = false) {
+        if (typeof categoryConfig === 'string') {
+            return categoryConfig; // Backward compatibility
+        }
+        
+        if (Array.isArray(categoryConfig)) {
+            return categoryConfig.join(' OR '); // Backward compatibility
+        }
+        
+        const keywords = useSecondary ? 
+            [...categoryConfig.primary, ...categoryConfig.secondary] : 
+            categoryConfig.primary;
+            
         if (keywords.length === 1) {
             return keywords[0];
         }
-        return keywords.join(' OR ');
+        
+        // Create sophisticated query with priorities
+        const primaryQuery = categoryConfig.primary.slice(0, 3).join(' OR ');
+        
+        if (!useSecondary) {
+            return primaryQuery;
+        }
+        
+        const secondaryQuery = categoryConfig.secondary.slice(0, 5).join(' OR ');
+        return `(${primaryQuery}) OR (${secondaryQuery})`;
     }
+
+         /**
+      * Get enhanced keywords for category with multiple search strategies
+      */
+     getCategoryKeywords(category) {
+         const config = this.categoryMappings[category];
+         if (!config) {
+             return [category]; // Fallback
+         }
+         
+         if (Array.isArray(config)) {
+             return config; // Backward compatibility
+         }
+         
+         // Return all keywords for comprehensive filtering
+         return [...config.primary, ...config.secondary];
+     }
+
+     /**
+      * Get optimal APIs for specific category to maximize real-time coverage
+      */
+     getOptimalAPIsForCategory(category, categoryConfig) {
+         if (!categoryConfig || !categoryConfig.sources) {
+             return ['gnews', 'newsdata', 'newsapi', 'mediastack', 'currentsapi']; // Default all APIs
+         }
+         
+         if (categoryConfig.sources.includes('all')) {
+             return ['gnews', 'newsdata', 'newsapi', 'mediastack', 'currentsapi'];
+         }
+         
+         return categoryConfig.sources;
+     }
+
+     /**
+      * Create multiple search queries for comprehensive coverage
+      */
+     createMultipleQueries(category, categoryConfig) {
+         const queries = [];
+         
+         if (!categoryConfig || Array.isArray(categoryConfig)) {
+             return [this.buildCategoryQuery(categoryConfig || [category])];
+         }
+         
+         // Primary query
+         queries.push(this.buildCategoryQuery(categoryConfig, false));
+         
+         // Secondary query for broader coverage
+         if (categoryConfig.secondary && categoryConfig.secondary.length > 0) {
+             queries.push(this.buildCategoryQuery(categoryConfig, true));
+         }
+         
+         // Special queries based on category type
+         if (categoryConfig.regions) {
+             const regionQuery = categoryConfig.regions.slice(0, 3).join(' OR ');
+             queries.push(regionQuery);
+         }
+         
+         if (categoryConfig.leagues) {
+             const leagueQuery = categoryConfig.leagues.slice(0, 3).join(' OR ');
+             queries.push(leagueQuery);
+         }
+         
+         if (categoryConfig.companies) {
+             const companyQuery = categoryConfig.companies.slice(0, 3).join(' OR ');
+             queries.push(companyQuery);
+         }
+         
+         return queries.slice(0, 3); // Limit to 3 queries max
+     }
 
     /**
      * Filter articles by category relevance with strict filtering
