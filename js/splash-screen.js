@@ -158,7 +158,7 @@ class BrightLensModernSplash {
     hideSplashAndRedirect() {
         if (this.isDestroyed || !this.splashElement) return;
         
-        console.log('🎭 Hiding modern splash and redirecting to homepage');
+        console.log('🎭 Hiding modern splash and staying on current page');
         
         // Clear any ongoing animations
         if (this.loadingInterval) {
@@ -168,14 +168,10 @@ class BrightLensModernSplash {
         // Add hidden class for CSS transition
         this.splashElement.classList.add('hidden');
         
-        // Remove from DOM after transition and redirect to homepage
+        // Remove from DOM after transition - NO REDIRECT, stay on current page
         setTimeout(() => {
             this.destroySplash();
-            // Always redirect to homepage after splash
-            if (window.location.pathname !== '/' && window.location.pathname !== '/index.html') {
-                console.log('🏠 Redirecting to homepage after splash');
-                window.location.href = '/index.html';
-            }
+            console.log('✅ Splash completed - staying on current page:', window.location.pathname);
         }, 1200); // Match CSS transition duration
     }
 
