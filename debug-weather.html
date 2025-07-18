@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Weather Globe Debug</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background: #000;
+            color: white;
+            font-family: Arial, sans-serif;
+        }
+        #debug-info {
+            position: fixed;
+            top: 10px;
+            left: 10px;
+            background: rgba(0,0,0,0.8);
+            padding: 10px;
+            border-radius: 5px;
+            z-index: 1000;
+        }
+        #globe {
+            width: 100vw;
+            height: 100vh;
+        }
+        .loading {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: white;
+            font-size: 24px;
+        }
+    </style>
+</head>
+<body>
+    <div id="debug-info">
+        <div>Status: <span id="status">Initializing...</span></div>
+        <div>Three.js: <span id="threejs-status">Loading...</span></div>
+        <div>Globe.gl: <span id="globegl-status">Loading...</span></div>
+        <div>Weather Data: <span id="data-status">Loading...</span></div>
+    </div>
+
+    <div class="loading" id="loading">Loading 3D Globe...</div>
+    <div id="globe"></div>
+
+    <!-- Load libraries -->
+    <script src="https://unpkg.com/three@0.150.1/build/three.min.js"></script>
+    <script src="https://unpkg.com/globe.gl@2.25.4/dist/globe.gl.min.js"></script>
+
+    <script>
+        function updateStatus(id, message, isError = false) {
+            const element = document.getElementById(id);
+            if (element) {
+                element.textContent = message;
+                element.style.color = isError ? 'red' : 'green';
+            }
+            console.log(`${id}: ${message}`);
+        }
+
+        function initDebugGlobe() {
+            try {
+                updateStatus('status', 'Starting initialization...');
+
+                // Check if Three.js loaded
+                if (typeof THREE !== 'undefined') {
+                    updateStatus('threejs-status', 'Loaded ✓');
+                } else {
+                    updateStatus('threejs-status', 'Failed ✗', true);
+                    return;
+                }
+
+                // Check if Globe.gl loaded
+                if (typeof Globe !== 'undefined') {
+                    updateStatus('globegl-status', 'Loaded ✓');
+                } else {
+                    updateStatus('globegl-status', 'Failed ✗', true);
+                    return;
+                }
+
+                // Simple test data
+                const testData = [
+                    { name: "New York", lat: 40.7128, lng: -74.0060, population: 8400000 },
+                    { name: "London", lat: 51.5074, lng: -0.1278, population: 9000000 },
+                    { name: "Tokyo", lat: 35.6762, lng: 139.6503, population: 37400000 }
+                ];
+
+                updateStatus('data-status', 'Test data ready ✓');
+
+                // Create globe
+                const globe = Globe()
+                    .globeImageUrl('//unpkg.com/three-globe/example/img/earth-day.jpg')
+                    .backgroundImageUrl('//unpkg.com/three-globe/example/img/night-sky.png')
+                    .pointsData(testData)
+                    .pointColor(() => '#4285f4')
+                    .pointAltitude(0.01)
+                    .pointRadius(0.3)
+                    .labelText(d => d.name)
+                    .labelColor(() => '#ffffff')
+                    .labelSize(1.2)
+                    .width(window.innerWidth)
+                    .height(window.innerHeight)
+                    (document.getElementById('globe'));
+
+                updateStatus('status', 'Globe created successfully ✓');
+                document.getElementById('loading').style.display = 'none';
+
+                console.log('Globe initialized successfully!', globe);
+
+            } catch (error) {
+                updateStatus('status', `Error: ${error.message}`, true);
+                console.error('Globe initialization error:', error);
+            }
+        }
+
+        // Wait for libraries to load
+        let checkCount = 0;
+        const maxChecks = 50; // 5 seconds max
+
+        function waitForLibraries() {
+            checkCount++;
+            
+            if (typeof THREE !== 'undefined' && typeof Globe !== 'undefined') {
+                console.log('Libraries loaded, initializing globe...');
+                setTimeout(initDebugGlobe, 100);
+            } else if (checkCount < maxChecks) {
+                setTimeout(waitForLibraries, 100);
+            } else {
+                updateStatus('status', 'Timeout waiting for libraries', true);
+                console.error('Timeout: Libraries did not load in time');
+            }
+        }
+
+        // Start checking when DOM is ready
+        document.addEventListener('DOMContentLoaded', () => {
+            console.log('DOM loaded, waiting for libraries...');
+            waitForLibraries();
+        });
+
+        // Window resize
+        window.addEventListener('resize', () => {
+            if (window.globe) {
+                window.globe.width(window.innerWidth).height(window.innerHeight);
+            }
+        });
+    </script>
+</body>
+</html>

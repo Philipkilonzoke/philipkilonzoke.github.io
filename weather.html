@@ -194,9 +194,50 @@
     <script src="js/weather-globe.js"></script>
     
     <script>
+        // Debug function to check what's loaded
+        function checkDependencies() {
+            console.log('=== Weather Globe Debug ===');
+            console.log('THREE.js loaded:', typeof THREE !== 'undefined');
+            console.log('Globe.gl loaded:', typeof Globe !== 'undefined');
+            console.log('WeatherData loaded:', typeof WeatherData !== 'undefined');
+            console.log('WeatherGlobe loaded:', typeof WeatherGlobe !== 'undefined');
+            
+            if (typeof WeatherData !== 'undefined') {
+                console.log('WeatherData API key:', WeatherData.API_KEY ? 'Present' : 'Missing');
+            }
+            
+            if (typeof WeatherGlobe !== 'undefined') {
+                console.log('WeatherGlobe init method:', typeof WeatherGlobe.init === 'function' ? 'Present' : 'Missing');
+            }
+        }
+
         // Initialize the weather globe when DOM is ready
         document.addEventListener('DOMContentLoaded', function() {
-            WeatherGlobe.init();
+            console.log('DOM Content Loaded');
+            checkDependencies();
+            
+            // Wait a bit for libraries to fully load
+            setTimeout(() => {
+                try {
+                    console.log('Attempting to initialize WeatherGlobe...');
+                    if (typeof WeatherGlobe !== 'undefined' && typeof WeatherGlobe.init === 'function') {
+                        WeatherGlobe.init();
+                        console.log('WeatherGlobe.init() called successfully');
+                    } else {
+                        console.error('WeatherGlobe is not available or init method missing');
+                        // Fallback - show a simple message
+                        document.getElementById('globe').innerHTML = '<div style="color: white; text-align: center; padding: 50px;">Loading 3D Globe...</div>';
+                    }
+                } catch (error) {
+                    console.error('Error initializing WeatherGlobe:', error);
+                    document.getElementById('globe').innerHTML = '<div style="color: white; text-align: center; padding: 50px;">Error loading 3D Globe. Please refresh the page.</div>';
+                }
+            }, 1000);
+        });
+
+        // Additional error handling
+        window.addEventListener('error', function(e) {
+            console.error('Global error:', e.error);
         });
     </script>
 </body>
