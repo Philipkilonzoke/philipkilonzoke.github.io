@@ -14,6 +14,13 @@ class NewsAPI {
             currentsapi: '9tI-4kOmMlJdgcosDUBsYYZDAnkLnuuL4Hrgc5TKlHmN_AMH'
         };
 
+        // CORS proxy services
+        this.corsProxies = [
+            'https://api.allorigins.win/raw?url=',
+            'https://corsproxy.io/?',
+            'https://api.codetabs.com/v1/proxy?quest='
+        ];
+
         // Category-specific API mappings for optimal relevance
         this.categoryMappings = {
             'latest': ['breaking', 'news', 'current'], // Latest from all categories
@@ -30,6 +37,42 @@ class NewsAPI {
 
         this.cache = new Map();
         this.cacheTimeout = 3 * 60 * 1000; // 3 minutes for fresh content
+    }
+
+    /**
+     * Make CORS-enabled API request using proxy
+     */
+    async corsProxyFetch(url, options = {}) {
+        for (let i = 0; i < this.corsProxies.length; i++) {
+            try {
+                const proxyUrl = this.corsProxies[i] + encodeURIComponent(url);
+                const response = await this.corsProxyFetch(proxyUrl, {
+                    ...options,
+                    headers: {
+                        ...options.headers,
+                        'User-Agent': 'BrightlensNews/1.0'
+                    }
+                });
+                
+                if (response.ok) {
+                    return response;
+                }
+                
+                // If this proxy fails, try the next one
+                console.warn(`CORS proxy ${i + 1} failed, trying next...`);
+                continue;
+            } catch (error) {
+                console.warn(`CORS proxy ${i + 1} error:`, error.message);
+                continue;
+            }
+        }
+        
+        // If all proxies fail, try direct request as last resort
+        try {
+            return await this.corsProxyFetch(url, options);
+        } catch (error) {
+            throw new Error(`All CORS proxies failed and direct request failed: ${error.message}`);
+        }
     }
 
     /**
@@ -124,7 +167,7 @@ class NewsAPI {
             const query = this.buildCategoryQuery(keywords);
             const url = `https://gnews.io/api/v4/search?q=${encodeURIComponent(query)}&lang=en&country=any&max=${Math.min(limit, 10)}&apikey=${this.apiKeys.gnews}`;
             
-            const response = await fetch(url);
+            const response = await this.corsProxyFetch(url);
             if (!response.ok) {
                 throw new Error(`GNews API error: ${response.status}`);
             }
@@ -150,7 +193,7 @@ class NewsAPI {
                 url += `&category=${category}`;
             }
             
-            const response = await fetch(url);
+            const response = await this.corsProxyFetch(url);
             if (!response.ok) {
                 throw new Error(`NewsData API error: ${response.status}`);
             }
@@ -179,7 +222,7 @@ class NewsAPI {
                 url = `https://newsapi.org/v2/everything?q=${encodeURIComponent(query)}&language=en&sortBy=publishedAt&pageSize=${Math.min(limit, 20)}&apiKey=${this.apiKeys.newsapi}`;
             }
             
-            const response = await fetch(url);
+            const response = await this.corsProxyFetch(url);
             if (!response.ok) {
                 throw new Error(`NewsAPI error: ${response.status}`);
             }
@@ -206,7 +249,7 @@ class NewsAPI {
                 url += `&categories=${category}`;
             }
             
-            const response = await fetch(url);
+            const response = await this.corsProxyFetch(url);
             if (!response.ok) {
                 throw new Error(`Mediastack API error: ${response.status}`);
             }
@@ -233,7 +276,7 @@ class NewsAPI {
                 url += `&category=${category}`;
             }
             
-            const response = await fetch(url);
+            const response = await this.corsProxyFetch(url);
             if (!response.ok) {
                 throw new Error(`CurrentsAPI error: ${response.status}`);
             }
@@ -671,7 +714,7 @@ class NewsAPI {
                     rssUrl = 'https://feeds.bbci.co.uk/news/rss.xml';
             }
 
-            const response = await fetch(`https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(rssUrl)}`);
+            const response = await this.corsProxyFetch(`https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(rssUrl)}`);
             if (!response.ok) throw new Error('BBC RSS fetch failed');
             
             const data = await response.json();
@@ -718,7 +761,7 @@ class NewsAPI {
                     rssUrl = 'https://www.reuters.com/rssFeed/topNews';
             }
 
-            const response = await fetch(`https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(rssUrl)}`);
+            const response = await this.corsProxyFetch(`https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(rssUrl)}`);
             if (!response.ok) throw new Error('Reuters RSS fetch failed');
             
             const data = await response.json();
@@ -765,7 +808,7 @@ class NewsAPI {
                     rssUrl = 'http://rss.cnn.com/rss/edition.rss';
             }
 
-            const response = await fetch(`https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(rssUrl)}`);
+            const response = await this.corsProxyFetch(`https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(rssUrl)}`);
             if (!response.ok) throw new Error('CNN RSS fetch failed');
             
             const data = await response.json();
@@ -815,7 +858,7 @@ class NewsAPI {
                     rssUrl = 'https://www.theguardian.com/international/rss';
             }
 
-            const response = await fetch(`https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(rssUrl)}`);
+            const response = await this.corsProxyFetch(`https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(rssUrl)}`);
             if (!response.ok) throw new Error('Guardian RSS fetch failed');
             
             const data = await response.json();
@@ -865,7 +908,7 @@ class NewsAPI {
                     rssUrl = 'https://apnews.com/index.rss';
             }
 
-            const response = await fetch(`https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(rssUrl)}`);
+            const response = await this.corsProxyFetch(`https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(rssUrl)}`);
             if (!response.ok) throw new Error('AP RSS fetch failed');
             
             const data = await response.json();
@@ -928,7 +971,7 @@ class NewsAPI {
         const articles = [];
         for (const rssUrl of kenyanRSSFeeds) {
             try {
-                const response = await fetch(`https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(rssUrl)}`);
+                const response = await this.corsProxyFetch(`https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(rssUrl)}`);
                 if (response.ok) {
                     const data = await response.json();
                     if (data.items) {
@@ -964,7 +1007,7 @@ class NewsAPI {
         const articles = [];
         for (const rssUrl of techRSSFeeds) {
             try {
-                const response = await fetch(`https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(rssUrl)}`);
+                const response = await this.corsProxyFetch(`https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(rssUrl)}`);
                 if (response.ok) {
                     const data = await response.json();
                     if (data.items) {
@@ -1000,7 +1043,7 @@ class NewsAPI {
         const articles = [];
         for (const rssUrl of businessRSSFeeds) {
             try {
-                const response = await fetch(`https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(rssUrl)}`);
+                const response = await this.corsProxyFetch(`https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(rssUrl)}`);
                 if (response.ok) {
                     const data = await response.json();
                     if (data.items) {
@@ -1036,7 +1079,7 @@ class NewsAPI {
         const articles = [];
         for (const rssUrl of sportsRSSFeeds) {
             try {
-                const response = await fetch(`https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(rssUrl)}`);
+                const response = await this.corsProxyFetch(`https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(rssUrl)}`);
                 if (response.ok) {
                     const data = await response.json();
                     if (data.items) {
@@ -1072,7 +1115,7 @@ class NewsAPI {
         const articles = [];
         for (const rssUrl of musicRSSFeeds) {
             try {
-                const response = await fetch(`https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(rssUrl)}`);
+                const response = await this.corsProxyFetch(`https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(rssUrl)}`);
                 if (response.ok) {
                     const data = await response.json();
                     if (data.items) {
@@ -1108,7 +1151,7 @@ class NewsAPI {
         const articles = [];
         for (const rssUrl of healthRSSFeeds) {
             try {
-                const response = await fetch(`https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(rssUrl)}`);
+                const response = await this.corsProxyFetch(`https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(rssUrl)}`);
                 if (response.ok) {
                     const data = await response.json();
                     if (data.items) {
@@ -1144,7 +1187,7 @@ class NewsAPI {
         const articles = [];
         for (const rssUrl of lifestyleRSSFeeds) {
             try {
-                const response = await fetch(`https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(rssUrl)}`);
+                const response = await this.corsProxyFetch(`https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(rssUrl)}`);
                 if (response.ok) {
                     const data = await response.json();
                     if (data.items) {

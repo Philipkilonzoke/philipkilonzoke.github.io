@@ -136,7 +136,28 @@ class BrightlensNews {
         const newsGrid = document.getElementById('news-grid');
         const newsError = document.getElementById('news-error');
         
-        if (newsLoading) newsLoading.style.display = 'block';
+        // Enhanced loading message with source status
+        if (newsLoading) {
+            newsLoading.style.display = 'block';
+            newsLoading.innerHTML = `
+                <div class="loading-content">
+                    <div class="loading-spinner"></div>
+                    <div class="loading-text">
+                        <h3>Loading ${this.currentCategory.charAt(0).toUpperCase() + this.currentCategory.slice(1)} News...</h3>
+                        <p>Fetching from multiple trusted sources worldwide</p>
+                        <div class="loading-sources">
+                            <small>
+                                <i class="fas fa-globe"></i> GNews &bull; 
+                                <i class="fas fa-newspaper"></i> NewsAPI &bull; 
+                                <i class="fas fa-rss"></i> BBC &bull; 
+                                <i class="fas fa-broadcast-tower"></i> Reuters &bull; 
+                                <i class="fas fa-satellite"></i> CNN
+                            </small>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
         if (newsGrid) newsGrid.style.display = 'none';
         if (newsError) newsError.style.display = 'none';
     }
@@ -154,8 +175,27 @@ class BrightlensNews {
         const newsLoading = document.getElementById('news-loading');
         const newsGrid = document.getElementById('news-grid');
         
+        // Enhanced error message with CORS context
+        const enhancedMessage = message.includes('CORS') 
+            ? `${message} We're working to bypass restrictions and fetch news from multiple sources.`
+            : `${message} Attempting to load from alternative news sources...`;
+        
         if (newsError) newsError.style.display = 'block';
-        if (errorMessage) errorMessage.textContent = message;
+        if (errorMessage) errorMessage.innerHTML = `
+            <div class="error-details">
+                <i class="fas fa-exclamation-circle"></i>
+                <strong>News Loading Issue</strong><br>
+                ${enhancedMessage}
+                <div class="error-actions" style="margin-top: 15px;">
+                    <button onclick="location.reload()" class="btn btn-sm btn-primary">
+                        <i class="fas fa-refresh"></i> Refresh Page
+                    </button>
+                    <button onclick="window.brightlensNews.switchCategory('latest')" class="btn btn-sm btn-secondary">
+                        <i class="fas fa-newspaper"></i> Try Latest News
+                    </button>
+                </div>
+            </div>
+        `;
         if (newsLoading) newsLoading.style.display = 'none';
         if (newsGrid) newsGrid.style.display = 'none';
     }
