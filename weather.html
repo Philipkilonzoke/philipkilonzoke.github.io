@@ -3,241 +3,894 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>3D Weather Globe - Brightlens News</title>
-    
-    <!-- Preload critical resources for instant loading -->
-    <link rel="preload" href="css/weather-globe.css" as="style">
-    <link rel="preload" href="js/weather-globe.js" as="script">
-    <link rel="preload" href="https://cdn.jsdelivr.net/npm/three@0.158.0/build/three.min.js" as="script">
-    <link rel="preload" href="https://cdn.jsdelivr.net/npm/globe.gl@2.31.0/dist/globe.gl.min.js" as="script">
-    
-    <!-- Optimized CSS -->
-    <link rel="stylesheet" href="css/styles.css">
-    <link rel="stylesheet" href="css/weather-globe.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    
-    <!-- High-performance Globe libraries - using more reliable CDN -->
-    <script src="https://cdn.jsdelivr.net/npm/three@0.158.0/build/three.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/globe.gl@2.31.0/dist/globe.gl.min.js"></script>
+    <title>Weather Globe - Brightlens News</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #0c1421 0%, #1a1a2e 100%);
+            color: white;
+            overflow: hidden;
+            height: 100vh;
+        }
+
+        .header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header h1 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            background: linear-gradient(135deg, #4CAF50, #2196F3);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .home-link {
+            color: #ccc;
+            text-decoration: none;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .home-link:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+        }
+
+        #globe {
+            width: 100vw;
+            height: 100vh;
+            cursor: grab;
+        }
+
+        #globe:active {
+            cursor: grabbing;
+        }
+
+        .loading {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            z-index: 2000;
+            background: rgba(0, 0, 0, 0.9);
+            padding: 2rem 3rem;
+            border-radius: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .loading h2 {
+            margin-bottom: 1rem;
+            color: #4CAF50;
+        }
+
+        .loading-spinner {
+            width: 50px;
+            height: 50px;
+            border: 3px solid rgba(255, 255, 255, 0.1);
+            border-top: 3px solid #4CAF50;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 1rem auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .info-panel {
+            position: fixed;
+            top: 80px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(20px);
+            border-radius: 12px;
+            padding: 1.5rem;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            z-index: 500;
+            min-width: 250px;
+        }
+
+        .info-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.5rem;
+            font-size: 0.9rem;
+        }
+
+        .info-label {
+            color: #ccc;
+        }
+
+        .info-value {
+            color: #4CAF50;
+            font-weight: 600;
+        }
+
+        .weather-popup {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0);
+            background: rgba(0, 0, 0, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            padding: 2rem;
+            border: 2px solid rgba(76, 175, 80, 0.3);
+            z-index: 3000;
+            min-width: 400px;
+            max-width: 90vw;
+            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+            opacity: 0;
+        }
+
+        .weather-popup.show {
+            transform: translate(-50%, -50%) scale(1);
+            opacity: 1;
+        }
+
+        .popup-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            padding-bottom: 1rem;
+        }
+
+        .popup-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: #4CAF50;
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            color: #ccc;
+            font-size: 1.5rem;
+            cursor: pointer;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+
+        .close-btn:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+        }
+
+        .weather-main {
+            display: grid;
+            grid-template-columns: auto 1fr;
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+            align-items: center;
+        }
+
+        .weather-icon {
+            width: 80px;
+            height: 80px;
+            filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.5));
+        }
+
+        .weather-info {
+            text-align: left;
+        }
+
+        .temperature {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: #2196F3;
+            margin-bottom: 0.5rem;
+        }
+
+        .condition {
+            font-size: 1.1rem;
+            color: #ccc;
+            text-transform: capitalize;
+            margin-bottom: 0.3rem;
+        }
+
+        .location-details {
+            font-size: 0.9rem;
+            color: #888;
+        }
+
+        .weather-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 1rem;
+        }
+
+        .stat-card {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            padding: 1rem;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .stat-card:hover {
+            background: rgba(255, 255, 255, 0.1);
+            transform: translateY(-2px);
+        }
+
+        .stat-icon {
+            font-size: 1.5rem;
+            margin-bottom: 0.5rem;
+            color: #4CAF50;
+        }
+
+        .stat-label {
+            font-size: 0.8rem;
+            color: #ccc;
+            margin-bottom: 0.3rem;
+        }
+
+        .stat-value {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: white;
+        }
+
+        .controls {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            z-index: 1000;
+        }
+
+        .control-btn {
+            background: rgba(0, 0, 0, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: white;
+            padding: 0.8rem 1.2rem;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .control-btn:hover {
+            background: rgba(76, 175, 80, 0.2);
+            border-color: #4CAF50;
+            transform: translateY(-2px);
+        }
+
+        .control-btn.active {
+            background: rgba(76, 175, 80, 0.3);
+            border-color: #4CAF50;
+        }
+
+        .search-container {
+            position: fixed;
+            top: 80px;
+            left: 20px;
+            z-index: 1000;
+        }
+
+        .search-input {
+            background: rgba(0, 0, 0, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: white;
+            padding: 0.8rem 1rem;
+            border-radius: 10px;
+            width: 250px;
+            font-size: 0.9rem;
+            backdrop-filter: blur(10px);
+        }
+
+        .search-input::placeholder {
+            color: #888;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: #4CAF50;
+            box-shadow: 0 0 0 2px rgba(76, 175, 80, 0.2);
+        }
+
+        /* Mobile responsive */
+        @media (max-width: 768px) {
+            .header {
+                padding: 1rem;
+            }
+            
+            .header h1 {
+                font-size: 1.2rem;
+            }
+            
+            .weather-popup {
+                min-width: 300px;
+                padding: 1.5rem;
+            }
+            
+            .weather-main {
+                grid-template-columns: 1fr;
+                text-align: center;
+            }
+            
+            .temperature {
+                font-size: 2rem;
+            }
+            
+            .search-input {
+                width: 200px;
+            }
+            
+            .controls {
+                bottom: 10px;
+                right: 10px;
+                left: 10px;
+                flex-direction: row;
+                justify-content: center;
+                flex-wrap: wrap;
+            }
+            
+            .control-btn {
+                flex: 1;
+                min-width: 100px;
+            }
+        }
+    </style>
 </head>
 <body>
-    <div class="weather-app">
-        <!-- Header -->
-        <header class="header" id="header">
-            <h1>
-                <i class="fas fa-globe-americas"></i>
-                3D Weather Globe
-            </h1>
-            <div class="header-controls">
-                <a href="index.html" class="home-link">
-                    <i class="fas fa-arrow-left"></i>
-                    Back to News
-                </a>
-            </div>
-        </header>
+    <div class="header">
+        <h1>🌍 Interactive Weather Globe</h1>
+        <a href="index.html" class="home-link">← Back to News</a>
+    </div>
 
-        <!-- Globe Container -->
-        <div class="globe-container">
-            <div id="globe"></div>
+    <div class="search-container">
+        <input type="text" class="search-input" placeholder="Search for a city..." id="search-input">
+    </div>
+
+    <div class="info-panel">
+        <div class="info-item">
+            <span class="info-label">Zoom Level:</span>
+            <span class="info-value" id="zoom-level">World</span>
         </div>
-
-        <!-- Zoom Level Indicator -->
-        <div class="zoom-indicator" id="zoom-indicator">
-            <div class="zoom-level">
-                <i class="fas fa-search-plus"></i>
-                <span id="zoom-text">World View</span>
-            </div>
-            <div class="location-count">
-                <span id="location-count">0</span> locations visible
-            </div>
+        <div class="info-item">
+            <span class="info-label">Locations:</span>
+            <span class="info-value" id="location-count">0</span>
         </div>
-
-        <!-- Navigation Instructions -->
-        <div class="nav-instructions" id="nav-instructions">
-            <div class="instruction-item">
-                <i class="fas fa-mouse-pointer"></i>
-                <span>Drag to rotate</span>
-            </div>
-            <div class="instruction-item">
-                <i class="fas fa-search-plus"></i>
-                <span>Scroll to zoom</span>
-            </div>
-            <div class="instruction-item">
-                <i class="fas fa-map-marker-alt"></i>
-                <span>Click for weather</span>
-            </div>
-        </div>
-
-        <!-- Controls -->
-        <div class="controls">
-            <button class="control-btn" onclick="resetGlobe()" title="Reset to World View">
-                <i class="fas fa-globe"></i>
-                <span>Reset</span>
-            </button>
-            <button class="control-btn" id="auto-rotate-btn" onclick="toggleRotation()" title="Auto Rotate">
-                <i class="fas fa-play" id="rotation-icon"></i>
-                <span id="rotation-text">Rotate</span>
-            </button>
-            <button class="control-btn" onclick="toggleLabels()" title="Toggle Labels" id="labels-btn">
-                <i class="fas fa-tags" id="labels-icon"></i>
-                <span id="labels-text">Labels</span>
-            </button>
-        </div>
-
-        <!-- Loading Screen -->
-        <div class="loading-screen" id="loading-screen">
-            <div class="loading-content">
-                <div class="globe-loader">
-                    <div class="loader-sphere"></div>
-                    <div class="loader-ring"></div>
-                </div>
-                <h2>Loading 3D Earth...</h2>
-                <p>Preparing your weather experience</p>
-                <div class="loading-progress">
-                    <div class="progress-bar" id="progress-bar"></div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Weather Details Panel -->
-        <div class="weather-panel" id="weather-panel">
-            <div class="panel-header">
-                <div class="location-title">
-                    <i class="fas fa-map-marker-alt"></i>
-                    <h3 id="location-name">Select a location</h3>
-                </div>
-                <button class="close-panel" onclick="closeWeatherPanel()">
-                    <i class="fas fa-times"></i>
-                </button>
-            </div>
-            
-            <div class="weather-content">
-                <div class="current-weather">
-                    <div class="weather-icon-container">
-                        <img id="weather-icon" src="" alt="Weather Icon" class="weather-icon">
-                    </div>
-                    <div class="weather-main-info">
-                        <div class="temperature" id="temperature">--°</div>
-                        <div class="condition" id="condition">Loading...</div>
-                        <div class="location-details" id="location-details">--</div>
-                    </div>
-                </div>
-                
-                <div class="weather-stats">
-                    <div class="stat-item">
-                        <div class="stat-icon"><i class="fas fa-thermometer-half"></i></div>
-                        <div class="stat-info">
-                            <span class="stat-label">Feels like</span>
-                            <span class="stat-value" id="feels-like">--°</span>
-                        </div>
-                    </div>
-                    <div class="stat-item">
-                        <div class="stat-icon"><i class="fas fa-tint"></i></div>
-                        <div class="stat-info">
-                            <span class="stat-label">Humidity</span>
-                            <span class="stat-value" id="humidity">--%</span>
-                        </div>
-                    </div>
-                    <div class="stat-item">
-                        <div class="stat-icon"><i class="fas fa-wind"></i></div>
-                        <div class="stat-info">
-                            <span class="stat-label">Wind</span>
-                            <span class="stat-value" id="wind-speed">-- km/h</span>
-                        </div>
-                    </div>
-                    <div class="stat-item">
-                        <div class="stat-icon"><i class="fas fa-eye"></i></div>
-                        <div class="stat-info">
-                            <span class="stat-label">Visibility</span>
-                            <span class="stat-value" id="visibility">-- km</span>
-                        </div>
-                    </div>
-                    <div class="stat-item">
-                        <div class="stat-icon"><i class="fas fa-compress-arrows-alt"></i></div>
-                        <div class="stat-info">
-                            <span class="stat-label">Pressure</span>
-                            <span class="stat-value" id="pressure">-- hPa</span>
-                        </div>
-                    </div>
-                    <div class="stat-item">
-                        <div class="stat-icon"><i class="fas fa-sun"></i></div>
-                        <div class="stat-info">
-                            <span class="stat-label">UV Index</span>
-                            <span class="stat-value" id="uv-index">--</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Search Panel -->
-        <div class="search-panel" id="search-panel">
-            <div class="search-container">
-                <div class="search-input-container">
-                    <i class="fas fa-search search-icon"></i>
-                    <input type="text" id="search-input" placeholder="Search for a city..." autocomplete="off">
-                    <button class="clear-search" id="clear-search" onclick="clearSearch()">
-                        <i class="fas fa-times"></i>
-                    </button>
-                </div>
-                <div class="search-results" id="search-results"></div>
-            </div>
-            <button class="search-toggle" onclick="toggleSearch()">
-                <i class="fas fa-search"></i>
-            </button>
+        <div class="info-item">
+            <span class="info-label">Status:</span>
+            <span class="info-value" id="status">Loading...</span>
         </div>
     </div>
 
-    <!-- Load main JavaScript -->
-    <script src="js/weather-data.js"></script>
-    <script src="js/weather-globe.js"></script>
-    
+    <div class="loading" id="loading">
+        <h2>Loading 3D Earth</h2>
+        <div class="loading-spinner"></div>
+        <p>Preparing your weather experience...</p>
+    </div>
+
+    <div id="globe"></div>
+
+    <div class="weather-popup" id="weather-popup">
+        <div class="popup-header">
+            <div class="popup-title" id="location-name">Weather Information</div>
+            <button class="close-btn" onclick="closeWeather()">×</button>
+        </div>
+        
+        <div class="weather-main">
+            <img id="weather-icon" class="weather-icon" src="" alt="">
+            <div class="weather-info">
+                <div class="temperature" id="temperature">--°</div>
+                <div class="condition" id="condition">Loading...</div>
+                <div class="location-details" id="location-details">--</div>
+            </div>
+        </div>
+        
+        <div class="weather-stats">
+            <div class="stat-card">
+                <div class="stat-icon">🌡️</div>
+                <div class="stat-label">Feels Like</div>
+                <div class="stat-value" id="feels-like">--°</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">💧</div>
+                <div class="stat-label">Humidity</div>
+                <div class="stat-value" id="humidity">--%</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">💨</div>
+                <div class="stat-label">Wind Speed</div>
+                <div class="stat-value" id="wind-speed">-- km/h</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">👁️</div>
+                <div class="stat-label">Visibility</div>
+                <div class="stat-value" id="visibility">-- km</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">📊</div>
+                <div class="stat-label">Pressure</div>
+                <div class="stat-value" id="pressure">-- hPa</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">☀️</div>
+                <div class="stat-label">UV Index</div>
+                <div class="stat-value" id="uv-index">--</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="controls">
+        <button class="control-btn" onclick="resetView()">
+            🏠 Reset View
+        </button>
+        <button class="control-btn" id="rotate-btn" onclick="toggleRotation()">
+            ▶️ Auto Rotate
+        </button>
+        <button class="control-btn" id="labels-btn" onclick="toggleLabels()">
+            🏷️ Toggle Labels
+        </button>
+    </div>
+
+    <!-- Three.js and Globe.gl from reliable CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/three@0.158.0/build/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/globe.gl@2.31.0/dist/globe.gl.min.js"></script>
+
     <script>
-        // Debug function to check what's loaded
-        function checkDependencies() {
-            console.log('=== Weather Globe Debug ===');
-            console.log('THREE.js loaded:', typeof THREE !== 'undefined');
-            console.log('Globe.gl loaded:', typeof Globe !== 'undefined');
-            console.log('WeatherData loaded:', typeof WeatherData !== 'undefined');
-            console.log('WeatherGlobe loaded:', typeof WeatherGlobe !== 'undefined');
+        // Weather API Configuration
+        const API_KEY = '1106a7ac15d31e2c5f376b1c155e8c6d';
+        const BASE_URL = 'https://api.openweathermap.org/data/2.5/weather';
+
+        // Globe instance and state
+        let globe;
+        let isRotating = false;
+        let showLabels = true;
+        let currentAltitude = 2.5;
+
+        // City data organized by zoom levels for Google Earth-like experience
+        const worldCities = [
+            // Major World Cities (Always visible)
+            { name: "New York", lat: 40.7128, lng: -74.0060, country: "US", pop: 8400000, type: "mega" },
+            { name: "London", lat: 51.5074, lng: -0.1278, country: "GB", pop: 9000000, type: "mega" },
+            { name: "Tokyo", lat: 35.6762, lng: 139.6503, country: "JP", pop: 37400000, type: "mega" },
+            { name: "Paris", lat: 48.8566, lng: 2.3522, country: "FR", pop: 2200000, type: "major" },
+            { name: "Sydney", lat: -33.8688, lng: 151.2093, country: "AU", pop: 5300000, type: "major" },
+            { name: "Dubai", lat: 25.2048, lng: 55.2708, country: "AE", pop: 3500000, type: "major" },
+            { name: "Singapore", lat: 1.3521, lng: 103.8198, country: "SG", pop: 5900000, type: "major" },
+            { name: "Mumbai", lat: 19.0760, lng: 72.8777, country: "IN", pop: 20700000, type: "mega" },
+            { name: "Beijing", lat: 39.9042, lng: 116.4074, country: "CN", pop: 21700000, type: "mega" },
+            { name: "São Paulo", lat: -23.5505, lng: -46.6333, country: "BR", pop: 12300000, type: "mega" },
+            { name: "Cairo", lat: 30.0444, lng: 31.2357, country: "EG", pop: 20900000, type: "mega" },
+            { name: "Moscow", lat: 55.7558, lng: 37.6176, country: "RU", pop: 12500000, type: "mega" },
+            { name: "Nairobi", lat: -1.2921, lng: 36.8219, country: "KE", pop: 4400000, type: "major" },
+            { name: "Los Angeles", lat: 34.0522, lng: -118.2437, country: "US", pop: 4000000, type: "major" },
+            { name: "Istanbul", lat: 41.0082, lng: 28.9784, country: "TR", pop: 15500000, type: "mega" },
+            { name: "Bangkok", lat: 13.7563, lng: 100.5018, country: "TH", pop: 10600000, type: "mega" }
+        ];
+
+        const regionalCities = [
+            // Regional cities (visible at closer zoom)
+            { name: "Berlin", lat: 52.5200, lng: 13.4050, country: "DE", pop: 3700000, type: "major" },
+            { name: "Madrid", lat: 40.4168, lng: -3.7038, country: "ES", pop: 3200000, type: "major" },
+            { name: "Rome", lat: 41.9028, lng: 12.4964, country: "IT", pop: 2800000, type: "major" },
+            { name: "Amsterdam", lat: 52.3676, lng: 4.9041, country: "NL", pop: 870000, type: "city" },
+            { name: "Barcelona", lat: 41.3851, lng: 2.1734, country: "ES", pop: 1600000, type: "city" },
+            { name: "Vienna", lat: 48.2082, lng: 16.3738, country: "AT", pop: 1900000, type: "city" },
+            { name: "Stockholm", lat: 59.3293, lng: 18.0686, country: "SE", pop: 980000, type: "city" },
+            { name: "Oslo", lat: 59.9139, lng: 10.7522, country: "NO", pop: 700000, type: "city" },
+            { name: "Copenhagen", lat: 55.6761, lng: 12.5683, country: "DK", pop: 660000, type: "city" },
+            { name: "Hong Kong", lat: 22.3193, lng: 114.1694, country: "HK", pop: 7500000, type: "major" },
+            { name: "Seoul", lat: 37.5665, lng: 126.9780, country: "KR", pop: 9700000, type: "mega" },
+            { name: "Delhi", lat: 28.7041, lng: 77.1025, country: "IN", pop: 32900000, type: "mega" },
+            { name: "Shanghai", lat: 31.2304, lng: 121.4737, country: "CN", pop: 26300000, type: "mega" },
+            { name: "Jakarta", lat: -6.2088, lng: 106.8456, country: "ID", pop: 10600000, type: "mega" },
+            { name: "Manila", lat: 14.5995, lng: 120.9842, country: "PH", pop: 13500000, type: "mega" },
+            { name: "Ho Chi Minh City", lat: 10.8231, lng: 106.6297, country: "VN", pop: 9000000, type: "mega" },
+            { name: "Bangalore", lat: 12.9716, lng: 77.5946, country: "IN", pop: 13200000, type: "mega" },
+            { name: "Chennai", lat: 13.0827, lng: 80.2707, country: "IN", pop: 11700000, type: "mega" },
+            { name: "Kolkata", lat: 22.5726, lng: 88.3639, country: "IN", pop: 14800000, type: "mega" },
+            { name: "Karachi", lat: 24.8607, lng: 67.0011, country: "PK", pop: 16000000, type: "mega" },
+            { name: "Lahore", lat: 31.5204, lng: 74.3587, country: "PK", pop: 11100000, type: "mega" },
+            { name: "Dhaka", lat: 23.8103, lng: 90.4125, country: "BD", pop: 22000000, type: "mega" },
+            { name: "Riyadh", lat: 24.7136, lng: 46.6753, country: "SA", pop: 7000000, type: "major" },
+            { name: "Tel Aviv", lat: 32.0853, lng: 34.7818, country: "IL", pop: 460000, type: "city" },
+            { name: "Cape Town", lat: -33.9249, lng: 18.4241, country: "ZA", pop: 4620000, type: "major" },
+            { name: "Johannesburg", lat: -26.2041, lng: 28.0473, country: "ZA", pop: 5600000, type: "major" },
+            { name: "Lagos", lat: 6.5244, lng: 3.3792, country: "NG", pop: 15400000, type: "mega" },
+            { name: "Casablanca", lat: 33.5731, lng: -7.5898, country: "MA", pop: 3360000, type: "major" },
+            { name: "Addis Ababa", lat: 9.1450, lng: 38.7451, country: "ET", pop: 5000000, type: "major" },
+            { name: "San Francisco", lat: 37.7749, lng: -122.4194, country: "US", pop: 880000, type: "city" },
+            { name: "Chicago", lat: 41.8781, lng: -87.6298, country: "US", pop: 2700000, type: "major" },
+            { name: "Houston", lat: 29.7604, lng: -95.3698, country: "US", pop: 2300000, type: "major" },
+            { name: "Phoenix", lat: 33.4484, lng: -112.0740, country: "US", pop: 1700000, type: "city" },
+            { name: "Miami", lat: 25.7617, lng: -80.1918, country: "US", pop: 470000, type: "city" },
+            { name: "Seattle", lat: 47.6062, lng: -122.3321, country: "US", pop: 750000, type: "city" },
+            { name: "Toronto", lat: 43.6532, lng: -79.3832, country: "CA", pop: 2900000, type: "major" },
+            { name: "Vancouver", lat: 49.2827, lng: -123.1207, country: "CA", pop: 680000, type: "city" },
+            { name: "Montreal", lat: 45.5017, lng: -73.5673, country: "CA", pop: 1800000, type: "city" },
+            { name: "Mexico City", lat: 19.4326, lng: -99.1332, country: "MX", pop: 9200000, type: "mega" },
+            { name: "Buenos Aires", lat: -34.6118, lng: -58.3960, country: "AR", pop: 3100000, type: "major" },
+            { name: "Lima", lat: -12.0464, lng: -77.0428, country: "PE", pop: 10700000, type: "mega" },
+            { name: "Bogotá", lat: 4.7110, lng: -74.0721, country: "CO", pop: 7400000, type: "major" },
+            { name: "Santiago", lat: -33.4489, lng: -70.6693, country: "CL", pop: 6700000, type: "major" },
+            { name: "Melbourne", lat: -37.8136, lng: 144.9631, country: "AU", pop: 5100000, type: "major" },
+            { name: "Brisbane", lat: -27.4698, lng: 153.0251, country: "AU", pop: 2560000, type: "major" },
+            { name: "Perth", lat: -31.9505, lng: 115.8605, country: "AU", pop: 2140000, type: "major" },
+            { name: "Auckland", lat: -36.8485, lng: 174.7633, country: "NZ", pop: 1700000, type: "city" }
+        ];
+
+        const localCities = [
+            // Kenya cities (visible at closest zoom)
+            { name: "Mombasa", lat: -4.0435, lng: 39.6682, country: "KE", pop: 1200000, type: "city" },
+            { name: "Kisumu", lat: -0.1022, lng: 34.7617, country: "KE", pop: 610000, type: "town" },
+            { name: "Nakuru", lat: -0.3031, lng: 36.0800, country: "KE", pop: 570000, type: "town" },
+            { name: "Eldoret", lat: 0.5143, lng: 35.2698, country: "KE", pop: 290000, type: "town" },
+            { name: "Thika", lat: -1.0332, lng: 37.0692, country: "KE", pop: 280000, type: "town" },
+            { name: "Meru", lat: 0.0500, lng: 37.6500, country: "KE", pop: 240000, type: "town" },
+            { name: "Garissa", lat: -0.4536, lng: 39.6401, country: "KE", pop: 120000, type: "town" },
+            { name: "Kitale", lat: 1.0167, lng: 35.0000, country: "KE", pop: 110000, type: "town" },
+            // More local cities from other regions
+            { name: "Zurich", lat: 47.3769, lng: 8.5417, country: "CH", pop: 430000, type: "city" },
+            { name: "Geneva", lat: 46.2044, lng: 6.1432, country: "CH", pop: 200000, type: "town" },
+            { name: "Helsinki", lat: 60.1699, lng: 24.9384, country: "FI", pop: 650000, type: "city" },
+            { name: "Lisbon", lat: 38.7223, lng: -9.1393, country: "PT", pop: 550000, type: "city" },
+            { name: "Athens", lat: 37.9838, lng: 23.7275, country: "GR", pop: 664000, type: "city" }
+        ];
+
+        function getLocationColor(location) {
+            if (location.type === "mega") return '#ff4444';      // Red for megacities
+            if (location.type === "major") return '#ff8800';     // Orange for major cities
+            if (location.type === "city") return '#4488ff';      // Blue for cities
+            return '#44ff44';                                    // Green for towns
+        }
+
+        function getLocationSize(location) {
+            if (location.type === "mega") return 0.6;
+            if (location.type === "major") return 0.4;
+            if (location.type === "city") return 0.3;
+            return 0.25;
+        }
+
+        function getCitiesForZoom(altitude) {
+            let cities = [...worldCities];
             
-            if (typeof WeatherData !== 'undefined') {
-                console.log('WeatherData API key:', WeatherData.API_KEY ? 'Present' : 'Missing');
+            if (altitude <= 2.0) {
+                cities = cities.concat(regionalCities);
             }
             
-            if (typeof WeatherGlobe !== 'undefined') {
-                console.log('WeatherGlobe init method:', typeof WeatherGlobe.init === 'function' ? 'Present' : 'Missing');
+            if (altitude <= 1.0) {
+                cities = cities.concat(localCities);
+            }
+            
+            return cities;
+        }
+
+        function getZoomLevelName(altitude) {
+            if (altitude >= 2.5) return "World";
+            if (altitude >= 2.0) return "Continental";
+            if (altitude >= 1.0) return "Regional";
+            return "Local";
+        }
+
+        function updateStatus(message) {
+            document.getElementById('status').textContent = message;
+            console.log('Status:', message);
+        }
+
+        function updateLocationCount(count) {
+            document.getElementById('location-count').textContent = count;
+        }
+
+        function updateZoomLevel(altitude) {
+            document.getElementById('zoom-level').textContent = getZoomLevelName(altitude);
+        }
+
+        async function initGlobe() {
+            try {
+                updateStatus('Initializing...');
+
+                // Check if libraries loaded
+                if (typeof THREE === 'undefined') {
+                    throw new Error('Three.js library failed to load');
+                }
+                if (typeof Globe === 'undefined') {
+                    throw new Error('Globe.gl library failed to load');
+                }
+
+                updateStatus('Creating globe...');
+
+                // Create the globe
+                globe = Globe()
+                    .globeImageUrl('//unpkg.com/three-globe/example/img/earth-day.jpg')
+                    .backgroundImageUrl('//unpkg.com/three-globe/example/img/night-sky.png')
+                    .pointsData(getCitiesForZoom(2.5))
+                    .pointColor(getLocationColor)
+                    .pointAltitude(0.01)
+                    .pointRadius(getLocationSize)
+                    .labelText(d => d.name)
+                    .labelColor(() => '#ffffff')
+                    .labelSize(1.2)
+                    .labelDotRadius(0.4)
+                    .labelAltitude(0.01)
+                    .onPointClick(handleLocationClick)
+                    .onLabelClick(handleLocationClick)
+                    .width(window.innerWidth)
+                    .height(window.innerHeight)
+                    .showAtmosphere(true)
+                    .atmosphereColor('#4CAF50')
+                    .atmosphereAltitude(0.15)
+                    (document.getElementById('globe'));
+
+                // Set initial view
+                globe.pointOfView({ lat: 20, lng: 0, altitude: 2.5 });
+
+                // Handle zoom changes
+                globe.onZoom((coords) => {
+                    currentAltitude = coords.altitude;
+                    updateZoomLevel(coords.altitude);
+                    
+                    // Update cities based on zoom level
+                    const cities = getCitiesForZoom(coords.altitude);
+                    globe.pointsData(cities);
+                    
+                    // Update labels if they're enabled
+                    if (showLabels) {
+                        globe.labelsData(cities.slice(0, 60)); // Limit labels for performance
+                    }
+                    
+                    updateLocationCount(cities.length);
+                });
+
+                updateStatus('Ready!');
+                updateLocationCount(worldCities.length);
+                updateZoomLevel(2.5);
+                
+                // Hide loading screen
+                document.getElementById('loading').style.display = 'none';
+
+                console.log('Globe initialized successfully');
+
+            } catch (error) {
+                updateStatus(`Error: ${error.message}`);
+                console.error('Globe initialization failed:', error);
+                
+                // Show error message
+                document.getElementById('globe').innerHTML = `
+                    <div style="display: flex; align-items: center; justify-content: center; height: 100vh; color: white; text-align: center; background: rgba(0,0,0,0.8);">
+                        <div>
+                            <h2 style="color: #ff4444; margin-bottom: 1rem;">Failed to Load 3D Globe</h2>
+                            <p style="margin-bottom: 1rem;">${error.message}</p>
+                            <p style="color: #ccc;">Please refresh the page or check your internet connection.</p>
+                            <button onclick="location.reload()" style="margin-top: 1rem; padding: 0.5rem 1rem; background: #4CAF50; border: none; color: white; border-radius: 5px; cursor: pointer;">
+                                Retry
+                            </button>
+                        </div>
+                    </div>
+                `;
+                document.getElementById('loading').style.display = 'none';
             }
         }
 
-        // Initialize the weather globe when DOM is ready
-        document.addEventListener('DOMContentLoaded', function() {
-            console.log('DOM Content Loaded');
-            checkDependencies();
+        async function handleLocationClick(location) {
+            if (!location) return;
             
-            // Wait a bit for libraries to fully load
-            setTimeout(() => {
-                try {
-                    console.log('Attempting to initialize WeatherGlobe...');
-                    if (typeof WeatherGlobe !== 'undefined' && typeof WeatherGlobe.init === 'function') {
-                        WeatherGlobe.init();
-                        console.log('WeatherGlobe.init() called successfully');
-                    } else {
-                        console.error('WeatherGlobe is not available or init method missing');
-                        // Fallback - show a simple message
-                        document.getElementById('globe').innerHTML = '<div style="color: white; text-align: center; padding: 50px;">Loading 3D Globe...</div>';
-                    }
-                } catch (error) {
-                    console.error('Error initializing WeatherGlobe:', error);
-                    document.getElementById('globe').innerHTML = '<div style="color: white; text-align: center; padding: 50px;">Error loading 3D Globe. Please refresh the page.</div>';
+            try {
+                updateStatus(`Loading weather for ${location.name}...`);
+                
+                // Show popup immediately with loading state
+                document.getElementById('location-name').textContent = `${location.name}, ${location.country}`;
+                document.getElementById('temperature').textContent = '--°';
+                document.getElementById('condition').textContent = 'Loading weather data...';
+                document.getElementById('location-details').textContent = `Population: ${location.pop.toLocaleString()}`;
+                document.getElementById('weather-popup').classList.add('show');
+                
+                // Fetch weather data
+                const response = await fetch(
+                    `${BASE_URL}?q=${location.name},${location.country}&appid=${API_KEY}&units=metric`,
+                    { timeout: 8000 }
+                );
+                
+                if (!response.ok) {
+                    throw new Error(`Weather service returned ${response.status}`);
                 }
-            }, 1000);
+                
+                const data = await response.json();
+                
+                // Update popup with real data
+                document.getElementById('temperature').textContent = `${Math.round(data.main.temp)}°C`;
+                document.getElementById('condition').textContent = data.weather[0].description;
+                document.getElementById('location-details').textContent = `${data.name}, ${data.sys.country} • Population: ${location.pop.toLocaleString()}`;
+                document.getElementById('feels-like').textContent = `${Math.round(data.main.feels_like)}°C`;
+                document.getElementById('humidity').textContent = `${data.main.humidity}%`;
+                document.getElementById('wind-speed').textContent = `${Math.round((data.wind?.speed || 0) * 3.6)} km/h`;
+                document.getElementById('visibility').textContent = `${Math.round((data.visibility || 10000) / 1000)} km`;
+                document.getElementById('pressure').textContent = `${data.main.pressure} hPa`;
+                document.getElementById('uv-index').textContent = data.uvi || 'N/A';
+                
+                // Weather icon
+                const iconUrl = `https://openweathermap.org/img/wn/${data.weather[0].icon}@2x.png`;
+                document.getElementById('weather-icon').src = iconUrl;
+                
+                updateStatus('Weather loaded successfully');
+                
+            } catch (error) {
+                console.error('Weather error:', error);
+                updateStatus(`Weather error: ${error.message}`);
+                
+                // Show error in popup
+                document.getElementById('condition').textContent = 'Weather data unavailable';
+                document.getElementById('location-details').textContent = 'Please try another location or check your connection';
+            }
+        }
+
+        function closeWeather() {
+            document.getElementById('weather-popup').classList.remove('show');
+        }
+
+        function resetView() {
+            if (globe) {
+                globe.pointOfView({ lat: 20, lng: 0, altitude: 2.5 }, 1000);
+                updateStatus('View reset to world level');
+            }
+        }
+
+        function toggleRotation() {
+            isRotating = !isRotating;
+            const btn = document.getElementById('rotate-btn');
+            
+            if (globe) {
+                globe.controls().autoRotate = isRotating;
+                globe.controls().autoRotateSpeed = 0.8;
+                
+                if (isRotating) {
+                    btn.textContent = '⏸️ Stop Rotation';
+                    btn.classList.add('active');
+                    updateStatus('Auto-rotation enabled');
+                } else {
+                    btn.textContent = '▶️ Auto Rotate';
+                    btn.classList.remove('active');
+                    updateStatus('Auto-rotation disabled');
+                }
+            }
+        }
+
+        function toggleLabels() {
+            showLabels = !showLabels;
+            const btn = document.getElementById('labels-btn');
+            
+            if (globe) {
+                if (showLabels) {
+                    const cities = getCitiesForZoom(currentAltitude);
+                    globe.labelsData(cities.slice(0, 60));
+                    btn.textContent = '🏷️ Hide Labels';
+                    btn.classList.add('active');
+                    updateStatus('Labels enabled');
+                } else {
+                    globe.labelsData([]);
+                    btn.textContent = '🏷️ Show Labels';
+                    btn.classList.remove('active');
+                    updateStatus('Labels disabled');
+                }
+            }
+        }
+
+        // Search functionality
+        function setupSearch() {
+            const searchInput = document.getElementById('search-input');
+            
+            searchInput.addEventListener('input', (e) => {
+                const query = e.target.value.toLowerCase().trim();
+                if (query.length < 2) return;
+                
+                // Search all cities
+                const allCities = [...worldCities, ...regionalCities, ...localCities];
+                const matches = allCities.filter(city => 
+                    city.name.toLowerCase().includes(query) ||
+                    city.country.toLowerCase().includes(query)
+                );
+                
+                if (matches.length > 0) {
+                    const city = matches[0];
+                    // Navigate to city
+                    globe.pointOfView({
+                        lat: city.lat,
+                        lng: city.lng,
+                        altitude: 1.5
+                    }, 1500);
+                    
+                    // Show weather after navigation
+                    setTimeout(() => {
+                        handleLocationClick(city);
+                    }, 1600);
+                    
+                    searchInput.value = '';
+                }
+            });
+        }
+
+        // Window resize handler
+        window.addEventListener('resize', () => {
+            if (globe) {
+                globe.width(window.innerWidth).height(window.innerHeight);
+            }
         });
 
-        // Additional error handling
-        window.addEventListener('error', function(e) {
-            console.error('Global error:', e.error);
+        // Close popup when clicking outside
+        document.addEventListener('click', (e) => {
+            const popup = document.getElementById('weather-popup');
+            if (popup.classList.contains('show') && !popup.contains(e.target) && !e.target.closest('#globe')) {
+                closeWeather();
+            }
+        });
+
+        // Keyboard shortcuts
+        document.addEventListener('keydown', (e) => {
+            if (e.target.tagName === 'INPUT') return;
+            
+            switch(e.key) {
+                case 'Escape':
+                    closeWeather();
+                    break;
+                case ' ':
+                    e.preventDefault();
+                    toggleRotation();
+                    break;
+                case 'r':
+                case 'R':
+                    resetView();
+                    break;
+                case 'l':
+                case 'L':
+                    toggleLabels();
+                    break;
+            }
+        });
+
+        // Initialize everything when libraries are loaded
+        function waitForLibraries() {
+            if (typeof THREE !== 'undefined' && typeof Globe !== 'undefined') {
+                initGlobe();
+                setupSearch();
+            } else {
+                setTimeout(waitForLibraries, 100);
+            }
+        }
+
+        // Start initialization
+        document.addEventListener('DOMContentLoaded', () => {
+            updateStatus('Loading libraries...');
+            waitForLibraries();
         });
     </script>
 </body>
