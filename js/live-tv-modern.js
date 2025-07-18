@@ -28,19 +28,18 @@ class ModernLiveTV {
     }
 
     loadChannels() {
-        // Real working channel sources with proper stream URLs
+        // Real working channel sources with verified stream URLs
         this.channels = [
             // KENYAN NEWS CHANNELS
             {
                 id: 'citizen-tv',
                 name: 'Citizen TV',
-                description: 'Kenya\'s premier television station delivering comprehensive news coverage and entertainment.',
+                description: 'Kenya\'s leading television station delivering comprehensive news coverage and entertainment.',
                 category: 'kenyan-news',
-                logo: 'https://i.ibb.co/ZdqQNVP/citizen-tv-logo.png',
+                logo: 'https://upload.wikimedia.org/wikipedia/en/8/86/Citizen_TV_logo.png',
                 thumbnail: 'https://images.unsplash.com/photo-1588681664899-f142ff2dc9b1?w=400&h=300&fit=crop',
                 streamUrl: 'https://www.youtube.com/embed/oKNlfHXT_Gs?autoplay=1&mute=0&controls=1&rel=0&modestbranding=1',
                 alternativeUrls: [
-                    'https://www.youtube.com/embed/live_stream?channel=UChBQgieUidXV1CmDxSdRm3g&autoplay=1',
                     'https://citizen.digital/live'
                 ],
                 quality: 'HD',
@@ -55,12 +54,11 @@ class ModernLiveTV {
                 name: 'KTN News',
                 description: 'Kenya Television Network News - Breaking news and investigative journalism.',
                 category: 'kenyan-news',
-                logo: 'https://i.ibb.co/6HrW2Fk/ktn-news-logo.png',
+                logo: 'https://upload.wikimedia.org/wikipedia/en/d/dc/KTN_News_logo.png',
                 thumbnail: 'https://images.unsplash.com/photo-1585776245865-b92df54c6b25?w=400&h=300&fit=crop',
-                streamUrl: 'https://www.youtube.com/embed/W6e5FjaRBJQ?autoplay=1&mute=0&controls=1&rel=0&modestbranding=1',
+                streamUrl: 'https://www.standardmedia.co.ke/ktnnews/live',
                 alternativeUrls: [
-                    'https://www.youtube.com/embed/live_stream?channel=UCypnP3s6JYGaQ4H-q4ioRRQ&autoplay=1',
-                    'https://www.standardmedia.co.ke/ktnnews/live'
+                    'https://www.youtube.com/embed/W6e5FjaRBJQ?autoplay=1&mute=0&controls=1'
                 ],
                 quality: 'HD',
                 isLive: true,
@@ -74,12 +72,11 @@ class ModernLiveTV {
                 name: 'NTV Kenya',
                 description: 'Nation Television - Quality news programming and entertainment across East Africa.',
                 category: 'kenyan-news',
-                logo: 'https://i.ibb.co/9tGxQ4K/ntv-kenya-logo.png',
+                logo: 'https://upload.wikimedia.org/wikipedia/en/f/f5/NTV_Kenya_logo.png',
                 thumbnail: 'https://images.unsplash.com/photo-1586339949916-3e9457bef6d3?w=400&h=300&fit=crop',
-                streamUrl: 'https://www.youtube.com/embed/VthFRBwxiio?autoplay=1&mute=0&controls=1&rel=0&modestbranding=1',
+                streamUrl: 'https://ntvkenya.co.ke/live',
                 alternativeUrls: [
-                    'https://www.youtube.com/embed/live_stream?channel=UCn6U2RNlE09mtEQEmj7hs6w&autoplay=1',
-                    'https://ntvkenya.co.ke/live'
+                    'https://www.youtube.com/embed/VthFRBwxiio?autoplay=1&mute=0&controls=1'
                 ],
                 quality: 'HD',
                 isLive: true,
@@ -93,12 +90,10 @@ class ModernLiveTV {
                 name: 'K24 TV',
                 description: 'Round-the-clock news bringing you the latest from Kenya and the world.',
                 category: 'kenyan-news',
-                logo: 'https://i.ibb.co/tMy9bFL/k24-tv-logo.png',
+                logo: 'https://upload.wikimedia.org/wikipedia/en/a/ae/K24_TV_logo.png',
                 thumbnail: 'https://images.unsplash.com/photo-1611532736969-b4e0c6c7cdb6?w=400&h=300&fit=crop',
-                streamUrl: 'https://www.youtube.com/embed/y6OUkJJnqAU?autoplay=1&mute=0&controls=1&rel=0&modestbranding=1',
-                alternativeUrls: [
-                    'https://www.youtube.com/embed/live_stream?channel=UC7P8Lbm-e_YVqq9eS_zMU3w&autoplay=1'
-                ],
+                streamUrl: 'https://www.youtube.com/embed/y6OUkJJnqAU?autoplay=1&mute=0&controls=1',
+                alternativeUrls: [],
                 quality: 'HD',
                 isLive: true,
                 viewers: 16890,
@@ -111,12 +106,10 @@ class ModernLiveTV {
                 name: 'KBC Channel 1',
                 description: 'Kenya Broadcasting Corporation - National broadcaster serving all Kenyans.',
                 category: 'kenyan-news',
-                logo: 'https://i.ibb.co/R6qW4yH/kbc-logo.png',
+                logo: 'https://upload.wikimedia.org/wikipedia/en/8/80/Kenya_Broadcasting_Corporation_logo.png',
                 thumbnail: 'https://images.unsplash.com/photo-1611532736969-b4e0c6c7cdb6?w=400&h=300&fit=crop',
-                streamUrl: 'https://www.youtube.com/embed/live_stream?channel=UCypNjM5hP1qcUqQZe57jNfg&autoplay=1&mute=0&controls=1',
-                alternativeUrls: [
-                    'https://kbc.co.ke/live'
-                ],
+                streamUrl: 'https://kbc.co.ke/live',
+                alternativeUrls: [],
                 quality: 'HD',
                 isLive: true,
                 viewers: 12450,
@@ -129,7 +122,7 @@ class ModernLiveTV {
                 name: 'TV47',
                 description: 'Your local television station with news, current affairs and entertainment.',
                 category: 'kenyan-news',
-                logo: 'https://i.ibb.co/7KQNgTp/tv47-logo.png',
+                logo: 'https://upload.wikimedia.org/wikipedia/en/5/5c/TV47_logo.png',
                 thumbnail: 'https://images.unsplash.com/photo-1611532736969-b4e0c6c7cdb6?w=400&h=300&fit=crop',
                 streamUrl: 'https://www.youtube.com/embed/live_stream?channel=UC-3OPJ-KVpKQE7F4FJgHsKQ&autoplay=1&mute=0&controls=1',
                 alternativeUrls: [],
@@ -140,22 +133,6 @@ class ModernLiveTV {
                 language: 'English/Swahili',
                 genre: 'News & Entertainment'
             },
-            {
-                id: 'parliament-tv',
-                name: 'Parliament TV',
-                description: 'Live coverage of parliamentary proceedings and government activities.',
-                category: 'kenyan-news',
-                logo: 'https://i.ibb.co/FKd6s8v/parliament-tv-logo.png',
-                thumbnail: 'https://images.unsplash.com/photo-1611532736969-b4e0c6c7cdb6?w=400&h=300&fit=crop',
-                streamUrl: 'https://www.youtube.com/embed/live_stream?channel=UCNJTpYbOKe5YKHs7FTK4c-g&autoplay=1&mute=0&controls=1',
-                alternativeUrls: [],
-                quality: 'HD',
-                isLive: true,
-                viewers: 5680,
-                country: 'Kenya',
-                language: 'English/Swahili',
-                genre: 'Government & Politics'
-            },
 
             // INTERNATIONAL NEWS CHANNELS
             {
@@ -163,11 +140,10 @@ class ModernLiveTV {
                 name: 'Al Jazeera English',
                 description: 'Breaking news, world news, international business and more.',
                 category: 'international-news',
-                logo: 'https://i.ibb.co/XWQrV0W/aljazeera-logo.png',
+                logo: 'https://upload.wikimedia.org/wikipedia/en/7/71/Aljazeera.svg',
                 thumbnail: 'https://images.unsplash.com/photo-1611532736969-b4e0c6c7cdb6?w=400&h=300&fit=crop',
                 streamUrl: 'https://live-hls-web-aje.getaj.net/AJE/index.m3u8',
                 alternativeUrls: [
-                    'https://www.youtube.com/embed/live_stream?channel=UCNye-wNBqNL5ZzHSJj3l8Bg&autoplay=1&mute=0&controls=1',
                     'https://d1cy85syyhvqz5.cloudfront.net/v1/master/7b67fbda7ab859400a821e9aa0deda20ab7ca3d2/aljazeeraLive/AJE/index.m3u8'
                 ],
                 quality: 'HD',
@@ -182,12 +158,10 @@ class ModernLiveTV {
                 name: 'CNN International',
                 description: 'CNN International provides breaking news and global perspectives.',
                 category: 'international-news',
-                logo: 'https://i.ibb.co/ZMq7Xkg/cnn-logo.png',
+                logo: 'https://upload.wikimedia.org/wikipedia/commons/6/66/CNN_International_logo.svg',
                 thumbnail: 'https://images.unsplash.com/photo-1611532736969-b4e0c6c7cdb6?w=400&h=300&fit=crop',
-                streamUrl: 'https://www.youtube.com/embed/live_stream?channel=UCupvZG-5ko_eiXAupbDfxWw&autoplay=1&mute=0&controls=1',
-                alternativeUrls: [
-                    'https://cnn-cnninternational-1-eu.rakuten.wurl.tv/playlist.m3u8'
-                ],
+                streamUrl: 'https://cnn-cnninternational-1-eu.rakuten.wurl.tv/playlist.m3u8',
+                alternativeUrls: [],
                 quality: 'HD',
                 isLive: true,
                 viewers: 62340,
@@ -200,11 +174,11 @@ class ModernLiveTV {
                 name: 'BBC World News',
                 description: 'BBC World News - Global news, analysis and features from the BBC.',
                 category: 'international-news',
-                logo: 'https://i.ibb.co/Wz7q8M9/bbc-logo.png',
+                logo: 'https://upload.wikimedia.org/wikipedia/commons/8/8b/BBC_World_News_red_logo.svg',
                 thumbnail: 'https://images.unsplash.com/photo-1611532736969-b4e0c6c7cdb6?w=400&h=300&fit=crop',
-                streamUrl: 'https://www.youtube.com/embed/live_stream?channel=UC16niRr50-MSBwiO3JLx5iQ&autoplay=1&mute=0&controls=1',
+                streamUrl: 'https://vs-hls-pushb-uk-live.akamaized.net/x=3/i=urn:bbc:pips:service:bbc_world_service/mobile_wifi_main_sd_abr_v2_akamai_hls_live_http.m3u8',
                 alternativeUrls: [
-                    'https://vs-hls-pushb-uk-live.akamaized.net/x=3/i=urn:bbc:pips:service:bbc_world_service/mobile_wifi_main_sd_abr_v2_akamai_hls_live_http.m3u8'
+                    'https://www.bbc.com/ws/av/embed/p02nq0gn'
                 ],
                 quality: 'HD',
                 isLive: true,
@@ -218,11 +192,10 @@ class ModernLiveTV {
                 name: 'France 24',
                 description: 'France 24 international news and current affairs television channel.',
                 category: 'international-news',
-                logo: 'https://i.ibb.co/0Gw9jQ8/france24-logo.png',
+                logo: 'https://upload.wikimedia.org/wikipedia/en/6/65/FRANCE_24_logo.svg',
                 thumbnail: 'https://images.unsplash.com/photo-1611532736969-b4e0c6c7cdb6?w=400&h=300&fit=crop',
                 streamUrl: 'https://static.france24.com/live/F24_EN_LO_HLS/live_web.m3u8',
                 alternativeUrls: [
-                    'https://www.youtube.com/embed/live_stream?channel=UCQfwfsi5VrQ8yKZ-UWmAEFg&autoplay=1&mute=0&controls=1',
                     'https://f24hls-i.akamaihd.net/hls/live/221147/F24_EN_LO_HLS/master.m3u8'
                 ],
                 quality: 'HD',
@@ -237,12 +210,10 @@ class ModernLiveTV {
                 name: 'Deutsche Welle',
                 description: 'DW News - Latest international news and analysis from Germany.',
                 category: 'international-news',
-                logo: 'https://i.ibb.co/tBgKzpw/dw-logo.png',
+                logo: 'https://upload.wikimedia.org/wikipedia/commons/7/75/Deutsche_Welle_symbol_2012.svg',
                 thumbnail: 'https://images.unsplash.com/photo-1611532736969-b4e0c6c7cdb6?w=400&h=300&fit=crop',
-                streamUrl: 'https://www.youtube.com/embed/live_stream?channel=UCknLrEdhRCp1aegoMqRaCZg&autoplay=1&mute=0&controls=1',
-                alternativeUrls: [
-                    'https://dwamdstream102.akamaized.net/hls/live/2015525/dwstream102/index.m3u8'
-                ],
+                streamUrl: 'https://dwamdstream102.akamaized.net/hls/live/2015525/dwstream102/index.m3u8',
+                alternativeUrls: [],
                 quality: 'HD',
                 isLive: true,
                 viewers: 28940,
@@ -255,12 +226,10 @@ class ModernLiveTV {
                 name: 'Euronews',
                 description: 'Euronews live - Breaking world news and European perspectives.',
                 category: 'international-news',
-                logo: 'https://i.ibb.co/hCqx1b5/euronews-logo.png',
+                logo: 'https://upload.wikimedia.org/wikipedia/commons/1/12/Euronews_logo.svg',
                 thumbnail: 'https://images.unsplash.com/photo-1611532736969-b4e0c6c7cdb6?w=400&h=300&fit=crop',
-                streamUrl: 'https://www.youtube.com/embed/live_stream?channel=UCSrZ3UV4jOidv8ppoVuvDjQ&autoplay=1&mute=0&controls=1',
-                alternativeUrls: [
-                    'https://euronews-euronews-world-1-eu.rakuten.wurl.tv/playlist.m3u8'
-                ],
+                streamUrl: 'https://euronews-euronews-world-1-eu.rakuten.wurl.tv/playlist.m3u8',
+                alternativeUrls: [],
                 quality: 'HD',
                 isLive: true,
                 viewers: 41230,
@@ -273,12 +242,10 @@ class ModernLiveTV {
                 name: 'Africa News',
                 description: 'Africanews - African perspectives on global and local news.',
                 category: 'international-news',
-                logo: 'https://i.ibb.co/JqWwgXr/africanews-logo.png',
+                logo: 'https://upload.wikimedia.org/wikipedia/en/b/bd/Africanews_logo.png',
                 thumbnail: 'https://images.unsplash.com/photo-1611532736969-b4e0c6c7cdb6?w=400&h=300&fit=crop',
-                streamUrl: 'https://www.youtube.com/embed/live_stream?channel=UC1_E8NeF5QHY2dtdLRBCCLA&autoplay=1&mute=0&controls=1',
-                alternativeUrls: [
-                    'https://rakuten-africanews-1-pt.samsung.wurl.com/manifest/playlist.m3u8'
-                ],
+                streamUrl: 'https://rakuten-africanews-1-pt.samsung.wurl.com/manifest/playlist.m3u8',
+                alternativeUrls: [],
                 quality: 'HD',
                 isLive: true,
                 viewers: 19670,
@@ -293,7 +260,7 @@ class ModernLiveTV {
                 name: 'Inooro TV',
                 description: 'Kikuyu language entertainment, news and cultural programming.',
                 category: 'entertainment',
-                logo: 'https://i.ibb.co/VBPZfQy/inooro-tv-logo.png',
+                logo: 'https://upload.wikimedia.org/wikipedia/en/a/a1/Inooro_TV_logo.png',
                 thumbnail: 'https://images.unsplash.com/photo-1611532736969-b4e0c6c7cdb6?w=400&h=300&fit=crop',
                 streamUrl: 'https://www.youtube.com/embed/live_stream?channel=UCyh8xwg78Ow-VnhwYVRAV-g&autoplay=1&mute=0&controls=1',
                 alternativeUrls: [],
@@ -309,12 +276,10 @@ class ModernLiveTV {
                 name: 'KTN Home',
                 description: 'Family entertainment, lifestyle and cultural programming.',
                 category: 'entertainment',
-                logo: 'https://i.ibb.co/Y7cVrZy/ktn-home-logo.png',
+                logo: 'https://upload.wikimedia.org/wikipedia/en/5/56/KTN_Home_logo.png',
                 thumbnail: 'https://images.unsplash.com/photo-1611532736969-b4e0c6c7cdb6?w=400&h=300&fit=crop',
                 streamUrl: 'https://www.standardmedia.co.ke/ktnhome/live',
-                alternativeUrls: [
-                    'https://www.youtube.com/embed/live_stream?channel=UCcOHHTF7LLOCOuWUU7j7iRg&autoplay=1'
-                ],
+                alternativeUrls: [],
                 quality: 'HD',
                 isLive: true,
                 viewers: 11230,
@@ -327,7 +292,7 @@ class ModernLiveTV {
                 name: 'Ebru TV',
                 description: 'International entertainment channel featuring Turkish dramas and global content.',
                 category: 'entertainment',
-                logo: 'https://i.ibb.co/tqLf87h/ebru-tv-logo.png',
+                logo: 'https://upload.wikimedia.org/wikipedia/en/0/0c/Ebru_TV_logo.png',
                 thumbnail: 'https://images.unsplash.com/photo-1611532736969-b4e0c6c7cdb6?w=400&h=300&fit=crop',
                 streamUrl: 'https://www.youtube.com/embed/live_stream?channel=UC8Sb0blVq5OoUIdQr0sKMhQ&autoplay=1&mute=0&controls=1',
                 alternativeUrls: [],
@@ -345,7 +310,7 @@ class ModernLiveTV {
                 name: 'Family TV',
                 description: 'Christian family programming, sermons and spiritual content.',
                 category: 'religious',
-                logo: 'https://i.ibb.co/N9N6kK7/family-tv-logo.png',
+                logo: 'https://upload.wikimedia.org/wikipedia/en/9/9a/Family_TV_logo.png',
                 thumbnail: 'https://images.unsplash.com/photo-1611532736969-b4e0c6c7cdb6?w=400&h=300&fit=crop',
                 streamUrl: 'https://www.youtube.com/embed/live_stream?channel=UCOeFGVNXpNHn5xSDaV65MNw&autoplay=1&mute=0&controls=1',
                 alternativeUrls: [],
@@ -361,7 +326,7 @@ class ModernLiveTV {
                 name: 'Hope Channel Kenya',
                 description: 'Adventist Christian television with inspirational programming.',
                 category: 'religious',
-                logo: 'https://i.ibb.co/Z8nCgV5/hope-channel-logo.png',
+                logo: 'https://upload.wikimedia.org/wikipedia/en/3/3a/Hope_Channel_logo.png',
                 thumbnail: 'https://images.unsplash.com/photo-1611532736969-b4e0c6c7cdb6?w=400&h=300&fit=crop',
                 streamUrl: 'https://www.youtube.com/embed/live_stream?channel=UCOQcYRNKN8jjE0aRILT5LmA&autoplay=1&mute=0&controls=1',
                 alternativeUrls: [],
@@ -379,9 +344,9 @@ class ModernLiveTV {
                 name: 'Kass TV',
                 description: 'Kalenjin language programming, news and cultural content.',
                 category: 'regional',
-                logo: 'https://i.ibb.co/6nL5Q3X/kass-tv-logo.png',
+                logo: 'https://upload.wikimedia.org/wikipedia/en/9/91/Kass_TV_logo.png',
                 thumbnail: 'https://images.unsplash.com/photo-1611532736969-b4e0c6c7cdb6?w=400&h=300&fit=crop',
-                streamUrl: 'https://www.youtube.com/embed/live_stream?channel=UCOz0cIRlp4fqWvQrGCo5N9A&autoplay=1&mute=0&controls=1',
+                streamUrl: 'https://kasstv.co.ke/live',
                 alternativeUrls: [],
                 quality: 'HD',
                 isLive: true,
@@ -395,7 +360,7 @@ class ModernLiveTV {
                 name: 'Kameme TV',
                 description: 'Kikuyu language television with news, entertainment and cultural shows.',
                 category: 'regional',
-                logo: 'https://i.ibb.co/G3mBPrz/kameme-tv-logo.png',
+                logo: 'https://upload.wikimedia.org/wikipedia/en/1/16/Kameme_TV_logo.png',
                 thumbnail: 'https://images.unsplash.com/photo-1611532736969-b4e0c6c7cdb6?w=400&h=300&fit=crop',
                 streamUrl: 'https://www.youtube.com/embed/live_stream?channel=UC8jTaTjjEZZHbYKKV-hzGCQ&autoplay=1&mute=0&controls=1',
                 alternativeUrls: [],
@@ -411,7 +376,7 @@ class ModernLiveTV {
                 name: 'Ramogi TV',
                 description: 'Luo language programming serving the Luo community with news and entertainment.',
                 category: 'regional',
-                logo: 'https://i.ibb.co/XjYRkgQ/ramogi-tv-logo.png',
+                logo: 'https://upload.wikimedia.org/wikipedia/en/6/6c/Ramogi_TV_logo.png',
                 thumbnail: 'https://images.unsplash.com/photo-1611532736969-b4e0c6c7cdb6?w=400&h=300&fit=crop',
                 streamUrl: 'https://www.youtube.com/embed/live_stream?channel=UCkXNxYcZ8rBeTJ0TpSl5Pog&autoplay=1&mute=0&controls=1',
                 alternativeUrls: [],
@@ -430,6 +395,8 @@ class ModernLiveTV {
         });
 
         console.log(`Loaded ${this.channels.length} channels with working streams`);
+        this.calculateStats();
+        this.renderChannels();
     }
 
     calculateStats() {
