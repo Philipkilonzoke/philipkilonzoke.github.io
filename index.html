@@ -22,8 +22,6 @@
         :root{--primary-color:#2563eb;--background-color:#ffffff;--text-color:#1e293b;--surface-color:#f8fafc;--border-color:#e2e8f0}
         body{font-family:'Inter',system-ui,sans-serif;background:var(--background-color);color:var(--text-color);line-height:1.6}
         .header{background:var(--surface-color);border-bottom:1px solid var(--border-color);position:sticky;top:0;z-index:100}
-        /* Critical splash screen styles for immediate rendering */
-        .splash-screen-3d{position:fixed;top:0;left:0;width:100vw;height:100vh;background:linear-gradient(135deg,#1e3a8a 0%,#2563eb 50%,#3b82f6 100%);display:flex;align-items:center;justify-content:center;z-index:10000;perspective:1000px}
     </style>
     <!-- Critical CSS Files -->
     <link rel="preload" href="css/splash-screen.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
@@ -42,7 +40,7 @@
     <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"></noscript>
 </head>
 <body>
-    <!-- 3D Splash Screen will be created dynamically by JavaScript -->
+    <!-- Modern 3D Splash Screen will be created dynamically by JavaScript -->
 
     <!-- Header -->
     <header class="header">
@@ -377,7 +375,6 @@
 
     <!-- Load splash screen first for immediate display -->
     <script src="js/splash-screen.js"></script>
-    <script src="js/page-transitions.js" defer></script>
     <script src="js/themes.js" defer></script>
     <script src="js/extended-articles.js" defer></script>
     <script src="js/news-api.js" defer></script>

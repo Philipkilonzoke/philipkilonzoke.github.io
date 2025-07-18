@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BrightLens News - Splash Demo</title>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Splash Screen CSS -->
+    <link rel="stylesheet" href="css/splash-screen.css">
+    
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+            margin: 0;
+            padding: 40px 20px;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .demo-container {
+            max-width: 600px;
+            background: white;
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+        
+        .demo-title {
+            font-size: 2.5rem;
+            font-weight: 800;
+            color: #1e293b;
+            margin-bottom: 1rem;
+            background: linear-gradient(45deg, #2563eb, #3b82f6, #60a5fa);
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .demo-subtitle {
+            font-size: 1.2rem;
+            color: #64748b;
+            margin-bottom: 2rem;
+        }
+        
+        .demo-button {
+            background: linear-gradient(45deg, #2563eb, #3b82f6);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin: 10px;
+        }
+        
+        .demo-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(37, 99, 235, 0.3);
+        }
+        
+        .demo-info {
+            background: #f1f5f9;
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 2rem;
+            text-align: left;
+        }
+        
+        .demo-info h3 {
+            color: #1e293b;
+            margin-bottom: 1rem;
+        }
+        
+        .demo-info ul {
+            color: #475569;
+            line-height: 1.6;
+        }
+        
+        .navigation-links {
+            margin-top: 2rem;
+        }
+        
+        .navigation-links a {
+            display: inline-block;
+            margin: 5px 10px;
+            padding: 10px 20px;
+            background: #f8fafc;
+            color: #2563eb;
+            text-decoration: none;
+            border-radius: 8px;
+            border: 2px solid #e2e8f0;
+            transition: all 0.3s ease;
+        }
+        
+        .navigation-links a:hover {
+            background: #2563eb;
+            color: white;
+            border-color: #2563eb;
+        }
+    </style>
+</head>
+<body>
+    <div class="demo-container">
+        <h1 class="demo-title">BrightLens News</h1>
+        <p class="demo-subtitle">Modern 3D Splash Screen Demo</p>
+        
+        <button class="demo-button" onclick="showSplash()">Show Splash Screen</button>
+        <button class="demo-button" onclick="clearSession()">Clear Session</button>
+        
+        <div class="demo-info">
+            <h3>Features:</h3>
+            <ul>
+                <li>Modern 3D animated logo with rotation and zoom effects</li>
+                <li>Dark gradient background with bright, high-contrast text</li>
+                <li>4-second display duration with smooth fade-out</li>
+                <li>Session-based control (shows only once per session)</li>
+                <li>Responsive design for desktop and mobile</li>
+                <li>Accessibility support (reduced motion, high contrast)</li>
+            </ul>
+        </div>
+        
+        <div class="navigation-links">
+            <a href="index.html">Home</a>
+            <a href="technology.html">Technology</a>
+            <a href="business.html">Business</a>
+            <a href="world.html">World</a>
+            <a href="latest.html">Latest</a>
+        </div>
+        
+        <div style="margin-top: 2rem; font-size: 0.9rem; color: #64748b;">
+            Open browser console to see splash screen logs
+        </div>
+    </div>
+
+    <!-- Splash Screen JavaScript -->
+    <script src="js/splash-screen.js"></script>
+    
+    <script>
+        function showSplash() {
+            if (window.BrightLensSplash) {
+                window.BrightLensSplash.forceShow();
+            } else {
+                // Fallback if global object not available
+                sessionStorage.removeItem('brightlens_splash_shown');
+                location.reload();
+            }
+        }
+        
+        function clearSession() {
+            if (window.BrightLensSplash) {
+                window.BrightLensSplash.clearSession();
+                alert('Session cleared! The splash will show on next page load or navigation.');
+            } else {
+                sessionStorage.removeItem('brightlens_splash_shown');
+                alert('Session cleared! The splash will show on next page load or navigation.');
+            }
+        }
+        
+        // Status update
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('🎯 Splash Demo Page loaded');
+            console.log('💾 Session status:', window.BrightLensSplash?.hasShown() ? 'Splash already shown' : 'Ready to show splash');
+        });
+        
+        document.addEventListener('splashScreenHidden', function() {
+            console.log('🎭 Splash screen hidden event received');
+        });
+    </script>
+</body>
+</html>

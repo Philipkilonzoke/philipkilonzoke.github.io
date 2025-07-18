@@ -1,309 +1,267 @@
 /**
  * BrightLens News Modern Splash Screen Manager
- * Clean, professional splash screen with BRIGHTLENS NEWS logo
+ * Displays a 3D animated splash screen for 4 seconds on first visit
+ * Handles session storage for preventing repeated shows
  */
 
-class SplashScreen3D {
+class BrightLensSplashScreen {
     constructor() {
-        console.log('🎬 BrightLens Splash Screen initializing...');
         this.splashElement = null;
-        this.progressBar = null;
-        this.loadStartTime = Date.now();
         this.displayDuration = 4000; // 4 seconds as requested
-        this.animationFrameId = null;
+        this.sessionKey = 'brightlens_splash_shown';
         this.isDestroyed = false;
-        this.currentProgress = 0;
-        this.progressSpeed = 25; // Progress increment per frame (100/4 = 25% per second)
         
+        // Initialize splash screen
         this.init();
     }
 
     init() {
-        console.log('🚀 Creating splash screen elements...');
-        this.createSplashScreen();
-        this.startProgressAnimation();
-        this.setupAutoHide();
+        // Check if splash should be shown
+        if (this.shouldShowSplash()) {
+            console.log('🌟 BrightLens News - Initializing splash screen');
+            this.createSplashScreen();
+            this.markSplashShown();
+            this.startAutoHide();
+        } else {
+            console.log('🚀 BrightLens News - Splash already shown this session');
+        }
+    }
+
+    shouldShowSplash() {
+        // Check session storage to prevent repeated shows in same session
+        return !sessionStorage.getItem(this.sessionKey);
+    }
+
+    markSplashShown() {
+        // Mark splash as shown for this session
+        sessionStorage.setItem(this.sessionKey, 'true');
     }
 
     createSplashScreen() {
         // Remove any existing splash screen
-        const existingSplash = document.querySelector('.splash-screen-3d');
+        const existingSplash = document.querySelector('.splash-screen');
         if (existingSplash) {
             existingSplash.remove();
-            console.log('🗑️ Removed existing splash screen');
         }
 
         // Create splash screen container
         this.splashElement = document.createElement('div');
-        this.splashElement.className = 'splash-screen-3d';
-        this.splashElement.style.cssText = `
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 100vh;
-            background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 30%, #3b82f6 70%, #60a5fa 100%);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 10000;
-            perspective: 1000px;
-            transition: all 1.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        this.splashElement.className = 'splash-screen';
+        
+        // Create splash content
+        this.splashElement.innerHTML = `
+            <div class="splash-decoration"></div>
+            <div class="splash-logo-container">
+                <h1 class="splash-logo">BRIGHTLENS NEWS</h1>
+                <p class="splash-subtitle">Your Window to the World</p>
+            </div>
+            <div class="splash-loading">
+                <div class="splash-progress">
+                    <div class="splash-progress-fill"></div>
+                </div>
+                <div class="splash-loading-text">Loading...</div>
+            </div>
         `;
-        
-        // Create logo container
-        const logoContainer = document.createElement('div');
-        logoContainer.className = 'splash-logo-container';
-        logoContainer.style.cssText = `
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            text-align: center;
-            animation: logoEntrance 2s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
-            transform: translateY(30px);
-            opacity: 0;
-        `;
-        
-        // Create logo image
-        const logo = document.createElement('img');
-        logo.src = 'assets/brightlens-splash-logo.svg';
-        logo.alt = 'BrightLens News';
-        logo.className = 'splash-logo';
-        logo.loading = 'eager';
-        logo.style.cssText = `
-            width: min(400px, 90vw);
-            height: auto;
-            max-width: 400px;
-            filter: drop-shadow(0 10px 25px rgba(0, 0, 0, 0.3));
-            animation: logoFloat 3s ease-in-out infinite;
-        `;
-        
-        // Handle logo load/error
-        logo.onload = () => {
-            console.log('✅ Splash screen logo loaded successfully');
-        };
-        logo.onerror = () => {
-            console.error('❌ Failed to load splash screen logo');
-            // Create fallback text logo
-            const fallbackLogo = document.createElement('div');
-            fallbackLogo.innerHTML = `
-                <h1 style="color: white; font-size: 3rem; font-weight: 800; text-shadow: 0 4px 20px rgba(0,0,0,0.5); margin: 0;">
-                    🔍 BRIGHTLENS<br>
-                    <span style="font-size: 2rem;">NEWS</span>
-                </h1>
-            `;
-            logo.parentNode.replaceChild(fallbackLogo, logo);
-        };
-        
-        // Create progress container
-        const progressContainer = document.createElement('div');
-        progressContainer.className = 'splash-progress-container';
-        progressContainer.style.cssText = `
-            margin-top: 40px;
-            width: min(300px, 80vw);
-            position: relative;
-        `;
-        
-        const progressBar = document.createElement('div');
-        progressBar.className = 'splash-progress-bar';
-        progressBar.style.cssText = `
-            width: 100%;
-            height: 6px;
-            background: rgba(255, 255, 255, 0.2);
-            border-radius: 10px;
-            overflow: hidden;
-            position: relative;
-            backdrop-filter: blur(10px);
-        `;
-        
-        this.progressBar = document.createElement('div');
-        this.progressBar.className = 'splash-progress-fill';
-        this.progressBar.style.cssText = `
-            height: 100%;
-            background: linear-gradient(90deg, #ffd43b 0%, #fab005 50%, #fd7e14 100%);
-            border-radius: 10px;
-            width: 0%;
-            transition: width 0.3s ease;
-            position: relative;
-            box-shadow: 0 0 20px rgba(253, 126, 20, 0.5);
-        `;
-        
-        const loadingText = document.createElement('div');
-        loadingText.className = 'splash-loading-text';
-        loadingText.textContent = 'Loading...';
-        loadingText.style.cssText = `
-            color: rgba(255, 255, 255, 0.9);
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-            font-size: 16px;
-            font-weight: 500;
-            margin-top: 20px;
-            animation: textPulse 2s ease-in-out infinite;
-            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
-        `;
-        
-        // Assemble elements
-        progressBar.appendChild(this.progressBar);
-        progressContainer.appendChild(progressBar);
-        logoContainer.appendChild(logo);
-        logoContainer.appendChild(progressContainer);
-        logoContainer.appendChild(loadingText);
-        this.splashElement.appendChild(logoContainer);
-        
-        // Add to page
+
+        // Add to DOM
         document.body.appendChild(this.splashElement);
-        console.log('✨ Splash screen added to page');
         
-        // Force reflow to ensure smooth animation
-        this.splashElement.offsetHeight;
-    }
-
-    startProgressAnimation() {
-        console.log('⏳ Starting progress animation...');
-        const animate = () => {
-            if (this.isDestroyed) return;
-            
-            const elapsed = Date.now() - this.loadStartTime;
-            const progress = Math.min((elapsed / this.displayDuration) * 100, 100);
-            
-            this.updateProgress(progress);
-            
-            if (progress < 100) {
-                this.animationFrameId = requestAnimationFrame(animate);
-            }
-        };
+        // Prevent scrolling while splash is visible
+        document.body.style.overflow = 'hidden';
         
-        this.animationFrameId = requestAnimationFrame(animate);
+        console.log('✨ Splash screen created and displayed');
     }
 
-    updateProgress(progress) {
-        if (this.progressBar) {
-            this.progressBar.style.width = `${progress}%`;
-        }
-        this.currentProgress = progress;
-    }
-
-    setupAutoHide() {
+    startAutoHide() {
+        if (this.isDestroyed) return;
+        
+        // Hide splash screen after display duration
         setTimeout(() => {
-            console.log('⏰ Auto-hiding splash screen...');
-            this.hide();
+            this.hideSplash();
         }, this.displayDuration);
     }
 
-    hide() {
+    hideSplash() {
         if (this.isDestroyed || !this.splashElement) return;
         
-        console.log('👋 Hiding splash screen...');
+        console.log('🎭 Hiding splash screen with fade-out effect');
         
-        // Cancel animation frame
-        if (this.animationFrameId) {
-            cancelAnimationFrame(this.animationFrameId);
-        }
+        // Add hidden class for smooth fade-out
+        this.splashElement.classList.add('hidden');
         
-        // Add hidden class for smooth transition
-        this.splashElement.style.opacity = '0';
-        this.splashElement.style.visibility = 'hidden';
-        this.splashElement.style.transform = 'scale(0.95) translateY(-20px)';
-        this.splashElement.style.filter = 'blur(10px)';
-        
-        // Remove element after transition
+        // Remove splash screen from DOM after transition
         setTimeout(() => {
-            this.destroy();
-        }, 1500); // Match transition duration
+            this.destroySplash();
+        }, 1000); // Match CSS transition duration
     }
 
-    destroy() {
+    destroySplash() {
         if (this.isDestroyed) return;
         
-        console.log('🗑️ Destroying splash screen...');
-        this.isDestroyed = true;
-        
-        if (this.animationFrameId) {
-            cancelAnimationFrame(this.animationFrameId);
+        try {
+            if (this.splashElement && this.splashElement.parentNode) {
+                this.splashElement.parentNode.removeChild(this.splashElement);
+            }
+            
+            // Restore scrolling
+            document.body.style.overflow = '';
+            
+            this.splashElement = null;
+            this.isDestroyed = true;
+            
+            console.log('🏁 Splash screen removed successfully');
+            
+            // Dispatch custom event for any listeners
+            document.dispatchEvent(new CustomEvent('splashScreenHidden'));
+            
+        } catch (error) {
+            console.error('❌ Error removing splash screen:', error);
         }
-        
-        if (this.splashElement && this.splashElement.parentNode) {
-            this.splashElement.parentNode.removeChild(this.splashElement);
-        }
-        
-        this.splashElement = null;
-        this.progressBar = null;
-        
-        // Dispatch custom event to notify that splash screen is complete
-        document.dispatchEvent(new CustomEvent('splashScreenComplete'));
-        console.log('✅ Splash screen completed successfully!');
     }
 
-    // Static method to create and show splash screen
-    static show() {
-        return new SplashScreen3D();
+    // Public method to manually hide splash (if needed)
+    forceHide() {
+        this.hideSplash();
     }
 }
 
-// Utility function to show splash screen on any page
-function showSplashScreen() {
-    console.log('🎯 showSplashScreen() called');
-    // Only show if not already showing
-    if (!document.querySelector('.splash-screen-3d')) {
-        console.log('🎪 Creating new splash screen instance');
-        return SplashScreen3D.show();
+// Enhanced Page Navigation Manager
+class PageNavigationManager {
+    constructor() {
+        this.init();
+    }
+
+    init() {
+        // Handle all internal navigation
+        this.setupNavigationHandlers();
+        
+        // Handle browser back/forward buttons
+        window.addEventListener('popstate', this.handlePopState.bind(this));
+        
+        console.log('🧭 Page navigation manager initialized');
+    }
+
+    setupNavigationHandlers() {
+        // Handle all internal links
+        document.addEventListener('click', (event) => {
+            const link = event.target.closest('a');
+            if (!link) return;
+            
+            const href = link.getAttribute('href');
+            if (!href || href.startsWith('#') || href.startsWith('mailto:') || href.startsWith('tel:')) {
+                return; // Skip anchors, mailto, tel links
+            }
+            
+            // Check if it's an internal link
+            if (this.isInternalLink(href)) {
+                event.preventDefault();
+                this.navigateWithSplash(href);
+            }
+        });
+    }
+
+    isInternalLink(href) {
+        // Check if it's a relative link or same domain
+        if (href.startsWith('/') || href.startsWith('./') || href.startsWith('../')) {
+            return true;
+        }
+        
+        try {
+            const url = new URL(href, window.location.origin);
+            return url.origin === window.location.origin;
+        } catch {
+            return false;
+        }
+    }
+
+    navigateWithSplash(url) {
+        // Only show splash if it's a different page
+        const currentPath = window.location.pathname;
+        const targetPath = new URL(url, window.location.origin).pathname;
+        
+        if (currentPath !== targetPath) {
+            console.log(`🌊 Navigating with splash to: ${url}`);
+            
+            // Create and show splash screen
+            const splash = new BrightLensSplashScreen();
+            
+            // Navigate after a brief delay to ensure splash shows
+            setTimeout(() => {
+                window.location.href = url;
+            }, 100);
+        } else {
+            // Same page, navigate directly
+            window.location.href = url;
+        }
+    }
+
+    handlePopState(event) {
+        // Show splash on browser back/forward if it's a different page
+        const splash = new BrightLensSplashScreen();
+    }
+}
+
+// Session Management for Cross-Page Splash Control
+class SplashSessionManager {
+    static clearSession() {
+        sessionStorage.removeItem('brightlens_splash_shown');
+        console.log('🔄 Splash session cleared');
+    }
+    
+    static hasShownSplash() {
+        return !!sessionStorage.getItem('brightlens_splash_shown');
+    }
+    
+    static resetOnNewTab() {
+        // Clear splash session when opening in new tab
+        if (document.referrer === '') {
+            sessionStorage.removeItem('brightlens_splash_shown');
+        }
+    }
+}
+
+// Auto-initialize when DOM is ready
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('🚀 BrightLens News - DOM loaded, initializing splash system');
+    
+    // Reset splash session for new tabs
+    SplashSessionManager.resetOnNewTab();
+    
+    // Create splash screen instance
+    const splashScreen = new BrightLensSplashScreen();
+    
+    // Initialize navigation manager
+    const navigationManager = new PageNavigationManager();
+    
+    // Global access for debugging
+    window.BrightLensSplash = {
+        clearSession: SplashSessionManager.clearSession,
+        forceShow: () => {
+            SplashSessionManager.clearSession();
+            new BrightLensSplashScreen();
+        },
+        hasShown: SplashSessionManager.hasShownSplash
+    };
+});
+
+// Handle page visibility changes
+document.addEventListener('visibilitychange', function() {
+    if (document.hidden) {
+        // Page is hidden
+        console.log('👁️ Page hidden');
     } else {
-        console.log('⚠️ Splash screen already exists, skipping');
+        // Page is visible
+        console.log('👁️ Page visible');
     }
+});
+
+// Export for potential module usage
+if (typeof module !== 'undefined' && module.exports) {
+    module.exports = {
+        BrightLensSplashScreen,
+        PageNavigationManager,
+        SplashSessionManager
+    };
 }
 
-// Auto-initialize on page load
-console.log('📱 Splash screen script loaded, document state:', document.readyState);
-
-if (document.readyState === 'loading') {
-    console.log('⏳ Document still loading, waiting for DOMContentLoaded...');
-    document.addEventListener('DOMContentLoaded', () => {
-        console.log('🎉 DOMContentLoaded event fired, showing splash screen');
-        showSplashScreen();
-    });
-} else {
-    console.log('🚀 Document already loaded, showing splash screen immediately');
-    showSplashScreen();
-}
-
-// Export for manual control if needed
-window.SplashScreen3D = SplashScreen3D;
-window.showSplashScreen = showSplashScreen;
-
-// Add CSS animations if not already present
-if (!document.querySelector('#splash-screen-animations')) {
-    const style = document.createElement('style');
-    style.id = 'splash-screen-animations';
-    style.textContent = `
-        @keyframes logoEntrance {
-            0% {
-                transform: translateY(30px) scale(0.8);
-                opacity: 0;
-            }
-            50% {
-                transform: translateY(-5px) scale(1.05);
-                opacity: 0.8;
-            }
-            100% {
-                transform: translateY(0) scale(1);
-                opacity: 1;
-            }
-        }
-        
-        @keyframes logoFloat {
-            0%, 100% {
-                transform: translateY(0px);
-            }
-            50% {
-                transform: translateY(-10px);
-            }
-        }
-        
-        @keyframes textPulse {
-            0%, 100% { opacity: 0.7; }
-            50% { opacity: 1; }
-        }
-    `;
-    document.head.appendChild(style);
-    console.log('🎨 Added splash screen animations');
-}
+console.log('📦 BrightLens Splash Screen module loaded successfully');
