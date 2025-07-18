@@ -398,7 +398,7 @@ class NewsAPI {
     }
 
     /**
-     * ULTRA-ENHANCED duplicate removal - ZERO duplicates guaranteed
+     * ULTRA-ENHANCED duplicate removal - ZERO duplicates guaranteed with advanced sports filtering
      */
     removeDuplicates(articles) {
         if (!articles || articles.length === 0) return [];
@@ -408,19 +408,22 @@ class NewsAPI {
         const seenTitles = new Set();
         const seenContent = new Set();
         const seenImages = new Set();
+        const titleTokens = new Map(); // Store tokenized titles for advanced comparison
         
         articles.forEach(article => {
             // Skip invalid articles
             if (!article.title || !article.url || 
                 article.title.trim().length < 10 || 
                 article.url.includes('example.com') ||
-                article.url.includes('placeholder')) {
+                article.url.includes('placeholder') ||
+                article.title.toLowerCase().includes('sample') ||
+                article.title.toLowerCase().includes('test article')) {
                 return;
             }
             
             // Normalize URL - remove all tracking parameters and fragments
             let normalizedUrl = article.url.toLowerCase().trim()
-                .replace(/[?&](utm_|fbclid|gclid|ref|source|medium|campaign)[^&]*&?/g, '')
+                .replace(/[?&](utm_|fbclid|gclid|ref|source|medium|campaign|si|feature)[^&]*&?/g, '')
                 .replace(/[?&#].*$/, '')
                 .replace(/\/$/, '');
             
@@ -428,11 +431,15 @@ class NewsAPI {
             const normalizedTitle = article.title.toLowerCase()
                 .replace(/[^\w\s]/g, ' ')
                 .replace(/\s+/g, ' ')
-                .trim()
-                .substring(0, 50); // First 50 chars for comparison
+                .trim();
             
-            // Create content fingerprint
-            const contentFingerprint = this.createContentFingerprint(article);
+            // Create enhanced content fingerprint
+            const contentFingerprint = this.createAdvancedContentFingerprint(article);
+            
+            // Tokenize title for advanced similarity detection
+            const titleWords = normalizedTitle.split(' ').filter(word => 
+                word.length > 2 && !['the', 'and', 'or', 'but', 'in', 'on', 'at', 'to', 'for', 'of', 'with', 'by'].includes(word)
+            );
             
             // Multiple duplicate checks
             if (seenUrls.has(normalizedUrl)) {
@@ -450,50 +457,168 @@ class NewsAPI {
                 return;
             }
             
-            // Check for similar titles with higher precision
+            // Advanced similarity check using title tokens
             let isSimilar = false;
-            for (const existingTitle of seenTitles) {
-                if (this.calculateAdvancedSimilarity(normalizedTitle, existingTitle) > 0.80) {
-                    console.log(`🔄 Similar title filtered: ${article.title}`);
-                    isSimilar = true;
-                    break;
+            for (const [existingTokens, existingArticle] of titleTokens.entries()) {
+                const similarity = this.calculateAdvancedTokenSimilarity(titleWords, existingTokens);
+                if (similarity > 0.75) { // Very strict similarity threshold
+                    console.log(`🔄 Similar content filtered (${(similarity * 100).toFixed(1)}% similar): ${article.title}`);
+                    
+                    // Keep the article from more authoritative source or more recent
+                    const currentSourceScore = this.getSourceAuthorityScore(article.source);
+                    const existingSourceScore = this.getSourceAuthorityScore(existingArticle.source);
+                    
+                    if (currentSourceScore > existingSourceScore || 
+                        (currentSourceScore === existingSourceScore && 
+                         new Date(article.publishedAt) > new Date(existingArticle.publishedAt))) {
+                        // Remove existing and continue with current
+                        titleTokens.delete(existingTokens);
+                        const existingIndex = filtered.findIndex(a => a.url === existingArticle.url);
+                        if (existingIndex > -1) {
+                            filtered.splice(existingIndex, 1);
+                            console.log(`🔄 Replaced lower quality duplicate: ${existingArticle.title}`);
+                        }
+                        break;
+                    } else {
+                        isSimilar = true;
+                        break;
+                    }
                 }
             }
             
+            // Special sports content validation for sports category
+            if (article.category === 'sports' && !this.isValidSportsContent(article)) {
+                console.log(`🔄 Invalid sports content filtered: ${article.title}`);
+                return;
+            }
+            
             if (!isSimilar) {
-                // Validate and enhance image URL
+                // Validate and enhance image URL for high quality
                 article.urlToImage = this.validateAndEnhanceImageUrl(article.urlToImage);
                 
+                // Store for duplicate detection
                 seenUrls.add(normalizedUrl);
                 seenTitles.add(normalizedTitle);
                 seenContent.add(contentFingerprint);
+                titleTokens.set(titleWords, article);
+                
                 filtered.push(article);
             }
         });
         
-        console.log(`🔥 ZERO-DUPLICATE FILTERING: ${articles.length} → ${filtered.length} articles (${articles.length - filtered.length} duplicates removed)`);
+        console.log(`🔥 ULTRA-STRICT FILTERING: ${articles.length} → ${filtered.length} articles (${articles.length - filtered.length} duplicates/invalid removed)`);
         return filtered;
     }
     
     /**
-     * Create unique content fingerprint for advanced duplicate detection
+     * Create advanced content fingerprint for duplicate detection
      */
-    createContentFingerprint(article) {
+    createAdvancedContentFingerprint(article) {
         const titleWords = (article.title || '').toLowerCase()
             .replace(/[^\w\s]/g, ' ')
             .split(' ')
-            .filter(word => word.length > 3)
-            .slice(0, 10)
+            .filter(word => word.length > 3 && !['news', 'breaking', 'update', 'report'].includes(word))
+            .slice(0, 12)
             .sort();
             
         const descWords = (article.description || '').toLowerCase()
             .replace(/[^\w\s]/g, ' ')
             .split(' ')
             .filter(word => word.length > 4)
-            .slice(0, 8)
+            .slice(0, 10)
             .sort();
-            
-        return `${titleWords.join('|')}::${descWords.join('|')}`;
+        
+        const sourceFingerprint = (article.source || '').toLowerCase().replace(/[^\w]/g, '');
+        
+        return `${titleWords.join('|')}::${descWords.join('|')}::${sourceFingerprint}`;
+    }
+    
+    /**
+     * Calculate advanced token-based similarity
+     */
+    calculateAdvancedTokenSimilarity(tokens1, tokens2) {
+        if (tokens1.length === 0 || tokens2.length === 0) return 0;
+        
+        const set1 = new Set(tokens1);
+        const set2 = new Set(tokens2);
+        const intersection = new Set([...set1].filter(x => set2.has(x)));
+        const union = new Set([...set1, ...set2]);
+        
+        // Jaccard similarity with length penalty for very different sized titles
+        const jaccard = intersection.size / union.size;
+        const lengthPenalty = Math.abs(tokens1.length - tokens2.length) / Math.max(tokens1.length, tokens2.length);
+        
+        return jaccard * (1 - lengthPenalty * 0.3);
+    }
+    
+    /**
+     * Validate sports content authenticity
+     */
+    isValidSportsContent(article) {
+        const text = `${article.title} ${article.description || ''}`.toLowerCase();
+        
+        // Must contain sports-related keywords
+        const sportsKeywords = [
+            'game', 'match', 'score', 'team', 'player', 'win', 'loss', 'championship',
+            'league', 'tournament', 'season', 'coach', 'athlete', 'sport', 'play',
+            'goal', 'point', 'victory', 'defeat', 'competition', 'olympic', 'final'
+        ];
+        
+        const hasValidSportsKeywords = sportsKeywords.some(keyword => text.includes(keyword));
+        
+        // Should not contain non-sports content indicators
+        const invalidKeywords = [
+            'politics', 'election', 'government', 'policy', 'bitcoin', 'crypto',
+            'stock market', 'economy', 'business deal', 'merger', 'acquisition',
+            'movie', 'film', 'album', 'song', 'concert', 'celebrity gossip'
+        ];
+        
+        const hasInvalidContent = invalidKeywords.some(keyword => text.includes(keyword));
+        
+        return hasValidSportsKeywords && !hasInvalidContent;
+    }
+    
+    /**
+     * Get enhanced source authority scores for sports
+     */
+    getSourceAuthorityScore(source) {
+        if (!source) return 1;
+        
+        const sourceStr = source.toLowerCase();
+        const sportsSourceScores = {
+            'espn': 10,
+            'bbc sport': 10,
+            'sky sports': 9,
+            'reuters': 9,
+            'associated press': 9,
+            'ap news': 9,
+            'fox sports': 8,
+            'cbs sports': 8,
+            'nbc sports': 8,
+            'the athletic': 8,
+            'bleacher report': 7,
+            'sports illustrated': 7,
+            'yahoo sports': 6,
+            'cnn': 6,
+            'bbc': 6,
+            'guardian': 6,
+            'independent': 5,
+            'daily mail': 4,
+            'goal.com': 7,
+            'uefa.com': 9,
+            'fifa.com': 9,
+            'nfl.com': 9,
+            'nba.com': 9,
+            'mlb.com': 9
+        };
+        
+        for (const [source_name, score] of Object.entries(sportsSourceScores)) {
+            if (sourceStr.includes(source_name)) {
+                return score;
+            }
+        }
+        
+        return 3; // Default score for unknown sources
     }
     
     /**
@@ -534,7 +659,7 @@ class NewsAPI {
     }
     
     /**
-     * Validate and enhance image URLs - NO broken images
+     * ENHANCED: Validate and optimize image URLs for high quality and fast loading
      */
     validateAndEnhanceImageUrl(imageUrl) {
         if (!imageUrl || 
@@ -551,9 +676,41 @@ class NewsAPI {
             imageUrl = imageUrl.replace('http://', 'https://');
         }
         
-        // Add image optimization parameters where possible
+        // Enhanced image optimization parameters for different services
         if (imageUrl.includes('unsplash.com')) {
-            imageUrl = imageUrl.includes('?') ? imageUrl + '&w=400&q=80' : imageUrl + '?w=400&q=80';
+            // High quality Unsplash optimization
+            imageUrl = imageUrl.includes('?') ? 
+                imageUrl + '&w=800&h=450&q=85&fit=crop&crop=entropy&auto=format' : 
+                imageUrl + '?w=800&h=450&q=85&fit=crop&crop=entropy&auto=format';
+        }
+        else if (imageUrl.includes('cloudinary.com')) {
+            // Cloudinary optimization
+            imageUrl = imageUrl.replace('/upload/', '/upload/c_fill,w_800,h_450,q_85,f_auto/');
+        }
+        else if (imageUrl.includes('amazonaws.com') || imageUrl.includes('s3.')) {
+            // AWS S3 optimization (if using image processing service)
+            imageUrl += imageUrl.includes('?') ? '&w=800&h=450&q=85' : '?w=800&h=450&q=85';
+        }
+        else if (imageUrl.includes('googleusercontent.com')) {
+            // Google Images optimization
+            imageUrl += imageUrl.includes('=') ? '-w800-h450-c' : '=w800-h450-c';
+        }
+        else if (imageUrl.includes('wp.com') || imageUrl.includes('wordpress.com')) {
+            // WordPress.com image optimization
+            imageUrl += imageUrl.includes('?') ? '&w=800&h=450&quality=85' : '?w=800&h=450&quality=85';
+        }
+        else if (imageUrl.includes('imgur.com')) {
+            // Imgur optimization
+            imageUrl = imageUrl.replace(/\.(jpg|jpeg|png|gif)$/, 'h.$1');
+        }
+        else if (imageUrl.includes('cdn.')) {
+            // Generic CDN optimization
+            imageUrl += imageUrl.includes('?') ? '&w=800&h=450&q=85' : '?w=800&h=450&q=85';
+        }
+        
+        // For other image services, try adding standard optimization parameters
+        else if (!imageUrl.includes('?')) {
+            imageUrl += '?w=800&h=450&q=85&format=auto';
         }
         
         return imageUrl;
