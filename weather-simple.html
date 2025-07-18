@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simple Weather Globe - Brightlens News</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background: #0a0a0a;
+            color: white;
+            font-family: Arial, sans-serif;
+            overflow: hidden;
+        }
+        
+        .header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            background: rgba(10, 10, 10, 0.95);
+            padding: 1rem 1.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .header h1 {
+            margin: 0;
+            font-size: 1.3rem;
+            color: #4285f4;
+        }
+        
+        .home-link {
+            color: #b0b0b0;
+            text-decoration: none;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            transition: all 0.3s ease;
+        }
+        
+        .home-link:hover {
+            color: white;
+            background: rgba(255, 255, 255, 0.1);
+        }
+        
+        #globe {
+            width: 100vw;
+            height: 100vh;
+        }
+        
+        .status {
+            position: fixed;
+            top: 80px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.8);
+            padding: 1rem;
+            border-radius: 8px;
+            z-index: 500;
+        }
+        
+        .loading {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            z-index: 1000;
+        }
+        
+        .weather-popup {
+            position: fixed;
+            top: 20%;
+            left: 20px;
+            background: rgba(0, 0, 0, 0.9);
+            border: 1px solid #333;
+            border-radius: 12px;
+            padding: 1.5rem;
+            min-width: 300px;
+            z-index: 2000;
+            display: none;
+        }
+        
+        .weather-popup.show {
+            display: block;
+        }
+        
+        .close-btn {
+            float: right;
+            background: none;
+            border: none;
+            color: white;
+            cursor: pointer;
+            font-size: 18px;
+        }
+        
+        .controls {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            z-index: 1000;
+        }
+        
+        .control-btn {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: white;
+            padding: 0.8rem 1rem;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .control-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🌍 3D Weather Globe</h1>
+        <a href="index.html" class="home-link">← Back to News</a>
+    </div>
+
+    <div class="loading" id="loading">
+        <h2>Loading 3D Globe...</h2>
+        <p>Please wait while we initialize the weather globe</p>
+    </div>
+
+    <div class="status" id="status">
+        <div>Status: <span id="status-text">Initializing...</span></div>
+        <div>Locations: <span id="location-count">0</span></div>
+    </div>
+
+    <div id="globe"></div>
+
+    <div class="weather-popup" id="weather-popup">
+        <button class="close-btn" onclick="closeWeather()">×</button>
+        <h3 id="location-name">Weather Info</h3>
+        <div id="weather-info">
+            <div>Temperature: <span id="temperature">--°C</span></div>
+            <div>Condition: <span id="condition">Loading...</span></div>
+            <div>Humidity: <span id="humidity">--%</span></div>
+            <div>Wind: <span id="wind">-- km/h</span></div>
+        </div>
+    </div>
+
+    <div class="controls">
+        <button class="control-btn" onclick="resetGlobe()">🏠 Reset View</button>
+        <button class="control-btn" onclick="toggleRotation()">🔄 Auto Rotate</button>
+    </div>
+
+    <!-- Load libraries from reliable CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/three@0.158.0/build/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/globe.gl@2.31.0/dist/globe.gl.min.js"></script>
+
+    <script>
+        // API Configuration
+        const API_KEY = '1106a7ac15d31e2c5f376b1c155e8c6d';
+        const BASE_URL = 'https://api.openweathermap.org/data/2.5/weather';
+
+        // Simple city data
+        const cities = [
+            { name: "New York", lat: 40.7128, lng: -74.0060, country: "US" },
+            { name: "London", lat: 51.5074, lng: -0.1278, country: "GB" },
+            { name: "Tokyo", lat: 35.6762, lng: 139.6503, country: "JP" },
+            { name: "Paris", lat: 48.8566, lng: 2.3522, country: "FR" },
+            { name: "Sydney", lat: -33.8688, lng: 151.2093, country: "AU" },
+            { name: "Dubai", lat: 25.2048, lng: 55.2708, country: "AE" },
+            { name: "Singapore", lat: 1.3521, lng: 103.8198, country: "SG" },
+            { name: "Mumbai", lat: 19.0760, lng: 72.8777, country: "IN" },
+            { name: "Beijing", lat: 39.9042, lng: 116.4074, country: "CN" },
+            { name: "São Paulo", lat: -23.5505, lng: -46.6333, country: "BR" },
+            { name: "Cairo", lat: 30.0444, lng: 31.2357, country: "EG" },
+            { name: "Moscow", lat: 55.7558, lng: 37.6176, country: "RU" },
+            { name: "Nairobi", lat: -1.2921, lng: 36.8219, country: "KE" },
+            { name: "Los Angeles", lat: 34.0522, lng: -118.2437, country: "US" },
+            { name: "Istanbul", lat: 41.0082, lng: 28.9784, country: "TR" },
+            { name: "Bangkok", lat: 13.7563, lng: 100.5018, country: "TH" },
+            { name: "Mexico City", lat: 19.4326, lng: -99.1332, country: "MX" },
+            { name: "Toronto", lat: 43.6532, lng: -79.3832, country: "CA" },
+            { name: "Buenos Aires", lat: -34.6118, lng: -58.3960, country: "AR" },
+            { name: "Jakarta", lat: -6.2088, lng: 106.8456, country: "ID" }
+        ];
+
+        let globe;
+        let isRotating = false;
+
+        function updateStatus(text) {
+            document.getElementById('status-text').textContent = text;
+            console.log('Status:', text);
+        }
+
+        function updateLocationCount(count) {
+            document.getElementById('location-count').textContent = count;
+        }
+
+        async function initGlobe() {
+            try {
+                updateStatus('Checking libraries...');
+
+                // Check if libraries loaded
+                if (typeof THREE === 'undefined') {
+                    throw new Error('Three.js failed to load');
+                }
+                if (typeof Globe === 'undefined') {
+                    throw new Error('Globe.gl failed to load');
+                }
+
+                updateStatus('Creating globe...');
+
+                // Create globe
+                globe = Globe()
+                    .globeImageUrl('//unpkg.com/three-globe/example/img/earth-day.jpg')
+                    .backgroundImageUrl('//unpkg.com/three-globe/example/img/night-sky.png')
+                    .pointsData(cities)
+                    .pointColor(() => '#4285f4')
+                    .pointAltitude(0.01)
+                    .pointRadius(0.4)
+                    .labelText(d => d.name)
+                    .labelColor(() => '#ffffff')
+                    .labelSize(1.5)
+                    .labelDotRadius(0.3)
+                    .labelAltitude(0.01)
+                    .onPointClick(handleCityClick)
+                    .onLabelClick(handleCityClick)
+                    .width(window.innerWidth)
+                    .height(window.innerHeight)
+                    (document.getElementById('globe'));
+
+                updateStatus('Globe ready!');
+                updateLocationCount(cities.length);
+                
+                document.getElementById('loading').style.display = 'none';
+
+                console.log('Globe initialized successfully!');
+
+            } catch (error) {
+                updateStatus(`Error: ${error.message}`);
+                console.error('Globe initialization error:', error);
+                
+                // Show fallback
+                document.getElementById('globe').innerHTML = `
+                    <div style="display: flex; align-items: center; justify-content: center; height: 100vh; color: white; text-align: center;">
+                        <div>
+                            <h2>Unable to load 3D Globe</h2>
+                            <p>Error: ${error.message}</p>
+                            <p>Please try refreshing the page or check your internet connection.</p>
+                        </div>
+                    </div>
+                `;
+            }
+        }
+
+        async function handleCityClick(city) {
+            if (!city) return;
+            
+            try {
+                updateStatus(`Loading weather for ${city.name}...`);
+                
+                const response = await fetch(
+                    `${BASE_URL}?q=${city.name},${city.country}&appid=${API_KEY}&units=metric`
+                );
+                
+                if (!response.ok) {
+                    throw new Error('Weather data not available');
+                }
+                
+                const data = await response.json();
+                
+                // Display weather
+                document.getElementById('location-name').textContent = `${data.name}, ${data.sys.country}`;
+                document.getElementById('temperature').textContent = `${Math.round(data.main.temp)}°C`;
+                document.getElementById('condition').textContent = data.weather[0].description;
+                document.getElementById('humidity').textContent = `${data.main.humidity}%`;
+                document.getElementById('wind').textContent = `${Math.round(data.wind.speed * 3.6)} km/h`;
+                
+                document.getElementById('weather-popup').classList.add('show');
+                
+                updateStatus('Weather loaded successfully!');
+                
+            } catch (error) {
+                console.error('Weather error:', error);
+                updateStatus(`Weather error: ${error.message}`);
+            }
+        }
+
+        function closeWeather() {
+            document.getElementById('weather-popup').classList.remove('show');
+        }
+
+        function resetGlobe() {
+            if (globe) {
+                globe.pointOfView({ lat: 20, lng: 0, altitude: 2.5 }, 1000);
+                updateStatus('View reset');
+            }
+        }
+
+        function toggleRotation() {
+            isRotating = !isRotating;
+            if (globe) {
+                globe.controls().autoRotate = isRotating;
+                globe.controls().autoRotateSpeed = 0.5;
+                updateStatus(isRotating ? 'Auto-rotation enabled' : 'Auto-rotation disabled');
+            }
+        }
+
+        // Window resize handler
+        window.addEventListener('resize', () => {
+            if (globe) {
+                globe.width(window.innerWidth).height(window.innerHeight);
+            }
+        });
+
+        // Initialize when libraries are loaded
+        function waitForLibraries() {
+            if (typeof THREE !== 'undefined' && typeof Globe !== 'undefined') {
+                initGlobe();
+            } else {
+                setTimeout(waitForLibraries, 100);
+            }
+        }
+
+        // Start initialization
+        document.addEventListener('DOMContentLoaded', () => {
+            updateStatus('Loading libraries...');
+            waitForLibraries();
+        });
+    </script>
+</body>
+</html>
