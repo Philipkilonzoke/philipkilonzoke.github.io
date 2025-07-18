@@ -178,7 +178,7 @@
             margin: 0 auto 3rem;
             position: relative;
             animation: fadeInUp 1s ease-out 0.4s both;
-            z-index: 1;
+            z-index: 100;
         }
 
         .search-wrapper {
@@ -216,6 +216,130 @@
             left: 1.3rem;
             font-size: 1.4rem;
             color: var(--accent-green);
+        }
+
+        /* Autocomplete Dropdown */
+        .autocomplete-dropdown {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: rgba(0, 0, 0, 0.95);
+            backdrop-filter: blur(20px);
+            border: 2px solid rgba(76, 175, 80, 0.3);
+            border-top: none;
+            border-radius: 0 0 20px 20px;
+            max-height: 300px;
+            overflow-y: auto;
+            z-index: 1000;
+            opacity: 0;
+            transform: translateY(-10px);
+            transition: all 0.3s ease;
+            pointer-events: none;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
+        }
+
+        .autocomplete-dropdown.show {
+            opacity: 1;
+            transform: translateY(0);
+            pointer-events: all;
+        }
+
+        .autocomplete-item {
+            padding: 1rem 1.5rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .autocomplete-item:hover,
+        .autocomplete-item.selected {
+            background: rgba(76, 175, 80, 0.2);
+            transform: translateX(5px);
+            border-left: 4px solid var(--accent-green);
+        }
+
+        .autocomplete-item:last-child {
+            border-bottom: none;
+        }
+
+        .autocomplete-item-icon {
+            color: var(--accent-green);
+            font-size: 1.1rem;
+            width: 20px;
+            text-align: center;
+        }
+
+        .autocomplete-item-text {
+            flex: 1;
+        }
+
+        .autocomplete-item-city {
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 0.2rem;
+            font-size: 1rem;
+        }
+
+        .autocomplete-item-country {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            font-weight: 400;
+        }
+
+        .autocomplete-loading {
+            padding: 1rem 1.5rem;
+            text-align: center;
+            color: var(--text-muted);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .autocomplete-loading i {
+            animation: spin 1s linear infinite;
+        }
+
+        .autocomplete-no-results {
+            padding: 1rem 1.5rem;
+            text-align: center;
+            color: var(--text-muted);
+            font-style: italic;
+        }
+
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        /* Mobile-specific improvements */
+        @media (max-width: 768px) {
+            .autocomplete-dropdown {
+                max-height: 250px;
+                border-radius: 0 0 15px 15px;
+            }
+            
+            .autocomplete-item {
+                padding: 1.2rem 1rem;
+                font-size: 0.95rem;
+            }
+            
+            .autocomplete-item-city {
+                font-size: 1rem;
+                margin-bottom: 0.3rem;
+            }
+            
+            .autocomplete-item-country {
+                font-size: 0.8rem;
+            }
+            
+            .search-input {
+                font-size: 16px; /* Prevents zoom on iOS */
+            }
         }
 
         .search-btn {
@@ -1235,11 +1359,12 @@
             <div class="search-container">
                 <div class="search-wrapper">
                     <i class="fas fa-search search-icon"></i>
-                    <input type="text" class="search-input" placeholder="Search for any city worldwide..." id="cityInput">
+                    <input type="text" class="search-input" placeholder="Type any city name (e.g., Nairobi)..." id="cityInput" autocomplete="off">
                     <button class="search-btn" onclick="searchWeather()">
                         <i class="fas fa-search"></i> Search
                     </button>
                 </div>
+                <div class="autocomplete-dropdown" id="autocompleteDropdown"></div>
             </div>
 
             <div class="quick-locations">
@@ -1549,6 +1674,157 @@
         let weatherData = [];
         let currentFeature = 'dashboard';
         let currentWeatherData = null;
+        let autocompleteDebounceTimer = null;
+        let selectedItemIndex = -1;
+
+        // Comprehensive cities database with full country names
+        const CITIES_DATABASE = [
+            // Major World Cities
+            { city: "Tokyo", country: "Japan", code: "JP" },
+            { city: "New York", country: "United States", code: "US" },
+            { city: "London", country: "United Kingdom", code: "GB" },
+            { city: "Paris", country: "France", code: "FR" },
+            { city: "Beijing", country: "China", code: "CN" },
+            { city: "Moscow", country: "Russia", code: "RU" },
+            { city: "Sydney", country: "Australia", code: "AU" },
+            { city: "Dubai", country: "United Arab Emirates", code: "AE" },
+            { city: "Singapore", country: "Singapore", code: "SG" },
+            { city: "Hong Kong", country: "Hong Kong", code: "HK" },
+            
+            // Africa
+            { city: "Nairobi", country: "Kenya", code: "KE" },
+            { city: "Mombasa", country: "Kenya", code: "KE" },
+            { city: "Kisumu", country: "Kenya", code: "KE" },
+            { city: "Nakuru", country: "Kenya", code: "KE" },
+            { city: "Eldoret", country: "Kenya", code: "KE" },
+            { city: "Thika", country: "Kenya", code: "KE" },
+            { city: "Malindi", country: "Kenya", code: "KE" },
+            { city: "Kitale", country: "Kenya", code: "KE" },
+            { city: "Garissa", country: "Kenya", code: "KE" },
+            { city: "Meru", country: "Kenya", code: "KE" },
+            { city: "Lagos", country: "Nigeria", code: "NG" },
+            { city: "Cairo", country: "Egypt", code: "EG" },
+            { city: "Cape Town", country: "South Africa", code: "ZA" },
+            { city: "Johannesburg", country: "South Africa", code: "ZA" },
+            { city: "Casablanca", country: "Morocco", code: "MA" },
+            { city: "Addis Ababa", country: "Ethiopia", code: "ET" },
+            { city: "Accra", country: "Ghana", code: "GH" },
+            { city: "Dar es Salaam", country: "Tanzania", code: "TZ" },
+            { city: "Kampala", country: "Uganda", code: "UG" },
+            { city: "Kigali", country: "Rwanda", code: "RW" },
+            
+            // Europe
+            { city: "Berlin", country: "Germany", code: "DE" },
+            { city: "Rome", country: "Italy", code: "IT" },
+            { city: "Madrid", country: "Spain", code: "ES" },
+            { city: "Amsterdam", country: "Netherlands", code: "NL" },
+            { city: "Vienna", country: "Austria", code: "AT" },
+            { city: "Prague", country: "Czech Republic", code: "CZ" },
+            { city: "Stockholm", country: "Sweden", code: "SE" },
+            { city: "Oslo", country: "Norway", code: "NO" },
+            { city: "Helsinki", country: "Finland", code: "FI" },
+            { city: "Copenhagen", country: "Denmark", code: "DK" },
+            { city: "Zurich", country: "Switzerland", code: "CH" },
+            { city: "Brussels", country: "Belgium", code: "BE" },
+            { city: "Warsaw", country: "Poland", code: "PL" },
+            { city: "Budapest", country: "Hungary", code: "HU" },
+            { city: "Athens", country: "Greece", code: "GR" },
+            { city: "Lisbon", country: "Portugal", code: "PT" },
+            { city: "Dublin", country: "Ireland", code: "IE" },
+            { city: "Edinburgh", country: "United Kingdom", code: "GB" },
+            { city: "Manchester", country: "United Kingdom", code: "GB" },
+            { city: "Birmingham", country: "United Kingdom", code: "GB" },
+            
+            // Asia
+            { city: "Shanghai", country: "China", code: "CN" },
+            { city: "Mumbai", country: "India", code: "IN" },
+            { city: "Delhi", country: "India", code: "IN" },
+            { city: "Bangalore", country: "India", code: "IN" },
+            { city: "Chennai", country: "India", code: "IN" },
+            { city: "Kolkata", country: "India", code: "IN" },
+            { city: "Seoul", country: "South Korea", code: "KR" },
+            { city: "Bangkok", country: "Thailand", code: "TH" },
+            { city: "Jakarta", country: "Indonesia", code: "ID" },
+            { city: "Manila", country: "Philippines", code: "PH" },
+            { city: "Kuala Lumpur", country: "Malaysia", code: "MY" },
+            { city: "Ho Chi Minh City", country: "Vietnam", code: "VN" },
+            { city: "Hanoi", country: "Vietnam", code: "VN" },
+            { city: "Yangon", country: "Myanmar", code: "MM" },
+            { city: "Dhaka", country: "Bangladesh", code: "BD" },
+            { city: "Karachi", country: "Pakistan", code: "PK" },
+            { city: "Lahore", country: "Pakistan", code: "PK" },
+            { city: "Islamabad", country: "Pakistan", code: "PK" },
+            { city: "Tehran", country: "Iran", code: "IR" },
+            { city: "Baghdad", country: "Iraq", code: "IQ" },
+            { city: "Riyadh", country: "Saudi Arabia", code: "SA" },
+            { city: "Tel Aviv", country: "Israel", code: "IL" },
+            { city: "Jerusalem", country: "Israel", code: "IL" },
+            
+            // Americas
+            { city: "Los Angeles", country: "United States", code: "US" },
+            { city: "Chicago", country: "United States", code: "US" },
+            { city: "Houston", country: "United States", code: "US" },
+            { city: "Miami", country: "United States", code: "US" },
+            { city: "San Francisco", country: "United States", code: "US" },
+            { city: "Boston", country: "United States", code: "US" },
+            { city: "Las Vegas", country: "United States", code: "US" },
+            { city: "Seattle", country: "United States", code: "US" },
+            { city: "Denver", country: "United States", code: "US" },
+            { city: "Atlanta", country: "United States", code: "US" },
+            { city: "Toronto", country: "Canada", code: "CA" },
+            { city: "Vancouver", country: "Canada", code: "CA" },
+            { city: "Montreal", country: "Canada", code: "CA" },
+            { city: "Ottawa", country: "Canada", code: "CA" },
+            { city: "Mexico City", country: "Mexico", code: "MX" },
+            { city: "Guadalajara", country: "Mexico", code: "MX" },
+            { city: "São Paulo", country: "Brazil", code: "BR" },
+            { city: "Rio de Janeiro", country: "Brazil", code: "BR" },
+            { city: "Brasília", country: "Brazil", code: "BR" },
+            { city: "Buenos Aires", country: "Argentina", code: "AR" },
+            { city: "Lima", country: "Peru", code: "PE" },
+            { city: "Bogotá", country: "Colombia", code: "CO" },
+            { city: "Santiago", country: "Chile", code: "CL" },
+            { city: "Caracas", country: "Venezuela", code: "VE" },
+            
+            // Oceania
+            { city: "Melbourne", country: "Australia", code: "AU" },
+            { city: "Brisbane", country: "Australia", code: "AU" },
+            { city: "Perth", country: "Australia", code: "AU" },
+            { city: "Adelaide", country: "Australia", code: "AU" },
+            { city: "Auckland", country: "New Zealand", code: "NZ" },
+            { city: "Wellington", country: "New Zealand", code: "NZ" },
+            { city: "Christchurch", country: "New Zealand", code: "NZ" }
+        ];
+
+        // Country code to full name mapping for major countries
+        const COUNTRY_NAMES = {
+            'US': 'United States', 'GB': 'United Kingdom', 'CA': 'Canada', 'AU': 'Australia',
+            'DE': 'Germany', 'FR': 'France', 'IT': 'Italy', 'ES': 'Spain', 'NL': 'Netherlands',
+            'CH': 'Switzerland', 'AT': 'Austria', 'BE': 'Belgium', 'NO': 'Norway', 'SE': 'Sweden',
+            'DK': 'Denmark', 'FI': 'Finland', 'IE': 'Ireland', 'PT': 'Portugal', 'GR': 'Greece',
+            'PL': 'Poland', 'CZ': 'Czech Republic', 'HU': 'Hungary', 'RU': 'Russia', 'UA': 'Ukraine',
+            'JP': 'Japan', 'CN': 'China', 'KR': 'South Korea', 'IN': 'India', 'TH': 'Thailand',
+            'SG': 'Singapore', 'MY': 'Malaysia', 'ID': 'Indonesia', 'PH': 'Philippines', 'VN': 'Vietnam',
+            'BD': 'Bangladesh', 'PK': 'Pakistan', 'LK': 'Sri Lanka', 'MM': 'Myanmar', 'KH': 'Cambodia',
+            'LA': 'Laos', 'IR': 'Iran', 'IQ': 'Iraq', 'SA': 'Saudi Arabia', 'AE': 'United Arab Emirates',
+            'IL': 'Israel', 'JO': 'Jordan', 'LB': 'Lebanon', 'SY': 'Syria', 'TR': 'Turkey',
+            'EG': 'Egypt', 'MA': 'Morocco', 'DZ': 'Algeria', 'TN': 'Tunisia', 'LY': 'Libya',
+            'NG': 'Nigeria', 'KE': 'Kenya', 'ET': 'Ethiopia', 'ZA': 'South Africa', 'GH': 'Ghana',
+            'TZ': 'Tanzania', 'UG': 'Uganda', 'RW': 'Rwanda', 'BI': 'Burundi', 'MW': 'Malawi',
+            'ZM': 'Zambia', 'ZW': 'Zimbabwe', 'BW': 'Botswana', 'NA': 'Namibia', 'SZ': 'Eswatini',
+            'BR': 'Brazil', 'AR': 'Argentina', 'CL': 'Chile', 'PE': 'Peru', 'CO': 'Colombia',
+            'VE': 'Venezuela', 'EC': 'Ecuador', 'BO': 'Bolivia', 'PY': 'Paraguay', 'UY': 'Uruguay',
+            'MX': 'Mexico', 'GT': 'Guatemala', 'BZ': 'Belize', 'SV': 'El Salvador', 'HN': 'Honduras',
+            'NI': 'Nicaragua', 'CR': 'Costa Rica', 'PA': 'Panama', 'CU': 'Cuba', 'JM': 'Jamaica',
+            'HT': 'Haiti', 'DO': 'Dominican Republic', 'PR': 'Puerto Rico', 'TT': 'Trinidad and Tobago',
+            'NZ': 'New Zealand', 'FJ': 'Fiji', 'PG': 'Papua New Guinea', 'SB': 'Solomon Islands',
+            'VU': 'Vanuatu', 'NC': 'New Caledonia', 'PF': 'French Polynesia', 'TO': 'Tonga',
+            'WS': 'Samoa', 'KI': 'Kiribati', 'TV': 'Tuvalu', 'NR': 'Nauru', 'PW': 'Palau'
+        };
+
+        function getFullCountryName(countryCode) {
+            return COUNTRY_NAMES[countryCode] || countryCode;
+        }
 
         // Initialize the app
         document.addEventListener('DOMContentLoaded', function() {
@@ -1565,11 +1841,50 @@
                 });
             });
 
-            // Enter key for search
-            document.getElementById('cityInput').addEventListener('keypress', function(e) {
+            // Enhanced search input with autocomplete
+            const cityInput = document.getElementById('cityInput');
+            const dropdown = document.getElementById('autocompleteDropdown');
+
+            // Input event for autocomplete
+            cityInput.addEventListener('input', function(e) {
+                const query = e.target.value.trim();
+                handleAutocomplete(query);
+            });
+
+            // Keyboard navigation
+            cityInput.addEventListener('keydown', function(e) {
                 if (e.key === 'Enter') {
-                    searchWeather();
+                    e.preventDefault();
+                    if (selectedItemIndex >= 0) {
+                        const items = dropdown.querySelectorAll('.autocomplete-item');
+                        if (items[selectedItemIndex]) {
+                            selectCity(items[selectedItemIndex].dataset.city);
+                        }
+                    } else {
+                        searchWeather();
+                    }
+                } else if (e.key === 'ArrowDown') {
+                    e.preventDefault();
+                    navigateDropdown(1);
+                } else if (e.key === 'ArrowUp') {
+                    e.preventDefault();
+                    navigateDropdown(-1);
+                } else if (e.key === 'Escape') {
+                    hideAutocomplete();
                 }
+            });
+
+            // Hide dropdown when clicking outside
+            document.addEventListener('click', function(e) {
+                if (!cityInput.contains(e.target) && !dropdown.contains(e.target)) {
+                    hideAutocomplete();
+                }
+            });
+
+            // Blur event
+            cityInput.addEventListener('blur', function() {
+                // Delay hiding to allow for clicks
+                setTimeout(hideAutocomplete, 200);
             });
 
             // Header scroll effect
@@ -1630,6 +1945,106 @@
             }
         }
 
+        // Autocomplete Functions
+        function handleAutocomplete(query) {
+            clearTimeout(autocompleteDebounceTimer);
+            
+            if (query.length < 2) {
+                hideAutocomplete();
+                return;
+            }
+
+            autocompleteDebounceTimer = setTimeout(() => {
+                const matches = searchCities(query);
+                showAutocompleteDropdown(matches);
+            }, 150);
+        }
+
+        function searchCities(query) {
+            const normalizedQuery = query.toLowerCase().trim();
+            return CITIES_DATABASE
+                .filter(city => 
+                    city.city.toLowerCase().includes(normalizedQuery) ||
+                    city.country.toLowerCase().includes(normalizedQuery)
+                )
+                .slice(0, 8) // Limit to 8 results
+                .sort((a, b) => {
+                    // Prioritize exact matches and city name matches
+                    const aCity = a.city.toLowerCase();
+                    const bCity = b.city.toLowerCase();
+                    
+                    if (aCity.startsWith(normalizedQuery) && !bCity.startsWith(normalizedQuery)) return -1;
+                    if (!aCity.startsWith(normalizedQuery) && bCity.startsWith(normalizedQuery)) return 1;
+                    
+                    return aCity.localeCompare(bCity);
+                });
+        }
+
+        function showAutocompleteDropdown(matches) {
+            const dropdown = document.getElementById('autocompleteDropdown');
+            selectedItemIndex = -1;
+
+            if (matches.length === 0) {
+                dropdown.innerHTML = '<div class="autocomplete-no-results">No cities found</div>';
+                dropdown.classList.add('show');
+                return;
+            }
+
+            const html = matches.map((city, index) => `
+                <div class="autocomplete-item" data-city="${city.city}, ${city.country}" onclick="selectCity('${city.city}, ${city.country}')">
+                    <i class="fas fa-map-marker-alt autocomplete-item-icon"></i>
+                    <div class="autocomplete-item-text">
+                        <div class="autocomplete-item-city">${city.city}</div>
+                        <div class="autocomplete-item-country">${city.country}</div>
+                    </div>
+                </div>
+            `).join('');
+
+            dropdown.innerHTML = html;
+            dropdown.classList.add('show');
+        }
+
+        function hideAutocomplete() {
+            const dropdown = document.getElementById('autocompleteDropdown');
+            dropdown.classList.remove('show');
+            selectedItemIndex = -1;
+        }
+
+        function navigateDropdown(direction) {
+            const dropdown = document.getElementById('autocompleteDropdown');
+            const items = dropdown.querySelectorAll('.autocomplete-item');
+            
+            if (items.length === 0) return;
+
+            // Remove previous selection
+            items.forEach(item => item.classList.remove('selected'));
+
+            // Calculate new index
+            selectedItemIndex += direction;
+            
+            if (selectedItemIndex < 0) {
+                selectedItemIndex = items.length - 1;
+            } else if (selectedItemIndex >= items.length) {
+                selectedItemIndex = 0;
+            }
+
+            // Add selection to new item
+            items[selectedItemIndex].classList.add('selected');
+            
+            // Scroll item into view
+            items[selectedItemIndex].scrollIntoView({
+                block: 'nearest',
+                behavior: 'smooth'
+            });
+        }
+
+        function selectCity(cityCountry) {
+            const cityInput = document.getElementById('cityInput');
+            cityInput.value = cityCountry;
+            hideAutocomplete();
+            searchWeather();
+        }
+
         async function searchWeather() {
             const cityInput = document.getElementById('cityInput');
             const city = cityInput.value.trim();
@@ -1683,7 +2098,8 @@
                 return {
                     id: data.id,
                     name: data.name,
-                    country: data.sys.country,
+                    country: getFullCountryName(data.sys.country),
+                    countryCode: data.sys.country,
                     coord: data.coord,
                     temp: Math.round(data.main.temp),
                     feelsLike: Math.round(data.main.feels_like),
