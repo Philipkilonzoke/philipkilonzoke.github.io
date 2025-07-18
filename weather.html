@@ -472,11 +472,130 @@
         const API_KEY = '1106a7ac15d31e2c5f376b1c155e8c6d';
         const BASE_URL = 'https://api.openweathermap.org/data/2.5/weather';
 
-        // Globe instance and state
-        let globe;
-        let isRotating = false;
-        let showLabels = true;
-        let currentAltitude = 2.5;
+                 // Globe instance and state
+         let globe;
+         let isRotating = false;
+         let showLabels = true;
+         let currentAltitude = 2.5;
+
+         // Geographical boundary data
+         const countryBorders = [
+             // Major continents and countries - simplified coordinate data
+             // Africa
+             { 
+                 name: "Africa", 
+                 coords: [
+                     [37.5, -35], [17.5, -35], [-17.5, -35], [-17.5, 5], [-9, 15], [12, 23], 
+                     [25, 23], [37.5, 15], [37.5, -35]
+                 ]
+             },
+             // North America
+             { 
+                 name: "North America", 
+                 coords: [
+                     [-168, 65], [-168, 15], [-82, 15], [-82, 48], [-125, 48], [-168, 65]
+                 ]
+             },
+             // South America
+             { 
+                 name: "South America", 
+                 coords: [
+                     [-35, 12], [-82, 12], [-82, -55], [-35, -55], [-35, 12]
+                 ]
+             },
+             // Europe
+             { 
+                 name: "Europe", 
+                 coords: [
+                     [-10, 71], [40, 71], [40, 35], [-10, 35], [-10, 71]
+                 ]
+             },
+             // Asia
+             { 
+                 name: "Asia", 
+                 coords: [
+                     [40, 75], [180, 75], [180, 10], [60, 10], [40, 35], [40, 75]
+                 ]
+             },
+             // Australia/Oceania
+             { 
+                 name: "Australia", 
+                 coords: [
+                     [110, -10], [155, -10], [155, -45], [110, -45], [110, -10]
+                 ]
+             }
+         ];
+
+         const countryBoundaries = [
+             // African Countries
+             { name: "Nigeria", coords: [[3, 14], [15, 14], [15, 4], [3, 4], [3, 14]] },
+             { name: "Kenya", coords: [[34, 5], [42, 5], [42, -5], [34, -5], [34, 5]] },
+             { name: "South Africa", coords: [[16, -22], [33, -22], [33, -35], [16, -35], [16, -22]] },
+             { name: "Egypt", coords: [[25, 32], [35, 32], [35, 22], [25, 22], [25, 32]] },
+             { name: "Morocco", coords: [[-13, 36], [-1, 36], [-1, 28], [-13, 28], [-13, 36]] },
+             { name: "Algeria", coords: [[-9, 37], [12, 37], [12, 19], [-9, 19], [-9, 37]] },
+             { name: "Libya", coords: [[10, 33], [25, 33], [25, 20], [10, 20], [10, 33]] },
+             { name: "Ethiopia", coords: [[33, 15], [48, 15], [48, 3], [33, 3], [33, 15]] },
+             { name: "Tanzania", coords: [[30, -1], [40, -1], [40, -12], [30, -12], [30, -1]] },
+             { name: "Ghana", coords: [[-4, 11], [1, 11], [1, 5], [-4, 5], [-4, 11]] },
+
+             // European Countries
+             { name: "United Kingdom", coords: [[-8, 59], [2, 59], [2, 50], [-8, 50], [-8, 59]] },
+             { name: "France", coords: [[-5, 51], [8, 51], [8, 42], [-5, 42], [-5, 51]] },
+             { name: "Germany", coords: [[6, 55], [15, 55], [15, 47], [6, 47], [6, 55]] },
+             { name: "Spain", coords: [[-10, 44], [4, 44], [4, 36], [-10, 36], [-10, 44]] },
+             { name: "Italy", coords: [[6, 47], [19, 47], [19, 36], [6, 36], [6, 47]] },
+             { name: "Poland", coords: [[14, 55], [24, 55], [24, 49], [14, 49], [14, 55]] },
+             { name: "Sweden", coords: [[11, 69], [24, 69], [24, 55], [11, 55], [11, 69]] },
+             { name: "Norway", coords: [[4, 71], [31, 71], [31, 58], [4, 58], [4, 71]] },
+             { name: "Finland", coords: [[20, 70], [32, 70], [32, 60], [20, 60], [20, 70]] },
+             { name: "Russia", coords: [[20, 82], [180, 82], [180, 41], [20, 41], [20, 82]] },
+
+             // Asian Countries
+             { name: "China", coords: [[73, 54], [135, 54], [135, 18], [73, 18], [73, 54]] },
+             { name: "India", coords: [[68, 37], [97, 37], [97, 6], [68, 6], [68, 37]] },
+             { name: "Japan", coords: [[130, 46], [146, 46], [146, 31], [130, 31], [130, 46]] },
+             { name: "Indonesia", coords: [[95, 6], [141, 6], [141, -11], [95, -11], [95, 6]] },
+             { name: "Thailand", coords: [[97, 21], [106, 21], [106, 5], [97, 5], [97, 21]] },
+             { name: "Vietnam", coords: [[102, 24], [110, 24], [110, 8], [102, 8], [102, 24]] },
+             { name: "South Korea", coords: [[125, 39], [130, 39], [130, 33], [125, 33], [125, 39]] },
+             { name: "Pakistan", coords: [[61, 37], [77, 37], [77, 24], [61, 24], [61, 37]] },
+             { name: "Bangladesh", coords: [[88, 27], [93, 27], [93, 20], [88, 20], [88, 27]] },
+             { name: "Philippines", coords: [[117, 19], [127, 19], [127, 5], [117, 5], [117, 19]] },
+
+             // North American Countries
+             { name: "United States", coords: [[-125, 49], [-66, 49], [-66, 25], [-125, 25], [-125, 49]] },
+             { name: "Canada", coords: [[-141, 84], [-52, 84], [-52, 42], [-141, 42], [-141, 84]] },
+             { name: "Mexico", coords: [[-117, 33], [-86, 33], [-86, 14], [-117, 14], [-117, 33]] },
+
+             // South American Countries
+             { name: "Brazil", coords: [[-74, 5], [-35, 5], [-35, -34], [-74, -34], [-74, 5]] },
+             { name: "Argentina", coords: [[-73, -22], [-53, -22], [-53, -55], [-73, -55], [-73, -22]] },
+             { name: "Chile", coords: [[-76, -17], [-66, -17], [-66, -56], [-76, -56], [-76, -17]] },
+             { name: "Peru", coords: [[-81, -0], [-68, -0], [-68, -18], [-81, -18], [-81, -0]] },
+             { name: "Colombia", coords: [[-79, 13], [-66, 13], [-66, -4], [-79, -4], [-79, 13]] },
+             { name: "Venezuela", coords: [[-73, 12], [-60, 12], [-60, 0], [-73, 0], [-73, 12]] },
+
+             // Oceania
+             { name: "Australia", coords: [[113, -10], [154, -10], [154, -44], [113, -44], [113, -10]] },
+             { name: "New Zealand", coords: [[166, -34], [179, -34], [179, -47], [166, -47], [166, -34]] }
+         ];
+
+         // Kenya counties for detailed zoom
+         const kenyaCounties = [
+             { name: "Nairobi", coords: [[36.7, -1.2], [36.9, -1.2], [36.9, -1.4], [36.7, -1.4], [36.7, -1.2]] },
+             { name: "Mombasa", coords: [[39.6, -4.0], [39.7, -4.0], [39.7, -4.1], [39.6, -4.1], [39.6, -4.0]] },
+             { name: "Kisumu", coords: [[34.7, -0.05], [34.8, -0.05], [34.8, -0.15], [34.7, -0.15], [34.7, -0.05]] },
+             { name: "Nakuru", coords: [[36.0, -0.25], [36.1, -0.25], [36.1, -0.35], [36.0, -0.35], [36.0, -0.25]] },
+             { name: "Eldoret", coords: [[35.2, 0.45], [35.3, 0.45], [35.3, 0.35], [35.2, 0.35], [35.2, 0.45]] },
+             { name: "Thika", coords: [[37.0, -1.0], [37.1, -1.0], [37.1, -1.1], [37.0, -1.1], [37.0, -1.0]] },
+             { name: "Meru", coords: [[37.6, 0.03], [37.7, 0.03], [37.7, -0.07], [37.6, -0.07], [37.6, 0.03]] },
+             { name: "Machakos", coords: [[37.2, -1.5], [37.3, -1.5], [37.3, -1.6], [37.2, -1.6], [37.2, -1.5]] },
+             { name: "Kitale", coords: [[35.0, 1.0], [35.1, 1.0], [35.1, 0.9], [35.0, 0.9], [35.0, 1.0]] },
+             { name: "Garissa", coords: [[39.6, -0.4], [39.7, -0.4], [39.7, -0.5], [39.6, -0.5], [39.6, -0.4]] },
+             { name: "Kakamega", coords: [[34.7, 0.25], [34.8, 0.25], [34.8, 0.15], [34.7, 0.15], [34.7, 0.25]] },
+             { name: "Nyeri", coords: [[36.9, -0.4], [37.0, -0.4], [37.0, -0.5], [36.9, -0.5], [36.9, -0.4]] }
+         ];
 
         // City data organized by zoom levels for Google Earth-like experience
         const worldCities = [
@@ -630,27 +749,41 @@
 
                 updateStatus('Creating globe...');
 
-                // Create the globe
-                globe = Globe()
-                    .globeImageUrl('//unpkg.com/three-globe/example/img/earth-day.jpg')
-                    .backgroundImageUrl('//unpkg.com/three-globe/example/img/night-sky.png')
-                    .pointsData(getCitiesForZoom(2.5))
-                    .pointColor(getLocationColor)
-                    .pointAltitude(0.01)
-                    .pointRadius(getLocationSize)
-                    .labelText(d => d.name)
-                    .labelColor(() => '#ffffff')
-                    .labelSize(1.2)
-                    .labelDotRadius(0.4)
-                    .labelAltitude(0.01)
-                    .onPointClick(handleLocationClick)
-                    .onLabelClick(handleLocationClick)
-                    .width(window.innerWidth)
-                    .height(window.innerHeight)
-                    .showAtmosphere(true)
-                    .atmosphereColor('#4CAF50')
-                    .atmosphereAltitude(0.15)
-                    (document.getElementById('globe'));
+                                 // Create the globe with geographical boundaries
+                 globe = Globe()
+                     .globeImageUrl('//unpkg.com/three-globe/example/img/earth-day.jpg')
+                     .backgroundImageUrl('//unpkg.com/three-globe/example/img/night-sky.png')
+                     .pointsData(getCitiesForZoom(2.5))
+                     .pointColor(getLocationColor)
+                     .pointAltitude(0.01)
+                     .pointRadius(getLocationSize)
+                     .labelText(d => d.name)
+                     .labelColor(() => '#ffffff')
+                     .labelSize(1.2)
+                     .labelDotRadius(0.4)
+                     .labelAltitude(0.01)
+                     .onPointClick(handleLocationClick)
+                     .onLabelClick(handleLocationClick)
+                     .width(window.innerWidth)
+                     .height(window.innerHeight)
+                     .showAtmosphere(true)
+                     .atmosphereColor('#4CAF50')
+                     .atmosphereAltitude(0.15)
+                     // Add geographical boundaries
+                     .hexPolygonsData([]) // Will be populated with country/region boundaries
+                     .hexPolygonResolution(3)
+                     .hexPolygonMargin(0.3)
+                     .hexPolygonColor(() => 'rgba(255, 255, 255, 0.1)')
+                     .hexPolygonAltitude(0.001)
+                     // Add country borders
+                     .pathsData([]) // Will be populated with border lines
+                     .pathColor(() => '#4CAF50')
+                     .pathStroke(1.5)
+                     .pathAltitude(0.002)
+                     (document.getElementById('globe'));
+
+                 // Load geographical boundaries based on zoom level
+                 loadGeographicalBoundaries(2.5);
 
                 // Set initial view
                 globe.pointOfView({ lat: 20, lng: 0, altitude: 2.5 });
