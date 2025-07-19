@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>All Categories Test - Brightlens News</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; background: #f5f5f5; }
+        .test-container { max-width: 1200px; margin: 0 auto; }
+        .category-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; margin-top: 20px; }
+        .category-card { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        .category-card h3 { margin: 0 0 10px 0; color: #2563eb; }
+        .category-link { display: inline-block; background: #2563eb; color: white; padding: 8px 16px; text-decoration: none; border-radius: 4px; margin: 5px 5px 5px 0; }
+        .category-link:hover { background: #1d4ed8; }
+        .status { padding: 10px; border-radius: 4px; margin: 10px 0; }
+        .status.checking { background: #e3f2fd; color: #1976d2; }
+        .status.success { background: #e8f5e8; color: #2e7d32; }
+        .status.error { background: #ffebee; color: #d32f2f; }
+        .description { color: #666; font-size: 14px; margin-bottom: 15px; }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>🔍 All Categories Test - Brightlens News</h1>
+        <p>This page tests all category pages and provides direct links to verify news loading works correctly across all categories.</p>
+        
+        <div class="category-grid">
+            <!-- Homepage / Latest -->
+            <div class="category-card">
+                <h3>📰 Latest News (Homepage)</h3>
+                <div class="description">Main homepage with latest breaking news from all sources</div>
+                <div class="status checking" id="status-latest">Checking...</div>
+                <a href="index.html" class="category-link">Visit Homepage</a>
+                <a href="latest.html" class="category-link">Latest Page</a>
+            </div>
+
+            <!-- Kenya -->
+            <div class="category-card">
+                <h3>🇰🇪 Kenya News</h3>
+                <div class="description">Local news from Kenya including politics, economy, and social issues</div>
+                <div class="status checking" id="status-kenya">Checking...</div>
+                <a href="kenya.html" class="category-link">Visit Kenya News</a>
+            </div>
+
+            <!-- World -->
+            <div class="category-card">
+                <h3>🌍 World News</h3>
+                <div class="description">International news covering global events and affairs</div>
+                <div class="status checking" id="status-world">Checking...</div>
+                <a href="world.html" class="category-link">Visit World News</a>
+            </div>
+
+            <!-- Sports -->
+            <div class="category-card">
+                <h3>⚽ Sports</h3>
+                <div class="description">Sports news including football, basketball, soccer, and more</div>
+                <div class="status checking" id="status-sports">Checking...</div>
+                <a href="sports.html" class="category-link">Visit Sports</a>
+            </div>
+
+            <!-- Technology -->
+            <div class="category-card">
+                <h3>💻 Technology</h3>
+                <div class="description">Tech news covering AI, gadgets, software, and innovations</div>
+                <div class="status checking" id="status-technology">Checking...</div>
+                <a href="technology.html" class="category-link">Visit Technology</a>
+            </div>
+
+            <!-- Business -->
+            <div class="category-card">
+                <h3>💼 Business</h3>
+                <div class="description">Business and finance news including markets and economy</div>
+                <div class="status checking" id="status-business">Checking...</div>
+                <a href="business.html" class="category-link">Visit Business</a>
+            </div>
+
+            <!-- Health -->
+            <div class="category-card">
+                <h3>🏥 Health</h3>
+                <div class="description">Health and medical news including wellness and fitness</div>
+                <div class="status checking" id="status-health">Checking...</div>
+                <a href="health.html" class="category-link">Visit Health</a>
+            </div>
+
+            <!-- Lifestyle -->
+            <div class="category-card">
+                <h3>✨ Lifestyle</h3>
+                <div class="description">Lifestyle content including fashion, food, travel, and culture</div>
+                <div class="status checking" id="status-lifestyle">Checking...</div>
+                <a href="lifestyle.html" class="category-link">Visit Lifestyle</a>
+            </div>
+
+            <!-- Entertainment -->
+            <div class="category-card">
+                <h3>🎬 Entertainment</h3>
+                <div class="description">Entertainment news covering movies, TV, celebrities, and shows</div>
+                <div class="status checking" id="status-entertainment">Checking...</div>
+                <a href="entertainment.html" class="category-link">Visit Entertainment</a>
+            </div>
+
+            <!-- Music -->
+            <div class="category-card">
+                <h3>🎵 Music</h3>
+                <div class="description">Music news including new releases, artists, and industry updates</div>
+                <div class="status checking" id="status-music">Checking...</div>
+                <a href="music.html" class="category-link">Visit Music</a>
+            </div>
+        </div>
+
+        <!-- Additional links -->
+        <div style="margin-top: 40px; padding: 20px; background: white; border-radius: 8px;">
+            <h3>🛠️ Debug & Testing Tools</h3>
+            <a href="debug-news.html" class="category-link">News API Debug</a>
+            <a href="test-navigation.html" class="category-link">Navigation Test</a>
+            <a href="live-tv.html" class="category-link">Live TV</a>
+            <a href="weather.html" class="category-link">Weather</a>
+            <a href="settings.html" class="category-link">Settings</a>
+        </div>
+    </div>
+
+    <script src="news-api.js"></script>
+    <script>
+        // Test all categories
+        const categories = [
+            'latest', 'kenya', 'world', 'sports', 'technology', 
+            'business', 'health', 'lifestyle', 'entertainment', 'music'
+        ];
+
+        async function testAllCategories() {
+            console.log('🚀 Testing all categories...');
+            
+            // Initialize NewsAPI
+            const newsAPI = new NewsAPI();
+            
+            // Test each category
+            for (const category of categories) {
+                const statusEl = document.getElementById(`status-${category}`);
+                
+                try {
+                    console.log(`Testing ${category}...`);
+                    statusEl.textContent = 'Testing...';
+                    
+                    const startTime = performance.now();
+                    const articles = await newsAPI.fetchNews(category, 5);
+                    const loadTime = (performance.now() - startTime).toFixed(2);
+                    
+                    if (articles && articles.length > 0) {
+                        statusEl.className = 'status success';
+                        statusEl.textContent = `✅ Working (${articles.length} articles, ${loadTime}ms)`;
+                        console.log(`✅ ${category}: ${articles.length} articles`);
+                    } else {
+                        statusEl.className = 'status error';
+                        statusEl.textContent = '⚠️ No articles found';
+                        console.warn(`⚠️ ${category}: No articles`);
+                    }
+                } catch (error) {
+                    statusEl.className = 'status error';
+                    statusEl.textContent = `❌ Error: ${error.message}`;
+                    console.error(`❌ ${category}:`, error);
+                }
+                
+                // Small delay between tests
+                await new Promise(resolve => setTimeout(resolve, 200));
+            }
+            
+            console.log('🏁 All category tests completed');
+        }
+
+        // Start testing when page loads
+        document.addEventListener('DOMContentLoaded', testAllCategories);
+    </script>
+</body>
+</html>

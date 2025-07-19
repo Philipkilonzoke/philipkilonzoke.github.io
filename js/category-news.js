@@ -419,6 +419,55 @@ class CategoryNews {
         if (newsGrid) newsGrid.style.display = 'none';
     }
 
+    showFallbackNotice() {
+        // Create or show a temporary notice that fallback data is being used
+        let notice = document.getElementById('fallback-notice');
+        if (!notice) {
+            notice = document.createElement('div');
+            notice.id = 'fallback-notice';
+            notice.style.cssText = `
+                background: #fff3cd;
+                border: 1px solid #ffeaa7;
+                color: #856404;
+                padding: 10px;
+                margin: 10px 0;
+                border-radius: 4px;
+                font-size: 14px;
+                text-align: center;
+                position: relative;
+            `;
+            notice.innerHTML = `
+                <i class="fas fa-info-circle"></i> 
+                Using offline content. Some news may be limited due to connection issues.
+                <button onclick="this.parentElement.style.display='none'" style="
+                    background: none; 
+                    border: none; 
+                    color: #856404; 
+                    font-size: 16px; 
+                    position: absolute; 
+                    right: 10px; 
+                    top: 50%; 
+                    transform: translateY(-50%); 
+                    cursor: pointer;
+                ">×</button>
+            `;
+            
+            const newsGrid = document.getElementById('news-grid');
+            if (newsGrid && newsGrid.parentNode) {
+                newsGrid.parentNode.insertBefore(notice, newsGrid);
+            }
+        } else {
+            notice.style.display = 'block';
+        }
+        
+        // Auto-hide after 10 seconds
+        setTimeout(() => {
+            if (notice) {
+                notice.style.display = 'none';
+            }
+        }, 10000);
+    }
+
     showNewsGrid() {
         const newsGrid = document.getElementById('news-grid');
         const newsLoading = document.getElementById('news-loading');
@@ -437,21 +486,30 @@ class CategoryNews {
         
         try {
             const startTime = performance.now();
-            console.log(`⚡ FAST loading ${this.category} news...`);
+            console.log(`⚡ ENHANCED loading ${this.category} news...`);
             
             // Optimized article limits for faster processing
             const limit = this.category === 'sports' ? 40 : 25;
             
-            // ULTRA-FAST parallel loading
+            // ENHANCED parallel loading with robust error handling
             const articles = await this.newsAPI.fetchNews(this.category, limit);
             
+            // Always check if we have articles (including fallback data)
             if (articles && articles.length > 0) {
+                console.log(`✅ Received ${articles.length} articles for ${this.category}`);
+                
                 // Immediate rendering without waiting for all processing
                 if (this.category === 'sports') {
                     // FAST sports filtering
                     this.allArticles = this.filterSportsArticlesFast(articles);
                 } else {
                     this.allArticles = articles; // Skip extra processing for speed
+                }
+                
+                // Ensure we have articles after filtering
+                if (this.allArticles.length === 0) {
+                    console.warn(`⚠️ No articles after filtering for ${this.category}, using all articles`);
+                    this.allArticles = articles;
                 }
                 
                 // Fast display with immediate rendering
@@ -470,14 +528,28 @@ class CategoryNews {
                 }, 100);
                 
                 const loadTime = (performance.now() - startTime).toFixed(2);
-                console.log(`🚀 ${this.category} news loaded: ${loadTime}ms - ${this.allArticles.length} articles`);
+                console.log(`🚀 ${this.category} news loaded: ${loadTime}ms - ${this.allArticles.length} articles displayed`);
+                
+                // Check if articles are fallback data and notify user
+                if (articles[0]?.id?.includes('fallback')) {
+                    this.showFallbackNotice();
+                }
             } else {
-                throw new Error('No articles found');
+                // This should rarely happen with the new fallback system
+                console.warn(`⚠️ No articles returned for ${this.category}`);
+                this.hideNewsLoading();
+                this.showNewsError(`No ${this.category} news available at the moment. Please try refreshing the page.`);
             }
         } catch (error) {
             console.error(`❌ Error loading ${this.category} news:`, error);
             this.hideNewsLoading();
-            this.showNewsError(`Unable to load ${this.category} news. Please try again.`);
+            
+            // Show a more helpful error message
+            const errorMessage = error.message.includes('timeout') 
+                ? `Loading ${this.category} news is taking longer than expected. Please check your internet connection and try again.`
+                : `Unable to load ${this.category} news at the moment. This might be due to network issues. Please try refreshing the page.`;
+            
+            this.showNewsError(errorMessage);
         } finally {
             this.isLoading = false;
         }
