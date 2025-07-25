@@ -219,7 +219,7 @@ class NewsAPI {
     /**
      * Enhanced Kenya news fetching with multiple local sources
      */
-    async fetchEnhancedKenyaNews(limit = 50) {
+    async fetchEnhancedKenyaNews(limit = 100) {
         const cacheKey = `kenya_enhanced_${limit}`;
         
         // Check cache first

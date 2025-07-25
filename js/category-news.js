@@ -9,7 +9,7 @@ class CategoryNews {
         this.newsAPI = new NewsAPI();
         this.category = category;
         this.currentPage = 1;
-        this.articlesPerPage = 30;
+        this.articlesPerPage = 50;
         this.allArticles = [];
         this.displayedArticles = [];
         this.isLoading = false;
@@ -145,7 +145,7 @@ class CategoryNews {
             if (this.category === 'kenya' && typeof loadKenyaSpecificNews === 'function') {
                 articles = await loadKenyaSpecificNews();
             } else {
-                articles = await this.newsAPI.fetchNews(this.category, 50);
+                articles = await this.newsAPI.fetchNews(this.category, 100);
             }
             
             if (articles && articles.length > 0) {
