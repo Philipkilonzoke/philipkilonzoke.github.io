@@ -139,7 +139,14 @@ class CategoryNews {
         
         try {
             console.log(`Loading ${this.category} news...`);
-            const articles = await this.newsAPI.fetchNews(this.category, 50);
+            
+            // For Kenya category, use specialized Kenya news loading if available
+            let articles;
+            if (this.category === 'kenya' && typeof loadKenyaSpecificNews === 'function') {
+                articles = await loadKenyaSpecificNews();
+            } else {
+                articles = await this.newsAPI.fetchNews(this.category, 50);
+            }
             
             if (articles && articles.length > 0) {
                 this.allArticles = articles;
