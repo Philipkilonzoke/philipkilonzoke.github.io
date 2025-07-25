@@ -131,6 +131,76 @@ const NEWS_SOURCES = {
             category: 'health',
             priority: 2,
             region: 'international'
+        },
+        {
+            name: 'Medical News Today',
+            rss: 'https://www.medicalnewstoday.com/rss',
+            category: 'health',
+            priority: 1,
+            region: 'international'
+        },
+        {
+            name: 'ScienceDaily Health',
+            rss: 'https://www.sciencedaily.com/rss/health_medicine.xml',
+            category: 'health',
+            priority: 1,
+            region: 'international'
+        },
+        {
+            name: 'WHO News',
+            rss: 'https://www.who.int/rss-feeds/news-releases',
+            category: 'health',
+            priority: 1,
+            region: 'international'
+        },
+        {
+            name: 'CDC Newsroom',
+            rss: 'https://tools.cdc.gov/api/v2/resources/media/rss.rss',
+            category: 'health',
+            priority: 1,
+            region: 'international'
+        },
+        {
+            name: 'Harvard Health',
+            rss: 'https://www.health.harvard.edu/blog/feed',
+            category: 'health',
+            priority: 1,
+            region: 'international'
+        },
+        {
+            name: 'Mayo Clinic News',
+            rss: 'https://newsnetwork.mayoclinic.org/feed/',
+            category: 'health',
+            priority: 1,
+            region: 'international'
+        },
+        {
+            name: 'Reuters Health',
+            rss: 'https://feeds.reuters.com/reuters/health',
+            category: 'health',
+            priority: 1,
+            region: 'international'
+        },
+        {
+            name: 'BBC Health',
+            rss: 'https://feeds.bbci.co.uk/news/health/rss.xml',
+            category: 'health',
+            priority: 1,
+            region: 'international'
+        },
+        {
+            name: 'Johns Hopkins Medicine',
+            rss: 'https://www.hopkinsmedicine.org/news/rss',
+            category: 'health',
+            priority: 1,
+            region: 'international'
+        },
+        {
+            name: 'NIH News',
+            rss: 'https://www.nih.gov/news-events/news-releases/rss.xml',
+            category: 'health',
+            priority: 1,
+            region: 'international'
         }
     ],
     science: [
