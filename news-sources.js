@@ -99,6 +99,62 @@ const NEWS_SOURCES = {
             category: 'sports',
             priority: 1,
             region: 'international'
+        },
+        {
+            name: 'Sky Sports',
+            rss: 'https://www.skysports.com/rss/12040',
+            category: 'sports',
+            priority: 1,
+            region: 'international'
+        },
+        {
+            name: 'CBS Sports',
+            rss: 'https://www.cbssports.com/rss/headlines/',
+            category: 'sports',
+            priority: 1,
+            region: 'us'
+        },
+        {
+            name: 'Yahoo Sports',
+            rss: 'https://sports.yahoo.com/rss/',
+            category: 'sports',
+            priority: 1,
+            region: 'international'
+        },
+        {
+            name: 'Goal.com',
+            rss: 'https://www.goal.com/feeds/news?format=rss&language=en-us',
+            category: 'sports',
+            priority: 1,
+            region: 'international'
+        },
+        {
+            name: 'Bleacher Report',
+            rss: 'https://bleacherreport.com/articles.rss',
+            category: 'sports',
+            priority: 1,
+            region: 'us'
+        },
+        {
+            name: 'Sporting News',
+            rss: 'https://www.sportingnews.com/us/rss',
+            category: 'sports',
+            priority: 1,
+            region: 'us'
+        },
+        {
+            name: 'The Guardian Sport',
+            rss: 'https://www.theguardian.com/sport/rss',
+            category: 'sports',
+            priority: 1,
+            region: 'international'
+        },
+        {
+            name: 'Fox Sports',
+            rss: 'https://www.foxsports.com/rss',
+            category: 'sports',
+            priority: 1,
+            region: 'us'
         }
     ],
     entertainment: [
