@@ -217,14 +217,40 @@ class WeatherDashboard {
      * Load weather for default location (Nairobi or saved location)
      */
     async loadDefaultLocation() {
-        if (this.currentLocation) {
-            await this.loadWeatherForCoordinates(
-                this.currentLocation.latitude, 
-                this.currentLocation.longitude,
-                false
-            );
-        } else {
-            await this.searchCity('Nairobi,KE');
+        try {
+            if (this.currentLocation) {
+                await this.loadWeatherForCoordinates(
+                    this.currentLocation.latitude, 
+                    this.currentLocation.longitude,
+                    false
+                );
+            } else {
+                // Set Nairobi as default location
+                this.currentLocation = {
+                    name: 'Nairobi',
+                    country: 'Kenya',
+                    admin1: 'Nairobi County',
+                    latitude: -1.2921,
+                    longitude: 36.8219
+                };
+                await this.loadNairobiWeatherDirect();
+            }
+        } catch (error) {
+            console.error('Default location load failed:', error);
+            // Final fallback - load Nairobi directly
+            try {
+                this.currentLocation = {
+                    name: 'Nairobi',
+                    country: 'Kenya',
+                    admin1: 'Nairobi County',
+                    latitude: -1.2921,
+                    longitude: 36.8219
+                };
+                await this.loadNairobiWeatherDirect();
+            } catch (fallbackError) {
+                console.error('Final fallback failed:', fallbackError);
+                this.showError('Unable to load weather data. Please try searching for a location.');
+            }
         }
     }
 
@@ -410,7 +436,73 @@ class WeatherDashboard {
 
         } catch (error) {
             console.error('Weather fetch error:', error);
-            this.showError('Unable to fetch weather data. Please try again later.');
+            // Fallback to Nairobi coordinates if API fails
+            if (!this.currentLocation || (this.currentLocation.latitude !== -1.2921 || this.currentLocation.longitude !== 36.8219)) {
+                console.log('Falling back to Nairobi weather data...');
+                this.currentLocation = {
+                    name: 'Nairobi',
+                    country: 'Kenya',
+                    admin1: 'Nairobi County',
+                    latitude: -1.2921,
+                    longitude: 36.8219
+                };
+                try {
+                    // Try to load Nairobi weather directly with coordinates
+                    await this.loadNairobiWeatherDirect();
+                } catch (fallbackError) {
+                    console.error('Fallback error:', fallbackError);
+                    this.showError('Unable to fetch weather data. Please try again later.');
+                }
+            } else {
+                this.showError('Unable to fetch weather data. Please try again later.');
+            }
+        }
+    }
+
+    /**
+     * Load Nairobi weather as a reliable fallback
+     */
+    async loadNairobiWeatherDirect() {
+        try {
+            // Nairobi coordinates
+            const latitude = -1.2921;
+            const longitude = 36.8219;
+            
+            // Construct weather API URL for Nairobi
+            const unit = this.currentUnit === 'fahrenheit' ? 'fahrenheit' : 'celsius';
+            const weatherURL = `${this.weatherAPI}?latitude=${latitude}&longitude=${longitude}&current=temperature_2m,relative_humidity_2m,weather_code,wind_speed_10m,pressure_msl&hourly=temperature_2m,weather_code,wind_speed_10m,relative_humidity_2m,precipitation_probability&daily=temperature_2m_max,temperature_2m_min,weather_code,precipitation_sum,wind_speed_10m_max&temperature_unit=${unit}&timezone=auto`;
+            
+            const response = await fetch(weatherURL);
+            if (!response.ok) {
+                throw new Error(`Weather API error: ${response.status}`);
+            }
+            
+            const weatherData = await response.json();
+            this.weatherData = weatherData;
+            
+            // Update UI with Nairobi weather
+            this.displayCurrentWeather(weatherData);
+            this.displayHourlyForecast(weatherData);
+            this.displayDailyForecast(weatherData);
+            this.updateCharts(weatherData);
+            this.updateBackground(weatherData);
+            this.checkWeatherAlerts(weatherData);
+            this.updatePageTitle(weatherData);
+            this.updateFavicon(weatherData);
+
+            this.hideLoading();
+            this.showWeatherContent();
+            this.saveUserPreferences();
+            this.updateLastUpdated();
+            
+            // Store last update timestamp
+            localStorage.setItem('weather-last-update', Date.now().toString());
+            
+            console.log('Successfully loaded Nairobi weather as fallback');
+            
+        } catch (error) {
+            console.error('Nairobi fallback failed:', error);
+            throw error; // Re-throw to be handled by caller
         }
     }
 
