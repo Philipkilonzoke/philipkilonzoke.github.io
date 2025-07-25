@@ -215,9 +215,10 @@ body {
     min-height: 100vh;
     position: relative;
     z-index: 1;
+    padding-top: calc(80px + var(--space-lg)); /* Account for fixed header */
 }
 
-/* Header */
+/* Weather Header (specific for weather dashboard) */
 .weather-header {
     display: flex;
     justify-content: space-between;
@@ -225,6 +226,11 @@ body {
     margin-bottom: var(--space-xl);
     flex-wrap: wrap;
     gap: var(--space-md);
+    background: var(--glass-bg);
+    backdrop-filter: var(--backdrop-blur);
+    border-radius: var(--radius-xl);
+    padding: var(--space-lg);
+    margin-top: var(--space-lg);
 }
 
 .header-left {
@@ -1041,6 +1047,7 @@ body {
 @media (max-width: 768px) {
     .weather-container {
         padding: var(--space-md);
+        padding-top: calc(70px + var(--space-md)); /* Account for smaller mobile header */
     }
     
     .weather-header {
