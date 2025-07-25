@@ -65,6 +65,13 @@ class WeatherDashboard {
         await this.loadDefaultLocation();
         this.createCharts();
         this.updateLastUpdated();
+        
+        // Initialize smooth scrolling after DOM is ready
+        setTimeout(() => {
+            if (window.weatherSmoothInteractions) {
+                window.weatherSmoothInteractions.updateSmoothScrolling();
+            }
+        }, 500);
     }
 
     /**
@@ -393,6 +400,13 @@ class WeatherDashboard {
             
             // Store last update timestamp
             localStorage.setItem('weather-last-update', Date.now().toString());
+            
+            // Refresh smooth scrolling after content update
+            setTimeout(() => {
+                if (window.weatherSmoothInteractions) {
+                    window.weatherSmoothInteractions.updateSmoothScrolling();
+                }
+            }, 100);
 
         } catch (error) {
             console.error('Weather fetch error:', error);
@@ -1254,6 +1268,13 @@ document.addEventListener('DOMContentLoaded', () => {
     window.addEventListener('beforeunload', () => {
         weatherDashboard.destroy();
     });
+    
+    // Add public refresh method
+    weatherDashboard.refreshWeatherData = async function() {
+        if (this.currentLocation) {
+            await this.loadWeatherForCoordinates(this.currentLocation.lat, this.currentLocation.lon, this.currentLocation.name);
+        }
+    };
     
     // Make it globally accessible for debugging
     window.weatherDashboard = weatherDashboard;

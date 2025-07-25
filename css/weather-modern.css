@@ -1,0 +1,395 @@
+/* ===================================
+   MODERN WEATHER DASHBOARD ENHANCEMENTS
+   World-Class Smooth Scrolling & Animations
+   ================================== */
+
+/* Enhanced Smooth Scrolling Foundation */
+:root {
+    /* Modern Animation System */
+    --ease-out-quart: cubic-bezier(0.25, 1, 0.5, 1);
+    --ease-in-out-circ: cubic-bezier(0.785, 0.135, 0.15, 0.86);
+    --ease-out-back: cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    --ease-elastic: cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    
+    /* Smooth Scroll Variables */
+    --scroll-padding: 2rem;
+    --scroll-behavior: smooth;
+    --momentum-scrolling: touch;
+    
+    /* Enhanced Glass Effects */
+    --glass-ultra: rgba(255, 255, 255, 0.05);
+    --glass-premium: rgba(255, 255, 255, 0.12);
+    --glass-luxury: rgba(255, 255, 255, 0.18);
+    --backdrop-ultra: blur(40px) saturate(180%);
+    --backdrop-premium: blur(60px) saturate(200%);
+    
+    /* Modern Shadows */
+    --shadow-glow: 0 0 40px rgba(59, 130, 246, 0.3);
+    --shadow-float: 0 25px 80px rgba(0, 0, 0, 0.15);
+    --shadow-deep: 0 35px 100px rgba(0, 0, 0, 0.25);
+    --shadow-premium: 0 50px 120px rgba(0, 0, 0, 0.35);
+}
+
+/* Ultra-Smooth Scrolling Configuration */
+html {
+    scroll-behavior: smooth;
+    scroll-padding-top: var(--scroll-padding);
+    overflow-x: hidden;
+}
+
+body {
+    -webkit-overflow-scrolling: touch;
+    scroll-behavior: smooth;
+    overscroll-behavior: none;
+}
+
+/* Modern Weather Container Enhancement */
+.weather-container-modern {
+    position: relative;
+    padding: 0 1rem;
+    max-width: 1400px;
+    margin: 0 auto;
+    transform: translateZ(0); /* Hardware acceleration */
+    will-change: transform;
+}
+
+/* Enhanced Smooth Scrolling for Hourly Forecast */
+.hourly-scroll-modern {
+    display: flex;
+    gap: 1rem;
+    overflow-x: auto;
+    overflow-y: hidden;
+    padding: 1.5rem 0 2rem 0;
+    scroll-behavior: smooth;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior-x: contain;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    position: relative;
+    mask: linear-gradient(90deg, transparent, black 5%, black 95%, transparent);
+    -webkit-mask: linear-gradient(90deg, transparent, black 5%, black 95%, transparent);
+}
+
+.hourly-scroll-modern::-webkit-scrollbar {
+    display: none;
+}
+
+/* Modern Hourly Cards with Smooth Interactions */
+.hourly-card-modern {
+    flex: 0 0 160px;
+    min-height: 220px;
+    background: var(--glass-premium);
+    backdrop-filter: var(--backdrop-ultra);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 20px;
+    padding: 1.5rem 1rem;
+    text-align: center;
+    transition: all 0.4s var(--ease-out-quart);
+    cursor: pointer;
+    scroll-snap-align: center;
+    position: relative;
+    overflow: hidden;
+    will-change: transform, box-shadow;
+    transform: translateZ(0);
+}
+
+.hourly-card-modern::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, rgba(59, 130, 246, 0.6), transparent);
+    transform: translateX(-100%);
+    transition: transform 0.6s var(--ease-out-quart);
+}
+
+.hourly-card-modern:hover::before {
+    transform: translateX(100%);
+}
+
+.hourly-card-modern:hover {
+    transform: translateY(-8px) scale(1.02);
+    background: var(--glass-luxury);
+    box-shadow: var(--shadow-float), var(--shadow-glow);
+    border-color: rgba(59, 130, 246, 0.3);
+}
+
+.hourly-card-modern:active {
+    transform: translateY(-4px) scale(0.98);
+}
+
+/* Enhanced Daily Forecast with Staggered Animation */
+.daily-container-modern {
+    display: grid;
+    gap: 1rem;
+    padding: 1rem 0;
+}
+
+.daily-card-modern {
+    background: var(--glass-premium);
+    backdrop-filter: var(--backdrop-ultra);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 18px;
+    padding: 1.5rem;
+    transition: all 0.3s var(--ease-out-quart);
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+    will-change: transform;
+    opacity: 0;
+    transform: translateY(20px);
+    animation: slideInUp 0.6s var(--ease-out-quart) forwards;
+}
+
+.daily-card-modern:nth-child(1) { animation-delay: 0.1s; }
+.daily-card-modern:nth-child(2) { animation-delay: 0.2s; }
+.daily-card-modern:nth-child(3) { animation-delay: 0.3s; }
+.daily-card-modern:nth-child(4) { animation-delay: 0.4s; }
+.daily-card-modern:nth-child(5) { animation-delay: 0.5s; }
+.daily-card-modern:nth-child(6) { animation-delay: 0.6s; }
+.daily-card-modern:nth-child(7) { animation-delay: 0.7s; }
+
+@keyframes slideInUp {
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.daily-card-modern:hover {
+    transform: translateY(-4px);
+    background: var(--glass-luxury);
+    box-shadow: var(--shadow-float);
+    border-color: rgba(255, 255, 255, 0.2);
+}
+
+/* Modern Floating Action Buttons */
+.floating-controls {
+    position: fixed;
+    bottom: 2rem;
+    right: 2rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    z-index: 1000;
+}
+
+.fab-modern {
+    width: 56px;
+    height: 56px;
+    background: var(--glass-premium);
+    backdrop-filter: var(--backdrop-premium);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 1.2rem;
+    cursor: pointer;
+    transition: all 0.3s var(--ease-out-back);
+    box-shadow: var(--shadow-float);
+    will-change: transform;
+}
+
+.fab-modern:hover {
+    transform: scale(1.1) rotate(5deg);
+    background: var(--glass-luxury);
+    box-shadow: var(--shadow-deep), var(--shadow-glow);
+}
+
+.fab-modern:active {
+    transform: scale(0.95);
+}
+
+/* Enhanced Search with Modern Animations */
+.search-modern {
+    position: relative;
+    margin-bottom: 2rem;
+}
+
+.search-input-modern {
+    width: 100%;
+    padding: 1.5rem 4rem 1.5rem 3rem;
+    background: var(--glass-premium);
+    backdrop-filter: var(--backdrop-ultra);
+    border: 2px solid rgba(255, 255, 255, 0.15);
+    border-radius: 25px;
+    color: white;
+    font-size: 1.1rem;
+    font-weight: 500;
+    outline: none;
+    transition: all 0.3s var(--ease-out-quart);
+    will-change: transform, box-shadow;
+}
+
+.search-input-modern::placeholder {
+    color: rgba(255, 255, 255, 0.6);
+    transition: opacity 0.3s ease;
+}
+
+.search-input-modern:focus {
+    transform: translateY(-2px);
+    border-color: rgba(59, 130, 246, 0.5);
+    box-shadow: var(--shadow-glow), 0 10px 30px rgba(0, 0, 0, 0.2);
+    background: var(--glass-luxury);
+}
+
+.search-input-modern:focus::placeholder {
+    opacity: 0.8;
+}
+
+/* Modern Loading Animation */
+.loading-modern {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 3rem;
+    text-align: center;
+}
+
+.loading-spinner-modern {
+    width: 80px;
+    height: 80px;
+    border: 4px solid rgba(255, 255, 255, 0.1);
+    border-left: 4px solid rgba(59, 130, 246, 0.8);
+    border-radius: 50%;
+    animation: modernSpin 1.2s linear infinite;
+    margin-bottom: 2rem;
+    filter: drop-shadow(0 0 20px rgba(59, 130, 246, 0.3));
+}
+
+@keyframes modernSpin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.loading-text-modern {
+    color: white;
+    font-size: 1.3rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+    opacity: 0;
+    animation: fadeInPulse 2s ease-in-out infinite;
+}
+
+@keyframes fadeInPulse {
+    0%, 100% { opacity: 0.5; }
+    50% { opacity: 1; }
+}
+
+/* Enhanced Weather Icons with Animations */
+.weather-icon-modern {
+    position: relative;
+    display: inline-block;
+    font-size: 3rem;
+    color: #fbbf24;
+    filter: drop-shadow(0 4px 12px rgba(251, 191, 36, 0.4));
+    transition: all 0.3s var(--ease-out-quart);
+}
+
+.weather-icon-modern:hover {
+    transform: scale(1.1) rotate(5deg);
+    filter: drop-shadow(0 8px 20px rgba(251, 191, 36, 0.6));
+}
+
+/* Smooth Navigation Dots for Hourly Forecast */
+.hourly-nav-dots {
+    display: flex;
+    justify-content: center;
+    gap: 0.5rem;
+    margin-top: 1rem;
+    padding: 0 1rem;
+}
+
+.nav-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.3);
+    cursor: pointer;
+    transition: all 0.3s var(--ease-out-quart);
+}
+
+.nav-dot.active {
+    background: rgba(59, 130, 246, 0.8);
+    transform: scale(1.5);
+    box-shadow: 0 0 15px rgba(59, 130, 246, 0.5);
+}
+
+/* Enhanced Responsive Design */
+@media (max-width: 768px) {
+    .hourly-card-modern {
+        flex: 0 0 140px;
+        min-height: 200px;
+        padding: 1.2rem 0.8rem;
+    }
+    
+    .floating-controls {
+        bottom: 1rem;
+        right: 1rem;
+    }
+    
+    .fab-modern {
+        width: 48px;
+        height: 48px;
+        font-size: 1rem;
+    }
+    
+    .search-input-modern {
+        padding: 1.2rem 3.5rem 1.2rem 2.5rem;
+        font-size: 1rem;
+    }
+}
+
+/* Advanced Scroll Snap for Perfect Alignment */
+@supports (scroll-snap-type: x mandatory) {
+    .hourly-scroll-modern {
+        scroll-snap-type: x mandatory;
+        scroll-padding: 0 1rem;
+    }
+    
+    .hourly-card-modern {
+        scroll-snap-align: center;
+        scroll-snap-stop: always;
+    }
+}
+
+/* Premium Glass Card Enhancement */
+.glass-card-premium {
+    background: var(--glass-premium);
+    backdrop-filter: var(--backdrop-premium);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 24px;
+    box-shadow: var(--shadow-float);
+    transition: all 0.4s var(--ease-out-quart);
+    position: relative;
+    overflow: hidden;
+}
+
+.glass-card-premium::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+    transform: translateX(-100%);
+    transition: transform 0.6s var(--ease-out-quart);
+}
+
+.glass-card-premium:hover::before {
+    transform: translateX(100%);
+}
+
+.glass-card-premium:hover {
+    transform: translateY(-4px);
+    background: var(--glass-luxury);
+    box-shadow: var(--shadow-deep), var(--shadow-glow);
+    border-color: rgba(255, 255, 255, 0.25);
+}
