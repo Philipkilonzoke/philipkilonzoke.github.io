@@ -3,1241 +3,302 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Weather - Brightlens News</title>
-    <link rel="stylesheet" href="css/styles.css">
-    <link rel="stylesheet" href="css/themes.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <title id="page-title">☀️ Weather Dashboard - Brightlens News</title>
+    <link rel="icon" id="weather-favicon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>☀️</text></svg>">
+    
+    <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    <style>
-        .weather-page {
-            min-height: 100vh;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            padding: 2rem 0;
-        }
-        
-        .weather-container {
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 0 1rem;
-        }
-        
-        .weather-header {
-            text-align: center;
-            margin-bottom: 3rem;
-            color: white;
-        }
-        
-        .weather-header h1 {
-            font-size: 3rem;
-            font-weight: 700;
-            margin-bottom: 0.5rem;
-            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
-        }
-        
-        .weather-header p {
-            font-size: 1.2rem;
-            opacity: 0.9;
-        }
-        
-        .search-section {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(20px);
-            border-radius: 20px;
-            padding: 2rem;
-            margin-bottom: 2rem;
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-        }
-        
-        .search-form {
-            display: flex;
-            gap: 1rem;
-            margin-bottom: 1rem;
-        }
-        
-        .search-input {
-            flex: 1;
-            padding: 1rem 1.5rem;
-            border: 2px solid #e2e8f0;
-            border-radius: 15px;
-            font-size: 1.1rem;
-            background: white;
-            transition: all 0.3s ease;
-            outline: none;
-        }
-        
-        .search-input:focus {
-            border-color: #667eea;
-            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
-        }
-        
-        .search-btn {
-            padding: 1rem 2rem;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            border: none;
-            border-radius: 15px;
-            font-size: 1.1rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
-        }
-        
-        .search-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
-        }
-        
-        .quick-cities {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 0.5rem;
-            justify-content: center;
-        }
-        
-        .city-chip {
-            padding: 0.5rem 1rem;
-            background: rgba(102, 126, 234, 0.1);
-            color: #667eea;
-            border: 1px solid rgba(102, 126, 234, 0.2);
-            border-radius: 25px;
-            font-size: 0.9rem;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-        
-        .city-chip:hover {
-            background: #667eea;
-            color: white;
-            transform: translateY(-1px);
-        }
-        
-        .loading-spinner {
-            display: none;
-            text-align: center;
-            padding: 3rem;
-            color: white;
-        }
-        
-        .spinner {
-            width: 50px;
-            height: 50px;
-            border: 4px solid rgba(255, 255, 255, 0.3);
-            border-top: 4px solid white;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-            margin: 0 auto 1rem;
-        }
-        
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-        
-        .weather-card {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(20px);
-            border-radius: 20px;
-            padding: 2.5rem;
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            display: none;
-            text-align: center;
-        }
-        
-        .location-header {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 1rem;
-            margin-bottom: 2rem;
-            flex-wrap: wrap;
-        }
-        
-        .location-name {
-            font-size: 2rem;
-            font-weight: 700;
-            color: #1e293b;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-        
-        .country-flag {
-            width: 40px;
-            height: 30px;
-            border-radius: 4px;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
-        }
-        
-        .weather-main {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 2rem;
-            margin-bottom: 2rem;
-            flex-wrap: wrap;
-        }
-        
-        .weather-icon-large {
-            width: 120px;
-            height: 120px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
-        }
-        
-        .weather-icon-large img {
-            width: 80px;
-            height: 80px;
-            filter: brightness(1.2);
-        }
-        
-        .temperature-section {
-            text-align: center;
-        }
-        
-        .temperature {
-            font-size: 4rem;
-            font-weight: 700;
-            color: #1e293b;
-            margin-bottom: 0.5rem;
-        }
-        
-        .temperature-unit {
-            font-size: 2rem;
-            color: #64748b;
-            margin-left: 0.5rem;
-        }
-        
-        .condition {
-            font-size: 1.5rem;
-            color: #64748b;
-            margin-bottom: 0.5rem;
-            text-transform: capitalize;
-        }
-        
-        .feels-like {
-            font-size: 1.1rem;
-            color: #94a3b8;
-        }
-        
-        .weather-details {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 1.5rem;
-            margin-top: 2rem;
-        }
-        
-        .detail-item {
-            background: rgba(102, 126, 234, 0.05);
-            border-radius: 15px;
-            padding: 1.5rem;
-            text-align: center;
-            border: 1px solid rgba(102, 126, 234, 0.1);
-            transition: all 0.3s ease;
-        }
-        
-        .detail-item:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.15);
-        }
-        
-        .detail-icon {
-            font-size: 2rem;
-            color: #667eea;
-            margin-bottom: 0.5rem;
-        }
-        
-        .detail-label {
-            font-size: 0.9rem;
-            color: #64748b;
-            margin-bottom: 0.5rem;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-        
-        .detail-value {
-            font-size: 1.5rem;
-            font-weight: 700;
-            color: #1e293b;
-        }
-        
-        .error-message {
-            background: rgba(239, 68, 68, 0.1);
-            border: 1px solid rgba(239, 68, 68, 0.2);
-            color: #dc2626;
-            padding: 1.5rem;
-            border-radius: 15px;
-            text-align: center;
-            margin-bottom: 2rem;
-            display: none;
-        }
-        
-        .unit-toggle {
-            position: absolute;
-            top: 2rem;
-            right: 2rem;
-            background: rgba(255, 255, 255, 0.9);
-            border: 1px solid rgba(102, 126, 234, 0.2);
-            border-radius: 25px;
-            padding: 0.5rem 1rem;
-            font-weight: 600;
-            color: #667eea;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-        
-        .unit-toggle:hover {
-            background: #667eea;
-            color: white;
-        }
-        
-        @media (max-width: 768px) {
-            .weather-header h1 {
-                font-size: 2.5rem;
-            }
-            
-            .search-form {
-                flex-direction: column;
-            }
-            
-            .weather-main {
-                flex-direction: column;
-                gap: 1.5rem;
-            }
-            
-            .temperature {
-                font-size: 3rem;
-            }
-            
-            .weather-details {
-                grid-template-columns: 1fr;
-                gap: 1rem;
-            }
-            
-            .unit-toggle {
-                position: static;
-                margin: 1rem auto;
-                display: block;
-                width: fit-content;
-            }
-        }
-        
-        .home-link {
-            position: absolute;
-            top: 2rem;
-            left: 2rem;
-            background: rgba(255, 255, 255, 0.9);
-            color: #667eea;
-            padding: 0.75rem 1.5rem;
-            border-radius: 25px;
-            text-decoration: none;
-            font-weight: 600;
-            border: 1px solid rgba(102, 126, 234, 0.2);
-            transition: all 0.3s ease;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-        
-        .home-link:hover {
-            background: #667eea;
-            color: white;
-            transform: translateY(-2px);
-        }
-        
-        @media (max-width: 768px) {
-            .home-link {
-                position: static;
-                margin: 1rem auto 2rem;
-                width: fit-content;
-            }
-        }
-    </style>
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="css/weather.css">
 </head>
 <body>
-    <div class="weather-page">
-        <div class="weather-container">
-            <!-- Home Link -->
-            <a href="index.html" class="home-link">
-                <i class="fas fa-arrow-left"></i>
-                Back to News
-            </a>
-            
-            <!-- Unit Toggle -->
-            <button id="unit-toggle" class="unit-toggle">°C</button>
-            
-            <!-- Header -->
-            <div class="weather-header">
-                <h1><i class="fas fa-cloud-sun"></i> Weather Forecast</h1>
-                <p>Get real-time weather information for any city worldwide</p>
-            </div>
+    <!-- Background -->
+    <div id="weather-background" class="weather-background sunny">
+        <div class="background-overlay"></div>
+        <div class="background-particles"></div>
+    </div>
 
-            <!-- Search Section -->
-            <div class="search-section">
-                <div class="search-form">
-                    <input type="text" id="city-input" class="search-input" placeholder="Enter city name (e.g., Nanyuki, New York, Tokyo)">
-                    <button id="search-btn" class="search-btn">
-                        <i class="fas fa-search"></i> Search
+    <!-- Main Container -->
+    <div class="weather-container">
+        <!-- Header -->
+        <header class="weather-header">
+            <div class="header-left">
+                <a href="index.html" class="back-button">
+                    <i class="fas fa-arrow-left"></i>
+                    <span>Back to News</span>
+                </a>
+                <div class="weather-title">
+                    <h1><i class="fas fa-cloud-sun weather-title-icon"></i> Weather Dashboard</h1>
+                    <p>Real-time weather information worldwide</p>
+                </div>
+            </div>
+            <div class="header-controls">
+                <button id="dark-mode-toggle" class="control-btn" title="Toggle Dark Mode">
+                    <i class="fas fa-moon"></i>
+                </button>
+                <button id="unit-toggle" class="control-btn" title="Toggle Temperature Unit">
+                    <span id="unit-display">°C</span>
+                </button>
+                <button id="refresh-btn" class="control-btn" title="Refresh Data">
+                    <i class="fas fa-sync-alt"></i>
+                </button>
+            </div>
+        </header>
+
+        <!-- Search Section -->
+        <section class="search-section glass-card">
+            <div class="search-container">
+                <div class="search-input-wrapper">
+                    <i class="fas fa-search search-icon"></i>
+                    <input type="text" id="city-input" class="search-input" placeholder="Search for a city or location..." autocomplete="off">
+                    <button id="search-btn" class="search-btn" title="Search">
+                        <i class="fas fa-search"></i>
+                    </button>
+                    <button id="location-btn" class="location-btn" title="Use Current Location">
+                        <i class="fas fa-location-arrow"></i>
                     </button>
                 </div>
-                <div class="quick-cities">
-                    <span class="city-chip" onclick="searchCity('Nanyuki')">Nanyuki</span>
-                    <span class="city-chip" onclick="searchCity('Nairobi')">Nairobi</span>
-                    <span class="city-chip" onclick="searchCity('New York')">New York</span>
-                    <span class="city-chip" onclick="searchCity('London')">London</span>
-                    <span class="city-chip" onclick="searchCity('Tokyo')">Tokyo</span>
-                    <span class="city-chip" onclick="searchCity('Dubai')">Dubai</span>
-                </div>
+                <div id="search-suggestions" class="search-suggestions"></div>
             </div>
-
-            <!-- Loading Spinner -->
-            <div id="loading-spinner" class="loading-spinner">
-                <div class="spinner"></div>
-                <p>Fetching weather data...</p>
-            </div>
-
-            <!-- Error Message -->
-            <div id="error-message" class="error-message">
-                <i class="fas fa-exclamation-triangle"></i>
-                <p id="error-text">Location not found. Please try a different city name.</p>
-            </div>
-
-            <!-- Weather Card -->
-            <div id="weather-card" class="weather-card">
-                <div class="location-header">
-                    <div class="location-name">
+            
+            <!-- Quick Cities -->
+            <div class="quick-cities">
+                <span class="quick-city-label">Quick Search:</span>
+                <div class="cities-grid">
+                    <button class="city-btn" data-city="Nairobi,KE">
                         <i class="fas fa-map-marker-alt"></i>
-                        <span id="location-name">City Name</span>
+                        <span>Nairobi</span>
+                    </button>
+                    <button class="city-btn" data-city="New York,US">
+                        <i class="fas fa-map-marker-alt"></i>
+                        <span>New York</span>
+                    </button>
+                    <button class="city-btn" data-city="London,GB">
+                        <i class="fas fa-map-marker-alt"></i>
+                        <span>London</span>
+                    </button>
+                    <button class="city-btn" data-city="Tokyo,JP">
+                        <i class="fas fa-map-marker-alt"></i>
+                        <span>Tokyo</span>
+                    </button>
+                    <button class="city-btn" data-city="Dubai,AE">
+                        <i class="fas fa-map-marker-alt"></i>
+                        <span>Dubai</span>
+                    </button>
+                    <button class="city-btn" data-city="Sydney,AU">
+                        <i class="fas fa-map-marker-alt"></i>
+                        <span>Sydney</span>
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Weather Alerts -->
+        <section id="weather-alerts" class="weather-alerts" style="display: none;">
+            <div class="alert-content glass-card">
+                <div class="alert-icon">
+                    <i class="fas fa-exclamation-triangle"></i>
+                </div>
+                <div class="alert-text">
+                    <h4 id="alert-title">Weather Alert</h4>
+                    <p id="alert-description">Alert description goes here.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Loading State -->
+        <section id="weather-loading" class="weather-loading" style="display: none;">
+            <div class="loading-container glass-card">
+                <div class="loading-spinner"></div>
+                <p>Loading weather data...</p>
+                <div class="loading-progress">
+                    <div class="progress-bar"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Error State -->
+        <section id="weather-error" class="weather-error" style="display: none;">
+            <div class="error-container glass-card">
+                <div class="error-icon">
+                    <i class="fas fa-exclamation-circle"></i>
+                </div>
+                <h3>Oops! Something went wrong</h3>
+                <p id="error-message">Unable to fetch weather data. Please try again.</p>
+                <button id="retry-btn" class="retry-btn">
+                    <i class="fas fa-redo"></i>
+                    Try Again
+                </button>
+            </div>
+        </section>
+
+        <!-- Current Weather -->
+        <section id="current-weather" class="current-weather" style="display: none;">
+            <div class="current-weather-card glass-card">
+                <div class="current-weather-header">
+                    <div class="location-info">
+                        <h2 id="current-city">City, Country</h2>
+                        <p id="current-datetime">Loading...</p>
+                        <div class="coordinates" id="coordinates"></div>
                     </div>
-                    <img id="country-flag" class="country-flag" src="" alt="Country Flag" style="display: none;">
+                    <div class="weather-status">
+                        <div class="weather-icon-container">
+                            <i id="current-weather-icon" class="weather-icon fas fa-sun"></i>
+                        </div>
+                        <p id="current-description">Sunny</p>
+                    </div>
                 </div>
 
-                <div class="weather-main">
-                    <div class="weather-icon-large">
-                        <img id="weather-icon" src="" alt="Weather Icon">
+                <div class="current-weather-main">
+                    <div class="temperature-display">
+                        <span id="current-temp" class="main-temp">25</span>
+                        <span class="temp-unit">°<span id="temp-unit-symbol">C</span></span>
                     </div>
-                    <div class="temperature-section">
-                        <div class="temperature">
-                            <span id="temperature">--</span>
-                            <span class="temperature-unit" id="temp-unit">°C</span>
-                        </div>
-                        <div class="condition" id="condition">--</div>
-                        <div class="feels-like">
-                            Feels like <span id="feels-like">--</span><span id="feels-like-unit">°C</span>
-                        </div>
+                    <div class="feels-like">
+                        Feels like <span id="feels-like-temp">27</span>°<span id="feels-like-unit">C</span>
                     </div>
                 </div>
 
-                <div class="weather-details">
-                    <div class="detail-item">
+                <!-- Weather Details Grid -->
+                <div class="weather-details-grid">
+                    <div class="detail-card">
                         <div class="detail-icon">
                             <i class="fas fa-wind"></i>
                         </div>
-                        <div class="detail-label">Wind Speed</div>
-                        <div class="detail-value" id="wind-speed">-- km/h</div>
+                        <div class="detail-content">
+                            <div class="detail-label">Wind Speed</div>
+                            <div class="detail-value" id="wind-speed">15 km/h</div>
+                        </div>
                     </div>
-                    <div class="detail-item">
+                    <div class="detail-card">
                         <div class="detail-icon">
                             <i class="fas fa-tint"></i>
                         </div>
-                        <div class="detail-label">Humidity</div>
-                        <div class="detail-value" id="humidity">--%</div>
+                        <div class="detail-content">
+                            <div class="detail-label">Humidity</div>
+                            <div class="detail-value" id="humidity">65%</div>
+                        </div>
                     </div>
-                    <div class="detail-item">
+                    <div class="detail-card">
                         <div class="detail-icon">
                             <i class="fas fa-thermometer-half"></i>
                         </div>
-                        <div class="detail-label">Pressure</div>
-                        <div class="detail-value" id="pressure">-- hPa</div>
+                        <div class="detail-content">
+                            <div class="detail-label">Pressure</div>
+                            <div class="detail-value" id="pressure">1013 hPa</div>
+                        </div>
                     </div>
-                    <div class="detail-item">
+                    <div class="detail-card">
                         <div class="detail-icon">
                             <i class="fas fa-eye"></i>
                         </div>
-                        <div class="detail-label">Visibility</div>
-                        <div class="detail-value" id="visibility">-- km</div>
+                        <div class="detail-content">
+                            <div class="detail-label">Visibility</div>
+                            <div class="detail-value" id="visibility">10 km</div>
+                        </div>
+                    </div>
+                    <div class="detail-card">
+                        <div class="detail-icon">
+                            <i class="fas fa-cloud"></i>
+                        </div>
+                        <div class="detail-content">
+                            <div class="detail-label">Cloud Cover</div>
+                            <div class="detail-value" id="cloud-cover">30%</div>
+                        </div>
+                    </div>
+                    <div class="detail-card">
+                        <div class="detail-icon">
+                            <i class="fas fa-sun"></i>
+                        </div>
+                        <div class="detail-content">
+                            <div class="detail-label">UV Index</div>
+                            <div class="detail-value" id="uv-index">5</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sun Times -->
+                <div class="sun-times">
+                    <div class="sun-time">
+                        <i class="fas fa-sun"></i>
+                        <div>
+                            <span class="sun-label">Sunrise</span>
+                            <span class="sun-value" id="sunrise-time">06:30</span>
+                        </div>
+                    </div>
+                    <div class="sun-time">
+                        <i class="fas fa-moon"></i>
+                        <div>
+                            <span class="sun-label">Sunset</span>
+                            <span class="sun-value" id="sunset-time">18:30</span>
+                        </div>
                     </div>
                 </div>
             </div>
+        </section>
 
-            <!-- 7-Day Forecast -->
-            <div id="forecast-section" class="forecast-section">
-                <h2><i class="fas fa-calendar-week"></i> 7-Day Weather Forecast</h2>
-                <div id="forecast-grid" class="forecast-grid">
-                    <!-- Forecast cards will be populated by JavaScript -->
+        <!-- Hourly Forecast -->
+        <section id="hourly-forecast" class="forecast-section" style="display: none;">
+            <div class="forecast-card glass-card">
+                <div class="section-header">
+                    <h3><i class="fas fa-clock"></i> 24-Hour Forecast</h3>
+                </div>
+                <div class="hourly-scroll" id="hourly-container">
+                    <!-- Hourly items will be inserted here -->
                 </div>
             </div>
+        </section>
+
+        <!-- Daily Forecast -->
+        <section id="daily-forecast" class="forecast-section" style="display: none;">
+            <div class="forecast-card glass-card">
+                <div class="section-header">
+                    <h3><i class="fas fa-calendar-week"></i> 7-Day Forecast</h3>
+                </div>
+                <div class="daily-container" id="daily-container">
+                    <!-- Daily items will be inserted here -->
+                </div>
+            </div>
+        </section>
+
+        <!-- Weather Charts -->
+        <section id="weather-charts" class="weather-charts" style="display: none;">
+            <div class="charts-container">
+                <div class="chart-card glass-card">
+                    <div class="chart-header">
+                        <h3><i class="fas fa-chart-line"></i> Temperature Trend</h3>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="temperature-chart"></canvas>
+                    </div>
+                </div>
+                <div class="chart-card glass-card">
+                    <div class="chart-header">
+                        <h3><i class="fas fa-chart-pie"></i> Weather Conditions</h3>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="conditions-chart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Last Updated -->
+        <div class="last-updated">
+            <p><i class="fas fa-clock"></i> Last updated: <span id="last-updated-time">Never</span></p>
         </div>
     </div>
 
-    <!-- Footer -->
-    <footer class="footer">
-        <div class="footer-wave">
-            <svg viewBox="0 0 1200 120" xmlns="http://www.w3.org/2000/svg">
-                <path d="M0,50 Q300,10 600,50 T1200,50 L1200,120 L0,120 Z" class="wave-path"></path>
-            </svg>
-        </div>
-        <div class="footer-content">
-            <div class="footer-grid">
-                <div class="footer-section">
-                    <div class="footer-logo">
-                        <h3><i class="fas fa-newspaper"></i> Brightlens News</h3>
-                        <p>Your Gateway to Global News</p>
-                    </div>
-                    <div class="footer-stats">
-                        <div class="stat-item">
-                            <span class="stat-number">50K+</span>
-                            <span class="stat-label">Daily Readers</span>
-                        </div>
-                        <div class="stat-item">
-                            <span class="stat-number">1M+</span>
-                            <span class="stat-label">Articles Published</span>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="footer-section">
-                    <h4>Quick Links</h4>
-                    <ul class="footer-links">
-                        <li><a href="index.html">Latest News</a></li>
-                        <li><a href="weather.html">Weather</a></li>
-                        <li><a href="live-tv.html">Live TV</a></li>
-                        <li><a href="#about">About Us</a></li>
-                    </ul>
-                </div>
-                
-                <div class="footer-section">
-                    <h4>Connect With Us</h4>
-                    <div class="social-links">
-                        <a href="https://instagram.com/philipkilonzo.ke" target="_blank" rel="noopener" class="social-link instagram">
-                            <i class="fab fa-instagram"></i>
-                            <span>@philipkilonzo.ke</span>
-                        </a>
-                        <a href="https://wa.me/254791943551" target="_blank" rel="noopener" class="social-link whatsapp">
-                            <i class="fab fa-whatsapp"></i>
-                            <span>+254 791 943 551</span>
-                        </a>
-                    </div>
-                    <div class="newsletter">
-                        <h5>Stay Updated</h5>
-                        <div class="newsletter-form">
-                            <input type="email" placeholder="Enter your email" class="newsletter-input">
-                            <button type="submit" class="newsletter-btn">
-                                <i class="fas fa-paper-plane"></i>
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="footer-bottom">
-                <p>&copy; 2025 Brightlens News. All rights reserved.</p>
-                <div class="footer-bottom-links">
-                    <a href="#privacy">Privacy Policy</a>
-                    <a href="#terms">Terms of Service</a>
-                    <a href="#contact">Contact</a>
-                </div>
-            </div>
-        </div>
-    </footer>
-
-    <style>
-        /* Footer Styles */
-        .footer {
-            position: relative;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            margin-top: 4rem;
-            overflow: hidden;
-        }
-
-        .footer-wave {
-            position: absolute;
-            top: -1px;
-            left: 0;
-            width: 100%;
-            height: 60px;
-            overflow: hidden;
-        }
-
-        .footer-wave svg {
-            width: 100%;
-            height: 100%;
-        }
-
-        .wave-path {
-            fill: rgba(255, 255, 255, 0.95);
-            animation: wave 4s ease-in-out infinite;
-        }
-
-        @keyframes wave {
-            0%, 100% { d: path("M0,50 Q300,10 600,50 T1200,50 L1200,120 L0,120 Z"); }
-            50% { d: path("M0,40 Q300,70 600,40 T1200,40 L1200,120 L0,120 Z"); }
-        }
-
-        .footer-content {
-            padding: 4rem 2rem 2rem;
-            max-width: 1200px;
-            margin: 0 auto;
-        }
-
-        .footer-grid {
-            display: grid;
-            grid-template-columns: 2fr 1fr 1.5fr;
-            gap: 3rem;
-            margin-bottom: 3rem;
-        }
-
-        .footer-section h3, .footer-section h4, .footer-section h5 {
-            margin-bottom: 1rem;
-            color: white;
-        }
-
-        .footer-logo h3 {
-            font-size: 1.8rem;
-            font-weight: 700;
-            margin-bottom: 0.5rem;
-        }
-
-        .footer-logo p {
-            color: rgba(255, 255, 255, 0.8);
-            font-size: 1.1rem;
-            margin-bottom: 2rem;
-        }
-
-        .footer-stats {
-            display: flex;
-            gap: 2rem;
-        }
-
-        .stat-item {
-            text-align: center;
-        }
-
-        .stat-number {
-            display: block;
-            font-size: 2rem;
-            font-weight: 700;
-            color: #fbbf24;
-            animation: pulse 2s infinite;
-        }
-
-        .stat-label {
-            display: block;
-            font-size: 0.9rem;
-            color: rgba(255, 255, 255, 0.8);
-            margin-top: 0.5rem;
-        }
-
-        @keyframes pulse {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.05); }
-        }
-
-        .footer-links {
-            list-style: none;
-            padding: 0;
-        }
-
-        .footer-links li {
-            margin-bottom: 0.8rem;
-        }
-
-        .footer-links a {
-            color: rgba(255, 255, 255, 0.8);
-            text-decoration: none;
-            transition: all 0.3s ease;
-            display: inline-flex;
-            align-items: center;
-            padding: 0.5rem 0;
-        }
-
-        .footer-links a:hover {
-            color: #fbbf24;
-            transform: translateX(5px);
-        }
-
-        .social-links {
-            margin-bottom: 2rem;
-        }
-
-        .social-link {
-            display: flex;
-            align-items: center;
-            gap: 0.8rem;
-            color: white;
-            text-decoration: none;
-            padding: 0.8rem;
-            margin-bottom: 0.8rem;
-            border-radius: 12px;
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            transition: all 0.3s ease;
-        }
-
-        .social-link:hover {
-            background: rgba(255, 255, 255, 0.2);
-            transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
-        }
-
-        .social-link.instagram:hover {
-            background: linear-gradient(45deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888);
-        }
-
-        .social-link.whatsapp:hover {
-            background: #25d366;
-        }
-
-        .social-link i {
-            font-size: 1.5rem;
-            width: 24px;
-            text-align: center;
-        }
-
-        .newsletter h5 {
-            font-size: 1.1rem;
-            margin-bottom: 1rem;
-        }
-
-        .newsletter-form {
-            display: flex;
-            gap: 0.5rem;
-        }
-
-        .newsletter-input {
-            flex: 1;
-            padding: 0.8rem;
-            border: 1px solid rgba(255, 255, 255, 0.3);
-            border-radius: 8px;
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(10px);
-            color: white;
-            font-size: 0.9rem;
-            outline: none;
-        }
-
-        .newsletter-input::placeholder {
-            color: rgba(255, 255, 255, 0.6);
-        }
-
-        .newsletter-input:focus {
-            border-color: #fbbf24;
-            box-shadow: 0 0 0 2px rgba(251, 191, 36, 0.2);
-        }
-
-        .newsletter-btn {
-            padding: 0.8rem 1rem;
-            background: #fbbf24;
-            color: #1f2937;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: 600;
-            transition: all 0.3s ease;
-        }
-
-        .newsletter-btn:hover {
-            background: #f59e0b;
-            transform: translateY(-2px);
-        }
-
-        .footer-bottom {
-            border-top: 1px solid rgba(255, 255, 255, 0.2);
-            padding-top: 2rem;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-            gap: 1rem;
-        }
-
-        .footer-bottom p {
-            color: rgba(255, 255, 255, 0.8);
-            margin: 0;
-        }
-
-        .footer-bottom-links {
-            display: flex;
-            gap: 2rem;
-        }
-
-        .footer-bottom-links a {
-            color: rgba(255, 255, 255, 0.6);
-            text-decoration: none;
-            font-size: 0.9rem;
-            transition: color 0.3s ease;
-        }
-
-        .footer-bottom-links a:hover {
-            color: #fbbf24;
-        }
-
-        /* Forecast Section Styles */
-        .forecast-section {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(20px);
-            border-radius: 20px;
-            padding: 2.5rem;
-            margin-top: 2rem;
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            display: none;
-        }
-
-        .forecast-section h2 {
-            text-align: center;
-            color: #1e293b;
-            margin-bottom: 2rem;
-            font-size: 2rem;
-            font-weight: 700;
-        }
-
-        .forecast-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-            gap: 1.5rem;
-        }
-
-        .forecast-card {
-            background: rgba(102, 126, 234, 0.05);
-            border-radius: 15px;
-            padding: 1.5rem 1rem;
-            text-align: center;
-            border: 1px solid rgba(102, 126, 234, 0.1);
-            transition: all 0.3s ease;
-        }
-
-        .forecast-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.2);
-        }
-
-        .forecast-day {
-            font-weight: 700;
-            color: #667eea;
-            margin-bottom: 0.5rem;
-            font-size: 1rem;
-        }
-
-        .forecast-date {
-            color: #64748b;
-            font-size: 0.9rem;
-            margin-bottom: 1rem;
-        }
-
-        .forecast-icon {
-            width: 60px;
-            height: 60px;
-            margin: 0 auto 1rem;
-            border-radius: 50%;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .forecast-icon img {
-            width: 40px;
-            height: 40px;
-            filter: brightness(1.2);
-        }
-
-        .forecast-temps {
-            margin-bottom: 0.5rem;
-        }
-
-        .forecast-high {
-            font-size: 1.3rem;
-            font-weight: 700;
-            color: #1e293b;
-        }
-
-        .forecast-low {
-            font-size: 1rem;
-            color: #64748b;
-            margin-left: 0.5rem;
-        }
-
-        .forecast-condition {
-            color: #64748b;
-            font-size: 0.9rem;
-            text-transform: capitalize;
-        }
-
-        @media (max-width: 768px) {
-            .footer-grid {
-                grid-template-columns: 1fr;
-                gap: 2rem;
-            }
-
-            .footer-stats {
-                justify-content: center;
-            }
-
-            .footer-bottom {
-                flex-direction: column;
-                text-align: center;
-            }
-
-            .footer-bottom-links {
-                flex-wrap: wrap;
-                justify-content: center;
-            }
-
-            .forecast-grid {
-                grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-                gap: 1rem;
-            }
-
-            .forecast-card {
-                padding: 1rem 0.5rem;
-            }
-        }
-    </style>
-
-    <script>
-        class ModernWeatherApp {
-            constructor() {
-                this.apiKey = 'ba29059ea28143c599260816250207';
-                this.baseUrl = 'https://api.weatherapi.com/v1/current.json';
-                this.forecastUrl = 'https://api.weatherapi.com/v1/forecast.json';
-                this.currentUnit = 'C'; // C or F
-                this.currentWeatherData = null;
-                this.forecastData = null;
-                
-                this.init();
-            }
-
-            init() {
-                this.setupEventListeners();
-                this.searchCity('Nairobi'); // Default city
-            }
-
-            setupEventListeners() {
-                const searchBtn = document.getElementById('search-btn');
-                const cityInput = document.getElementById('city-input');
-                const unitToggle = document.getElementById('unit-toggle');
-
-                searchBtn.addEventListener('click', () => this.handleSearch());
-                cityInput.addEventListener('keypress', (e) => {
-                    if (e.key === 'Enter') {
-                        this.handleSearch();
-                    }
-                });
-                unitToggle.addEventListener('click', () => this.toggleUnit());
-            }
-
-            handleSearch() {
-                const cityInput = document.getElementById('city-input');
-                const city = cityInput.value.trim();
-                if (city) {
-                    this.searchCity(city);
-                }
-            }
-
-            async searchCity(city) {
-                this.showLoading();
-                this.hideError();
-                this.hideWeatherCard();
-                this.hideForecast();
-
-                try {
-                    // Fetch current weather and 7-day forecast
-                    const [currentResponse, forecastResponse] = await Promise.all([
-                        fetch(`${this.baseUrl}?key=${this.apiKey}&q=${encodeURIComponent(city)}&aqi=no`),
-                        fetch(`${this.forecastUrl}?key=${this.apiKey}&q=${encodeURIComponent(city)}&days=7&aqi=no&alerts=no`)
-                    ]);
-                    
-                    if (!currentResponse.ok || !forecastResponse.ok) {
-                        throw new Error('City not found');
-                    }
-
-                    const currentData = await currentResponse.json();
-                    const forecastData = await forecastResponse.json();
-                    
-                    this.currentWeatherData = currentData;
-                    this.forecastData = forecastData;
-                    
-                    this.displayWeather(currentData);
-                    this.displayForecast(forecastData);
-                    this.hideLoading();
-                    this.showWeatherCard();
-                    this.showForecast();
-                } catch (error) {
-                    console.error('Weather fetch error:', error);
-                    this.hideLoading();
-                    this.showError('Location not found. Please check the city name and try again.');
-                }
-            }
-
-            displayWeather(data) {
-                const location = data.location;
-                const current = data.current;
-
-                // Update search input
-                document.getElementById('city-input').value = `${location.name}, ${location.country}`;
-
-                // Location info
-                document.getElementById('location-name').textContent = `${location.name}, ${location.country}`;
-                
-                // Country flag (using flagcdn.com)
-                const flagImg = document.getElementById('country-flag');
-                const countryCode = this.getCountryCode(location.country);
-                if (countryCode) {
-                    flagImg.src = `https://flagcdn.com/w40/${countryCode}.png`;
-                    flagImg.style.display = 'block';
-                    flagImg.onerror = () => flagImg.style.display = 'none';
-                } else {
-                    flagImg.style.display = 'none';
-                }
-
-                // Weather icon
-                const weatherIcon = document.getElementById('weather-icon');
-                weatherIcon.src = `https:${current.condition.icon}`;
-                weatherIcon.alt = current.condition.text;
-
-                // Temperature
-                this.updateTemperature(current);
-
-                // Condition
-                document.getElementById('condition').textContent = current.condition.text;
-
-                // Details
-                document.getElementById('wind-speed').textContent = `${current.wind_kph} km/h`;
-                document.getElementById('humidity').textContent = `${current.humidity}%`;
-                document.getElementById('pressure').textContent = `${current.pressure_mb} hPa`;
-                document.getElementById('visibility').textContent = `${current.vis_km} km`;
-            }
-
-            updateTemperature(current) {
-                const temp = this.currentUnit === 'C' ? current.temp_c : current.temp_f;
-                const feelsLike = this.currentUnit === 'C' ? current.feelslike_c : current.feelslike_f;
-                
-                document.getElementById('temperature').textContent = Math.round(temp);
-                document.getElementById('feels-like').textContent = Math.round(feelsLike);
-                document.getElementById('temp-unit').textContent = `°${this.currentUnit}`;
-                document.getElementById('feels-like-unit').textContent = `°${this.currentUnit}`;
-            }
-
-            toggleUnit() {
-                this.currentUnit = this.currentUnit === 'C' ? 'F' : 'C';
-                document.getElementById('unit-toggle').textContent = `°${this.currentUnit}`;
-                
-                // If weather data is loaded, update temperature display
-                if (this.currentWeatherData) {
-                    this.updateTemperature(this.currentWeatherData.current);
-                }
-                
-                // Update forecast temperatures
-                if (this.forecastData) {
-                    this.displayForecast(this.forecastData);
-                }
-            }
-
-            displayForecast(data) {
-                const forecastGrid = document.getElementById('forecast-grid');
-                forecastGrid.innerHTML = '';
-
-                data.forecast.forecastday.forEach((day, index) => {
-                    const date = new Date(day.date);
-                    const dayName = index === 0 ? 'Today' : 
-                                   index === 1 ? 'Tomorrow' : 
-                                   date.toLocaleDateString('en-US', { weekday: 'short' });
-                    
-                    const maxTemp = this.currentUnit === 'C' ? Math.round(day.day.maxtemp_c) : Math.round(day.day.maxtemp_f);
-                    const minTemp = this.currentUnit === 'C' ? Math.round(day.day.mintemp_c) : Math.round(day.day.mintemp_f);
-                    
-                    const forecastCard = document.createElement('div');
-                    forecastCard.className = 'forecast-card';
-                    forecastCard.innerHTML = `
-                        <div class="forecast-day">${dayName}</div>
-                        <div class="forecast-date">${date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</div>
-                        <div class="forecast-icon">
-                            <img src="https:${day.day.condition.icon}" alt="${day.day.condition.text}">
-                        </div>
-                        <div class="forecast-temps">
-                            <span class="forecast-high">${maxTemp}°</span>
-                            <span class="forecast-low">${minTemp}°</span>
-                        </div>
-                        <div class="forecast-condition">${day.day.condition.text}</div>
-                    `;
-                    
-                    forecastGrid.appendChild(forecastCard);
-                });
-            }
-
-            showForecast() {
-                document.getElementById('forecast-section').style.display = 'block';
-            }
-
-            hideForecast() {
-                document.getElementById('forecast-section').style.display = 'none';
-            }
-
-            getCountryCode(countryName) {
-                const countryCodes = {
-                    'United States': 'us',
-                    'United States of America': 'us',
-                    'USA': 'us',
-                    'United Kingdom': 'gb',
-                    'UK': 'gb',
-                    'Kenya': 'ke',
-                    'Japan': 'jp',
-                    'Germany': 'de',
-                    'France': 'fr',
-                    'Australia': 'au',
-                    'Canada': 'ca',
-                    'India': 'in',
-                    'China': 'cn',
-                    'Brazil': 'br',
-                    'South Africa': 'za',
-                    'Nigeria': 'ng',
-                    'Egypt': 'eg',
-                    'UAE': 'ae',
-                    'United Arab Emirates': 'ae',
-                    'Switzerland': 'ch',
-                    'Netherlands': 'nl',
-                    'Sweden': 'se',
-                    'Norway': 'no',
-                    'Denmark': 'dk',
-                    'Finland': 'fi',
-                    'Italy': 'it',
-                    'Spain': 'es',
-                    'Portugal': 'pt',
-                    'Belgium': 'be',
-                    'Austria': 'at',
-                    'Poland': 'pl',
-                    'Russia': 'ru',
-                    'Turkey': 'tr',
-                    'Greece': 'gr',
-                    'Ireland': 'ie',
-                    'Iceland': 'is',
-                    'Luxembourg': 'lu',
-                    'Malta': 'mt',
-                    'Cyprus': 'cy',
-                    'New Zealand': 'nz',
-                    'Singapore': 'sg',
-                    'Malaysia': 'my',
-                    'Thailand': 'th',
-                    'Philippines': 'ph',
-                    'Indonesia': 'id',
-                    'South Korea': 'kr',
-                    'Vietnam': 'vn',
-                    'Mexico': 'mx',
-                    'Argentina': 'ar',
-                    'Chile': 'cl',
-                    'Colombia': 'co',
-                    'Peru': 'pe',
-                    'Venezuela': 've',
-                    'Uruguay': 'uy',
-                    'Paraguay': 'py',
-                    'Bolivia': 'bo',
-                    'Ecuador': 'ec',
-                    'Israel': 'il',
-                    'Saudi Arabia': 'sa',
-                    'Qatar': 'qa',
-                    'Kuwait': 'kw',
-                    'Bahrain': 'bh',
-                    'Oman': 'om',
-                    'Jordan': 'jo',
-                    'Lebanon': 'lb',
-                    'Morocco': 'ma',
-                    'Tunisia': 'tn',
-                    'Algeria': 'dz',
-                    'Libya': 'ly',
-                    'Sudan': 'sd',
-                    'Ethiopia': 'et',
-                    'Ghana': 'gh',
-                    'Ivory Coast': 'ci',
-                    'Senegal': 'sn',
-                    'Mali': 'ml',
-                    'Burkina Faso': 'bf',
-                    'Niger': 'ne',
-                    'Chad': 'td',
-                    'Central African Republic': 'cf',
-                    'Cameroon': 'cm',
-                    'Gabon': 'ga',
-                    'Republic of the Congo': 'cg',
-                    'Democratic Republic of the Congo': 'cd',
-                    'Angola': 'ao',
-                    'Zambia': 'zm',
-                    'Zimbabwe': 'zw',
-                    'Botswana': 'bw',
-                    'Namibia': 'na',
-                    'Mozambique': 'mz',
-                    'Madagascar': 'mg',
-                    'Mauritius': 'mu',
-                    'Seychelles': 'sc',
-                    'Comoros': 'km',
-                    'Cape Verde': 'cv',
-                    'Sao Tome and Principe': 'st',
-                    'Guinea-Bissau': 'gw',
-                    'Guinea': 'gn',
-                    'Sierra Leone': 'sl',
-                    'Liberia': 'lr',
-                    'Togo': 'tg',
-                    'Benin': 'bj',
-                    'Rwanda': 'rw',
-                    'Burundi': 'bi',
-                    'Djibouti': 'dj',
-                    'Eritrea': 'er',
-                    'Somalia': 'so',
-                    'Uganda': 'ug',
-                    'Tanzania': 'tz',
-                    'Malawi': 'mw',
-                    'Lesotho': 'ls',
-                    'Eswatini': 'sz',
-                    'Swaziland': 'sz'
-                };
-                return countryCodes[countryName] || countryName.toLowerCase().substring(0, 2);
-            }
-
-            showLoading() {
-                document.getElementById('loading-spinner').style.display = 'block';
-            }
-
-            hideLoading() {
-                document.getElementById('loading-spinner').style.display = 'none';
-            }
-
-            showError(message) {
-                document.getElementById('error-text').textContent = message;
-                document.getElementById('error-message').style.display = 'block';
-            }
-
-            hideError() {
-                document.getElementById('error-message').style.display = 'none';
-            }
-
-            showWeatherCard() {
-                document.getElementById('weather-card').style.display = 'block';
-            }
-
-            hideWeatherCard() {
-                document.getElementById('weather-card').style.display = 'none';
-            }
-        }
-
-        // Global function for quick city search
-        function searchCity(city) {
-            document.getElementById('city-input').value = city;
-            window.weatherApp.searchCity(city);
-        }
-
-        // Initialize the app when DOM is loaded
-        document.addEventListener('DOMContentLoaded', () => {
-            window.weatherApp = new ModernWeatherApp();
-        });
-    </script>
+    <!-- Chart.js Library -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <!-- Custom JavaScript -->
+    <script src="js/weather.js"></script>
 </body>
 </html>
