@@ -902,6 +902,7 @@
     <script src="js/themes.js" defer></script>
     <script src="js/extended-articles.js" defer></script>
     <script src="js/news-api.js" defer></script>
+    <script src="js/main.js" defer></script>
     <script>
         // Homepage specific JavaScript
         function smoothScroll(target) {
@@ -910,70 +911,65 @@
             });
         }
         
-        // Load breaking news for ticker
+        // Initialize news instance for homepage (same as Breaking News page)
+        let newsInstance = null;
+        
+        // Load breaking news for ticker using exact same logic as Breaking News page
         async function loadBreakingNews() {
             try {
-                // Initialize news API
-                const newsAPI = new NewsAPI();
-                const articles = await newsAPI.fetchNews('latest', 20);
+                // Initialize the same BrightlensNews class used on Breaking News page
+                if (!newsInstance) {
+                    newsInstance = new BrightlensNews();
+                    // Override the current category to 'latest' for homepage
+                    newsInstance.currentCategory = 'latest';
+                }
+                
+                // Load news using the exact same method as Breaking News page
+                await newsInstance.loadNews('latest', false);
+                
+                // Get the articles that were loaded (same as Breaking News page)
+                const articles = newsInstance.allArticles;
                 
                 const ticker = document.getElementById('news-ticker');
                 if (articles && articles.length > 0) {
-                    // Filter out any invalid articles
+                    // Filter out any invalid articles (same filtering as Breaking News page)
                     const validArticles = articles.filter(article => 
                         article && 
                         article.title && 
                         article.url && 
-                        article.title.trim().length > 10 &&
+                        article.title.trim().length > 5 &&
                         !article.title.toLowerCase().includes('removed')
                     );
                     
-                    // Create ticker items with full article content
-                    const tickerItems = validArticles.map(article => {
-                        // Format the date
-                        let formattedDate = 'Just now';
-                        if (article.publishedAt) {
-                            try {
-                                const date = new Date(article.publishedAt);
-                                const now = new Date();
-                                const diffInHours = Math.floor((now - date) / (1000 * 60 * 60));
-                                
-                                if (diffInHours < 1) {
-                                    formattedDate = 'Just now';
-                                } else if (diffInHours < 24) {
-                                    formattedDate = `${diffInHours}h ago`;
-                                } else {
-                                    const diffInDays = Math.floor(diffInHours / 24);
-                                    if (diffInDays === 1) {
-                                        formattedDate = 'Yesterday';
-                                    } else if (diffInDays < 7) {
-                                        formattedDate = `${diffInDays} days ago`;
-                                    } else {
-                                        formattedDate = date.toLocaleDateString();
-                                    }
-                                }
-                            } catch (e) {
-                                formattedDate = 'Recently';
-                            }
-                        }
+                    // Create ticker items using the exact same article structure as Breaking News page
+                    const tickerItems = validArticles.slice(0, 15).map(article => {
+                        // Use the exact same formatDate method as Breaking News page
+                        const formattedDate = newsInstance.newsAPI.formatDate(article.publishedAt);
                         
-                        // Clean and truncate title
-                        const cleanTitle = article.title.length > 100 ? 
+                        // Use the exact same image validation as Breaking News page
+                        const imageUrl = article.urlToImage;
+                        const hasValidImage = imageUrl && 
+                                             imageUrl !== 'null' && 
+                                             imageUrl !== 'None' && 
+                                             imageUrl !== 'undefined' &&
+                                             imageUrl.startsWith('http');
+                        
+                        // Use the exact same description as Breaking News page
+                        const description = article.description || 'No description available.';
+                        const truncatedDescription = description.length > 150 ? 
+                            description.substring(0, 150) + '...' : description;
+                        
+                        // Use the exact same title truncation as Breaking News page
+                        const truncatedTitle = article.title.length > 100 ? 
                             article.title.substring(0, 100) + '...' : article.title;
                         
-                        // Clean and truncate description
-                        let description = article.description || article.content || 'Read more to discover the full story and latest updates on this developing news.';
-                        if (description.length > 150) {
-                            description = description.substring(0, 150) + '...';
-                        }
-                        
-                        // Clean source name
+                        // Use the exact same source name as Breaking News page
                         const sourceName = article.source || 'Brightlens News';
                         
                         return `
                             <div class="ticker-item" onclick="window.open('${article.url}', '_blank')">
-                                ${article.image ? 
-                                    `<img src="${article.image}" alt="${article.title}" class="ticker-image" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                                ${hasValidImage ? 
+                                    `<img src="${imageUrl}" alt="${article.title}" class="ticker-image" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
                                      <div class="ticker-image-placeholder" style="display: none;">
                                          <i class="fas fa-newspaper"></i>
                                      </div>` :
@@ -982,8 +978,8 @@
                                      </div>`
                                 }
                                 <div class="ticker-text">
-                                    <h3 class="ticker-title">${cleanTitle}</h3>
-                                    <p class="ticker-description">${description}</p>
+                                    <h3 class="ticker-title">${truncatedTitle}</h3>
+                                    <p class="ticker-description">${truncatedDescription}</p>
                                     <div class="ticker-meta">
                                         <span class="ticker-source">${sourceName}</span>
                                         <span class="ticker-date">${formattedDate}</span>
@@ -995,6 +991,8 @@
                     
                     // Duplicate the content for seamless scrolling
                     ticker.innerHTML = tickerItems + tickerItems;
+                    
+                    console.log(`✓ Homepage ticker loaded with ${validArticles.length} articles (same as Breaking News page)`);
                 } else {
                     // Fallback content if no articles loaded
                     ticker.innerHTML = `
@@ -1138,20 +1136,40 @@
             }, true);
         }
         
+        // Wait for all scripts to load before initializing
+        function waitForScripts() {
+            return new Promise((resolve) => {
+                const checkScripts = () => {
+                    if (typeof BrightlensNews !== 'undefined' && typeof NewsAPI !== 'undefined') {
+                        resolve();
+                    } else {
+                        setTimeout(checkScripts, 100);
+                    }
+                };
+                checkScripts();
+            });
+        }
+        
         // Initialize homepage
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', async function() {
             // Hide loading screen
             setTimeout(() => {
                 document.getElementById('loading-screen').classList.add('hidden');
             }, 1000);
             
-            // Load breaking news
-            loadBreakingNews().then(() => {
+            // Wait for scripts to load
+            await waitForScripts();
+            
+            // Load breaking news with the same system as Breaking News page
+            try {
+                await loadBreakingNews();
                 // Setup ticker interaction after content is loaded
                 setTimeout(() => {
                     setupTickerInteraction();
                 }, 500);
-            });
+            } catch (error) {
+                console.error('Failed to load breaking news:', error);
+            }
             
             // Setup sidebar functionality
             const mobileToggle = document.querySelector('.mobile-menu-toggle');
