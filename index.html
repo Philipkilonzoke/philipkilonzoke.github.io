@@ -160,8 +160,9 @@
         .ticker-content {
             display: flex;
             gap: 2rem;
-            animation: scroll-left 60s linear infinite;
+            animation: scroll-left 120s linear infinite;
             padding: 1rem 0;
+            will-change: transform;
         }
         
         .ticker-content:hover {
@@ -169,8 +170,8 @@
         }
         
         @keyframes scroll-left {
-            0% { transform: translateX(100%); }
-            100% { transform: translateX(-100%); }
+            0% { transform: translateX(0%); }
+            100% { transform: translateX(-50%); }
         }
         
         .ticker-item {
@@ -790,28 +791,100 @@
             try {
                 // Initialize news API
                 const newsAPI = new NewsAPI();
-                const articles = await newsAPI.fetchNews('latest', 10);
+                const articles = await newsAPI.fetchNews('latest', 15);
                 
                 const ticker = document.getElementById('news-ticker');
                 if (articles && articles.length > 0) {
-                    // Create ticker items
-                    const tickerItems = articles.map(article => `
-                        <div class="ticker-item">
-                            ${article.image ? 
-                                `<img src="${article.image}" alt="${article.title}" class="ticker-image" onerror="this.style.display='none'">` :
-                                `<div class="ticker-image" style="background: var(--surface-color); display: flex; align-items: center; justify-content: center; color: var(--text-muted);"><i class="fas fa-newspaper"></i></div>`
+                    // Filter out any invalid articles
+                    const validArticles = articles.filter(article => 
+                        article && 
+                        article.title && 
+                        article.url && 
+                        article.title.trim().length > 5 &&
+                        !article.title.toLowerCase().includes('removed')
+                    );
+                    
+                    // Create ticker items with proper formatting
+                    const tickerItems = validArticles.map(article => {
+                        // Format the date
+                        let formattedDate = 'Just now';
+                        if (article.publishedAt) {
+                            try {
+                                const date = new Date(article.publishedAt);
+                                const now = new Date();
+                                const diffInHours = Math.floor((now - date) / (1000 * 60 * 60));
+                                
+                                if (diffInHours < 1) {
+                                    formattedDate = 'Just now';
+                                } else if (diffInHours < 24) {
+                                    formattedDate = `${diffInHours}h ago`;
+                                } else {
+                                    formattedDate = date.toLocaleDateString();
+                                }
+                            } catch (e) {
+                                formattedDate = 'Recently';
                             }
+                        }
+                        
+                        // Truncate title for ticker
+                        const truncatedTitle = article.title.length > 80 ? 
+                            article.title.substring(0, 80) + '...' : article.title;
+                            
+                        return `
+                            <div class="ticker-item" onclick="window.open('${article.url}', '_blank')" style="cursor: pointer;">
+                                ${article.image ? 
+                                    `<img src="${article.image}" alt="${article.title}" class="ticker-image" onerror="this.parentElement.querySelector('.ticker-image-fallback').style.display='flex'; this.style.display='none';">
+                                     <div class="ticker-image-fallback" style="width: 60px; height: 60px; background: var(--surface-color); border-radius: var(--radius-md); display: none; align-items: center; justify-content: center; color: var(--text-muted); border: 1px solid var(--border-color);"><i class="fas fa-newspaper"></i></div>` :
+                                    `<div class="ticker-image" style="width: 60px; height: 60px; background: var(--surface-color); border-radius: var(--radius-md); display: flex; align-items: center; justify-content: center; color: var(--text-muted); border: 1px solid var(--border-color);"><i class="fas fa-newspaper"></i></div>`
+                                }
+                                <div class="ticker-text">
+                                    <div class="ticker-title">${truncatedTitle}</div>
+                                    <div class="ticker-meta">${article.source || 'Brightlens News'} • ${formattedDate}</div>
+                                </div>
+                            </div>
+                        `;
+                    }).join('');
+                    
+                    // Duplicate the content for seamless scrolling
+                    ticker.innerHTML = tickerItems + tickerItems;
+                } else {
+                    // Fallback content if no articles loaded
+                    ticker.innerHTML = `
+                        <div class="ticker-item">
+                            <div class="ticker-image" style="width: 60px; height: 60px; background: var(--surface-color); border-radius: var(--radius-md); display: flex; align-items: center; justify-content: center; color: var(--text-muted); border: 1px solid var(--border-color);">
+                                <i class="fas fa-newspaper"></i>
+                            </div>
                             <div class="ticker-text">
-                                <div class="ticker-title">${article.title}</div>
-                                <div class="ticker-meta">${article.source} • ${article.publishedAt}</div>
+                                <div class="ticker-title">Welcome to Brightlens News - Your trusted source for breaking news</div>
+                                <div class="ticker-meta">Brightlens News • Now</div>
                             </div>
                         </div>
-                    `).join('');
-                    
-                    ticker.innerHTML = tickerItems;
+                        <div class="ticker-item">
+                            <div class="ticker-image" style="width: 60px; height: 60px; background: var(--surface-color); border-radius: var(--radius-md); display: flex; align-items: center; justify-content: center; color: var(--text-muted); border: 1px solid var(--border-color);">
+                                <i class="fas fa-globe"></i>
+                            </div>
+                            <div class="ticker-text">
+                                <div class="ticker-title">Stay updated with the latest news from multiple reliable sources worldwide</div>
+                                <div class="ticker-meta">Brightlens News • Now</div>
+                            </div>
+                        </div>
+                    `;
                 }
             } catch (error) {
                 console.error('Error loading breaking news:', error);
+                // Show fallback content on error
+                const ticker = document.getElementById('news-ticker');
+                ticker.innerHTML = `
+                    <div class="ticker-item">
+                        <div class="ticker-image" style="width: 60px; height: 60px; background: var(--surface-color); border-radius: var(--radius-md); display: flex; align-items: center; justify-content: center; color: var(--text-muted); border: 1px solid var(--border-color);">
+                            <i class="fas fa-newspaper"></i>
+                        </div>
+                        <div class="ticker-text">
+                            <div class="ticker-title">Brightlens News - Loading the latest breaking news...</div>
+                            <div class="ticker-meta">Brightlens News • Now</div>
+                        </div>
+                    </div>
+                `;
             }
         }
         
