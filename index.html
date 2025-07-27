@@ -3,16 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Brightlens News - Latest News from Multiple Sources</title>
+    <title>Brightlens News - Your Gateway to Global Headlines</title>
     
     <!-- SEO Meta Tags -->
-    <meta name="description" content="Brightlens News provides the latest breaking news from multiple reliable sources worldwide. Stay updated with Kenya news, world news, technology, business, sports, and entertainment.">
-    <meta name="keywords" content="news, breaking news, Kenya news, world news, technology, business, sports, entertainment, Brightlens">
+    <meta name="description" content="Welcome to Brightlens News - Your trusted gateway to global headlines. Stay updated with breaking news from multiple reliable sources worldwide.">
+    <meta name="keywords" content="news, breaking news, Kenya news, world news, technology, business, sports, entertainment, Brightlens, homepage">
     <meta name="author" content="Philip Kilonzo">
     
     <!-- Open Graph Meta Tags -->
-    <meta property="og:title" content="Brightlens News - Latest News from Multiple Sources">
-    <meta property="og:description" content="Stay updated with the latest breaking news from multiple reliable sources worldwide.">
+    <meta property="og:title" content="Brightlens News - Your Gateway to Global Headlines">
+    <meta property="og:description" content="Welcome to Brightlens News - Your trusted gateway to global headlines and breaking news.">
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://philipkilonzoke.github.io">
     
@@ -27,6 +27,11 @@
         .loading-spinner{width:60px;height:60px;border:4px solid rgba(255,255,255,0.3);border-top:4px solid white;border-radius:50%;animation:spin 1s linear infinite;margin:0 auto 1rem}
         @keyframes spin{0%{transform:rotate(0deg)}100%{transform:rotate(360deg)}}
         .header{background:var(--surface-color);border-bottom:1px solid var(--border-color);position:sticky;top:0;z-index:100}
+        .hero-section{background:linear-gradient(135deg,var(--primary-color),#1e40af);color:white;padding:4rem 0;text-align:center}
+        .hero-title{font-size:3rem;font-weight:700;margin-bottom:1rem}
+        .hero-subtitle{font-size:1.25rem;margin-bottom:2rem;opacity:0.9}
+        .explore-btn{background:rgba(255,255,255,0.2);color:white;border:2px solid rgba(255,255,255,0.3);padding:1rem 2rem;border-radius:50px;font-size:1.1rem;font-weight:600;cursor:pointer;transition:all 0.3s ease;backdrop-filter:blur(10px)}
+        .explore-btn:hover{background:rgba(255,255,255,0.3);transform:translateY(-2px)}
     </style>
     <!-- Non-Critical CSS Files -->
     <link rel="preload" href="css/styles.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
@@ -38,6 +43,313 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="preload" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" as="style" onload="this.onload=null;this.rel='stylesheet'">
     <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"></noscript>
+    
+    <style>
+        /* Homepage specific styles */
+        .hero-section {
+            background: linear-gradient(135deg, var(--primary-color), #1e40af);
+            color: white;
+            padding: 4rem 0;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .hero-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="25" cy="25" r="1" fill="white" opacity="0.1"/><circle cx="75" cy="75" r="1" fill="white" opacity="0.1"/><circle cx="50" cy="10" r="0.5" fill="white" opacity="0.1"/><circle cx="10" cy="60" r="0.5" fill="white" opacity="0.1"/><circle cx="90" cy="40" r="0.5" fill="white" opacity="0.1"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>');
+            pointer-events: none;
+        }
+        
+        .hero-content {
+            position: relative;
+            z-index: 1;
+        }
+        
+        .hero-title {
+            font-size: 3.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            background: linear-gradient(45deg, #ffffff, #e2e8f0);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .hero-subtitle {
+            font-size: 1.25rem;
+            margin-bottom: 2.5rem;
+            opacity: 0.9;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        
+        .explore-btn {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            padding: 1rem 2rem;
+            border-radius: 50px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .explore-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+        }
+        
+        /* Breaking News Ticker */
+        .breaking-news-section {
+            background: var(--surface-color);
+            border-bottom: 1px solid var(--border-color);
+            padding: 1rem 0;
+            overflow: hidden;
+        }
+        
+        .breaking-news-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+        
+        .breaking-badge {
+            background: #dc2626;
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: var(--radius-md);
+            font-weight: 600;
+            font-size: 0.875rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .breaking-badge i {
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        
+        .news-ticker {
+            position: relative;
+            overflow: hidden;
+            background: white;
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-sm);
+        }
+        
+        .ticker-content {
+            display: flex;
+            gap: 2rem;
+            animation: scroll-left 60s linear infinite;
+            padding: 1rem 0;
+        }
+        
+        .ticker-content:hover {
+            animation-play-state: paused;
+        }
+        
+        @keyframes scroll-left {
+            0% { transform: translateX(100%); }
+            100% { transform: translateX(-100%); }
+        }
+        
+        .ticker-item {
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 0.5rem 1rem;
+            background: var(--surface-color);
+            border-radius: var(--radius-md);
+            min-width: 300px;
+            border: 1px solid var(--border-color);
+        }
+        
+        .ticker-image {
+            width: 60px;
+            height: 60px;
+            border-radius: var(--radius-md);
+            object-fit: cover;
+            flex-shrink: 0;
+        }
+        
+        .ticker-text {
+            flex: 1;
+        }
+        
+        .ticker-title {
+            font-weight: 600;
+            font-size: 0.875rem;
+            line-height: 1.3;
+            margin-bottom: 0.25rem;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+        
+        .ticker-meta {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+        
+        /* Category Grid */
+        .categories-section {
+            padding: 4rem 0;
+            background: var(--background-color);
+        }
+        
+        .section-header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+        
+        .section-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            color: var(--text-color);
+        }
+        
+        .section-subtitle {
+            font-size: 1.125rem;
+            color: var(--text-muted);
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        
+        .categories-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+        
+        .category-card {
+            background: var(--surface-color);
+            border-radius: var(--radius-lg);
+            padding: 2rem;
+            text-align: center;
+            border: 1px solid var(--border-color);
+            transition: all 0.3s ease;
+            text-decoration: none;
+            color: inherit;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .category-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, var(--primary-color), #1e40af);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        
+        .category-card:hover::before {
+            opacity: 0.05;
+        }
+        
+        .category-card:hover {
+            transform: translateY(-8px);
+            box-shadow: var(--shadow-lg);
+            border-color: var(--primary-color);
+        }
+        
+        .category-icon {
+            font-size: 3rem;
+            color: var(--primary-color);
+            margin-bottom: 1rem;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .category-card:hover .category-icon {
+            color: var(--primary-color);
+            transform: scale(1.1);
+        }
+        
+        .category-name {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .category-description {
+            color: var(--text-muted);
+            font-size: 0.875rem;
+            position: relative;
+            z-index: 1;
+        }
+        
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .hero-title {
+                font-size: 2.5rem;
+            }
+            
+            .hero-subtitle {
+                font-size: 1rem;
+            }
+            
+            .section-title {
+                font-size: 2rem;
+            }
+            
+            .categories-grid {
+                grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+                gap: 1.5rem;
+            }
+            
+            .category-card {
+                padding: 1.5rem;
+            }
+            
+            .ticker-content {
+                animation-duration: 40s;
+            }
+            
+            .ticker-item {
+                min-width: 250px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .hero-title {
+                font-size: 2rem;
+            }
+            
+            .categories-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
 </head>
 <body>
     <!-- Loading Screen -->
@@ -45,7 +357,7 @@
         <div class="loading-container">
             <div class="loading-spinner"></div>
             <h2>Brightlens News</h2>
-            <p>Loading the latest stories...</p>
+            <p>Loading your gateway to global headlines...</p>
         </div>
     </div>
 
@@ -58,7 +370,8 @@
                 </div>
                 <nav class="nav">
                     <div class="nav-links">
-                        <a href="latest.html" class="nav-link active">Latest</a>
+                        <a href="index.html" class="nav-link active">Home</a>
+                        <a href="latest.html" class="nav-link">Breaking</a>
                         <a href="kenya.html" class="nav-link">Kenya</a>
                         <a href="world.html" class="nav-link">World</a>
                         <a href="entertainment.html" class="nav-link">Entertainment</a>
@@ -92,8 +405,11 @@
                 </button>
             </div>
             <nav class="sidebar-nav">
-                <a href="latest.html" class="sidebar-link active">
-                    <i class="fas fa-home"></i> Latest News
+                <a href="index.html" class="sidebar-link active">
+                    <i class="fas fa-home"></i> Homepage
+                </a>
+                <a href="latest.html" class="sidebar-link">
+                    <i class="fas fa-bolt"></i> Breaking News
                 </a>
                 <a href="kenya.html" class="sidebar-link">
                     <i class="fas fa-flag"></i> Kenyan News
@@ -135,46 +451,153 @@
 
     <!-- Main Content -->
     <main class="main">
-        <div class="container">
-            <!-- Category Title -->
-            <div class="category-header">
-                <h2 id="category-title">Latest News</h2>
-                <div class="category-meta">
-                    <span id="article-count">Loading articles...</span>
-                    <span id="last-updated"></span>
+        <!-- Hero Section -->
+        <section class="hero-section">
+            <div class="container">
+                <div class="hero-content">
+                    <h1 class="hero-title">Welcome to Brightlens News</h1>
+                    <p class="hero-subtitle">Your Gateway to Global Headlines — Stay informed with real-time breaking news from multiple trusted sources worldwide</p>
+                    <a href="#categories" class="explore-btn" onclick="smoothScroll('#categories')">
+                        <i class="fas fa-compass"></i>
+                        Explore Now
+                    </a>
                 </div>
             </div>
+        </section>
 
-            <!-- News Loading -->
-            <div id="news-loading" class="news-loading">
-                <div class="loading-spinner-small"></div>
-                <p>Fetching latest news from multiple sources...</p>
-            </div>
-
-            <!-- News Error -->
-            <div id="news-error" class="news-error" style="display: none;">
-                <div class="error-content">
-                    <i class="fas fa-exclamation-triangle"></i>
-                    <h3>Unable to Load News</h3>
-                    <p id="error-message">We're having trouble connecting to our news sources. Please check your internet connection and try again.</p>
-                    <button id="retry-button" class="retry-button">
-                        <i class="fas fa-redo"></i> Try Again
-                    </button>
+        <!-- Breaking News Ticker -->
+        <section class="breaking-news-section">
+            <div class="container">
+                <div class="breaking-news-header">
+                    <div class="breaking-badge">
+                        <i class="fas fa-bolt"></i>
+                        Breaking News
+                    </div>
+                </div>
+                <div class="news-ticker">
+                    <div class="ticker-content" id="news-ticker">
+                        <!-- Breaking news items will be populated here -->
+                        <div class="ticker-item">
+                            <div class="ticker-image-placeholder" style="width: 60px; height: 60px; background: var(--surface-color); border-radius: var(--radius-md); display: flex; align-items: center; justify-content: center; color: var(--text-muted);">
+                                <i class="fas fa-newspaper"></i>
+                            </div>
+                            <div class="ticker-text">
+                                <div class="ticker-title">Loading breaking news...</div>
+                                <div class="ticker-meta">Brightlens News</div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
+        </section>
 
-            <!-- News Grid -->
-            <div id="news-grid" class="news-grid" style="display: none;">
-                <!-- News articles will be populated here -->
+        <!-- Categories Section -->
+        <section class="categories-section" id="categories">
+            <div class="container">
+                <div class="section-header">
+                    <h2 class="section-title">Explore News Categories</h2>
+                    <p class="section-subtitle">Discover the latest stories across different topics that matter to you</p>
+                </div>
+                
+                <div class="categories-grid">
+                    <a href="latest.html" class="category-card">
+                        <div class="category-icon">
+                            <i class="fas fa-bolt"></i>
+                        </div>
+                        <h3 class="category-name">Breaking News</h3>
+                        <p class="category-description">Latest breaking stories and urgent updates from around the world</p>
+                    </a>
+                    
+                    <a href="kenya.html" class="category-card">
+                        <div class="category-icon">
+                            <i class="fas fa-flag"></i>
+                        </div>
+                        <h3 class="category-name">Kenya</h3>
+                        <p class="category-description">Local news, politics, and developments from across Kenya</p>
+                    </a>
+                    
+                    <a href="world.html" class="category-card">
+                        <div class="category-icon">
+                            <i class="fas fa-globe"></i>
+                        </div>
+                        <h3 class="category-name">World</h3>
+                        <p class="category-description">International news and global events that shape our world</p>
+                    </a>
+                    
+                    <a href="technology.html" class="category-card">
+                        <div class="category-icon">
+                            <i class="fas fa-microchip"></i>
+                        </div>
+                        <h3 class="category-name">Technology</h3>
+                        <p class="category-description">Latest tech innovations, gadgets, and digital trends</p>
+                    </a>
+                    
+                    <a href="business.html" class="category-card">
+                        <div class="category-icon">
+                            <i class="fas fa-chart-line"></i>
+                        </div>
+                        <h3 class="category-name">Business</h3>
+                        <p class="category-description">Financial markets, economy, and business developments</p>
+                    </a>
+                    
+                    <a href="sports.html" class="category-card">
+                        <div class="category-icon">
+                            <i class="fas fa-football-ball"></i>
+                        </div>
+                        <h3 class="category-name">Sports</h3>
+                        <p class="category-description">Sports news, scores, and updates from around the globe</p>
+                    </a>
+                    
+                    <a href="entertainment.html" class="category-card">
+                        <div class="category-icon">
+                            <i class="fas fa-film"></i>
+                        </div>
+                        <h3 class="category-name">Entertainment</h3>
+                        <p class="category-description">Movies, TV shows, celebrity news, and entertainment industry</p>
+                    </a>
+                    
+                    <a href="health.html" class="category-card">
+                        <div class="category-icon">
+                            <i class="fas fa-heartbeat"></i>
+                        </div>
+                        <h3 class="category-name">Health</h3>
+                        <p class="category-description">Health news, medical breakthroughs, and wellness tips</p>
+                    </a>
+                    
+                    <a href="music.html" class="category-card">
+                        <div class="category-icon">
+                            <i class="fas fa-music"></i>
+                        </div>
+                        <h3 class="category-name">Music</h3>
+                        <p class="category-description">Music news, artist updates, and industry developments</p>
+                    </a>
+                    
+                    <a href="weather.html" class="category-card">
+                        <div class="category-icon">
+                            <i class="fas fa-cloud-sun"></i>
+                        </div>
+                        <h3 class="category-name">Weather</h3>
+                        <p class="category-description">Weather forecasts, climate news, and meteorological updates</p>
+                    </a>
+                    
+                    <a href="live-tv.html" class="category-card">
+                        <div class="category-icon">
+                            <i class="fas fa-tv"></i>
+                        </div>
+                        <h3 class="category-name">Live TV</h3>
+                        <p class="category-description">Watch live news broadcasts and TV channels online</p>
+                    </a>
+                    
+                    <a href="lifestyle.html" class="category-card">
+                        <div class="category-icon">
+                            <i class="fas fa-spa"></i>
+                        </div>
+                        <h3 class="category-name">Lifestyle</h3>
+                        <p class="category-description">Lifestyle trends, fashion, travel, and personal development</p>
+                    </a>
+                </div>
             </div>
-
-            <!-- Load More Button -->
-            <div class="load-more-container" style="display: none;">
-                <button id="load-more" class="load-more-button">
-                    <i class="fas fa-plus-circle"></i> Load More Articles
-                </button>
-            </div>
-        </div>
+        </section>
     </main>
 
     <!-- Theme Selector Modal -->
@@ -275,28 +698,28 @@
                 <div class="footer-section">
                     <h4><i class="fas fa-list-ul"></i> News Categories</h4>
                     <div class="footer-links">
-                        <a href="#" data-category="latest" class="footer-link">
-                            <i class="fas fa-bolt"></i> Latest News
+                        <a href="latest.html" data-category="latest" class="footer-link">
+                            <i class="fas fa-bolt"></i> Breaking News
                         </a>
-                        <a href="#" data-category="kenya" class="footer-link">
+                        <a href="kenya.html" data-category="kenya" class="footer-link">
                             <i class="fas fa-map-marker-alt"></i> Kenya
                         </a>
-                        <a href="#" data-category="world" class="footer-link">
+                        <a href="world.html" data-category="world" class="footer-link">
                             <i class="fas fa-globe"></i> World
                         </a>
-                        <a href="#" data-category="entertainment" class="footer-link">
+                        <a href="entertainment.html" data-category="entertainment" class="footer-link">
                             <i class="fas fa-film"></i> Entertainment
                         </a>
-                        <a href="#" data-category="technology" class="footer-link">
+                        <a href="technology.html" data-category="technology" class="footer-link">
                             <i class="fas fa-microchip"></i> Technology
                         </a>
-                        <a href="#" data-category="business" class="footer-link">
+                        <a href="business.html" data-category="business" class="footer-link">
                             <i class="fas fa-chart-line"></i> Business
                         </a>
-                        <a href="#" data-category="sports" class="footer-link">
+                        <a href="sports.html" data-category="sports" class="footer-link">
                             <i class="fas fa-futbol"></i> Sports
                         </a>
-                        <a href="#" data-category="health" class="footer-link">
+                        <a href="health.html" data-category="health" class="footer-link">
                             <i class="fas fa-heartbeat"></i> Health
                         </a>
                     </div>
@@ -354,6 +777,80 @@
     <script src="js/themes.js" defer></script>
     <script src="js/extended-articles.js" defer></script>
     <script src="js/news-api.js" defer></script>
-    <script src="js/main.js" defer></script>
+    <script>
+        // Homepage specific JavaScript
+        function smoothScroll(target) {
+            document.querySelector(target).scrollIntoView({
+                behavior: 'smooth'
+            });
+        }
+        
+        // Load breaking news for ticker
+        async function loadBreakingNews() {
+            try {
+                // Initialize news API
+                const newsAPI = new NewsAPI();
+                const articles = await newsAPI.fetchNews('latest', 10);
+                
+                const ticker = document.getElementById('news-ticker');
+                if (articles && articles.length > 0) {
+                    // Create ticker items
+                    const tickerItems = articles.map(article => `
+                        <div class="ticker-item">
+                            ${article.image ? 
+                                `<img src="${article.image}" alt="${article.title}" class="ticker-image" onerror="this.style.display='none'">` :
+                                `<div class="ticker-image" style="background: var(--surface-color); display: flex; align-items: center; justify-content: center; color: var(--text-muted);"><i class="fas fa-newspaper"></i></div>`
+                            }
+                            <div class="ticker-text">
+                                <div class="ticker-title">${article.title}</div>
+                                <div class="ticker-meta">${article.source} • ${article.publishedAt}</div>
+                            </div>
+                        </div>
+                    `).join('');
+                    
+                    ticker.innerHTML = tickerItems;
+                }
+            } catch (error) {
+                console.error('Error loading breaking news:', error);
+            }
+        }
+        
+        // Initialize homepage
+        document.addEventListener('DOMContentLoaded', function() {
+            // Hide loading screen
+            setTimeout(() => {
+                document.getElementById('loading-screen').classList.add('hidden');
+            }, 1000);
+            
+            // Load breaking news
+            loadBreakingNews();
+            
+            // Setup sidebar functionality
+            const mobileToggle = document.querySelector('.mobile-menu-toggle');
+            const sidebar = document.querySelector('.sidebar');
+            const sidebarClose = document.querySelector('.sidebar-close');
+            
+            if (mobileToggle) {
+                mobileToggle.addEventListener('click', () => {
+                    sidebar?.classList.add('open');
+                });
+            }
+            
+            if (sidebarClose) {
+                sidebarClose.addEventListener('click', () => {
+                    sidebar?.classList.remove('open');
+                });
+            }
+            
+            // Close sidebar when clicking outside
+            document.addEventListener('click', (e) => {
+                if (sidebar?.classList.contains('open') && 
+                    !sidebar.contains(e.target) && 
+                    !mobileToggle?.contains(e.target)) {
+                    sidebar.classList.remove('open');
+                }
+            });
+        });
+    </script>
 </body>
 </html>
