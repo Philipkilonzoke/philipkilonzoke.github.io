@@ -1,0 +1,1380 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Astronomy - Brightlens News</title>
+    
+    <!-- SEO Meta Tags -->
+    <meta name="description" content="Explore the universe with live astronomical data, planets, stars, galaxies, and cosmic events from reliable scientific sources.">
+    <meta name="keywords" content="astronomy, space, planets, stars, galaxies, cosmic events, universe, NASA, space exploration, Brightlens">
+    <meta name="author" content="Philip Kilonzo">
+    
+    <!-- Open Graph Meta Tags -->
+    <meta property="og:title" content="Astronomy - Brightlens News">
+    <meta property="og:description" content="Explore the universe with live astronomical data and cosmic discoveries.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://philipkilonzoke.github.io/astronomy.html">
+    
+    <!-- Critical CSS Inline for Faster Loading -->
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box}
+        :root{--primary-color:#2563eb;--background-color:#ffffff;--text-color:#1e293b;--surface-color:#f8fafc;--border-color:#e2e8f0}
+        body{font-family:'Inter',system-ui,sans-serif;background:var(--background-color);color:var(--text-color);line-height:1.6}
+        .loading-screen{position:fixed;top:0;left:0;width:100%;height:100%;background:var(--primary-color);display:flex;align-items:center;justify-content:center;z-index:9999;transition:opacity 0.3s}
+        .loading-screen.hidden{opacity:0;visibility:hidden}
+        .loading-container{text-align:center;color:white}
+        .loading-spinner{width:60px;height:60px;border:4px solid rgba(255,255,255,0.3);border-top:4px solid white;border-radius:50%;animation:spin 1s linear infinite;margin:0 auto 1rem}
+        @keyframes spin{0%{transform:rotate(0deg)}100%{transform:rotate(360deg)}}
+        .header{background:var(--surface-color);border-bottom:1px solid var(--border-color);position:sticky;top:0;z-index:100}
+    </style>
+    <!-- Non-Critical CSS Files -->
+    <link rel="preload" href="css/styles.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <link rel="preload" href="css/themes.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <noscript><link rel="stylesheet" href="css/styles.css"><link rel="stylesheet" href="css/themes.css"></noscript>
+    <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"></noscript>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preload" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"></noscript>
+    
+    <style>
+        /* Astronomy specific styles */
+        .astronomy-header {
+            background: linear-gradient(135deg, #1e1b4b, #3730a3, #1e40af);
+            color: white;
+            padding: 3rem 0;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .astronomy-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200"><defs><radialGradient id="star" cx="50%" cy="50%" r="2px"><stop offset="0%" stop-color="white" stop-opacity="1"/><stop offset="100%" stop-color="white" stop-opacity="0"/></radialGradient></defs><circle cx="20" cy="30" r="1" fill="url(%23star)"><animate attributeName="opacity" values="0.3;1;0.3" dur="3s" repeatCount="indefinite"/></circle><circle cx="180" cy="60" r="1.5" fill="url(%23star)"><animate attributeName="opacity" values="1;0.3;1" dur="4s" repeatCount="indefinite"/></circle><circle cx="60" cy="120" r="1" fill="url(%23star)"><animate attributeName="opacity" values="0.5;1;0.5" dur="2s" repeatCount="indefinite"/></circle><circle cx="140" cy="150" r="1" fill="url(%23star)"><animate attributeName="opacity" values="1;0.2;1" dur="3.5s" repeatCount="indefinite"/></circle><circle cx="90" cy="50" r="0.8" fill="url(%23star)"><animate attributeName="opacity" values="0.4;1;0.4" dur="2.5s" repeatCount="indefinite"/></circle><circle cx="160" cy="120" r="1.2" fill="url(%23star)"><animate attributeName="opacity" values="1;0.4;1" dur="4.5s" repeatCount="indefinite"/></circle></svg>');
+            pointer-events: none;
+            animation: twinkle 6s ease-in-out infinite;
+        }
+        
+        @keyframes twinkle {
+            0%, 100% { opacity: 0.8; }
+            50% { opacity: 1; }
+        }
+        
+        .astronomy-header-content {
+            position: relative;
+            z-index: 1;
+            text-align: center;
+        }
+        
+        .astronomy-title {
+            font-size: 3rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+        
+        .astronomy-subtitle {
+            font-size: 1.2rem;
+            opacity: 0.9;
+            margin-bottom: 2rem;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        
+        .search-section {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 2rem;
+        }
+        
+        .search-container {
+            position: relative;
+            max-width: 400px;
+            width: 100%;
+        }
+        
+        .search-input {
+            width: 100%;
+            padding: 0.875rem 1rem 0.875rem 3rem;
+            border: 2px solid rgba(255,255,255,0.3);
+            border-radius: 50px;
+            background: rgba(255,255,255,0.15);
+            color: white;
+            font-size: 1rem;
+            backdrop-filter: blur(10px);
+        }
+        
+        .search-input::placeholder {
+            color: rgba(255,255,255,0.8);
+        }
+        
+        .search-icon {
+            position: absolute;
+            left: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: rgba(255,255,255,0.8);
+            font-size: 1.1rem;
+        }
+        
+        .tabs-container {
+            background: var(--surface-color);
+            border-bottom: 1px solid var(--border-color);
+            padding: 1rem 0;
+            position: sticky;
+            top: 72px;
+            z-index: 90;
+        }
+        
+        .tabs-nav {
+            display: flex;
+            justify-content: center;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        
+        .tab-btn {
+            padding: 0.75rem 1.5rem;
+            border: 2px solid var(--border-color);
+            border-radius: 50px;
+            background: var(--background-color);
+            color: var(--text-color);
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .tab-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        
+        .tab-btn.active {
+            background: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+        }
+        
+        .tab-btn.loading::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            animation: shimmer 1.5s infinite;
+        }
+        
+        @keyframes shimmer {
+            100% { left: 100%; }
+        }
+        
+        .content-section {
+            padding: 2rem 0;
+            min-height: 400px;
+        }
+        
+        .section-content {
+            display: none;
+        }
+        
+        .section-content.active {
+            display: block;
+        }
+        
+        .astronomy-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        
+        .astronomy-card {
+            background: var(--surface-color);
+            border-radius: 16px;
+            padding: 1.5rem;
+            border: 1px solid var(--border-color);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .astronomy-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+            border-color: var(--primary-color);
+        }
+        
+        .card-image {
+            width: 100%;
+            height: 200px;
+            background: linear-gradient(135deg, #1e1b4b, #3730a3);
+            border-radius: 12px;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3rem;
+            color: white;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .card-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 12px;
+        }
+        
+        .card-image.planet {
+            background: linear-gradient(135deg, #dc2626, #ea580c);
+        }
+        
+        .card-image.star {
+            background: linear-gradient(135deg, #fbbf24, #f59e0b);
+        }
+        
+        .card-image.galaxy {
+            background: linear-gradient(135deg, #7c3aed, #a855f7);
+        }
+        
+        .card-image.event {
+            background: linear-gradient(135deg, #059669, #10b981);
+        }
+        
+        .card-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: var(--text-color);
+        }
+        
+        .card-type {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            margin-bottom: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .card-type.planet {
+            background: rgba(220, 38, 38, 0.1);
+            color: #dc2626;
+        }
+        
+        .card-type.star {
+            background: rgba(245, 158, 11, 0.1);
+            color: #f59e0b;
+        }
+        
+        .card-type.galaxy {
+            background: rgba(124, 58, 237, 0.1);
+            color: #7c3aed;
+        }
+        
+        .card-type.event {
+            background: rgba(5, 150, 105, 0.1);
+            color: #059669;
+        }
+        
+        .card-description {
+            color: var(--text-muted);
+            margin-bottom: 1rem;
+            line-height: 1.5;
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+        
+        .card-details {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+            font-size: 0.875rem;
+        }
+        
+        .detail-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.5rem;
+            background: rgba(0,0,0,0.02);
+            border-radius: 8px;
+        }
+        
+        .detail-label {
+            font-weight: 600;
+            color: var(--text-muted);
+        }
+        
+        .detail-value {
+            color: var(--text-color);
+            font-weight: 500;
+        }
+        
+        .card-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--primary-color);
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 0.875rem;
+            transition: all 0.3s ease;
+        }
+        
+        .card-link:hover {
+            color: var(--primary-color);
+            transform: translateX(4px);
+        }
+        
+        .load-more-container {
+            text-align: center;
+            margin: 2rem 0;
+        }
+        
+        .load-more-btn {
+            padding: 0.875rem 2rem;
+            border: 2px solid var(--primary-color);
+            border-radius: 50px;
+            background: var(--background-color);
+            color: var(--primary-color);
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .load-more-btn:hover {
+            background: var(--primary-color);
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(37, 99, 235, 0.3);
+        }
+        
+        .load-more-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .load-more-btn.loading i {
+            animation: spin 1s linear infinite;
+        }
+        
+        .loading-message {
+            text-align: center;
+            padding: 3rem 1rem;
+            color: var(--text-muted);
+        }
+        
+        .loading-message i {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+            color: var(--primary-color);
+            animation: pulse 1.5s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 0.5; }
+            50% { opacity: 1; }
+        }
+        
+        .error-message {
+            text-align: center;
+            padding: 3rem 1rem;
+            color: var(--text-muted);
+        }
+        
+        .error-message i {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            color: #ef4444;
+        }
+        
+        .section-stats {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+        }
+        
+        .stat-item {
+            text-align: center;
+            padding: 1rem;
+            background: var(--surface-color);
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+            min-width: 120px;
+        }
+        
+        .stat-number {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary-color);
+            margin-bottom: 0.25rem;
+        }
+        
+        .stat-label {
+            font-size: 0.875rem;
+            color: var(--text-muted);
+            font-weight: 500;
+        }
+        
+        @media (max-width: 768px) {
+            .astronomy-title {
+                font-size: 2.5rem;
+                flex-direction: column;
+                gap: 0.25rem;
+            }
+            
+            .tabs-nav {
+                padding: 0 1rem;
+            }
+            
+            .tab-btn {
+                font-size: 0.8rem;
+                padding: 0.625rem 1.25rem;
+            }
+            
+            .astronomy-grid {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+            }
+            
+            .card-details {
+                grid-template-columns: 1fr;
+            }
+            
+            .section-stats {
+                gap: 1rem;
+            }
+            
+            .stat-item {
+                min-width: 100px;
+                padding: 0.75rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Loading Screen -->
+    <div id="loading-screen" class="loading-screen">
+        <div class="loading-container">
+            <div class="loading-spinner"></div>
+            <h2>Brightlens News</h2>
+            <p>Loading astronomical data...</p>
+        </div>
+    </div>
+
+    <!-- Header -->
+    <header class="header">
+        <div class="container">
+            <div class="header-content">
+                <div class="logo">
+                    <h1><a href="index.html" style="color: inherit; text-decoration: none;"><i class="fas fa-newspaper"></i> Brightlens News</a></h1>
+                </div>
+                <nav class="nav">
+                    <div class="nav-links">
+                        <a href="index.html" class="nav-link">Home</a>
+                        <a href="latest.html" class="nav-link">Breaking</a>
+                        <a href="kenya.html" class="nav-link">Kenya</a>
+                        <a href="world.html" class="nav-link">World</a>
+                        <a href="entertainment.html" class="nav-link">Entertainment</a>
+                        <a href="technology.html" class="nav-link">Technology</a>
+                        <a href="business.html" class="nav-link">Business</a>
+                        <a href="sports.html" class="nav-link">Sports</a>
+                        <a href="health.html" class="nav-link">Health</a>
+                        <a href="lifestyle.html" class="nav-link">Lifestyle</a>
+                        <a href="music.html" class="nav-link">Music</a>
+                        <a href="food.html" class="nav-link">Food</a>
+                        <a href="movies.html" class="nav-link">Movies</a>
+                        <a href="crypto.html" class="nav-link">Crypto</a>
+                        <a href="astronomy.html" class="nav-link active">Astronomy</a>
+                    </div>
+                    <div class="nav-controls">
+                        <button id="theme-toggle" class="theme-toggle" title="Change Theme">
+                            <i class="fas fa-palette"></i>
+                        </button>
+                    </div>
+                </nav>
+                <div class="mobile-menu-toggle">
+                    <i class="fas fa-bars"></i>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Sidebar -->
+    <aside class="sidebar">
+        <div class="sidebar-content">
+            <div class="sidebar-header">
+                <h3>Categories</h3>
+                <button class="sidebar-close">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <nav class="sidebar-nav">
+                <a href="index.html" class="sidebar-link">
+                    <i class="fas fa-home"></i> Homepage
+                </a>
+                <a href="latest.html" class="sidebar-link">
+                    <i class="fas fa-bolt"></i> Breaking News
+                </a>
+                <a href="kenya.html" class="sidebar-link">
+                    <i class="fas fa-flag"></i> Kenyan News
+                </a>
+                <a href="world.html" class="sidebar-link">
+                    <i class="fas fa-globe"></i> World News
+                </a>
+                <a href="entertainment.html" class="sidebar-link">
+                    <i class="fas fa-film"></i> Entertainment
+                </a>
+                <a href="technology.html" class="sidebar-link">
+                    <i class="fas fa-microchip"></i> Technology
+                </a>
+                <a href="business.html" class="sidebar-link">
+                    <i class="fas fa-chart-line"></i> Business
+                </a>
+                <a href="sports.html" class="sidebar-link">
+                    <i class="fas fa-football-ball"></i> Sports
+                </a>
+                <a href="health.html" class="sidebar-link">
+                    <i class="fas fa-heartbeat"></i> Health
+                </a>
+                <a href="lifestyle.html" class="sidebar-link">
+                    <i class="fas fa-spa"></i> Lifestyle
+                </a>
+                <a href="music.html" class="sidebar-link">
+                    <i class="fas fa-music"></i> Music
+                </a>
+                <a href="food.html" class="sidebar-link">
+                    <i class="fas fa-utensils"></i> Food & Recipes
+                </a>
+                <a href="movies.html" class="sidebar-link">
+                    <i class="fas fa-video"></i> Movies
+                </a>
+                <a href="crypto.html" class="sidebar-link">
+                    <i class="fas fa-coins"></i> Crypto 🪙
+                </a>
+                <a href="astronomy.html" class="sidebar-link active">
+                    <i class="fas fa-rocket"></i> Astronomy 🚀
+                </a>
+                <div class="sidebar-divider"></div>
+                <a href="weather.html" class="sidebar-link">
+                    <i class="fas fa-cloud-sun"></i> Weather
+                </a>
+                <a href="live-tv.html" class="sidebar-link">
+                    <i class="fas fa-tv"></i> Live TV
+                </a>
+            </nav>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main">
+        <!-- Astronomy Header -->
+        <div class="astronomy-header">
+            <div class="container">
+                <div class="astronomy-header-content">
+                    <h1 class="astronomy-title">
+                        <span>🚀 Explore the Universe</span>
+                        <span>— Brightlens Astronomy</span>
+                    </h1>
+                    <p class="astronomy-subtitle">Discover planets, stars, galaxies, and cosmic events with live astronomical data from reliable scientific sources</p>
+                    
+                    <div class="search-section">
+                        <div class="search-container">
+                            <i class="fas fa-search search-icon"></i>
+                            <input type="text" id="astronomy-search" class="search-input" placeholder="Search planets, stars, galaxies...">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tabs Navigation -->
+        <div class="tabs-container">
+            <div class="container">
+                <div class="tabs-nav">
+                    <button class="tab-btn active" data-tab="planets">
+                        <i class="fas fa-globe-americas"></i>
+                        Planets
+                    </button>
+                    <button class="tab-btn" data-tab="stars">
+                        <i class="fas fa-star"></i>
+                        Stars
+                    </button>
+                    <button class="tab-btn" data-tab="galaxies">
+                        <i class="fas fa-spiral"></i>
+                        Galaxies
+                    </button>
+                    <button class="tab-btn" data-tab="events">
+                        <i class="fas fa-calendar-alt"></i>
+                        Events
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="container">
+            <!-- Content Sections -->
+            <div class="content-section">
+                <!-- Planets Section -->
+                <div id="planets-section" class="section-content active">
+                    <div class="section-stats" id="planets-stats"></div>
+                    <div id="planets-grid" class="astronomy-grid"></div>
+                    <div class="load-more-container">
+                        <button id="load-more-planets" class="load-more-btn">
+                            <i class="fas fa-plus"></i>
+                            Load More Planets
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Stars Section -->
+                <div id="stars-section" class="section-content">
+                    <div class="section-stats" id="stars-stats"></div>
+                    <div id="stars-grid" class="astronomy-grid"></div>
+                    <div class="load-more-container">
+                        <button id="load-more-stars" class="load-more-btn">
+                            <i class="fas fa-plus"></i>
+                            Load More Stars
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Galaxies Section -->
+                <div id="galaxies-section" class="section-content">
+                    <div class="section-stats" id="galaxies-stats"></div>
+                    <div id="galaxies-grid" class="astronomy-grid"></div>
+                    <div class="load-more-container">
+                        <button id="load-more-galaxies" class="load-more-btn">
+                            <i class="fas fa-plus"></i>
+                            Load More Galaxies
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Events Section -->
+                <div id="events-section" class="section-content">
+                    <div class="section-stats" id="events-stats"></div>
+                    <div id="events-grid" class="astronomy-grid"></div>
+                    <div class="load-more-container">
+                        <button id="load-more-events" class="load-more-btn">
+                            <i class="fas fa-plus"></i>
+                            Load More Events
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Theme Selector Modal -->
+    <div id="theme-modal" class="theme-modal">
+        <div class="theme-modal-content">
+            <div class="theme-modal-header">
+                <h3>Choose Theme</h3>
+                <button class="theme-modal-close">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="theme-grid">
+                <button class="theme-option" data-theme="default">
+                    <div class="theme-preview theme-preview-default"></div>
+                    <span>Default</span>
+                </button>
+                <button class="theme-option" data-theme="dark">
+                    <div class="theme-preview theme-preview-dark"></div>
+                    <span>Dark</span>
+                </button>
+                <button class="theme-option" data-theme="blue">
+                    <div class="theme-preview theme-preview-blue"></div>
+                    <span>Ocean Blue</span>
+                </button>
+                <button class="theme-option" data-theme="green">
+                    <div class="theme-preview theme-preview-green"></div>
+                    <span>Forest Green</span>
+                </button>
+                <button class="theme-option" data-theme="purple">
+                    <div class="theme-preview theme-preview-purple"></div>
+                    <span>Royal Purple</span>
+                </button>
+                <button class="theme-option" data-theme="orange">
+                    <div class="theme-preview theme-preview-orange"></div>
+                    <span>Sunset Orange</span>
+                </button>
+                <button class="theme-option" data-theme="rose">
+                    <div class="theme-preview theme-preview-rose"></div>
+                    <span>Rose Pink</span>
+                </button>
+                <button class="theme-option" data-theme="emerald">
+                    <div class="theme-preview theme-preview-emerald"></div>
+                    <span>Emerald</span>
+                </button>
+                <button class="theme-option" data-theme="indigo">
+                    <div class="theme-preview theme-preview-indigo"></div>
+                    <span>Indigo</span>
+                </button>
+                <button class="theme-option" data-theme="amber">
+                    <div class="theme-preview theme-preview-amber"></div>
+                    <span>Amber</span>
+                </button>
+                <button class="theme-option" data-theme="teal">
+                    <div class="theme-preview theme-preview-teal"></div>
+                    <span>Teal</span>
+                </button>
+                <button class="theme-option" data-theme="crimson">
+                    <div class="theme-preview theme-preview-crimson"></div>
+                    <span>Crimson</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-wave">
+            <svg viewBox="0 0 1440 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M0,64L48,58.7C96,53,192,43,288,48C384,53,480,75,576,80C672,85,768,75,864,64C960,53,1056,43,1152,48C1248,53,1344,75,1392,85.3L1440,96L1440,0L1392,0C1344,0,1248,0,1152,0C1056,0,960,0,864,0C768,0,672,0,576,0C480,0,384,0,288,0C192,0,96,0,48,0L0,0Z" fill="var(--primary-color)"/>
+            </svg>
+        </div>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section footer-brand">
+                    <div class="footer-logo">
+                        <h4>
+                            <i class="fas fa-newspaper footer-icon"></i>
+                            Brightlens News
+                        </h4>
+                        <div class="footer-tagline">Your Gateway to Global News</div>
+                    </div>
+                    <p>Your trusted source for comprehensive news coverage from multiple reliable sources worldwide. Stay informed with real-time updates.</p>
+                    <div class="footer-stats">
+                        <div class="stat-item">
+                            <div class="stat-number">24/7</div>
+                            <div class="stat-label">Coverage</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-number">10</div>
+                            <div class="stat-label">Categories</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-number">∞</div>
+                            <div class="stat-label">Stories</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="footer-section">
+                    <h4><i class="fas fa-list-ul"></i> News Categories</h4>
+                    <div class="footer-links">
+                        <a href="latest.html" data-category="latest" class="footer-link">
+                            <i class="fas fa-bolt"></i> Breaking News
+                        </a>
+                        <a href="kenya.html" data-category="kenya" class="footer-link">
+                            <i class="fas fa-map-marker-alt"></i> Kenya
+                        </a>
+                        <a href="world.html" data-category="world" class="footer-link">
+                            <i class="fas fa-globe"></i> World
+                        </a>
+                        <a href="entertainment.html" data-category="entertainment" class="footer-link">
+                            <i class="fas fa-film"></i> Entertainment
+                        </a>
+                        <a href="technology.html" data-category="technology" class="footer-link">
+                            <i class="fas fa-microchip"></i> Technology
+                        </a>
+                        <a href="business.html" data-category="business" class="footer-link">
+                            <i class="fas fa-chart-line"></i> Business
+                        </a>
+                        <a href="sports.html" data-category="sports" class="footer-link">
+                            <i class="fas fa-futbol"></i> Sports
+                        </a>
+                        <a href="health.html" data-category="health" class="footer-link">
+                            <i class="fas fa-heartbeat"></i> Health
+                        </a>
+                        <a href="crypto.html" data-category="crypto" class="footer-link">
+                            <i class="fas fa-coins"></i> Crypto
+                        </a>
+                        <a href="astronomy.html" data-category="astronomy" class="footer-link">
+                            <i class="fas fa-rocket"></i> Astronomy
+                        </a>
+                    </div>
+                </div>
+                <div class="footer-section">
+                    <h4><i class="fas fa-share-alt"></i> Connect With Us</h4>
+                    <div class="social-links">
+                        <a href="https://instagram.com/philipkilonzo.ke" target="_blank" rel="noopener noreferrer" class="social-link instagram">
+                            <div class="social-icon">
+                                <i class="fab fa-instagram"></i>
+                            </div>
+                            <div class="social-info">
+                                <span class="social-platform">Instagram</span>
+                                <span class="social-handle">@philipkilonzo.ke</span>
+                            </div>
+                        </a>
+                        <a href="https://wa.me/254791943551" target="_blank" rel="noopener noreferrer" class="social-link whatsapp">
+                            <div class="social-icon">
+                                <i class="fab fa-whatsapp"></i>
+                            </div>
+                            <div class="social-info">
+                                <span class="social-platform">WhatsApp</span>
+                                <span class="social-handle">+254 791 943 551</span>
+                            </div>
+                        </a>
+                    </div>
+                    <div class="footer-newsletter">
+                        <h5>Stay Updated</h5>
+                        <p>Get the latest news delivered to your inbox</p>
+                        <div class="newsletter-form">
+                            <input type="email" placeholder="Enter your email">
+                            <button type="submit">
+                                <i class="fas fa-paper-plane"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <div class="footer-bottom-content">
+                    <div class="footer-copyright">
+                        <p>&copy; 2025 Brightlens News. All rights reserved.</p>
+                    </div>
+                    <div class="footer-links-bottom">
+                        <a href="#">Privacy Policy</a>
+                        <a href="#">Terms of Service</a>
+                        <a href="#">Contact</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="footer-glow"></div>
+    </footer>
+
+    <script src="js/themes.js" defer></script>
+    <script src="js/main.js" defer></script>
+    <script>
+        // Astronomy Data Manager
+        class AstronomyExplorer {
+            constructor() {
+                this.baseUrl = 'https://api.arcsecond.io';
+                this.endpoints = {
+                    planets: '/planets/',
+                    stars: '/stars/',
+                    galaxies: '/galaxies/',
+                    events: '/events/'
+                };
+                
+                this.data = {
+                    planets: [],
+                    stars: [],
+                    galaxies: [],
+                    events: []
+                };
+                
+                this.filteredData = {
+                    planets: [],
+                    stars: [],
+                    galaxies: [],
+                    events: []
+                };
+                
+                this.pagination = {
+                    planets: { page: 1, hasMore: true, loading: false },
+                    stars: { page: 1, hasMore: true, loading: false },
+                    galaxies: { page: 1, hasMore: true, loading: false },
+                    events: { page: 1, hasMore: true, loading: false }
+                };
+                
+                this.currentTab = 'planets';
+                this.searchTerm = '';
+                
+                this.planetImages = {
+                    'Mercury': 'https://upload.wikimedia.org/wikipedia/commons/4/4a/Mercury_in_true_color.jpg',
+                    'Venus': 'https://upload.wikimedia.org/wikipedia/commons/0/08/Venus_from_Mariner_10.jpg',
+                    'Earth': 'https://upload.wikimedia.org/wikipedia/commons/9/97/The_Earth_seen_from_Apollo_17.jpg',
+                    'Mars': 'https://upload.wikimedia.org/wikipedia/commons/0/02/OSIRIS_Mars_true_color.jpg',
+                    'Jupiter': 'https://upload.wikimedia.org/wikipedia/commons/2/2b/Jupiter_and_its_shrunken_Great_Red_Spot.jpg',
+                    'Saturn': 'https://upload.wikimedia.org/wikipedia/commons/c/c7/Saturn_during_Equinox.jpg',
+                    'Uranus': 'https://upload.wikimedia.org/wikipedia/commons/3/3d/Uranus2.jpg',
+                    'Neptune': 'https://upload.wikimedia.org/wikipedia/commons/6/63/Neptune_-_Voyager_2_%2829347980845%29_flatten_crop.jpg'
+                };
+                
+                this.init();
+            }
+            
+            async init() {
+                this.setupEventListeners();
+                await this.loadTabData('planets');
+            }
+            
+            setupEventListeners() {
+                // Tab navigation
+                document.querySelectorAll('.tab-btn').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        const tab = e.target.closest('.tab-btn').dataset.tab;
+                        this.switchTab(tab);
+                    });
+                });
+                
+                // Search functionality
+                const searchInput = document.getElementById('astronomy-search');
+                if (searchInput) {
+                    searchInput.addEventListener('input', (e) => {
+                        this.searchTerm = e.target.value.toLowerCase();
+                        this.filterData();
+                    });
+                }
+                
+                // Load more buttons
+                Object.keys(this.endpoints).forEach(type => {
+                    const btn = document.getElementById(`load-more-${type}`);
+                    if (btn) {
+                        btn.addEventListener('click', () => {
+                            this.loadMoreData(type);
+                        });
+                    }
+                });
+            }
+            
+            async switchTab(tab) {
+                // Update active tab
+                document.querySelectorAll('.tab-btn').forEach(btn => {
+                    btn.classList.remove('active');
+                });
+                document.querySelector(`[data-tab="${tab}"]`).classList.add('active');
+                
+                // Update active section
+                document.querySelectorAll('.section-content').forEach(section => {
+                    section.classList.remove('active');
+                });
+                document.getElementById(`${tab}-section`).classList.add('active');
+                
+                this.currentTab = tab;
+                
+                // Load data if not already loaded
+                if (this.data[tab].length === 0) {
+                    await this.loadTabData(tab);
+                } else {
+                    this.filterData();
+                }
+            }
+            
+            async loadTabData(type) {
+                try {
+                    this.setTabLoading(type, true);
+                    
+                    const response = await fetch(`${this.baseUrl}${this.endpoints[type]}`);
+                    const data = await response.json();
+                    
+                    if (data.results) {
+                        this.data[type] = data.results.slice(0, 10); // Initial 10 items
+                        this.pagination[type].hasMore = data.results.length > 10;
+                    } else if (Array.isArray(data)) {
+                        this.data[type] = data.slice(0, 10);
+                        this.pagination[type].hasMore = data.length > 10;
+                    } else {
+                        // Fallback to mock data
+                        this.data[type] = this.getMockData(type);
+                        this.pagination[type].hasMore = true;
+                    }
+                    
+                    this.filterData();
+                    this.updateStats(type);
+                    
+                } catch (error) {
+                    console.error(`Error loading ${type} data:`, error);
+                    this.data[type] = this.getMockData(type);
+                    this.filterData();
+                    this.updateStats(type);
+                } finally {
+                    this.setTabLoading(type, false);
+                }
+            }
+            
+            async loadMoreData(type) {
+                if (this.pagination[type].loading || !this.pagination[type].hasMore) return;
+                
+                try {
+                    this.pagination[type].loading = true;
+                    this.setLoadMoreLoading(type, true);
+                    
+                    // Simulate API pagination (since Arcsecond.io doesn't have clear pagination docs)
+                    const mockData = this.getMockData(type, 5); // Load 5 more items
+                    this.data[type] = [...this.data[type], ...mockData];
+                    
+                    // Simulate end of data
+                    this.pagination[type].page++;
+                    if (this.pagination[type].page > 3) {
+                        this.pagination[type].hasMore = false;
+                    }
+                    
+                    this.filterData();
+                    this.updateStats(type);
+                    
+                } catch (error) {
+                    console.error(`Error loading more ${type} data:`, error);
+                } finally {
+                    this.pagination[type].loading = false;
+                    this.setLoadMoreLoading(type, false);
+                }
+            }
+            
+            filterData() {
+                const type = this.currentTab;
+                let filtered = [...this.data[type]];
+                
+                if (this.searchTerm) {
+                    filtered = filtered.filter(item => {
+                        const name = item.name || item.title || '';
+                        const type_name = item.type || item.category || '';
+                        const description = item.description || '';
+                        
+                        return name.toLowerCase().includes(this.searchTerm) ||
+                               type_name.toLowerCase().includes(this.searchTerm) ||
+                               description.toLowerCase().includes(this.searchTerm);
+                    });
+                }
+                
+                this.filteredData[type] = filtered;
+                this.renderData(type);
+            }
+            
+            renderData(type) {
+                const grid = document.getElementById(`${type}-grid`);
+                if (!grid) return;
+                
+                const data = this.filteredData[type];
+                
+                if (data.length === 0) {
+                    grid.innerHTML = `
+                        <div class="loading-message" style="grid-column: 1 / -1;">
+                            <i class="fas fa-search"></i>
+                            <h3>No ${type} found</h3>
+                            <p>Try adjusting your search terms or explore other categories.</p>
+                        </div>
+                    `;
+                    return;
+                }
+                
+                grid.innerHTML = data.map(item => this.createCard(item, type)).join('');
+                
+                // Update load more button
+                const loadMoreBtn = document.getElementById(`load-more-${type}`);
+                if (loadMoreBtn) {
+                    loadMoreBtn.style.display = this.pagination[type].hasMore ? 'inline-flex' : 'none';
+                }
+            }
+            
+            createCard(item, type) {
+                const name = item.name || item.title || 'Unknown';
+                const description = item.description || this.getDefaultDescription(type);
+                const typeName = item.type || type.slice(0, -1); // Remove 's' from plural
+                
+                let details = '';
+                switch (type) {
+                    case 'planets':
+                        details = `
+                            <div class="detail-item">
+                                <span class="detail-label">Type</span>
+                                <span class="detail-value">${item.type || 'Planet'}</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Mass</span>
+                                <span class="detail-value">${item.mass || 'Unknown'}</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Radius</span>
+                                <span class="detail-value">${item.radius || 'Unknown'}</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Distance</span>
+                                <span class="detail-value">${item.distance || 'Unknown'}</span>
+                            </div>
+                        `;
+                        break;
+                    case 'stars':
+                        details = `
+                            <div class="detail-item">
+                                <span class="detail-label">Type</span>
+                                <span class="detail-value">${item.spectral_type || 'Unknown'}</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Magnitude</span>
+                                <span class="detail-value">${item.magnitude || 'Unknown'}</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Distance</span>
+                                <span class="detail-value">${item.distance || 'Unknown'}</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Temperature</span>
+                                <span class="detail-value">${item.temperature || 'Unknown'}</span>
+                            </div>
+                        `;
+                        break;
+                    case 'galaxies':
+                        details = `
+                            <div class="detail-item">
+                                <span class="detail-label">Type</span>
+                                <span class="detail-value">${item.type || 'Galaxy'}</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Distance</span>
+                                <span class="detail-value">${item.distance || 'Unknown'}</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Magnitude</span>
+                                <span class="detail-value">${item.magnitude || 'Unknown'}</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Size</span>
+                                <span class="detail-value">${item.size || 'Unknown'}</span>
+                            </div>
+                        `;
+                        break;
+                    case 'events':
+                        details = `
+                            <div class="detail-item">
+                                <span class="detail-label">Date</span>
+                                <span class="detail-value">${item.date || 'Unknown'}</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Type</span>
+                                <span class="detail-value">${item.type || 'Event'}</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Visibility</span>
+                                <span class="detail-value">${item.visibility || 'Unknown'}</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Duration</span>
+                                <span class="detail-value">${item.duration || 'Unknown'}</span>
+                            </div>
+                        `;
+                        break;
+                }
+                
+                const imageUrl = this.getImageForItem(name, type);
+                const imageHtml = imageUrl 
+                    ? `<img src="${imageUrl}" alt="${name}" onerror="this.style.display='none'; this.parentElement.innerHTML='${this.getIconForType(type)}'">`
+                    : this.getIconForType(type);
+                
+                return `
+                    <div class="astronomy-card">
+                        <div class="card-image ${type.slice(0, -1)}">
+                            ${imageHtml}
+                        </div>
+                        <div class="card-type ${type.slice(0, -1)}">${typeName}</div>
+                        <h3 class="card-title">${name}</h3>
+                        <p class="card-description">${description}</p>
+                        <div class="card-details">
+                            ${details}
+                        </div>
+                        ${item.url ? `<a href="${item.url}" target="_blank" class="card-link">
+                            Learn More <i class="fas fa-external-link-alt"></i>
+                        </a>` : ''}
+                    </div>
+                `;
+            }
+            
+            getImageForItem(name, type) {
+                if (type === 'planets' && this.planetImages[name]) {
+                    return this.planetImages[name];
+                }
+                return null;
+            }
+            
+            getIconForType(type) {
+                const icons = {
+                    planets: '🪐',
+                    stars: '⭐',
+                    galaxies: '🌌',
+                    events: '🔭'
+                };
+                return icons[type] || '🌟';
+            }
+            
+            getDefaultDescription(type) {
+                const descriptions = {
+                    planets: 'A celestial body orbiting a star, fascinating in its composition and characteristics.',
+                    stars: 'A luminous sphere of plasma held together by its own gravity, burning bright in the cosmos.',
+                    galaxies: 'A gravitationally bound system of stars, stellar remnants, and interstellar matter.',
+                    events: 'An astronomical phenomenon observable from Earth, offering insights into the universe.'
+                };
+                return descriptions[type] || 'An interesting astronomical object worth exploring.';
+            }
+            
+            getMockData(type, count = 10) {
+                const mockData = {
+                    planets: [
+                        { name: 'Mercury', type: 'Terrestrial Planet', mass: '3.3011×10²³ kg', radius: '2,439.7 km', distance: '57.9 million km', description: 'The smallest planet in our solar system and nearest to the Sun.' },
+                        { name: 'Venus', type: 'Terrestrial Planet', mass: '4.8675×10²⁴ kg', radius: '6,051.8 km', distance: '108.2 million km', description: 'The hottest planet in our solar system with a thick, toxic atmosphere.' },
+                        { name: 'Earth', type: 'Terrestrial Planet', mass: '5.972×10²⁴ kg', radius: '6,371 km', distance: '149.6 million km', description: 'Our home planet, the only known world to harbor life.' },
+                        { name: 'Mars', type: 'Terrestrial Planet', mass: '6.4171×10²³ kg', radius: '3,389.5 km', distance: '227.9 million km', description: 'The Red Planet, target for future human exploration.' },
+                        { name: 'Jupiter', type: 'Gas Giant', mass: '1.8982×10²⁷ kg', radius: '69,911 km', distance: '778.5 million km', description: 'The largest planet in our solar system with over 80 moons.' },
+                        { name: 'Saturn', type: 'Gas Giant', mass: '5.6834×10²⁶ kg', radius: '58,232 km', distance: '1.432 billion km', description: 'Known for its spectacular ring system and numerous moons.' },
+                        { name: 'Uranus', type: 'Ice Giant', mass: '8.6810×10²⁵ kg', radius: '25,362 km', distance: '2.867 billion km', description: 'An ice giant that rotates on its side with a unique tilted axis.' },
+                        { name: 'Neptune', type: 'Ice Giant', mass: '1.02413×10²⁶ kg', radius: '24,622 km', distance: '4.515 billion km', description: 'The windiest planet with speeds reaching up to 2,100 km/h.' },
+                        { name: 'Pluto', type: 'Dwarf Planet', mass: '1.303×10²² kg', radius: '1,188.3 km', distance: '5.906 billion km', description: 'A dwarf planet in the Kuiper Belt with five known moons.' },
+                        { name: 'Ceres', type: 'Dwarf Planet', mass: '9.1×10²⁰ kg', radius: '473 km', distance: '413.7 million km', description: 'The largest object in the asteroid belt between Mars and Jupiter.' }
+                    ],
+                    stars: [
+                        { name: 'Sirius', spectral_type: 'A1V', magnitude: '-1.46', distance: '8.6 light-years', temperature: '9,940 K', description: 'The brightest star in the night sky, located in Canis Major.' },
+                        { name: 'Canopus', spectral_type: 'A9II', magnitude: '-0.74', distance: '310 light-years', temperature: '7,400 K', description: 'The second-brightest star in the night sky.' },
+                        { name: 'Arcturus', spectral_type: 'K0III', magnitude: '-0.05', distance: '36.7 light-years', temperature: '4,290 K', description: 'A red giant star in the constellation Boötes.' },
+                        { name: 'Vega', spectral_type: 'A0V', magnitude: '0.03', distance: '25 light-years', temperature: '9,602 K', description: 'The fifth-brightest star in the night sky.' },
+                        { name: 'Capella', spectral_type: 'G5III', magnitude: '0.08', distance: '42.9 light-years', temperature: '4,940 K', description: 'The brightest star in the constellation Auriga.' },
+                        { name: 'Rigel', spectral_type: 'B8Ia', magnitude: '0.13', distance: '860 light-years', temperature: '12,100 K', description: 'A blue supergiant star in the constellation Orion.' },
+                        { name: 'Procyon', spectral_type: 'F5IV-V', magnitude: '0.34', distance: '11.5 light-years', temperature: '6,530 K', description: 'The brightest star in Canis Minor.' },
+                        { name: 'Betelgeuse', spectral_type: 'M1-2Ia-ab', magnitude: '0.50', distance: '640 light-years', temperature: '3,500 K', description: 'A red supergiant star in Orion, one of the largest known stars.' },
+                        { name: 'Achernar', spectral_type: 'B6Vep', magnitude: '0.46', distance: '139 light-years', temperature: '20,000 K', description: 'The flattest star known, spinning at nearly its breakup velocity.' },
+                        { name: 'Altair', spectral_type: 'A7V', magnitude: '0.77', distance: '16.7 light-years', temperature: '7,550 K', description: 'The brightest star in the constellation Aquila.' }
+                    ],
+                    galaxies: [
+                        { name: 'Andromeda Galaxy', type: 'Spiral Galaxy', distance: '2.537 million light-years', magnitude: '3.44', size: '220,000 light-years', description: 'The nearest major galaxy to the Milky Way and the most distant object visible to the naked eye.' },
+                        { name: 'Milky Way', type: 'Barred Spiral Galaxy', distance: '0 light-years', magnitude: 'N/A', size: '100,000 light-years', description: 'Our home galaxy containing over 100 billion stars.' },
+                        { name: 'Triangulum Galaxy', type: 'Spiral Galaxy', distance: '3 million light-years', magnitude: '5.72', size: '60,000 light-years', description: 'The third-largest member of the Local Group of galaxies.' },
+                        { name: 'Large Magellanic Cloud', type: 'Irregular Galaxy', distance: '160,000 light-years', magnitude: '0.9', size: '14,000 light-years', description: 'A satellite galaxy of the Milky Way visible from the Southern Hemisphere.' },
+                        { name: 'Small Magellanic Cloud', type: 'Irregular Galaxy', distance: '200,000 light-years', magnitude: '2.7', size: '7,000 light-years', description: 'A smaller companion galaxy to the Large Magellanic Cloud.' },
+                        { name: 'Whirlpool Galaxy', type: 'Spiral Galaxy', distance: '23 million light-years', magnitude: '8.4', size: '76,000 light-years', description: 'A classic grand design spiral galaxy with prominent arms.' },
+                        { name: 'Sombrero Galaxy', type: 'Spiral Galaxy', distance: '29.3 million light-years', magnitude: '8.0', size: '50,000 light-years', description: 'A peculiar galaxy with a prominent dust lane and bright nucleus.' },
+                        { name: 'Pinwheel Galaxy', type: 'Spiral Galaxy', distance: '21 million light-years', magnitude: '7.9', size: '170,000 light-years', description: 'A face-on spiral galaxy in the constellation Ursa Major.' },
+                        { name: 'Centaurus A', type: 'Elliptical Galaxy', distance: '13.7 million light-years', magnitude: '6.84', size: '60,000 light-years', description: 'A prominent radio galaxy with a supermassive black hole.' },
+                        { name: 'Messier 87', type: 'Elliptical Galaxy', distance: '53.5 million light-years', magnitude: '8.6', size: '120,000 light-years', description: 'Famous for its supermassive black hole imaged by the Event Horizon Telescope.' }
+                    ],
+                    events: [
+                        { name: 'Solar Eclipse', type: 'Eclipse', date: 'April 8, 2024', visibility: 'North America', duration: '4 minutes', description: 'A total solar eclipse visible across North America.' },
+                        { name: 'Lunar Eclipse', type: 'Eclipse', date: 'March 14, 2025', visibility: 'Global', duration: '65 minutes', description: 'A total lunar eclipse visible from most of Earth.' },
+                        { name: 'Mars Opposition', type: 'Planetary Event', date: 'January 16, 2025', visibility: 'Global', duration: 'All night', description: 'Mars at its closest approach to Earth, appearing brightest.' },
+                        { name: 'Perseid Meteor Shower', type: 'Meteor Shower', date: 'August 12-13, 2024', visibility: 'Northern Hemisphere', duration: 'All night', description: 'One of the most prolific meteor showers of the year.' },
+                        { name: 'Geminid Meteor Shower', type: 'Meteor Shower', date: 'December 13-14, 2024', visibility: 'Global', duration: 'All night', description: 'The year\'s best meteor shower with up to 120 meteors per hour.' },
+                        { name: 'Venus Transit', type: 'Planetary Event', date: 'June 8, 2125', visibility: 'Global', duration: '6 hours', description: 'Venus passing directly between Earth and the Sun.' },
+                        { name: 'Jupiter Conjunction', type: 'Planetary Event', date: 'May 17, 2025', visibility: 'Evening Sky', duration: 'Several days', description: 'Jupiter and Venus appearing very close in the evening sky.' },
+                        { name: 'Comet NEOWISE', type: 'Comet', date: 'July 2020', visibility: 'Northern Hemisphere', duration: 'Several weeks', description: 'A bright comet visible to the naked eye.' },
+                        { name: 'Aurora Borealis', type: 'Aurora', date: 'Variable', visibility: 'High Latitudes', duration: 'Hours', description: 'Northern lights caused by solar wind interaction.' },
+                        { name: 'International Space Station Pass', type: 'Satellite', date: 'Daily', visibility: 'Global', duration: '6 minutes', description: 'The ISS passing overhead, visible as a bright moving star.' }
+                    ]
+                };
+                
+                return mockData[type] ? mockData[type].slice(0, count) : [];
+            }
+            
+            updateStats(type) {
+                const statsContainer = document.getElementById(`${type}-stats`);
+                if (!statsContainer) return;
+                
+                const total = this.data[type].length;
+                const filtered = this.filteredData[type].length;
+                
+                statsContainer.innerHTML = `
+                    <div class="stat-item">
+                        <div class="stat-number">${filtered}</div>
+                        <div class="stat-label">Shown</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-number">${total}</div>
+                        <div class="stat-label">Total</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-number">${this.searchTerm ? 'Filtered' : 'All'}</div>
+                        <div class="stat-label">View</div>
+                    </div>
+                `;
+            }
+            
+            setTabLoading(type, loading) {
+                const tabBtn = document.querySelector(`[data-tab="${type}"]`);
+                if (tabBtn) {
+                    if (loading) {
+                        tabBtn.classList.add('loading');
+                    } else {
+                        tabBtn.classList.remove('loading');
+                    }
+                }
+            }
+            
+            setLoadMoreLoading(type, loading) {
+                const btn = document.getElementById(`load-more-${type}`);
+                if (btn) {
+                    if (loading) {
+                        btn.classList.add('loading');
+                        btn.disabled = true;
+                        btn.innerHTML = '<i class="fas fa-spinner"></i> Loading...';
+                    } else {
+                        btn.classList.remove('loading');
+                        btn.disabled = false;
+                        btn.innerHTML = `<i class="fas fa-plus"></i> Load More ${type.charAt(0).toUpperCase() + type.slice(1)}`;
+                    }
+                }
+            }
+        }
+        
+        // Initialize astronomy explorer when DOM is loaded
+        document.addEventListener('DOMContentLoaded', function() {
+            // Hide loading screen
+            setTimeout(() => {
+                document.getElementById('loading-screen').classList.add('hidden');
+            }, 1000);
+            
+            // Initialize astronomy explorer
+            new AstronomyExplorer();
+            
+            // Setup sidebar functionality
+            const mobileToggle = document.querySelector('.mobile-menu-toggle');
+            const sidebar = document.querySelector('.sidebar');
+            const sidebarClose = document.querySelector('.sidebar-close');
+            
+            if (mobileToggle) {
+                mobileToggle.addEventListener('click', () => {
+                    sidebar?.classList.add('open');
+                });
+            }
+            
+            if (sidebarClose) {
+                sidebarClose.addEventListener('click', () => {
+                    sidebar?.classList.remove('open');
+                });
+            }
+            
+            // Close sidebar when clicking outside
+            document.addEventListener('click', (e) => {
+                if (sidebar?.classList.contains('open') && 
+                    !sidebar.contains(e.target) && 
+                    !mobileToggle?.contains(e.target)) {
+                    sidebar.classList.remove('open');
+                }
+            });
+        });
+    </script>
+</body>
+</html>
