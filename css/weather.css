@@ -71,6 +71,32 @@ html {
     scroll-behavior: smooth;
 }
 
+/* Global smooth scrolling for all elements */
+* {
+    scroll-behavior: smooth;
+}
+
+/* Enhanced scrolling for touch devices */
+.weather-container,
+.hourly-scroll,
+.daily-container,
+.search-suggestions {
+    -webkit-overflow-scrolling: touch;
+    scroll-behavior: smooth;
+}
+
+/* Integrate with website theme system */
+body.weather-page {
+    background: var(--background-color);
+    color: var(--text-color);
+}
+
+/* Override weather-specific styles to work with website themes */
+.weather-container {
+    background: var(--background-color);
+    color: var(--text-color);
+}
+
 body {
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     line-height: 1.6;
@@ -216,6 +242,8 @@ body {
     position: relative;
     z-index: 1;
     padding-top: calc(80px + var(--space-lg)); /* Account for fixed header */
+    scroll-behavior: smooth;
+    overflow-x: hidden;
 }
 
 /* Weather Header (specific for weather dashboard) */
@@ -819,6 +847,9 @@ body {
     padding-bottom: var(--space-md);
     scrollbar-width: thin;
     scrollbar-color: rgba(255, 255, 255, 0.3) transparent;
+    scroll-behavior: smooth;
+    -webkit-overflow-scrolling: touch;
+    scroll-snap-type: x mandatory;
 }
 
 .hourly-scroll::-webkit-scrollbar {
@@ -845,6 +876,7 @@ body {
     transition: all var(--transition-normal);
     cursor: pointer;
     backdrop-filter: var(--backdrop-blur);
+    scroll-snap-align: start;
 }
 
 .hourly-item:hover {

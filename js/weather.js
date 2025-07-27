@@ -153,10 +153,7 @@ class WeatherDashboard {
             refreshBtn.addEventListener('click', () => this.refreshWeatherData());
         }
 
-        const darkModeToggle = document.getElementById('dark-mode-toggle');
-        if (darkModeToggle) {
-            darkModeToggle.addEventListener('click', () => this.toggleDarkMode());
-        }
+        // Remove dark mode toggle - now using website's theme system
 
         // Quick city buttons
         const cityButtons = document.querySelectorAll('.city-btn');
@@ -1145,44 +1142,7 @@ class WeatherDashboard {
         this.saveUserPreferences();
     }
 
-    /**
-     * Toggle dark mode
-     */
-    toggleDarkMode() {
-        this.isDarkMode = !this.isDarkMode;
-        
-        if (this.isDarkMode) {
-            this.enableDarkMode();
-        } else {
-            this.disableDarkMode();
-        }
-        
-        this.saveUserPreferences();
-    }
-
-    /**
-     * Enable dark mode
-     */
-    enableDarkMode() {
-        document.documentElement.setAttribute('data-theme', 'dark');
-        const darkModeBtn = document.getElementById('dark-mode-toggle');
-        if (darkModeBtn) {
-            darkModeBtn.innerHTML = '<i class="fas fa-sun"></i>';
-        }
-        this.isDarkMode = true;
-    }
-
-    /**
-     * Disable dark mode
-     */
-    disableDarkMode() {
-        document.documentElement.removeAttribute('data-theme');
-        const darkModeBtn = document.getElementById('dark-mode-toggle');
-        if (darkModeBtn) {
-            darkModeBtn.innerHTML = '<i class="fas fa-moon"></i>';
-        }
-        this.isDarkMode = false;
-    }
+    // Dark mode functionality removed - now using website's integrated theme system
 
     /**
      * Refresh weather data
