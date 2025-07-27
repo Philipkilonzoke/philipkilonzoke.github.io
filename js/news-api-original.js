@@ -428,6 +428,11 @@ class NewsAPI {
                     return extendedDB.getExtendedLatestNews(source);
             }
         }
+
+        // Return empty arrays for Kenya and sports categories to ensure only real-time news
+        if (category === 'kenya' || category === 'sports') {
+            return [];
+        }
         
         // Fallback to basic articles if extended DB not available
         const baseArticles = {
@@ -523,35 +528,7 @@ class NewsAPI {
                     category: "technology"
                 }
             ],
-            kenya: [
-                {
-                    title: "Kenya's Economic Growth Shows Steady Progress",
-                    description: "Latest economic indicators show Kenya's GDP growth remains robust amid global uncertainties.",
-                    url: "https://example.com/kenya-economy",
-                    urlToImage: "https://images.unsplash.com/photo-1609198092458-38a293c7ac4b?w=400",
-                    publishedAt: new Date().toISOString(),
-                    source: "Nation Kenya",
-                    category: "business"
-                },
-                {
-                    title: "Nairobi Tech Hub Attracts International Investment",
-                    description: "Silicon Savannah continues to grow as global tech companies establish operations in Nairobi.",
-                    url: "https://example.com/nairobi-tech",
-                    urlToImage: "https://images.unsplash.com/photo-1586953208448-b95a79798f07?w=400",
-                    publishedAt: new Date(Date.now() - 1800000).toISOString(),
-                    source: "Citizen Digital",
-                    category: "technology"
-                },
-                {
-                    title: "Kenya's Conservation Efforts Gain Global Recognition",
-                    description: "Wildlife conservation programs in Kenya receive international praise for innovative approaches.",
-                    url: "https://example.com/kenya-conservation",
-                    urlToImage: "https://images.unsplash.com/photo-1549366021-9f761d040a94?w=400",
-                    publishedAt: new Date(Date.now() - 5400000).toISOString(),
-                    source: "The Star Kenya",
-                    category: "general"
-                }
-            ],
+            kenya: [],
             world: [
                 {
                     title: "European Union Announces New Digital Policy Framework",
@@ -632,26 +609,7 @@ class NewsAPI {
                     category: "business"
                 }
             ],
-            sports: [
-                {
-                    title: "Olympic Preparations Intensify Across Host Cities",
-                    description: "Athletes and organizers make final preparations as upcoming Olympic Games approach.",
-                    url: "https://example.com/olympic-prep",
-                    urlToImage: "https://images.unsplash.com/photo-1461896836934-ffe607ba8211?w=400",
-                    publishedAt: new Date().toISOString(),
-                    source: source,
-                    category: "sports"
-                },
-                {
-                    title: "Football Transfer Season Sees Record-Breaking Deals",
-                    description: "Major European clubs complete high-profile signings in unprecedented transfer window.",
-                    url: "https://example.com/football-transfers",
-                    urlToImage: "https://images.unsplash.com/photo-1574629810360-7efbbe195018?w=400",
-                    publishedAt: new Date(Date.now() - 1800000).toISOString(),
-                    source: source,
-                    category: "sports"
-                }
-            ],
+            sports: [],
             health: [
                 {
                     title: "Revolutionary Gene Therapy Shows Promise",
@@ -790,17 +748,7 @@ class NewsAPI {
                     category: "business"
                 }
             ],
-            sports: [
-                {
-                    title: "Paralympic Training Centers Upgrade Technology",
-                    description: "Advanced sports science equipment enhances training for Paralympic athletes worldwide.",
-                    url: "https://example.com/paralympic-tech",
-                    urlToImage: "https://images.unsplash.com/photo-1551698618-1dfe5d97d256?w=400",
-                    publishedAt: new Date(Date.now() - timeOffsets[0]).toISOString(),
-                    source: source,
-                    category: "sports"
-                }
-            ],
+            sports: [],
             health: [
                 {
                     title: "Breakthrough in Alzheimer's Research Shows Promise",

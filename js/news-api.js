@@ -1782,6 +1782,11 @@ class NewsAPI {
                     return extendedDB.getExtendedLatestNews(source);
             }
         }
+
+        // Return empty arrays for Kenya and sports categories to ensure only real-time news
+        if (category === 'kenya' || category === 'sports') {
+            return [];
+        }
         
         // Fallback to basic articles if extended DB not available
         const baseArticles = {
@@ -1877,35 +1882,7 @@ class NewsAPI {
                     category: "technology"
                 }
             ],
-            kenya: [
-                {
-                    title: "Kenya's Economic Growth Shows Steady Progress",
-                    description: "Kenya's economy demonstrates remarkable resilience with GDP growth of 5.2% in the latest quarter, outpacing regional averages despite global economic challenges. The Central Bank of Kenya reports strong performance across key sectors including agriculture, manufacturing, and services. Tourism revenue has recovered to pre-pandemic levels, contributing significantly to foreign exchange earnings. The government's digital transformation initiatives and infrastructure development programs, including the Standard Gauge Railway and renewable energy projects, continue to attract international investment. Financial analysts highlight Kenya's stable currency, controlled inflation rates, and improved business environment as key factors supporting sustained economic growth. The positive trajectory positions Kenya as East Africa's economic powerhouse.",
-                    url: "https://example.com/kenya-economy",
-                    urlToImage: "https://images.unsplash.com/photo-1609198092458-38a293c7ac4b?w=400",
-                    publishedAt: new Date().toISOString(),
-                    source: "Nation Kenya",
-                    category: "business"
-                },
-                {
-                    title: "Nairobi Tech Hub Attracts International Investment",
-                    description: "Nairobi's Silicon Savannah continues its remarkable growth trajectory, attracting over $2 billion in international investment this year alone. Major global technology companies including Google, Microsoft, and Meta have established significant operations in the city, creating thousands of high-skilled jobs and positioning Kenya as Africa's technology leader. The Konza Technopolis project is nearing completion, offering world-class infrastructure for tech companies and startups. Local innovations in mobile banking, fintech, and agritech are gaining global recognition, with Kenyan solutions being adopted across Africa and beyond. The government's supportive policies, including tax incentives for tech companies and improved digital infrastructure, have created an attractive environment for international investors seeking to tap into Africa's growing digital economy.",
-                    url: "https://example.com/nairobi-tech",
-                    urlToImage: "https://images.unsplash.com/photo-1586953208448-b95a79798f07?w=400",
-                    publishedAt: new Date(Date.now() - 1800000).toISOString(),
-                    source: "Citizen Digital",
-                    category: "technology"
-                },
-                {
-                    title: "Kenya's Conservation Efforts Gain Global Recognition",
-                    description: "Kenya's innovative wildlife conservation programs have received international acclaim, with the country being recognized as a global leader in sustainable wildlife management. The Kenya Wildlife Service reports a 30% increase in elephant populations over the past five years, thanks to comprehensive anti-poaching efforts and community-based conservation initiatives. The country's marine protected areas have also shown remarkable recovery, with coral reef restoration projects yielding impressive results. International conservation organizations praise Kenya's holistic approach, which combines traditional conservation methods with cutting-edge technology including GPS tracking, drone surveillance, and artificial intelligence for wildlife monitoring. The success has attracted significant international funding and partnerships, positioning Kenya as a model for conservation efforts across Africa.",
-                    url: "https://example.com/kenya-conservation",
-                    urlToImage: "https://images.unsplash.com/photo-1549366021-9f761d040a94?w=400",
-                    publishedAt: new Date(Date.now() - 5400000).toISOString(),
-                    source: "The Star Kenya",
-                    category: "general"
-                }
-            ],
+            kenya: [],
             world: [
                 {
                     title: "European Union Announces New Digital Policy Framework",
@@ -1986,26 +1963,7 @@ class NewsAPI {
                     category: "business"
                 }
             ],
-            sports: [
-                {
-                    title: "Olympic Preparations Intensify Across Host Cities",
-                    description: "Athletes and organizers make final preparations as upcoming Olympic Games approach.",
-                    url: "https://example.com/olympic-prep",
-                    urlToImage: "https://images.unsplash.com/photo-1461896836934-ffe607ba8211?w=400",
-                    publishedAt: new Date().toISOString(),
-                    source: source,
-                    category: "sports"
-                },
-                {
-                    title: "Football Transfer Season Sees Record-Breaking Deals",
-                    description: "Major European clubs complete high-profile signings in unprecedented transfer window.",
-                    url: "https://example.com/football-transfers",
-                    urlToImage: "https://images.unsplash.com/photo-1574629810360-7efbbe195018?w=400",
-                    publishedAt: new Date(Date.now() - 1800000).toISOString(),
-                    source: source,
-                    category: "sports"
-                }
-            ],
+            sports: [],
             health: [
                 {
                     title: "Revolutionary Gene Therapy Shows Promise",
@@ -2142,17 +2100,7 @@ class NewsAPI {
                     category: "business"
                 }
             ],
-            sports: [
-                {
-                    title: "Paralympic Training Centers Upgrade Technology",
-                    description: "Advanced sports science equipment enhances training for Paralympic athletes worldwide.",
-                    url: "https://example.com/paralympic-tech",
-                    urlToImage: "https://images.unsplash.com/photo-1551698618-1dfe5d97d256?w=400",
-                    publishedAt: new Date(Date.now() - timeOffsets[0]).toISOString(),
-                    source: source,
-                    category: "sports"
-                }
-            ],
+            sports: [],
             health: [
                 {
                     title: "Breakthrough in Alzheimer's Research Shows Promise",

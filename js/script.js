@@ -158,6 +158,14 @@ function getApiKey(keyName) {
 
 // Display sample news when no API keys are available
 function displaySampleNews() {
+    // Return empty for Kenya and sports categories to ensure only real-time news
+    if (currentCategory === 'kenya' || currentCategory === 'sports') {
+        allArticles = [];
+        displayNews([]);
+        updateArticleCount();
+        return;
+    }
+    
     const sampleArticles = [
         {
             title: "Breaking News Story 1",
