@@ -310,6 +310,135 @@
             color: var(--primary-color);
         }
         
+        .popular-movies-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin-top: 2rem;
+            max-width: 1000px;
+        }
+        
+        .popular-movie-card {
+            background: var(--surface-color);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            overflow: hidden;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        
+        .popular-movie-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+            border-color: var(--primary-color);
+        }
+        
+        .popular-movie-poster {
+            width: 100%;
+            height: 250px;
+            object-fit: cover;
+            transition: transform 0.3s ease;
+        }
+        
+        .popular-movie-card:hover .popular-movie-poster {
+            transform: scale(1.05);
+        }
+        
+        .popular-movie-info {
+            padding: 1rem;
+            text-align: center;
+        }
+        
+        .popular-movie-title {
+            font-weight: 600;
+            font-size: 1rem;
+            color: var(--text-color);
+            margin-bottom: 0.5rem;
+            line-height: 1.3;
+        }
+        
+        .popular-movie-year {
+            color: var(--primary-color);
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+        
+        .loading-popular {
+            text-align: center;
+            padding: 2rem 0;
+            color: #64748b;
+        }
+        
+        .loading-popular .fa-spinner {
+            animation: spin 1s linear infinite;
+            font-size: 1.5rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        /* Search autocomplete */
+        .search-autocomplete {
+            position: relative;
+        }
+        
+        .autocomplete-dropdown {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: var(--surface-color);
+            border: 1px solid var(--border-color);
+            border-top: none;
+            border-radius: 0 0 8px 8px;
+            max-height: 300px;
+            overflow-y: auto;
+            z-index: 1000;
+            display: none;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+        }
+        
+        .autocomplete-item {
+            padding: 0.75rem 1rem;
+            cursor: pointer;
+            border-bottom: 1px solid var(--border-color);
+            transition: background-color 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+        
+        .autocomplete-item:hover,
+        .autocomplete-item.selected {
+            background: rgba(59, 130, 246, 0.1);
+        }
+        
+        .autocomplete-item:last-child {
+            border-bottom: none;
+        }
+        
+        .autocomplete-poster {
+            width: 40px;
+            height: 60px;
+            object-fit: cover;
+            border-radius: 4px;
+            flex-shrink: 0;
+        }
+        
+        .autocomplete-info {
+            flex: 1;
+        }
+        
+        .autocomplete-title {
+            font-weight: 600;
+            color: var(--text-color);
+            font-size: 0.9rem;
+        }
+        
+        .autocomplete-year {
+            color: #64748b;
+            font-size: 0.8rem;
+        }
+        
         .rating-badge {
             background: linear-gradient(135deg, #fbbf24, #f59e0b);
             color: white;
@@ -486,7 +615,12 @@
         <section class="search-section">
             <div class="container">
                 <div class="search-container">
-                    <input type="text" id="movie-search" class="search-input" placeholder="Search for a movie (e.g., Inception, Avatar, The Matrix)...">
+                    <div class="search-autocomplete">
+                        <input type="text" id="movie-search" class="search-input" placeholder="Search for a movie (e.g., Conjuring, Avengers, Spider-Man)...">
+                        <div id="autocomplete-dropdown" class="autocomplete-dropdown">
+                            <!-- Autocomplete suggestions will appear here -->
+                        </div>
+                    </div>
                     <button id="search-btn" class="search-btn">
                         <i class="fas fa-search"></i> Search
                     </button>
@@ -497,13 +631,19 @@
         <!-- Movie Results Section -->
         <section class="results-section">
             <div class="container">
-                <!-- Welcome State -->
+                <!-- Welcome State with Latest Movies -->
                 <div id="welcome-state" class="welcome-state">
                     <div class="welcome-icon">🎭</div>
-                    <h2>Welcome to Movie Discovery</h2>
-                    <p>Search for any movie to get detailed information including cast, plot, ratings, and more!</p>
-                    <div style="margin-top: 1.5rem; color: #64748b; font-size: 0.9rem;">
-                        <p>Try searching for: <strong>Inception</strong>, <strong>The Godfather</strong>, <strong>Avatar</strong>, or <strong>Interstellar</strong></p>
+                    <h2>Discover Popular Movies</h2>
+                    <p>Click on any movie below to get detailed information or search for any movie above!</p>
+                    
+                    <div id="popular-movies" class="popular-movies-grid">
+                        <!-- Popular movies will be loaded here -->
+                    </div>
+                    
+                    <div id="loading-popular" class="loading-popular" style="display: none;">
+                        <i class="fas fa-spinner fa-spin"></i>
+                        <p>Loading popular movies...</p>
                     </div>
                 </div>
                 

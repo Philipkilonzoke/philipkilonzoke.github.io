@@ -805,7 +805,7 @@
             return `
                 <div class="recipe-card" onclick="openRecipe('${recipe.sourceUrl || recipe.spoonacularSourceUrl}')">
                     ${recipe.image 
-                        ? `<img data-src="${recipe.image}" alt="${recipe.title}" class="recipe-image" loading="lazy">`
+                        ? `<img data-src="${recipe.image.replace('556x370', '636x393').replace('312x231', '636x393')}" alt="${recipe.title}" class="recipe-image" loading="lazy">`
                         : `<div class="recipe-image-placeholder">🍽️</div>`
                     }
                     <div class="recipe-content">

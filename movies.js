@@ -11,15 +11,22 @@ class MovieApp {
         this.errorState = document.getElementById('error-message');
         this.movieResult = document.getElementById('movie-result');
         this.errorText = document.getElementById('error-text');
+        this.autocompleteDropdown = document.getElementById('autocomplete-dropdown');
+        this.popularMoviesGrid = document.getElementById('popular-movies');
+        this.loadingPopular = document.getElementById('loading-popular');
         
         this.currentSearch = '';
         this.isLoading = false;
+        this.autocompleteTimeout = null;
+        this.selectedIndex = -1;
+        this.suggestions = [];
         
         this.init();
     }
     
     init() {
         this.setupEventListeners();
+        this.loadPopularMovies();
         this.showWelcomeState();
     }
     
@@ -35,10 +42,56 @@ class MovieApp {
             }
         });
         
-        // Input validation
+        // Input validation and autocomplete
         this.searchInput.addEventListener('input', () => {
             const query = this.searchInput.value.trim();
             this.searchBtn.disabled = query.length === 0 || this.isLoading;
+            
+            // Handle autocomplete
+            if (query.length >= 2) {
+                clearTimeout(this.autocompleteTimeout);
+                this.autocompleteTimeout = setTimeout(() => {
+                    this.searchAutocomplete(query);
+                }, 300);
+            } else {
+                this.hideAutocomplete();
+            }
+        });
+        
+        // Keyboard navigation for autocomplete
+        this.searchInput.addEventListener('keydown', (e) => {
+            if (this.suggestions.length === 0) return;
+            
+            switch (e.key) {
+                case 'ArrowDown':
+                    e.preventDefault();
+                    this.selectedIndex = Math.min(this.selectedIndex + 1, this.suggestions.length - 1);
+                    this.updateAutocompleteSelection();
+                    break;
+                case 'ArrowUp':
+                    e.preventDefault();
+                    this.selectedIndex = Math.max(this.selectedIndex - 1, -1);
+                    this.updateAutocompleteSelection();
+                    break;
+                case 'Enter':
+                    e.preventDefault();
+                    if (this.selectedIndex >= 0) {
+                        this.selectAutocompleteItem(this.suggestions[this.selectedIndex]);
+                    } else {
+                        this.handleSearch();
+                    }
+                    break;
+                case 'Escape':
+                    this.hideAutocomplete();
+                    break;
+            }
+        });
+        
+        // Hide autocomplete when clicking outside
+        document.addEventListener('click', (e) => {
+            if (!e.target.closest('.search-autocomplete')) {
+                this.hideAutocomplete();
+            }
         });
     }
     
@@ -106,7 +159,7 @@ class MovieApp {
         ).join('');
         
         const poster = movie.Poster && movie.Poster !== 'N/A' 
-            ? `<img src="${movie.Poster}" alt="${movie.Title}" class="movie-poster" loading="lazy">`
+            ? `<img src="${movie.Poster.replace('SX300', 'SX800')}" alt="${movie.Title}" class="movie-poster" loading="lazy">`
             : `<div class="movie-poster-placeholder">🎬</div>`;
         
         const rating = movie.imdbRating && movie.imdbRating !== 'N/A'
@@ -248,6 +301,169 @@ class MovieApp {
         this.loadingState.style.display = 'none';
         this.errorState.style.display = 'none';
         this.movieResult.style.display = 'none';
+    }
+    
+    // Popular Movies Functionality
+    async loadPopularMovies() {
+        const popularTitles = [
+            'Avengers Endgame', 'Spider-Man No Way Home', 'The Batman', 'Top Gun Maverick',
+            'Black Panther', 'Dune', 'No Time to Die', 'Fast X', 'Guardians of the Galaxy',
+            'John Wick 4', 'Scream VI', 'The Super Mario Bros Movie', 'Avatar The Way of Water',
+            'Doctor Strange', 'Thor Love and Thunder', 'Jurassic World Dominion'
+        ];
+        
+        try {
+            this.showLoadingPopular();
+            
+            // Load a subset of popular movies (8 movies for better performance)
+            const selectedTitles = popularTitles.slice(0, 8);
+            const moviePromises = selectedTitles.map(title => this.fetchMovieForPopular(title));
+            const movies = await Promise.all(moviePromises);
+            
+            // Filter out failed requests
+            const validMovies = movies.filter(movie => movie !== null);
+            
+            this.displayPopularMovies(validMovies);
+            
+        } catch (error) {
+            console.error('Error loading popular movies:', error);
+            this.popularMoviesGrid.innerHTML = '<p>Unable to load popular movies at the moment.</p>';
+        } finally {
+            this.hideLoadingPopular();
+        }
+    }
+    
+    async fetchMovieForPopular(title) {
+        try {
+            const url = `${OMDB_BASE_URL}?apikey=${OMDB_API_KEY}&t=${encodeURIComponent(title)}`;
+            const response = await fetch(url);
+            const data = await response.json();
+            
+            if (data.Response === 'True') {
+                return data;
+            }
+            return null;
+        } catch (error) {
+            console.error(`Error fetching ${title}:`, error);
+            return null;
+        }
+    }
+    
+    displayPopularMovies(movies) {
+        if (!movies || movies.length === 0) {
+            this.popularMoviesGrid.innerHTML = '<p>No popular movies available at the moment.</p>';
+            return;
+        }
+        
+        const moviesHTML = movies.map(movie => this.createPopularMovieCard(movie)).join('');
+        this.popularMoviesGrid.innerHTML = moviesHTML;
+        
+        // Add click event listeners
+        this.popularMoviesGrid.querySelectorAll('.popular-movie-card').forEach((card, index) => {
+            card.addEventListener('click', () => {
+                this.searchInput.value = movies[index].Title;
+                this.searchMovie(movies[index].Title);
+            });
+        });
+    }
+    
+    createPopularMovieCard(movie) {
+        const poster = movie.Poster && movie.Poster !== 'N/A' 
+            ? movie.Poster.replace('SX300', 'SX500') // Higher quality poster
+            : 'https://via.placeholder.com/200x300/e2e8f0/64748b?text=No+Poster';
+        
+        return `
+            <div class="popular-movie-card" data-title="${movie.Title}">
+                <img src="${poster}" alt="${movie.Title}" class="popular-movie-poster" loading="lazy">
+                <div class="popular-movie-info">
+                    <div class="popular-movie-title">${movie.Title}</div>
+                    <div class="popular-movie-year">${movie.Year}</div>
+                </div>
+            </div>
+        `;
+    }
+    
+    showLoadingPopular() {
+        this.loadingPopular.style.display = 'block';
+        this.popularMoviesGrid.style.display = 'none';
+    }
+    
+    hideLoadingPopular() {
+        this.loadingPopular.style.display = 'none';
+        this.popularMoviesGrid.style.display = 'grid';
+    }
+    
+    // Autocomplete Functionality
+    async searchAutocomplete(query) {
+        try {
+            // Use OMDb search endpoint for autocomplete
+            const url = `${OMDB_BASE_URL}?apikey=${OMDB_API_KEY}&s=${encodeURIComponent(query)}&type=movie`;
+            const response = await fetch(url);
+            const data = await response.json();
+            
+            if (data.Response === 'True' && data.Search) {
+                this.suggestions = data.Search.slice(0, 8); // Limit to 8 suggestions
+                this.displayAutocomplete();
+            } else {
+                this.hideAutocomplete();
+            }
+        } catch (error) {
+            console.error('Error fetching autocomplete:', error);
+            this.hideAutocomplete();
+        }
+    }
+    
+    displayAutocomplete() {
+        if (this.suggestions.length === 0) {
+            this.hideAutocomplete();
+            return;
+        }
+        
+        const suggestionsHTML = this.suggestions.map((movie, index) => {
+            const poster = movie.Poster && movie.Poster !== 'N/A' 
+                ? movie.Poster.replace('SX300', 'SX500') // Higher quality
+                : 'https://via.placeholder.com/40x60/e2e8f0/64748b?text=?';
+            
+            return `
+                <div class="autocomplete-item" data-index="${index}">
+                    <img src="${poster}" alt="${movie.Title}" class="autocomplete-poster" loading="lazy">
+                    <div class="autocomplete-info">
+                        <div class="autocomplete-title">${movie.Title}</div>
+                        <div class="autocomplete-year">${movie.Year}</div>
+                    </div>
+                </div>
+            `;
+        }).join('');
+        
+        this.autocompleteDropdown.innerHTML = suggestionsHTML;
+        this.autocompleteDropdown.style.display = 'block';
+        this.selectedIndex = -1;
+        
+        // Add click event listeners
+        this.autocompleteDropdown.querySelectorAll('.autocomplete-item').forEach((item, index) => {
+            item.addEventListener('click', () => {
+                this.selectAutocompleteItem(this.suggestions[index]);
+            });
+        });
+    }
+    
+    updateAutocompleteSelection() {
+        const items = this.autocompleteDropdown.querySelectorAll('.autocomplete-item');
+        items.forEach((item, index) => {
+            item.classList.toggle('selected', index === this.selectedIndex);
+        });
+    }
+    
+    selectAutocompleteItem(movie) {
+        this.searchInput.value = movie.Title;
+        this.hideAutocomplete();
+        this.searchMovie(movie.Title);
+    }
+    
+    hideAutocomplete() {
+        this.autocompleteDropdown.style.display = 'none';
+        this.suggestions = [];
+        this.selectedIndex = -1;
     }
 }
 
