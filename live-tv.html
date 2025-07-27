@@ -181,6 +181,49 @@
             height: 1px;
             background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
         }
+
+        /* Video Player Overlay */
+        .video-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(0, 0, 0, 0.95);
+            backdrop-filter: blur(10px);
+            z-index: 1000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .video-overlay.active {
+            display: flex;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .video-player-container {
+            width: 90%;
+            max-width: 1200px;
+            background: var(--glass-bg);
+            border-radius: var(--radius-xl);
+            padding: var(--space-lg);
+            backdrop-filter: var(--backdrop-blur);
+            border: 1px solid var(--glass-border);
+            position: relative;
+        }
+
+        @media (max-width: 768px) {
+            .video-player-container {
+                width: 95%;
+                padding: var(--space-sm);
+            }
+        }
     </style>
     
     <!-- Non-critical CSS -->
@@ -221,12 +264,6 @@
                 </div>
                 
                 <div style="display: flex; align-items: center; gap: var(--space-sm);">
-                    <div style="display: flex; align-items: center; gap: var(--space-xs); padding: var(--space-xs) var(--space-sm); background: var(--glass-bg); border-radius: 20px; border: 1px solid var(--glass-border);">
-                        <div style="width: 8px; height: 8px; background: var(--accent-red); border-radius: 50%; animation: pulse 2s infinite;"></div>
-                        <span style="font-size: 0.875rem; font-weight: 500;">
-                            <span id="viewer-count">12.5K</span> Watching
-                        </span>
-                    </div>
                     <select id="themeSelect" style="background: var(--glass-bg); color: var(--text-primary); border: 1px solid var(--glass-border); border-radius: var(--radius-sm); padding: var(--space-xs); font-size: 0.875rem;">
                         <option value="default">Default Theme</option>
                         <option value="dark">Dark Theme</option>
@@ -287,59 +324,59 @@
                     <!-- Channel cards will be inserted here by JavaScript -->
                 </div>
             </section>
-
-            <!-- Enhanced Video Player Section -->
-            <section id="player-section" style="display: none; margin-bottom: var(--space-xl);">
-                <div class="glass-card" style="padding: var(--space-lg);">
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--space-md);">
-                        <div style="display: flex; align-items: center; gap: var(--space-sm);">
-                            <img id="current-channel-logo" src="" alt="" style="width: 40px; height: 40px; border-radius: var(--radius-sm); object-fit: contain; background: white; padding: 4px;">
-                            <div>
-                                <h3 id="current-channel" style="font-size: 1.25rem; font-weight: 600; margin-bottom: 2px;">Select a Channel</h3>
-                                <p id="current-category" style="font-size: 0.875rem; color: var(--text-secondary);">Category</p>
-                            </div>
-                        </div>
-                        <div style="display: flex; align-items: center; gap: var(--space-sm);">
-                            <div style="display: flex; align-items: center; gap: var(--space-xs); padding: var(--space-xs) var(--space-sm); background: var(--glass-bg); border-radius: 20px;">
-                                <div style="width: 6px; height: 6px; background: var(--accent-red); border-radius: 50%; animation: pulse 2s infinite;"></div>
-                                <span style="font-size: 0.75rem; color: var(--text-secondary);">LIVE</span>
-                            </div>
-                            <button id="fullscreen-btn" style="background: var(--glass-bg); color: var(--text-primary); border: 1px solid var(--glass-border); border-radius: var(--radius-sm); padding: var(--space-xs); cursor: pointer; transition: all var(--transition-fast);">
-                                <i class="fas fa-expand"></i>
-                            </button>
-                            <button id="close-player" style="background: var(--accent-red); color: white; border: none; border-radius: var(--radius-sm); padding: var(--space-xs) var(--space-sm); cursor: pointer; font-size: 0.875rem; transition: all var(--transition-fast);">
-                                <i class="fas fa-times"></i> Close
-                            </button>
-                        </div>
-                    </div>
-                    
-                    <div id="video-container" style="position: relative; width: 100%; height: 0; padding-bottom: 56.25%; border-radius: var(--radius-lg); overflow: hidden; background: #000; box-shadow: var(--shadow-xl);">
-                        <iframe id="youtube-player" 
-                                style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none;"
-                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                                allowfullscreen>
-                        </iframe>
-                        <div id="player-loading" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: white; text-align: center; display: none;">
-                            <div class="loading-spinner" style="width: 40px; height: 40px; margin: 0 auto var(--space-sm);"></div>
-                            <p>Loading stream...</p>
-                        </div>
-                    </div>
-                    
-                    <div style="display: flex; justify-content: center; gap: var(--space-sm); margin-top: var(--space-md); flex-wrap: wrap;">
-                        <button id="prev-channel" style="background: var(--glass-bg); color: var(--text-primary); border: 1px solid var(--glass-border); border-radius: var(--radius-md); padding: var(--space-sm) var(--space-md); cursor: pointer; transition: all var(--transition-fast); display: flex; align-items: center; gap: var(--space-xs);">
-                            <i class="fas fa-chevron-left"></i> Previous
-                        </button>
-                        <button id="quality-toggle" style="background: var(--glass-bg); color: var(--text-primary); border: 1px solid var(--glass-border); border-radius: var(--radius-md); padding: var(--space-sm) var(--space-md); cursor: pointer; transition: all var(--transition-fast);">
-                            <i class="fas fa-cog"></i> Quality
-                        </button>
-                        <button id="next-channel" style="background: var(--glass-bg); color: var(--text-primary); border: 1px solid var(--glass-border); border-radius: var(--radius-md); padding: var(--space-sm) var(--space-md); cursor: pointer; transition: all var(--transition-fast); display: flex; align-items: center; gap: var(--space-xs);">
-                            Next <i class="fas fa-chevron-right"></i>
-                        </button>
-                    </div>
-                </div>
-            </section>
         </div>
     </main>
+
+    <!-- Video Player Overlay -->
+    <div id="video-overlay" class="video-overlay">
+        <div class="video-player-container">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--space-md);">
+                <div style="display: flex; align-items: center; gap: var(--space-sm);">
+                    <img id="current-channel-logo" src="" alt="" style="width: 50px; height: 50px; border-radius: var(--radius-sm); object-fit: contain; background: white; padding: 4px;">
+                    <div>
+                        <h3 id="current-channel" style="font-size: 1.5rem; font-weight: 700; margin-bottom: 4px; color: var(--text-primary);">Channel Name</h3>
+                        <p id="current-category" style="font-size: 1rem; color: var(--text-secondary);">Category</p>
+                    </div>
+                </div>
+                <div style="display: flex; align-items: center; gap: var(--space-sm);">
+                    <div style="display: flex; align-items: center; gap: var(--space-xs); padding: var(--space-xs) var(--space-sm); background: var(--glass-bg); border-radius: 20px; border: 1px solid var(--glass-border);">
+                        <div style="width: 8px; height: 8px; background: var(--accent-red); border-radius: 50%; animation: pulse 2s infinite;"></div>
+                        <span style="font-size: 0.875rem; color: var(--text-secondary); font-weight: 600;">LIVE</span>
+                    </div>
+                    <button id="fullscreen-btn" style="background: var(--glass-bg); color: var(--text-primary); border: 1px solid var(--glass-border); border-radius: var(--radius-sm); padding: var(--space-sm); cursor: pointer; transition: all var(--transition-fast);">
+                        <i class="fas fa-expand"></i>
+                    </button>
+                    <button id="close-player" style="background: var(--accent-red); color: white; border: none; border-radius: var(--radius-sm); padding: var(--space-sm) var(--space-md); cursor: pointer; font-size: 0.875rem; font-weight: 600; transition: all var(--transition-fast);">
+                        <i class="fas fa-times"></i> Close
+                    </button>
+                </div>
+            </div>
+            
+            <div id="video-container" style="position: relative; width: 100%; height: 0; padding-bottom: 56.25%; border-radius: var(--radius-lg); overflow: hidden; background: #000; box-shadow: var(--shadow-xl);">
+                <iframe id="youtube-player" 
+                        style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none;"
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                        allowfullscreen>
+                </iframe>
+                <div id="player-loading" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: white; text-align: center; display: block;">
+                    <div class="loading-spinner" style="width: 40px; height: 40px; margin: 0 auto var(--space-sm);"></div>
+                    <p>Loading stream...</p>
+                </div>
+            </div>
+            
+            <div style="display: flex; justify-content: center; gap: var(--space-sm); margin-top: var(--space-md); flex-wrap: wrap;">
+                <button id="prev-channel" style="background: var(--glass-bg); color: var(--text-primary); border: 1px solid var(--glass-border); border-radius: var(--radius-md); padding: var(--space-sm) var(--space-md); cursor: pointer; transition: all var(--transition-fast); display: flex; align-items: center; gap: var(--space-xs);">
+                    <i class="fas fa-chevron-left"></i> Previous
+                </button>
+                <button id="quality-toggle" style="background: var(--glass-bg); color: var(--text-primary); border: 1px solid var(--glass-border); border-radius: var(--radius-md); padding: var(--space-sm) var(--space-md); cursor: pointer; transition: all var(--transition-fast);">
+                    <i class="fas fa-cog"></i> Quality
+                </button>
+                <button id="next-channel" style="background: var(--glass-bg); color: var(--text-primary); border: 1px solid var(--glass-border); border-radius: var(--radius-md); padding: var(--space-sm) var(--space-md); cursor: pointer; transition: all var(--transition-fast); display: flex; align-items: center; gap: var(--space-xs);">
+                    Next <i class="fas fa-chevron-right"></i>
+                </button>
+            </div>
+        </div>
+    </div>
 
     <!-- Scroll to Top Button -->
     <button id="scroll-top" style="position: fixed; bottom: var(--space-lg); right: var(--space-lg); width: 50px; height: 50px; background: var(--primary-blue); color: white; border: none; border-radius: 50%; cursor: pointer; display: none; z-index: 1000; transition: all var(--transition-fast); box-shadow: var(--shadow-lg);">
@@ -399,7 +436,6 @@
                 url: 'https://www.youtube.com/embed/XOacA3RYrXk',
                 quality: 'HD',
                 language: 'English',
-                viewers: '89.2K',
                 type: 'news'
             },
             {
@@ -412,7 +448,6 @@
                 url: 'https://www.youtube.com/embed/9Auq9mYxFEE',
                 quality: 'HD',
                 language: 'English',
-                viewers: '67.3K',
                 type: 'news'
             },
             {
@@ -425,7 +460,6 @@
                 url: 'https://www.youtube.com/embed/gCNeDWCI0vo',
                 quality: 'HD',
                 language: 'English',
-                viewers: '45.2K',
                 type: 'news'
             },
             {
@@ -438,7 +472,6 @@
                 url: 'https://www.youtube.com/embed/gzw1hoiBK6Q',
                 quality: 'HD',
                 language: 'English/Swahili',
-                viewers: '28.7K',
                 type: 'local'
             },
             {
@@ -451,7 +484,6 @@
                 url: 'https://www.youtube.com/embed/Au1KkxlGvGs',
                 quality: 'HD',
                 language: 'English/Swahili',
-                viewers: '19.4K',
                 type: 'local'
             },
             {
@@ -464,7 +496,6 @@
                 url: 'https://www.youtube.com/embed/74t0979nG6U',
                 quality: 'HD',
                 language: 'English/Swahili',
-                viewers: '31.6K',
                 type: 'local'
             },
             {
@@ -477,7 +508,6 @@
                 url: 'https://www.youtube.com/embed/tkDUSbvSExg',
                 quality: 'HD',
                 language: 'English',
-                viewers: '23.5K',
                 type: 'international'
             },
             {
@@ -490,7 +520,6 @@
                 url: 'https://www.youtube.com/embed/pqabxBKzZ6M',
                 quality: 'HD',
                 language: 'English',
-                viewers: '18.9K',
                 type: 'international'
             },
             {
@@ -503,7 +532,6 @@
                 url: 'https://www.youtube.com/embed/pykz0DEwvUs',
                 quality: 'HD',
                 language: 'English',
-                viewers: '34.7K',
                 type: 'international'
             },
             {
@@ -516,7 +544,6 @@
                 url: 'https://www.youtube.com/embed/Cy0s_bxzqkw',
                 quality: 'HD',
                 language: 'English',
-                viewers: '52.1K',
                 type: 'documentary'
             },
             {
@@ -529,7 +556,6 @@
                 url: 'https://www.youtube.com/embed/daqB3i9WYIY',
                 quality: '4K',
                 language: 'English',
-                viewers: '15.8K',
                 type: 'documentary'
             },
             {
@@ -542,18 +568,16 @@
                 url: 'https://www.youtube.com/embed/9Auq9mYxFEE',
                 quality: 'HD',
                 language: 'English',
-                viewers: '42.8K',
                 type: 'international'
             }
         ];
 
         let currentChannelIndex = 0;
-        let isPlayerVisible = false;
         let filteredChannels = [...channels];
 
         // DOM Elements
         const channelsGrid = document.getElementById('channels-grid');
-        const playerSection = document.getElementById('player-section');
+        const videoOverlay = document.getElementById('video-overlay');
         const youtubePlayer = document.getElementById('youtube-player');
         const currentChannelElement = document.getElementById('current-channel');
         const currentCategoryElement = document.getElementById('current-category');
@@ -565,7 +589,6 @@
         const fullscreenBtn = document.getElementById('fullscreen-btn');
         const scrollTopBtn = document.getElementById('scroll-top');
         const loadingScreen = document.getElementById('loading-screen');
-        const viewerCount = document.getElementById('viewer-count');
         const channelSearch = document.getElementById('channel-search');
         const filterTags = document.querySelectorAll('.filter-tag');
 
@@ -573,7 +596,6 @@
         function init() {
             renderChannels();
             setupEventListeners();
-            updateViewerCount();
             
             // Hide loading screen after content loads
             setTimeout(() => {
@@ -624,8 +646,8 @@
                                 ${channel.language}
                             </span>
                             <span style="font-size: 0.75rem; color: var(--text-secondary);">
-                                <i class="fas fa-users" style="margin-right: 4px;"></i>
-                                ${channel.viewers} watching
+                                <i class="fas fa-signal" style="margin-right: 4px;"></i>
+                                ${channel.quality} Quality
                             </span>
                         </div>
                         <button style="
@@ -654,7 +676,7 @@
 
         // Enhanced event listeners
         function setupEventListeners() {
-            // Channel selection
+            // Channel selection - immediately open video player
             channelsGrid.addEventListener('click', (e) => {
                 const channelCard = e.target.closest('.channel-card');
                 if (channelCard) {
@@ -694,6 +716,13 @@
             // Fullscreen toggle
             fullscreenBtn.addEventListener('click', toggleFullscreen);
 
+            // Close player when clicking outside
+            videoOverlay.addEventListener('click', (e) => {
+                if (e.target === videoOverlay) {
+                    closePlayer();
+                }
+            });
+
             // Scroll to top
             window.addEventListener('scroll', () => {
                 if (window.scrollY > 300) {
@@ -721,7 +750,7 @@
 
             // Keyboard shortcuts
             document.addEventListener('keydown', (e) => {
-                if (isPlayerVisible) {
+                if (videoOverlay.classList.contains('active')) {
                     if (e.key === 'Escape') closePlayer();
                     if (e.key === 'ArrowLeft') playChannel(currentChannelIndex - 1);
                     if (e.key === 'ArrowRight') playChannel(currentChannelIndex + 1);
@@ -748,13 +777,17 @@
             return activeTag ? activeTag.dataset.category : 'all';
         }
 
-        // Enhanced play channel function
+        // Enhanced play channel function - immediate video player
         function playChannel(index) {
             if (index < 0) index = filteredChannels.length - 1;
             if (index >= filteredChannels.length) index = 0;
             
             currentChannelIndex = index;
             const channel = filteredChannels[index];
+            
+            // Show video overlay immediately
+            videoOverlay.classList.add('active');
+            document.body.style.overflow = 'hidden'; // Prevent background scrolling
             
             // Show loading
             playerLoading.style.display = 'block';
@@ -771,16 +804,9 @@
                 this.style.display = 'none';
                 const fallback = document.createElement('div');
                 fallback.textContent = channel.fallbackLogo;
-                fallback.style.cssText = 'width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; background: white; border-radius: var(--radius-sm);';
+                fallback.style.cssText = 'width: 50px; height: 50px; display: flex; align-items: center; justify-content: center; font-size: 2rem; background: white; border-radius: var(--radius-sm);';
                 this.parentNode.insertBefore(fallback, this.nextSibling);
             };
-            
-            // Show player
-            if (!isPlayerVisible) {
-                playerSection.style.display = 'block';
-                playerSection.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                isPlayerVisible = true;
-            }
             
             // Hide loading after delay
             setTimeout(() => {
@@ -791,8 +817,8 @@
         // Close player
         function closePlayer() {
             youtubePlayer.src = '';
-            playerSection.style.display = 'none';
-            isPlayerVisible = false;
+            videoOverlay.classList.remove('active');
+            document.body.style.overflow = 'auto'; // Restore scrolling
         }
 
         // Toggle fullscreen
@@ -809,18 +835,7 @@
             }
         }
 
-        // Update viewer count periodically
-        function updateViewerCount() {
-            const counts = ['12.5K', '13.2K', '14.1K', '12.8K', '13.7K', '15.1K', '14.8K'];
-            let index = 0;
-            
-            setInterval(() => {
-                viewerCount.textContent = counts[index % counts.length];
-                index++;
-            }, 8000);
-        }
-
-        // Add pulse animation
+        // Add pulse animation and responsive styles
         const style = document.createElement('style');
         style.textContent = `
             @keyframes pulse {
@@ -858,6 +873,28 @@
                 .header > .container > div > div {
                     justify-content: center;
                 }
+                
+                .video-player-container {
+                    height: 100vh;
+                    display: flex;
+                    flex-direction: column;
+                }
+                
+                .video-player-container > div:first-child {
+                    flex-direction: column;
+                    gap: var(--space-sm);
+                    align-items: stretch;
+                }
+                
+                .video-player-container > div:first-child > div:last-child {
+                    justify-content: center;
+                }
+                
+                .video-player-container #video-container {
+                    flex: 1;
+                    padding-bottom: 0;
+                    height: auto;
+                }
             }
             
             @media (max-width: 480px) {
@@ -867,20 +904,6 @@
                 
                 .channel-card h3 {
                     font-size: 1rem !important;
-                }
-                
-                #player-section .glass-card {
-                    padding: var(--space-sm) !important;
-                }
-                
-                #player-section .glass-card > div:first-child {
-                    flex-direction: column;
-                    gap: var(--space-sm);
-                    align-items: stretch;
-                }
-                
-                #player-section .glass-card > div:first-child > div:last-child {
-                    justify-content: center;
                 }
             }
         `;
