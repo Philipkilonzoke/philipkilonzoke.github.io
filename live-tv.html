@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>📡 Live TV Streaming - Brightlens News</title>
-    <meta name="description" content="Watch live news channels streaming 24/7. Al Jazeera, Citizen TV, KTN News, NTV Kenya, and more premium channels with HD quality.">
+    <meta name="description" content="Watch live news channels streaming 24/7. CNN, BBC, Al Jazeera, Citizen TV, KTN News, NTV Kenya, and more premium channels with HD quality.">
     
     <!-- Preload critical resources -->
     <link rel="preload" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" as="style">
@@ -19,29 +19,98 @@
         }
         
         :root {
-            --primary-color: #2563eb;
-            --secondary-color: #1e40af;
-            --accent-color: #dc2626;
-            --success-color: #16a34a;
-            --background-color: #0f172a;
+            /* Modern Color System */
+            --primary-blue: #3b82f6;
+            --primary-blue-dark: #1d4ed8;
+            --secondary-purple: #8b5cf6;
+            --accent-orange: #f97316;
+            --accent-red: #dc2626;
+            --success-green: #16a34a;
+            
+            /* Background & Surfaces */
+            --bg-primary: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --bg-secondary: rgba(255, 255, 255, 0.95);
             --surface-color: #1e293b;
             --card-color: #334155;
+            
+            /* Text Colors */
             --text-primary: #f8fafc;
             --text-secondary: #cbd5e1;
-            --border-color: #475569;
-            --hover-color: #3b82f6;
-            --gradient-primary: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            --gradient-live: linear-gradient(90deg, #ff0000, #ff4500, #ff0000);
-            --shadow-lg: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-            --blur-bg: rgba(15, 23, 42, 0.8);
+            --text-muted: #94a3b8;
+            
+            /* Glass Effects */
+            --glass-bg: rgba(255, 255, 255, 0.1);
+            --glass-bg-strong: rgba(255, 255, 255, 0.2);
+            --glass-border: rgba(255, 255, 255, 0.2);
+            --backdrop-blur: blur(20px);
+            
+            /* Shadows */
+            --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+            
+            /* Spacing */
+            --space-xs: 0.5rem;
+            --space-sm: 1rem;
+            --space-md: 1.5rem;
+            --space-lg: 2rem;
+            --space-xl: 3rem;
+            
+            /* Border Radius */
+            --radius-sm: 8px;
+            --radius-md: 12px;
+            --radius-lg: 16px;
+            --radius-xl: 20px;
+            
+            /* Transitions */
+            --transition-fast: 0.15s ease;
+            --transition-normal: 0.3s ease;
+            --transition-slow: 0.5s ease;
+        }
+        
+        [data-theme="dark"] {
+            --bg-primary: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            --bg-secondary: rgba(15, 23, 42, 0.95);
+            --glass-bg: rgba(15, 23, 42, 0.3);
+            --glass-bg-strong: rgba(15, 23, 42, 0.5);
         }
         
         body {
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-            background: var(--background-color);
-            color: var(--text-primary);
             line-height: 1.6;
+            color: var(--text-primary);
             overflow-x: hidden;
+            min-height: 100vh;
+            position: relative;
+        }
+        
+        .tv-background {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: var(--bg-primary);
+            background-size: 400% 400%;
+            animation: gradientShift 20s ease infinite;
+            z-index: -2;
+        }
+        
+        @keyframes gradientShift {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+        }
+        
+        .background-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(2px);
+            z-index: -1;
         }
         
         .loading-screen {
@@ -50,7 +119,7 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: var(--background-color);
+            background: var(--surface-color);
             display: flex;
             align-items: center;
             justify-content: center;
@@ -61,8 +130,8 @@
         .loading-spinner {
             width: 60px;
             height: 60px;
-            border: 4px solid var(--border-color);
-            border-top: 4px solid var(--primary-color);
+            border: 4px solid var(--glass-border);
+            border-top: 4px solid var(--primary-blue);
             border-radius: 50%;
             animation: spin 1s linear infinite;
         }
@@ -73,9 +142,9 @@
         }
         
         .header {
-            background: var(--blur-bg);
-            backdrop-filter: blur(20px);
-            border-bottom: 1px solid var(--border-color);
+            background: var(--glass-bg);
+            backdrop-filter: var(--backdrop-blur);
+            border-bottom: 1px solid var(--glass-border);
             position: sticky;
             top: 0;
             z-index: 100;
@@ -84,12 +153,33 @@
         .container {
             max-width: 1400px;
             margin: 0 auto;
-            padding: 0 1rem;
+            padding: 0 var(--space-sm);
         }
         
         .hidden {
             opacity: 0;
             visibility: hidden;
+        }
+        
+        .glass-card {
+            background: var(--glass-bg);
+            backdrop-filter: var(--backdrop-blur);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-xl);
+            box-shadow: var(--shadow-lg);
+            transition: all var(--transition-normal);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .glass-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
         }
     </style>
     
@@ -100,39 +190,44 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 </head>
 <body>
+    <!-- Background -->
+    <div class="tv-background">
+        <div class="background-overlay"></div>
+    </div>
+
     <!-- Loading Screen -->
     <div id="loading-screen" class="loading-screen">
         <div style="text-align: center; color: var(--text-primary);">
             <div class="loading-spinner"></div>
-            <h3 style="margin-top: 1rem;">Loading Live TV...</h3>
-            <p style="color: var(--text-secondary); margin-top: 0.5rem;">Preparing your streaming experience</p>
+            <h3 style="margin-top: var(--space-sm); font-weight: 600;">Loading Live TV...</h3>
+            <p style="color: var(--text-secondary); margin-top: var(--space-xs);">Preparing your streaming experience</p>
         </div>
     </div>
 
     <!-- Header -->
     <header class="header">
         <div class="container">
-            <div style="display: flex; justify-content: space-between; align-items: center; padding: 1rem 0;">
-                <div style="display: flex; align-items: center; gap: 1rem;">
-                    <a href="index.html" style="color: var(--text-secondary); text-decoration: none; display: flex; align-items: center; gap: 0.5rem; font-size: 0.9rem; transition: color 0.3s;">
+            <div style="display: flex; justify-content: space-between; align-items: center; padding: var(--space-sm) 0;">
+                <div style="display: flex; align-items: center; gap: var(--space-sm);">
+                    <a href="index.html" style="color: var(--text-secondary); text-decoration: none; display: flex; align-items: center; gap: var(--space-xs); font-size: 0.9rem; transition: color var(--transition-fast); border-radius: var(--radius-sm); padding: var(--space-xs);">
                         <i class="fas fa-arrow-left"></i>
                         <span>Back to News</span>
                     </a>
-                    <div style="height: 20px; width: 1px; background: var(--border-color);"></div>
-                    <h1 style="font-size: 1.5rem; font-weight: 700; background: var(--gradient-primary); -webkit-background-clip: text; -webkit-text-fill-color: transparent; display: flex; align-items: center; gap: 0.5rem;">
-                        <i class="fas fa-broadcast-tower" style="color: var(--accent-color);"></i>
+                    <div style="height: 20px; width: 1px; background: var(--glass-border);"></div>
+                    <h1 style="font-size: 1.5rem; font-weight: 700; background: var(--bg-primary); -webkit-background-clip: text; -webkit-text-fill-color: transparent; display: flex; align-items: center; gap: var(--space-xs);">
+                        <i class="fas fa-broadcast-tower" style="color: var(--accent-red);"></i>
                         📡 Live TV Streaming
                     </h1>
                 </div>
                 
-                <div style="display: flex; align-items: center; gap: 1rem;">
-                    <div style="display: flex; align-items: center; gap: 0.5rem; padding: 0.5rem 1rem; background: var(--surface-color); border-radius: 20px; border: 1px solid var(--border-color);">
-                        <div style="width: 8px; height: 8px; background: var(--accent-color); border-radius: 50%; animation: pulse 2s infinite;"></div>
+                <div style="display: flex; align-items: center; gap: var(--space-sm);">
+                    <div style="display: flex; align-items: center; gap: var(--space-xs); padding: var(--space-xs) var(--space-sm); background: var(--glass-bg); border-radius: 20px; border: 1px solid var(--glass-border);">
+                        <div style="width: 8px; height: 8px; background: var(--accent-red); border-radius: 50%; animation: pulse 2s infinite;"></div>
                         <span style="font-size: 0.875rem; font-weight: 500;">
                             <span id="viewer-count">12.5K</span> Watching
                         </span>
                     </div>
-                    <select id="themeSelect" style="background: var(--surface-color); color: var(--text-primary); border: 1px solid var(--border-color); border-radius: 8px; padding: 0.5rem; font-size: 0.875rem;">
+                    <select id="themeSelect" style="background: var(--glass-bg); color: var(--text-primary); border: 1px solid var(--glass-border); border-radius: var(--radius-sm); padding: var(--space-xs); font-size: 0.875rem;">
                         <option value="default">Default Theme</option>
                         <option value="dark">Dark Theme</option>
                         <option value="blue">Blue Theme</option>
@@ -143,48 +238,101 @@
     </header>
 
     <!-- Main Content -->
-    <main style="padding: 2rem 0; min-height: calc(100vh - 200px);">
+    <main style="padding: var(--space-lg) 0; min-height: calc(100vh - 200px);">
         <div class="container">
-            <!-- Live TV Section -->
-            <section style="margin-bottom: 3rem;">
-                <div style="text-align: center; margin-bottom: 3rem;">
-                    <h2 style="font-size: 2.5rem; font-weight: 700; margin-bottom: 1rem; background: var(--gradient-primary); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">
-                        📡 Watch Live News Now
-                    </h2>
-                    <p style="font-size: 1.125rem; color: var(--text-secondary); max-width: 600px; margin: 0 auto;">
-                        Stream premium news channels in HD quality with instant playback. No ads, no delays.
-                    </p>
-                </div>
+            <!-- Hero Section -->
+            <section style="text-align: center; margin-bottom: var(--space-xl);">
+                <h2 style="font-size: 3rem; font-weight: 800; margin-bottom: var(--space-sm); background: var(--bg-primary); -webkit-background-clip: text; -webkit-text-fill-color: transparent; line-height: 1.2;">
+                    📡 Watch Live News Now
+                </h2>
+                <p style="font-size: 1.25rem; color: var(--text-secondary); max-width: 600px; margin: 0 auto; line-height: 1.6;">
+                    Stream premium news channels in HD quality with instant playback. No ads, no delays.
+                </p>
+            </section>
 
-                <!-- Channels Grid -->
-                <div id="channels-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 1.5rem; margin-bottom: 2rem;">
+            <!-- Search Section -->
+            <section class="glass-card" style="margin-bottom: var(--space-xl); padding: var(--space-lg);">
+                <div style="display: flex; align-items: center; gap: var(--space-sm); margin-bottom: var(--space-md);">
+                    <i class="fas fa-search" style="color: var(--text-muted);"></i>
+                    <input type="text" id="channel-search" placeholder="Search channels..." style="flex: 1; background: var(--glass-bg); border: 1px solid var(--glass-border); border-radius: var(--radius-md); padding: var(--space-sm); color: var(--text-primary); font-size: 1rem;">
+                    <button id="filter-btn" style="background: var(--primary-blue); color: white; border: none; border-radius: var(--radius-md); padding: var(--space-sm) var(--space-md); cursor: pointer; transition: all var(--transition-fast);">
+                        <i class="fas fa-filter"></i>
+                        Filter
+                    </button>
+                </div>
+                
+                <!-- Quick Filter Tags -->
+                <div style="display: flex; flex-wrap: wrap; gap: var(--space-xs);">
+                    <button class="filter-tag active" data-category="all" style="background: var(--primary-blue); color: white; border: none; border-radius: 20px; padding: var(--space-xs) var(--space-sm); font-size: 0.875rem; cursor: pointer; transition: all var(--transition-fast);">
+                        All Channels
+                    </button>
+                    <button class="filter-tag" data-category="news" style="background: var(--glass-bg); color: var(--text-primary); border: 1px solid var(--glass-border); border-radius: 20px; padding: var(--space-xs) var(--space-sm); font-size: 0.875rem; cursor: pointer; transition: all var(--transition-fast);">
+                        News
+                    </button>
+                    <button class="filter-tag" data-category="international" style="background: var(--glass-bg); color: var(--text-primary); border: 1px solid var(--glass-border); border-radius: 20px; padding: var(--space-xs) var(--space-sm); font-size: 0.875rem; cursor: pointer; transition: all var(--transition-fast);">
+                        International
+                    </button>
+                    <button class="filter-tag" data-category="local" style="background: var(--glass-bg); color: var(--text-primary); border: 1px solid var(--glass-border); border-radius: 20px; padding: var(--space-xs) var(--space-sm); font-size: 0.875rem; cursor: pointer; transition: all var(--transition-fast);">
+                        Local Kenya
+                    </button>
+                    <button class="filter-tag" data-category="documentary" style="background: var(--glass-bg); color: var(--text-primary); border: 1px solid var(--glass-border); border-radius: 20px; padding: var(--space-xs) var(--space-sm); font-size: 0.875rem; cursor: pointer; transition: all var(--transition-fast);">
+                        Documentary
+                    </button>
+                </div>
+            </section>
+
+            <!-- Channels Grid -->
+            <section style="margin-bottom: var(--space-xl);">
+                <div id="channels-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: var(--space-md); justify-items: center;">
                     <!-- Channel cards will be inserted here by JavaScript -->
                 </div>
             </section>
 
-            <!-- Video Player Section -->
-            <section id="player-section" style="display: none; margin-bottom: 3rem;">
-                <div style="background: var(--surface-color); border-radius: 16px; padding: 1.5rem; border: 1px solid var(--border-color); box-shadow: var(--shadow-lg);">
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
-                        <h3 id="current-channel" style="font-size: 1.25rem; font-weight: 600;">Select a Channel</h3>
-                        <button id="close-player" style="background: var(--accent-color); color: white; border: none; border-radius: 8px; padding: 0.5rem 1rem; cursor: pointer; font-size: 0.875rem; transition: all 0.3s;">
-                            <i class="fas fa-times"></i> Close
-                        </button>
+            <!-- Enhanced Video Player Section -->
+            <section id="player-section" style="display: none; margin-bottom: var(--space-xl);">
+                <div class="glass-card" style="padding: var(--space-lg);">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--space-md);">
+                        <div style="display: flex; align-items: center; gap: var(--space-sm);">
+                            <img id="current-channel-logo" src="" alt="" style="width: 40px; height: 40px; border-radius: var(--radius-sm); object-fit: contain; background: white; padding: 4px;">
+                            <div>
+                                <h3 id="current-channel" style="font-size: 1.25rem; font-weight: 600; margin-bottom: 2px;">Select a Channel</h3>
+                                <p id="current-category" style="font-size: 0.875rem; color: var(--text-secondary);">Category</p>
+                            </div>
+                        </div>
+                        <div style="display: flex; align-items: center; gap: var(--space-sm);">
+                            <div style="display: flex; align-items: center; gap: var(--space-xs); padding: var(--space-xs) var(--space-sm); background: var(--glass-bg); border-radius: 20px;">
+                                <div style="width: 6px; height: 6px; background: var(--accent-red); border-radius: 50%; animation: pulse 2s infinite;"></div>
+                                <span style="font-size: 0.75rem; color: var(--text-secondary);">LIVE</span>
+                            </div>
+                            <button id="fullscreen-btn" style="background: var(--glass-bg); color: var(--text-primary); border: 1px solid var(--glass-border); border-radius: var(--radius-sm); padding: var(--space-xs); cursor: pointer; transition: all var(--transition-fast);">
+                                <i class="fas fa-expand"></i>
+                            </button>
+                            <button id="close-player" style="background: var(--accent-red); color: white; border: none; border-radius: var(--radius-sm); padding: var(--space-xs) var(--space-sm); cursor: pointer; font-size: 0.875rem; transition: all var(--transition-fast);">
+                                <i class="fas fa-times"></i> Close
+                            </button>
+                        </div>
                     </div>
                     
-                    <div style="position: relative; width: 100%; height: 0; padding-bottom: 56.25%; border-radius: 12px; overflow: hidden; background: #000;">
+                    <div id="video-container" style="position: relative; width: 100%; height: 0; padding-bottom: 56.25%; border-radius: var(--radius-lg); overflow: hidden; background: #000; box-shadow: var(--shadow-xl);">
                         <iframe id="youtube-player" 
                                 style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none;"
                                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                                 allowfullscreen>
                         </iframe>
+                        <div id="player-loading" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: white; text-align: center; display: none;">
+                            <div class="loading-spinner" style="width: 40px; height: 40px; margin: 0 auto var(--space-sm);"></div>
+                            <p>Loading stream...</p>
+                        </div>
                     </div>
                     
-                    <div style="display: flex; justify-content: center; gap: 1rem; margin-top: 1rem;">
-                        <button id="prev-channel" style="background: var(--surface-color); color: var(--text-primary); border: 1px solid var(--border-color); border-radius: 8px; padding: 0.75rem 1.5rem; cursor: pointer; transition: all 0.3s;">
+                    <div style="display: flex; justify-content: center; gap: var(--space-sm); margin-top: var(--space-md); flex-wrap: wrap;">
+                        <button id="prev-channel" style="background: var(--glass-bg); color: var(--text-primary); border: 1px solid var(--glass-border); border-radius: var(--radius-md); padding: var(--space-sm) var(--space-md); cursor: pointer; transition: all var(--transition-fast); display: flex; align-items: center; gap: var(--space-xs);">
                             <i class="fas fa-chevron-left"></i> Previous
                         </button>
-                        <button id="next-channel" style="background: var(--surface-color); color: var(--text-primary); border: 1px solid var(--border-color); border-radius: 8px; padding: 0.75rem 1.5rem; cursor: pointer; transition: all 0.3s;">
+                        <button id="quality-toggle" style="background: var(--glass-bg); color: var(--text-primary); border: 1px solid var(--glass-border); border-radius: var(--radius-md); padding: var(--space-sm) var(--space-md); cursor: pointer; transition: all var(--transition-fast);">
+                            <i class="fas fa-cog"></i> Quality
+                        </button>
+                        <button id="next-channel" style="background: var(--glass-bg); color: var(--text-primary); border: 1px solid var(--glass-border); border-radius: var(--radius-md); padding: var(--space-sm) var(--space-md); cursor: pointer; transition: all var(--transition-fast); display: flex; align-items: center; gap: var(--space-xs);">
                             Next <i class="fas fa-chevron-right"></i>
                         </button>
                     </div>
@@ -194,35 +342,44 @@
     </main>
 
     <!-- Scroll to Top Button -->
-    <button id="scroll-top" style="position: fixed; bottom: 2rem; right: 2rem; width: 50px; height: 50px; background: var(--primary-color); color: white; border: none; border-radius: 50%; cursor: pointer; display: none; z-index: 1000; transition: all 0.3s; box-shadow: var(--shadow-lg);">
+    <button id="scroll-top" style="position: fixed; bottom: var(--space-lg); right: var(--space-lg); width: 50px; height: 50px; background: var(--primary-blue); color: white; border: none; border-radius: 50%; cursor: pointer; display: none; z-index: 1000; transition: all var(--transition-fast); box-shadow: var(--shadow-lg);">
         <i class="fas fa-arrow-up"></i>
     </button>
 
     <!-- Footer -->
-    <footer style="background: var(--surface-color); border-top: 1px solid var(--border-color); padding: 2rem 0; margin-top: 3rem;">
+    <footer style="background: var(--glass-bg); backdrop-filter: var(--backdrop-blur); border-top: 1px solid var(--glass-border); padding: var(--space-lg) 0; margin-top: var(--space-xl);">
         <div class="container">
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 2rem; margin-bottom: 2rem;">
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: var(--space-lg); margin-bottom: var(--space-lg);">
                 <div>
-                    <h4 style="font-size: 1.125rem; font-weight: 600; margin-bottom: 1rem;">Brightlens Live TV</h4>
+                    <h4 style="font-size: 1.125rem; font-weight: 600; margin-bottom: var(--space-sm);">Brightlens Live TV</h4>
                     <p style="color: var(--text-secondary); line-height: 1.6;">
                         Watch premium news channels streaming live 24/7. High-quality video and audio with instant playback.
                     </p>
                 </div>
                 <div>
-                    <h4 style="font-size: 1.125rem; font-weight: 600; margin-bottom: 1rem;">Connect With Us</h4>
-                    <div style="display: flex; flex-direction: column; gap: 0.5rem;">
-                        <a href="https://instagram.com/philipkilonzo.ke" target="_blank" style="color: var(--text-secondary); text-decoration: none; display: flex; align-items: center; gap: 0.5rem; transition: color 0.3s;">
+                    <h4 style="font-size: 1.125rem; font-weight: 600; margin-bottom: var(--space-sm);">Features</h4>
+                    <ul style="list-style: none; color: var(--text-secondary); line-height: 1.8;">
+                        <li><i class="fas fa-check" style="color: var(--success-green); margin-right: var(--space-xs);"></i> HD Quality Streaming</li>
+                        <li><i class="fas fa-check" style="color: var(--success-green); margin-right: var(--space-xs);"></i> No Ads or Interruptions</li>
+                        <li><i class="fas fa-check" style="color: var(--success-green); margin-right: var(--space-xs);"></i> Mobile Responsive</li>
+                        <li><i class="fas fa-check" style="color: var(--success-green); margin-right: var(--space-xs);"></i> Fast Channel Switching</li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 style="font-size: 1.125rem; font-weight: 600; margin-bottom: var(--space-sm);">Connect With Us</h4>
+                    <div style="display: flex; flex-direction: column; gap: var(--space-xs);">
+                        <a href="https://instagram.com/philipkilonzo.ke" target="_blank" style="color: var(--text-secondary); text-decoration: none; display: flex; align-items: center; gap: var(--space-xs); transition: color var(--transition-fast); padding: var(--space-xs); border-radius: var(--radius-sm);">
                             <i class="fab fa-instagram"></i>
                             @philipkilonzo.ke
                         </a>
-                        <a href="https://wa.me/254791943551" target="_blank" style="color: var(--text-secondary); text-decoration: none; display: flex; align-items: center; gap: 0.5rem; transition: color 0.3s;">
+                        <a href="https://wa.me/254791943551" target="_blank" style="color: var(--text-secondary); text-decoration: none; display: flex; align-items: center; gap: var(--space-xs); transition: color var(--transition-fast); padding: var(--space-xs); border-radius: var(--radius-sm);">
                             <i class="fab fa-whatsapp"></i>
                             +254 791 943 551
                         </a>
                     </div>
                 </div>
             </div>
-            <div style="text-align: center; padding-top: 2rem; border-top: 1px solid var(--border-color); color: var(--text-secondary);">
+            <div style="text-align: center; padding-top: var(--space-lg); border-top: 1px solid var(--glass-border); color: var(--text-secondary);">
                 <p>&copy; 2025 Brightlens News - Live TV Streaming. All rights reserved.</p>
             </div>
         </div>
@@ -230,156 +387,187 @@
 
     <!-- JavaScript -->
     <script>
-        // Channel data with working YouTube Live streams
+        // Enhanced channel data with proper logos and improved URLs
         const channels = [
             {
-                id: 'al-jazeera',
-                name: 'Al Jazeera English',
-                description: 'Breaking news and analysis from around the world',
-                logo: '🌍',
+                id: 'cnn-live',
+                name: 'CNN International',
+                description: 'Breaking news and analysis from CNN International',
+                logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/6/66/CNN_International_logo.svg/120px-CNN_International_logo.svg.png',
+                fallbackLogo: '📰',
                 category: 'International News',
-                url: 'https://www.youtube.com/embed/gCNeDWCI0vo',
+                url: 'https://www.youtube.com/embed/XOacA3RYrXk',
                 quality: 'HD',
                 language: 'English',
-                viewers: '45.2K'
-            },
-            {
-                id: 'citizen-tv',
-                name: 'Citizen TV Kenya',
-                description: 'Kenya\'s leading television station',
-                logo: '🇰🇪',
-                category: 'Local News',
-                url: 'https://www.youtube.com/embed/gzw1hoiBK6Q',
-                quality: 'HD',
-                language: 'English/Swahili',
-                viewers: '28.7K'
-            },
-            {
-                id: 'love-nature',
-                name: 'Love Nature',
-                description: 'Stunning 4K nature documentaries',
-                logo: '🌿',
-                category: 'Nature & Wildlife',
-                url: 'https://www.youtube.com/embed/daqB3i9WYIY',
-                quality: '4K',
-                language: 'English',
-                viewers: '15.8K'
-            },
-            {
-                id: 'nat-geo',
-                name: 'National Geographic',
-                description: 'Explore the world with National Geographic',
-                logo: '🌎',
-                category: 'Documentary',
-                url: 'https://www.youtube.com/embed/Cy0s_bxzqkw',
-                quality: 'HD',
-                language: 'English',
-                viewers: '52.1K'
-            },
-            {
-                id: 'ktn-news',
-                name: 'KTN News',
-                description: 'Kenya Television Network News',
-                logo: '📺',
-                category: 'Local News',
-                url: 'https://www.youtube.com/embed/Au1KkxlGvGs',
-                quality: 'HD',
-                language: 'English/Swahili',
-                viewers: '19.4K'
-            },
-            {
-                id: 'ntv-kenya',
-                name: 'NTV Kenya',
-                description: 'Nation Television - Premier news and entertainment',
-                logo: '🏛️',
-                category: 'Local News',
-                url: 'https://www.youtube.com/embed/74t0979nG6U',
-                quality: 'HD',
-                language: 'English/Swahili',
-                viewers: '31.6K'
+                viewers: '89.2K',
+                type: 'news'
             },
             {
                 id: 'bbc-news',
                 name: 'BBC News',
                 description: 'BBC World Service Live',
-                logo: '🇬🇧',
+                logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/7/75/BBC_News_red_logo.svg/120px-BBC_News_red_logo.svg.png',
+                fallbackLogo: '🇬🇧',
                 category: 'International News',
                 url: 'https://www.youtube.com/embed/9Auq9mYxFEE',
                 quality: 'HD',
                 language: 'English',
-                viewers: '67.3K'
+                viewers: '67.3K',
+                type: 'news'
             },
             {
-                id: 'sky-news',
-                name: 'Sky News',
-                description: 'Latest breaking news from Sky News',
-                logo: '☁️',
+                id: 'al-jazeera',
+                name: 'Al Jazeera English',
+                description: 'Breaking news and analysis from around the world',
+                logo: 'https://upload.wikimedia.org/wikipedia/en/thumb/f/f2/Aljazeera_eng.svg/120px-Aljazeera_eng.svg.png',
+                fallbackLogo: '🌍',
                 category: 'International News',
-                url: 'https://www.youtube.com/embed/9Auq9mYxFEE',
+                url: 'https://www.youtube.com/embed/gCNeDWCI0vo',
                 quality: 'HD',
                 language: 'English',
-                viewers: '42.8K'
+                viewers: '45.2K',
+                type: 'news'
+            },
+            {
+                id: 'citizen-tv',
+                name: 'Citizen TV Kenya',
+                description: 'Kenya\'s leading television station',
+                logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/8/86/Citizen_TV_logo.png/120px-Citizen_TV_logo.png',
+                fallbackLogo: '🇰🇪',
+                category: 'Local News',
+                url: 'https://www.youtube.com/embed/gzw1hoiBK6Q',
+                quality: 'HD',
+                language: 'English/Swahili',
+                viewers: '28.7K',
+                type: 'local'
+            },
+            {
+                id: 'ktn-news',
+                name: 'KTN News',
+                description: 'Kenya Television Network News',
+                logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/c/c5/KTN_logo.png/120px-KTN_logo.png',
+                fallbackLogo: '📺',
+                category: 'Local News',
+                url: 'https://www.youtube.com/embed/Au1KkxlGvGs',
+                quality: 'HD',
+                language: 'English/Swahili',
+                viewers: '19.4K',
+                type: 'local'
+            },
+            {
+                id: 'ntv-kenya',
+                name: 'NTV Kenya',
+                description: 'Nation Television - Premier news and entertainment',
+                logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/1/1c/NTV_%28Kenya%29_logo.svg/120px-NTV_%28Kenya%29_logo.svg.png',
+                fallbackLogo: '🏛️',
+                category: 'Local News',
+                url: 'https://www.youtube.com/embed/74t0979nG6U',
+                quality: 'HD',
+                language: 'English/Swahili',
+                viewers: '31.6K',
+                type: 'local'
             },
             {
                 id: 'france24',
                 name: 'France 24 English',
                 description: 'French international news channel',
-                logo: '🇫🇷',
+                logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/8/8a/France24.svg/120px-France24.svg.png',
+                fallbackLogo: '🇫🇷',
                 category: 'International News',
                 url: 'https://www.youtube.com/embed/tkDUSbvSExg',
                 quality: 'HD',
                 language: 'English',
-                viewers: '23.5K'
+                viewers: '23.5K',
+                type: 'international'
             },
             {
                 id: 'dw-news',
                 name: 'DW News',
                 description: 'Deutsche Welle - German international broadcaster',
-                logo: '🇩🇪',
+                logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/7/75/Deutsche_Welle_symbol_2012.svg/120px-Deutsche_Welle_symbol_2012.svg.png',
+                fallbackLogo: '🇩🇪',
                 category: 'International News',
                 url: 'https://www.youtube.com/embed/pqabxBKzZ6M',
                 quality: 'HD',
                 language: 'English',
-                viewers: '18.9K'
-            },
-            {
-                id: 'cnn-live',
-                name: 'CNN Live',
-                description: 'CNN International Live Stream',
-                logo: '📰',
-                category: 'International News',
-                url: 'https://www.youtube.com/embed/XOacA3RYrXk',
-                quality: 'HD',
-                language: 'English',
-                viewers: '89.2K'
+                viewers: '18.9K',
+                type: 'international'
             },
             {
                 id: 'euronews',
                 name: 'Euronews',
                 description: 'European perspective on world news',
-                logo: '🇪🇺',
+                logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/c/c5/Euronews_2016_logo.svg/120px-Euronews_2016_logo.svg.png',
+                fallbackLogo: '🇪🇺',
                 category: 'International News',
                 url: 'https://www.youtube.com/embed/pykz0DEwvUs',
                 quality: 'HD',
                 language: 'English',
-                viewers: '34.7K'
+                viewers: '34.7K',
+                type: 'international'
+            },
+            {
+                id: 'nat-geo',
+                name: 'National Geographic',
+                description: 'Explore the world with National Geographic',
+                logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/f/fc/Natgeologo.svg/120px-Natgeologo.svg.png',
+                fallbackLogo: '🌎',
+                category: 'Documentary',
+                url: 'https://www.youtube.com/embed/Cy0s_bxzqkw',
+                quality: 'HD',
+                language: 'English',
+                viewers: '52.1K',
+                type: 'documentary'
+            },
+            {
+                id: 'love-nature',
+                name: 'Love Nature',
+                description: 'Stunning 4K nature documentaries',
+                logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/b/b5/Love_Nature_logo.svg/120px-Love_Nature_logo.svg.png',
+                fallbackLogo: '🌿',
+                category: 'Nature & Wildlife',
+                url: 'https://www.youtube.com/embed/daqB3i9WYIY',
+                quality: '4K',
+                language: 'English',
+                viewers: '15.8K',
+                type: 'documentary'
+            },
+            {
+                id: 'sky-news',
+                name: 'Sky News',
+                description: 'Latest breaking news from Sky News',
+                logo: 'https://upload.wikimedia.org/wikipedia/en/thumb/9/9a/Sky_News_logo.svg/120px-Sky_News_logo.svg.png',
+                fallbackLogo: '☁️',
+                category: 'International News',
+                url: 'https://www.youtube.com/embed/9Auq9mYxFEE',
+                quality: 'HD',
+                language: 'English',
+                viewers: '42.8K',
+                type: 'international'
             }
         ];
 
         let currentChannelIndex = 0;
         let isPlayerVisible = false;
+        let filteredChannels = [...channels];
 
         // DOM Elements
         const channelsGrid = document.getElementById('channels-grid');
         const playerSection = document.getElementById('player-section');
         const youtubePlayer = document.getElementById('youtube-player');
         const currentChannelElement = document.getElementById('current-channel');
+        const currentCategoryElement = document.getElementById('current-category');
+        const currentChannelLogo = document.getElementById('current-channel-logo');
+        const playerLoading = document.getElementById('player-loading');
         const closePlayerBtn = document.getElementById('close-player');
         const prevChannelBtn = document.getElementById('prev-channel');
         const nextChannelBtn = document.getElementById('next-channel');
+        const fullscreenBtn = document.getElementById('fullscreen-btn');
         const scrollTopBtn = document.getElementById('scroll-top');
         const loadingScreen = document.getElementById('loading-screen');
         const viewerCount = document.getElementById('viewer-count');
+        const channelSearch = document.getElementById('channel-search');
+        const filterTags = document.querySelectorAll('.filter-tag');
 
         // Initialize the app
         function init() {
@@ -393,61 +581,69 @@
             }, 1500);
         }
 
-        // Render channel cards
+        // Render channel cards with improved design
         function renderChannels() {
-            channelsGrid.innerHTML = channels.map((channel, index) => `
-                <div class="channel-card" data-index="${index}" style="
-                    background: var(--card-color);
-                    border-radius: 16px;
-                    padding: 1.5rem;
-                    border: 1px solid var(--border-color);
+            channelsGrid.innerHTML = filteredChannels.map((channel, index) => `
+                <div class="channel-card glass-card" data-index="${index}" style="
+                    padding: var(--space-md);
                     cursor: pointer;
-                    transition: all 0.3s ease;
-                    position: relative;
-                    overflow: hidden;
-                    transform: translateY(0);
-                " onmouseover="this.style.transform='translateY(-5px)'; this.style.boxShadow='var(--shadow-lg)'; this.style.borderColor='var(--primary-color)'" 
-                   onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='none'; this.style.borderColor='var(--border-color)'">
+                    transition: all var(--transition-normal);
+                    max-width: 380px;
+                    width: 100%;
+                " onmouseover="this.style.transform='translateY(-8px)'; this.style.boxShadow='var(--shadow-xl)'" 
+                   onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='var(--shadow-lg)'">
                     
-                    <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1rem;">
-                        <div style="display: flex; align-items: center; gap: 0.75rem;">
-                            <div style="font-size: 2rem;">${channel.logo}</div>
+                    <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: var(--space-md);">
+                        <div style="display: flex; align-items: center; gap: var(--space-sm);">
+                            <div style="position: relative; width: 60px; height: 60px; border-radius: var(--radius-md); overflow: hidden; background: white; display: flex; align-items: center; justify-content: center; box-shadow: var(--shadow-sm);">
+                                <img src="${channel.logo}" alt="${channel.name}" 
+                                     style="width: 100%; height: 100%; object-fit: contain; padding: 4px;"
+                                     onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                                <div style="display: none; font-size: 2rem; align-items: center; justify-content: center; width: 100%; height: 100%;">${channel.fallbackLogo}</div>
+                            </div>
                             <div>
-                                <h3 style="font-size: 1.125rem; font-weight: 600; margin-bottom: 0.25rem;">${channel.name}</h3>
-                                <span style="font-size: 0.75rem; color: var(--text-secondary); background: var(--surface-color); padding: 0.25rem 0.5rem; border-radius: 4px;">${channel.category}</span>
+                                <h3 style="font-size: 1.125rem; font-weight: 600; margin-bottom: 0.25rem; color: var(--text-primary);">${channel.name}</h3>
+                                <span style="font-size: 0.75rem; color: var(--text-secondary); background: var(--glass-bg); padding: 0.25rem 0.5rem; border-radius: 12px; border: 1px solid var(--glass-border);">${channel.category}</span>
                             </div>
                         </div>
                         <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 0.25rem;">
-                            <span style="font-size: 0.75rem; color: var(--success-color); font-weight: 500; display: flex; align-items: center; gap: 0.25rem;">
-                                <div style="width: 6px; height: 6px; background: var(--success-color); border-radius: 50%; animation: pulse 2s infinite;"></div>
+                            <span style="font-size: 0.75rem; color: var(--accent-red); font-weight: 600; display: flex; align-items: center; gap: 0.25rem; background: rgba(220, 38, 38, 0.1); padding: 0.25rem 0.5rem; border-radius: 12px;">
+                                <div style="width: 6px; height: 6px; background: var(--accent-red); border-radius: 50%; animation: pulse 2s infinite;"></div>
                                 LIVE
                             </span>
-                            <span style="font-size: 0.75rem; color: var(--text-secondary);">${channel.quality}</span>
+                            <span style="font-size: 0.75rem; color: var(--text-secondary); background: var(--glass-bg); padding: 0.25rem 0.5rem; border-radius: 12px;">${channel.quality}</span>
                         </div>
                     </div>
                     
-                    <p style="color: var(--text-secondary); font-size: 0.875rem; margin-bottom: 1rem; line-height: 1.5;">${channel.description}</p>
+                    <p style="color: var(--text-secondary); font-size: 0.875rem; margin-bottom: var(--space-md); line-height: 1.5;">${channel.description}</p>
                     
                     <div style="display: flex; justify-content: space-between; align-items: center;">
                         <div style="display: flex; flex-direction: column; gap: 0.25rem;">
-                            <span style="font-size: 0.75rem; color: var(--text-secondary);">Language: ${channel.language}</span>
-                            <span style="font-size: 0.75rem; color: var(--text-secondary);">👥 ${channel.viewers} watching</span>
+                            <span style="font-size: 0.75rem; color: var(--text-secondary);">
+                                <i class="fas fa-globe" style="margin-right: 4px;"></i>
+                                ${channel.language}
+                            </span>
+                            <span style="font-size: 0.75rem; color: var(--text-secondary);">
+                                <i class="fas fa-users" style="margin-right: 4px;"></i>
+                                ${channel.viewers} watching
+                            </span>
                         </div>
                         <button style="
-                            background: var(--primary-color);
+                            background: var(--primary-blue);
                             color: white;
                             border: none;
-                            border-radius: 8px;
-                            padding: 0.75rem 1.5rem;
+                            border-radius: var(--radius-md);
+                            padding: var(--space-sm) var(--space-md);
                             font-size: 0.875rem;
-                            font-weight: 500;
+                            font-weight: 600;
                             cursor: pointer;
-                            transition: all 0.3s;
+                            transition: all var(--transition-fast);
                             display: flex;
                             align-items: center;
-                            gap: 0.5rem;
-                        " onmouseover="this.style.background='var(--hover-color)'; this.style.transform='scale(1.05)'" 
-                           onmouseout="this.style.background='var(--primary-color)'; this.style.transform='scale(1)'">
+                            gap: var(--space-xs);
+                            box-shadow: var(--shadow-sm);
+                        " onmouseover="this.style.background='var(--primary-blue-dark)'; this.style.transform='scale(1.05)'" 
+                           onmouseout="this.style.background='var(--primary-blue)'; this.style.transform='scale(1)'">
                             <i class="fas fa-play"></i>
                             Watch Now
                         </button>
@@ -456,7 +652,7 @@
             `).join('');
         }
 
-        // Setup event listeners
+        // Enhanced event listeners
         function setupEventListeners() {
             // Channel selection
             channelsGrid.addEventListener('click', (e) => {
@@ -467,10 +663,36 @@
                 }
             });
 
+            // Search functionality
+            channelSearch.addEventListener('input', (e) => {
+                const searchTerm = e.target.value.toLowerCase();
+                filterChannels(searchTerm, getActiveFilter());
+            });
+
+            // Filter tags
+            filterTags.forEach(tag => {
+                tag.addEventListener('click', () => {
+                    filterTags.forEach(t => {
+                        t.classList.remove('active');
+                        t.style.background = 'var(--glass-bg)';
+                        t.style.color = 'var(--text-primary)';
+                    });
+                    tag.classList.add('active');
+                    tag.style.background = 'var(--primary-blue)';
+                    tag.style.color = 'white';
+                    
+                    const category = tag.dataset.category;
+                    filterChannels(channelSearch.value.toLowerCase(), category);
+                });
+            });
+
             // Player controls
             closePlayerBtn.addEventListener('click', closePlayer);
             prevChannelBtn.addEventListener('click', () => playChannel(currentChannelIndex - 1));
             nextChannelBtn.addEventListener('click', () => playChannel(currentChannelIndex + 1));
+            
+            // Fullscreen toggle
+            fullscreenBtn.addEventListener('click', toggleFullscreen);
 
             // Scroll to top
             window.addEventListener('scroll', () => {
@@ -503,22 +725,55 @@
                     if (e.key === 'Escape') closePlayer();
                     if (e.key === 'ArrowLeft') playChannel(currentChannelIndex - 1);
                     if (e.key === 'ArrowRight') playChannel(currentChannelIndex + 1);
+                    if (e.key === 'f' || e.key === 'F') toggleFullscreen();
                 }
             });
         }
 
-        // Play selected channel
+        // Filter channels
+        function filterChannels(searchTerm, category) {
+            filteredChannels = channels.filter(channel => {
+                const matchesSearch = channel.name.toLowerCase().includes(searchTerm) || 
+                                    channel.description.toLowerCase().includes(searchTerm) ||
+                                    channel.category.toLowerCase().includes(searchTerm);
+                const matchesCategory = category === 'all' || channel.type === category;
+                return matchesSearch && matchesCategory;
+            });
+            renderChannels();
+        }
+
+        // Get active filter
+        function getActiveFilter() {
+            const activeTag = document.querySelector('.filter-tag.active');
+            return activeTag ? activeTag.dataset.category : 'all';
+        }
+
+        // Enhanced play channel function
         function playChannel(index) {
-            if (index < 0) index = channels.length - 1;
-            if (index >= channels.length) index = 0;
+            if (index < 0) index = filteredChannels.length - 1;
+            if (index >= filteredChannels.length) index = 0;
             
             currentChannelIndex = index;
-            const channel = channels[index];
+            const channel = filteredChannels[index];
             
-            // Update player
+            // Show loading
+            playerLoading.style.display = 'block';
+            
+            // Update player info
             const embedUrl = `${channel.url}?autoplay=1&mute=0&controls=1&rel=0&modestbranding=1&playsinline=1`;
             youtubePlayer.src = embedUrl;
-            currentChannelElement.textContent = `${channel.logo} ${channel.name}`;
+            currentChannelElement.textContent = channel.name;
+            currentCategoryElement.textContent = channel.category;
+            
+            // Update logo
+            currentChannelLogo.src = channel.logo;
+            currentChannelLogo.onerror = function() {
+                this.style.display = 'none';
+                const fallback = document.createElement('div');
+                fallback.textContent = channel.fallbackLogo;
+                fallback.style.cssText = 'width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; background: white; border-radius: var(--radius-sm);';
+                this.parentNode.insertBefore(fallback, this.nextSibling);
+            };
             
             // Show player
             if (!isPlayerVisible) {
@@ -527,9 +782,10 @@
                 isPlayerVisible = true;
             }
             
-            // Update button states
-            prevChannelBtn.disabled = false;
-            nextChannelBtn.disabled = false;
+            // Hide loading after delay
+            setTimeout(() => {
+                playerLoading.style.display = 'none';
+            }, 2000);
         }
 
         // Close player
@@ -539,18 +795,32 @@
             isPlayerVisible = false;
         }
 
+        // Toggle fullscreen
+        function toggleFullscreen() {
+            const videoContainer = document.getElementById('video-container');
+            if (!document.fullscreenElement) {
+                videoContainer.requestFullscreen().catch(err => {
+                    console.log(`Error attempting to enable fullscreen: ${err.message}`);
+                });
+                fullscreenBtn.innerHTML = '<i class="fas fa-compress"></i>';
+            } else {
+                document.exitFullscreen();
+                fullscreenBtn.innerHTML = '<i class="fas fa-expand"></i>';
+            }
+        }
+
         // Update viewer count periodically
         function updateViewerCount() {
-            const counts = ['12.5K', '13.2K', '14.1K', '12.8K', '13.7K'];
+            const counts = ['12.5K', '13.2K', '14.1K', '12.8K', '13.7K', '15.1K', '14.8K'];
             let index = 0;
             
             setInterval(() => {
                 viewerCount.textContent = counts[index % counts.length];
                 index++;
-            }, 5000);
+            }, 8000);
         }
 
-        // Pulse animation for live indicators
+        // Add pulse animation
         const style = document.createElement('style');
         style.textContent = `
             @keyframes pulse {
@@ -558,15 +828,60 @@
                 50% { opacity: 0.7; transform: scale(1.1); }
             }
             
-            .channel-card:hover {
-                transform: translateY(-5px);
-                box-shadow: var(--shadow-lg);
-                border-color: var(--primary-color);
+            .filter-tag:hover {
+                background: var(--primary-blue) !important;
+                color: white !important;
+                transform: scale(1.05);
             }
             
-            .channel-card button:hover {
-                background: var(--hover-color) !important;
-                transform: scale(1.05);
+            @media (max-width: 768px) {
+                #channels-grid {
+                    grid-template-columns: 1fr !important;
+                    max-width: 400px;
+                    margin: 0 auto;
+                }
+                
+                .container {
+                    padding: 0 var(--space-sm);
+                }
+                
+                h2 {
+                    font-size: 2rem !important;
+                }
+                
+                .header > .container > div {
+                    flex-direction: column;
+                    gap: var(--space-sm);
+                    align-items: stretch;
+                }
+                
+                .header > .container > div > div {
+                    justify-content: center;
+                }
+            }
+            
+            @media (max-width: 480px) {
+                .channel-card {
+                    padding: var(--space-sm) !important;
+                }
+                
+                .channel-card h3 {
+                    font-size: 1rem !important;
+                }
+                
+                #player-section .glass-card {
+                    padding: var(--space-sm) !important;
+                }
+                
+                #player-section .glass-card > div:first-child {
+                    flex-direction: column;
+                    gap: var(--space-sm);
+                    align-items: stretch;
+                }
+                
+                #player-section .glass-card > div:first-child > div:last-child {
+                    justify-content: center;
+                }
             }
         `;
         document.head.appendChild(style);
