@@ -12,174 +12,305 @@
     
     <!-- Critical CSS inline for faster loading -->
     <style>
+        /* CSS Variables for consistent theming */
+        :root {
+            --primary-color: #3b82f6;
+            --secondary-color: #1e40af;
+            --accent-color: #f59e0b;
+            --text-primary: #111827;
+            --text-secondary: #6b7280;
+            --bg-primary: #ffffff;
+            --bg-secondary: #f8fafc;
+            --bg-card: #ffffff;
+            --border-color: #e5e7eb;
+            --glass-bg: rgba(255, 255, 255, 0.1);
+            --glass-border: rgba(255, 255, 255, 0.2);
+            --shadow-lg: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        [data-theme="dark"] {
+            --text-primary: #f9fafb;
+            --text-secondary: #d1d5db;
+            --bg-primary: #111827;
+            --bg-secondary: #1f2937;
+            --bg-card: #374151;
+            --border-color: #4b5563;
+            --glass-bg: rgba(0, 0, 0, 0.3);
+            --glass-border: rgba(255, 255, 255, 0.1);
+        }
+
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
-        
-        :root {
-            /* Modern Color System */
-            --primary-blue: #3b82f6;
-            --primary-blue-dark: #1d4ed8;
-            --secondary-purple: #8b5cf6;
-            --accent-orange: #f97316;
-            --accent-red: #dc2626;
-            --success-green: #16a34a;
-            
-            /* Background & Surfaces */
-            --bg-primary: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            --bg-secondary: rgba(255, 255, 255, 0.95);
-            --surface-color: #1e293b;
-            --card-color: #334155;
-            
-            /* Text Colors */
-            --text-primary: #f8fafc;
-            --text-secondary: #cbd5e1;
-            --text-muted: #94a3b8;
-            
-            /* Glass Effects */
-            --glass-bg: rgba(255, 255, 255, 0.1);
-            --glass-bg-strong: rgba(255, 255, 255, 0.2);
-            --glass-border: rgba(255, 255, 255, 0.2);
-            --backdrop-blur: blur(20px);
-            
-            /* Shadows */
-            --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
-            --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
-            
-            /* Spacing */
-            --space-xs: 0.5rem;
-            --space-sm: 1rem;
-            --space-md: 1.5rem;
-            --space-lg: 2rem;
-            --space-xl: 3rem;
-            
-            /* Border Radius */
-            --radius-sm: 8px;
-            --radius-md: 12px;
-            --radius-lg: 16px;
-            --radius-xl: 20px;
-            
-            /* Transitions */
-            --transition-fast: 0.15s ease;
-            --transition-normal: 0.3s ease;
-            --transition-slow: 0.5s ease;
-        }
-        
-        [data-theme="dark"] {
-            --bg-primary: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
-            --bg-secondary: rgba(15, 23, 42, 0.95);
-            --glass-bg: rgba(15, 23, 42, 0.3);
-            --glass-bg-strong: rgba(15, 23, 42, 0.5);
-        }
-        
+
         body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-            line-height: 1.6;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
             color: var(--text-primary);
             overflow-x: hidden;
-            min-height: 100vh;
-            position: relative;
+            line-height: 1.6;
         }
-        
-        .tv-background {
+
+        /* Animated background */
+        body::before {
+            content: '';
             position: fixed;
             top: 0;
             left: 0;
-            width: 100vw;
-            height: 100vh;
-            background: var(--bg-primary);
-            background-size: 400% 400%;
-            animation: gradientShift 20s ease infinite;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(circle at 20% 50%, rgba(120, 119, 198, 0.3) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(255, 119, 198, 0.3) 0%, transparent 50%),
+                radial-gradient(circle at 40% 80%, rgba(120, 200, 255, 0.3) 0%, transparent 50%);
+            animation: backgroundShift 20s ease-in-out infinite;
             z-index: -2;
         }
-        
-        @keyframes gradientShift {
-            0%, 100% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
+
+        @keyframes backgroundShift {
+            0%, 100% { transform: translateX(0) translateY(0); }
+            33% { transform: translateX(-20px) translateY(-10px); }
+            66% { transform: translateX(20px) translateY(10px); }
         }
-        
-        .background-overlay {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.1);
-            backdrop-filter: blur(2px);
-            z-index: -1;
-        }
-        
-        .loading-screen {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: var(--surface-color);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 9999;
-            transition: opacity 0.5s ease;
-        }
-        
-        .loading-spinner {
-            width: 60px;
-            height: 60px;
-            border: 4px solid var(--glass-border);
-            border-top: 4px solid var(--primary-blue);
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-        }
-        
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-        
-        .header {
-            background: var(--glass-bg);
-            backdrop-filter: var(--backdrop-blur);
-            border-bottom: 1px solid var(--glass-border);
-            position: sticky;
-            top: 0;
-            z-index: 100;
-        }
-        
+
+        /* Glass morphism container */
         .container {
             max-width: 1400px;
             margin: 0 auto;
-            padding: 0 var(--space-sm);
-        }
-        
-        .hidden {
-            opacity: 0;
-            visibility: hidden;
-        }
-        
-        .glass-card {
+            padding: 2rem;
+            backdrop-filter: blur(20px);
             background: var(--glass-bg);
-            backdrop-filter: var(--backdrop-blur);
+            border-radius: 24px;
             border: 1px solid var(--glass-border);
-            border-radius: var(--radius-xl);
             box-shadow: var(--shadow-lg);
-            transition: all var(--transition-normal);
-            position: relative;
-            overflow: hidden;
+            margin-top: 2rem;
+            margin-bottom: 2rem;
         }
-        
-        .glass-card::before {
+
+        /* Header */
+        .header {
+            text-align: center;
+            margin-bottom: 3rem;
+            position: relative;
+        }
+
+        .header h1 {
+            font-size: 3.5rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #667eea, #764ba2, #f093fb);
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 1rem;
+            text-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .header p {
+            font-size: 1.25rem;
+            color: var(--text-secondary);
+            max-width: 600px;
+            margin: 0 auto 2rem;
+            opacity: 0.9;
+        }
+
+        /* Search and Filter */
+        .controls {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .search-box {
+            position: relative;
+            flex: 1;
+            max-width: 400px;
+        }
+
+        .search-box input {
+            width: 100%;
+            padding: 1rem 1rem 1rem 3rem;
+            border: 2px solid var(--glass-border);
+            border-radius: 16px;
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            color: var(--text-primary);
+            font-size: 1rem;
+            transition: var(--transition);
+            outline: none;
+        }
+
+        .search-box input:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+
+        .search-box i {
+            position: absolute;
+            left: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-secondary);
+        }
+
+        .filter-select {
+            padding: 1rem 2rem;
+            border: 2px solid var(--glass-border);
+            border-radius: 16px;
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            color: var(--text-primary);
+            font-size: 1rem;
+            cursor: pointer;
+            transition: var(--transition);
+            outline: none;
+        }
+
+        .filter-select:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+
+        /* Categories */
+        .category {
+            margin-bottom: 4rem;
+        }
+
+        .category-title {
+            font-size: 2rem;
+            font-weight: 600;
+            margin-bottom: 2rem;
+            text-align: center;
+            position: relative;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .category-title::after {
             content: '';
             position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 1px;
-            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+            bottom: -0.5rem;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100px;
+            height: 4px;
+            background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
+            border-radius: 2px;
+        }
+
+        /* Channel Grid */
+        .channel-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        /* Channel Card */
+        .channel-card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            overflow: hidden;
+            transition: var(--transition);
+            cursor: pointer;
+            position: relative;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            transform: translateY(0);
+        }
+
+        .channel-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+            border-color: var(--primary-color);
+        }
+
+        .channel-card:active {
+            transform: translateY(-4px);
+        }
+
+        .channel-header {
+            padding: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            position: relative;
+        }
+
+        .channel-logo {
+            width: 60px;
+            height: 60px;
+            border-radius: 12px;
+            object-fit: contain;
+            background: white;
+            padding: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            flex-shrink: 0;
+        }
+
+        .channel-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .channel-name {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+            color: var(--text-primary);
+        }
+
+        .channel-description {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            opacity: 0.8;
+        }
+
+        /* Quality and Status Indicators */
+        .channel-badges {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .badge {
+            padding: 0.25rem 0.75rem;
+            border-radius: 8px;
+            font-size: 0.75rem;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .badge.live {
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+            color: white;
+            animation: pulse 2s infinite;
+        }
+
+        .badge.hd {
+            background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+            color: white;
+        }
+
+        .badge.free {
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: white;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
         }
 
         /* Video Player Overlay */
@@ -187,15 +318,15 @@
             position: fixed;
             top: 0;
             left: 0;
-            width: 100vw;
-            height: 100vh;
-            background: rgba(0, 0, 0, 0.95);
-            backdrop-filter: blur(10px);
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            backdrop-filter: blur(20px);
             z-index: 1000;
             display: none;
-            align-items: center;
             justify-content: center;
-            animation: fadeIn 0.3s ease;
+            align-items: center;
+            animation: fadeIn 0.3s ease-out;
         }
 
         .video-overlay.active {
@@ -207,717 +338,729 @@
             to { opacity: 1; }
         }
 
-        .video-player-container {
+        .video-container {
             width: 90%;
             max-width: 1200px;
-            background: var(--glass-bg);
-            border-radius: var(--radius-xl);
-            padding: var(--space-lg);
-            backdrop-filter: var(--backdrop-blur);
-            border: 1px solid var(--glass-border);
+            height: 80%;
+            max-height: 675px;
+            background: #000;
+            border-radius: 16px;
+            overflow: hidden;
             position: relative;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.5);
+            animation: slideIn 0.4s ease-out;
         }
 
-        @media (max-width: 768px) {
-            .video-player-container {
-                width: 95%;
-                padding: var(--space-sm);
+        @keyframes slideIn {
+            from { 
+                opacity: 0; 
+                transform: translateY(30px) scale(0.95); 
             }
+            to { 
+                opacity: 1; 
+                transform: translateY(0) scale(1); 
+            }
+        }
+
+        .video-player {
+            width: 100%;
+            height: 100%;
+            border: none;
+            border-radius: 16px;
+        }
+
+        .video-header {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(180deg, rgba(0, 0, 0, 0.8) 0%, transparent 100%);
+            padding: 1.5rem;
+            z-index: 10;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .video-title {
+            color: white;
+            font-size: 1.25rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .close-btn {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: white;
+            padding: 0.75rem;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: var(--transition);
+            backdrop-filter: blur(10px);
+            width: 44px;
+            height: 44px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .close-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: scale(1.1);
+        }
+
+        /* Loading States */
+        .loading {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100%;
+            color: white;
+            font-size: 1.125rem;
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid rgba(255, 255, 255, 0.3);
+            border-left-color: white;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-right: 1rem;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .container {
+                margin: 1rem;
+                padding: 1.5rem;
+                border-radius: 16px;
+            }
+
+            .header h1 {
+                font-size: 2.5rem;
+            }
+
+            .header p {
+                font-size: 1rem;
+            }
+
+            .controls {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .search-box {
+                max-width: none;
+            }
+
+            .channel-grid {
+                grid-template-columns: 1fr;
+                gap: 1.5rem;
+            }
+
+            .video-container {
+                width: 95%;
+                height: 85%;
+            }
+
+            .video-header {
+                padding: 1rem;
+            }
+
+            .video-title {
+                font-size: 1rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .channel-header {
+                padding: 1rem;
+            }
+            
+            .channel-logo {
+                width: 50px;
+                height: 50px;
+            }
+        }
+
+        /* Focus styles for accessibility */
+        .channel-card:focus {
+            outline: 3px solid var(--primary-color);
+            outline-offset: 2px;
+        }
+
+        .close-btn:focus {
+            outline: 2px solid white;
+            outline-offset: 2px;
+        }
+
+        /* Hide scrollbar but allow scrolling */
+        body::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        body::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        body::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 3px;
+        }
+
+        body::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.5);
         }
     </style>
     
-    <!-- Non-critical CSS -->
-    <link rel="stylesheet" href="css/styles.css">
-    <link rel="stylesheet" href="css/themes.css">
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <!-- External CSS -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
 </head>
 <body>
-    <!-- Background -->
-    <div class="tv-background">
-        <div class="background-overlay"></div>
-    </div>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <h1>📡 Live TV Streaming</h1>
+            <p>Stream premium news channels from around the world in high definition, 24/7. Stay informed with trusted global news sources.</p>
+        </header>
 
-    <!-- Loading Screen -->
-    <div id="loading-screen" class="loading-screen">
-        <div style="text-align: center; color: var(--text-primary);">
-            <div class="loading-spinner"></div>
-            <h3 style="margin-top: var(--space-sm); font-weight: 600;">Loading Live TV...</h3>
-            <p style="color: var(--text-secondary); margin-top: var(--space-xs);">Preparing your streaming experience</p>
+        <!-- Search and Filter Controls -->
+        <div class="controls">
+            <div class="search-box">
+                <i class="fas fa-search"></i>
+                <input type="text" id="searchInput" placeholder="Search channels...">
+            </div>
+            <select class="filter-select" id="categoryFilter">
+                <option value="all">All Categories</option>
+                <option value="international">International News</option>
+                <option value="local">Local & Regional</option>
+                <option value="business">Business & Economics</option>
+                <option value="sports">Sports</option>
+                <option value="documentary">Documentary & Educational</option>
+                <option value="special">Special Interest</option>
+            </select>
         </div>
-    </div>
 
-    <!-- Header -->
-    <header class="header">
-        <div class="container">
-            <div style="display: flex; justify-content: space-between; align-items: center; padding: var(--space-sm) 0;">
-                <div style="display: flex; align-items: center; gap: var(--space-sm);">
-                    <a href="index.html" style="color: var(--text-secondary); text-decoration: none; display: flex; align-items: center; gap: var(--space-xs); font-size: 0.9rem; transition: color var(--transition-fast); border-radius: var(--radius-sm); padding: var(--space-xs);">
-                        <i class="fas fa-arrow-left"></i>
-                        <span>Back to News</span>
-                    </a>
-                    <div style="height: 20px; width: 1px; background: var(--glass-border);"></div>
-                    <h1 style="font-size: 1.5rem; font-weight: 700; background: var(--bg-primary); -webkit-background-clip: text; -webkit-text-fill-color: transparent; display: flex; align-items: center; gap: var(--space-xs);">
-                        <i class="fas fa-broadcast-tower" style="color: var(--accent-red);"></i>
-                        📡 Live TV Streaming
-                    </h1>
+        <!-- International News Channels -->
+        <section class="category" data-category="international">
+            <h2 class="category-title">🌍 International News</h2>
+            <div class="channel-grid">
+                <!-- CNN -->
+                <div class="channel-card" data-url="https://www.youtube.com/embed/Os7VXGFrY18?autoplay=1&mute=1" data-name="CNN International">
+                    <div class="channel-header">
+                        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/b/b1/CNN.svg/512px-CNN.svg.png" alt="CNN" class="channel-logo">
+                        <div class="channel-info">
+                            <h3 class="channel-name">CNN International</h3>
+                            <p class="channel-description">Breaking news and analysis from around the world</p>
+                        </div>
+                    </div>
+                    <div class="channel-badges">
+                        <span class="badge live">● LIVE</span>
+                        <span class="badge hd">HD</span>
+                        <span class="badge free">FREE</span>
+                    </div>
                 </div>
-                
-                <div style="display: flex; align-items: center; gap: var(--space-sm);">
-                    <select id="themeSelect" style="background: var(--glass-bg); color: var(--text-primary); border: 1px solid var(--glass-border); border-radius: var(--radius-sm); padding: var(--space-xs); font-size: 0.875rem;">
-                        <option value="default">Default Theme</option>
-                        <option value="dark">Dark Theme</option>
-                        <option value="blue">Blue Theme</option>
-                    </select>
+
+                <!-- BBC Earth -->
+                <div class="channel-card" data-url="https://www.youtube.com/embed/28eWqTGi-yQ?autoplay=1&mute=1" data-name="BBC Earth">
+                    <div class="channel-header">
+                        <img src="https://upload.wikimedia.org/wikipedia/en/thumb/4/41/BBC_Earth_logo.svg/512px-BBC_Earth_logo.svg.png" alt="BBC Earth" class="channel-logo">
+                        <div class="channel-info">
+                            <h3 class="channel-name">BBC Earth</h3>
+                            <p class="channel-description">Nature documentaries and wildlife programming</p>
+                        </div>
+                    </div>
+                    <div class="channel-badges">
+                        <span class="badge live">● LIVE</span>
+                        <span class="badge hd">HD</span>
+                        <span class="badge free">FREE</span>
+                    </div>
+                </div>
+
+                <!-- Sky News -->
+                <div class="channel-card" data-url="https://www.youtube.com/embed/tIvVG5UQWRU?autoplay=1&mute=1" data-name="Sky News">
+                    <div class="channel-header">
+                        <img src="https://upload.wikimedia.org/wikipedia/en/thumb/9/9a/Sky_News_logo.svg/512px-Sky_News_logo.svg.png" alt="Sky News" class="channel-logo">
+                        <div class="channel-info">
+                            <h3 class="channel-name">Sky News</h3>
+                            <p class="channel-description">UK and international news coverage</p>
+                        </div>
+                    </div>
+                    <div class="channel-badges">
+                        <span class="badge live">● LIVE</span>
+                        <span class="badge hd">HD</span>
+                        <span class="badge free">FREE</span>
+                    </div>
+                </div>
+
+                <!-- Live Now Fox -->
+                <div class="channel-card" data-url="https://www.youtube.com/embed/YDfiTGGPYCk?autoplay=1&mute=1" data-name="Live Now Fox">
+                    <div class="channel-header">
+                        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/6/67/Fox_News_Channel_logo.svg/512px-Fox_News_Channel_logo.svg.png" alt="Live Now Fox" class="channel-logo">
+                        <div class="channel-info">
+                            <h3 class="channel-name">Live Now Fox</h3>
+                            <p class="channel-description">Breaking news and live coverage</p>
+                        </div>
+                    </div>
+                    <div class="channel-badges">
+                        <span class="badge live">● LIVE</span>
+                        <span class="badge hd">HD</span>
+                        <span class="badge free">FREE</span>
+                    </div>
+                </div>
+
+                <!-- France 24 -->
+                <div class="channel-card" data-url="https://www.youtube.com/embed/l8PMl7tUDIE?autoplay=1&mute=1" data-name="France 24">
+                    <div class="channel-header">
+                        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/8/8a/France24.svg/512px-France24.svg.png" alt="France 24" class="channel-logo">
+                        <div class="channel-info">
+                            <h3 class="channel-name">France 24</h3>
+                            <p class="channel-description">French international news channel</p>
+                        </div>
+                    </div>
+                    <div class="channel-badges">
+                        <span class="badge live">● LIVE</span>
+                        <span class="badge hd">HD</span>
+                        <span class="badge free">FREE</span>
+                    </div>
+                </div>
+
+                <!-- Euro News -->
+                <div class="channel-card" data-url="https://www.youtube.com/embed/pykpO5kQJ98?autoplay=1&mute=1" data-name="Euronews">
+                    <div class="channel-header">
+                        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/3/39/Euronews_2016_logo.svg/512px-Euronews_2016_logo.svg.png" alt="Euronews" class="channel-logo">
+                        <div class="channel-info">
+                            <h3 class="channel-name">Euronews</h3>
+                            <p class="channel-description">European perspective on world news</p>
+                        </div>
+                    </div>
+                    <div class="channel-badges">
+                        <span class="badge live">● LIVE</span>
+                        <span class="badge hd">HD</span>
+                        <span class="badge free">FREE</span>
+                    </div>
+                </div>
+
+                <!-- Franceinfo -->
+                <div class="channel-card" data-url="https://www.youtube.com/embed/Z-Nwo-ypKtM?autoplay=1&mute=1" data-name="Franceinfo">
+                    <div class="channel-header">
+                        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/3/3f/Franceinfo_logo.svg/512px-Franceinfo_logo.svg.png" alt="Franceinfo" class="channel-logo">
+                        <div class="channel-info">
+                            <h3 class="channel-name">Franceinfo</h3>
+                            <p class="channel-description">French 24-hour news channel</p>
+                        </div>
+                    </div>
+                    <div class="channel-badges">
+                        <span class="badge live">● LIVE</span>
+                        <span class="badge hd">HD</span>
+                        <span class="badge free">FREE</span>
+                    </div>
+                </div>
+
+                <!-- Africa News -->
+                <div class="channel-card" data-url="https://www.youtube.com/embed/b6R9-7KZ8YM?autoplay=1&mute=1" data-name="Africanews">
+                    <div class="channel-header">
+                        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/b/bc/Africanews_logo.svg/512px-Africanews_logo.svg.png" alt="Africanews" class="channel-logo">
+                        <div class="channel-info">
+                            <h3 class="channel-name">Africanews</h3>
+                            <p class="channel-description">Pan-African news and current affairs</p>
+                        </div>
+                    </div>
+                    <div class="channel-badges">
+                        <span class="badge live">● LIVE</span>
+                        <span class="badge hd">HD</span>
+                        <span class="badge free">FREE</span>
+                    </div>
+                </div>
+
+                <!-- WION -->
+                <div class="channel-card" data-url="https://www.youtube.com/embed/ccydDtAE0z8?autoplay=1&mute=1" data-name="WION">
+                    <div class="channel-header">
+                        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/d/d7/WION_news_Logo.svg/512px-WION_news_Logo.svg.png" alt="WION" class="channel-logo">
+                        <div class="channel-info">
+                            <h3 class="channel-name">WION</h3>
+                            <p class="channel-description">World is One News - India's global news network</p>
+                        </div>
+                    </div>
+                    <div class="channel-badges">
+                        <span class="badge live">● LIVE</span>
+                        <span class="badge hd">HD</span>
+                        <span class="badge free">FREE</span>
+                    </div>
+                </div>
+
+                <!-- ABC News -->
+                <div class="channel-card" data-url="https://www.youtube.com/embed/0M7AfGWjeVA?autoplay=1&mute=1" data-name="ABC News">
+                    <div class="channel-header">
+                        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/1/1e/ABC_News_logo.svg/512px-ABC_News_logo.svg.png" alt="ABC News" class="channel-logo">
+                        <div class="channel-info">
+                            <h3 class="channel-name">ABC News</h3>
+                            <p class="channel-description">American Broadcasting Company news division</p>
+                        </div>
+                    </div>
+                    <div class="channel-badges">
+                        <span class="badge live">● LIVE</span>
+                        <span class="badge hd">HD</span>
+                        <span class="badge free">FREE</span>
+                    </div>
                 </div>
             </div>
-        </div>
-    </header>
+        </section>
 
-    <!-- Main Content -->
-    <main style="padding: var(--space-lg) 0; min-height: calc(100vh - 200px);">
-        <div class="container">
-            <!-- Hero Section -->
-            <section style="text-align: center; margin-bottom: var(--space-xl);">
-                <h2 style="font-size: 3rem; font-weight: 800; margin-bottom: var(--space-sm); background: var(--bg-primary); -webkit-background-clip: text; -webkit-text-fill-color: transparent; line-height: 1.2;">
-                    📡 Watch Live News Now
-                </h2>
-                <p style="font-size: 1.25rem; color: var(--text-secondary); max-width: 600px; margin: 0 auto; line-height: 1.6;">
-                    Stream premium news channels in HD quality with instant playback. No ads, no delays.
-                </p>
-            </section>
+        <!-- Local & Regional Channels -->
+        <section class="category" data-category="local">
+            <h2 class="category-title">🏛️ Local & Regional</h2>
+            <div class="channel-grid">
+                <!-- Times Now -->
+                <div class="channel-card" data-url="https://www.youtube.com/embed/Snv4BpX6CAI?autoplay=1&mute=1" data-name="Times Now">
+                    <div class="channel-header">
+                        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/3/3a/Times_Now_logo.svg/512px-Times_Now_logo.svg.png" alt="Times Now" class="channel-logo">
+                        <div class="channel-info">
+                            <h3 class="channel-name">Times Now</h3>
+                            <p class="channel-description">India's leading English news channel</p>
+                        </div>
+                    </div>
+                    <div class="channel-badges">
+                        <span class="badge live">● LIVE</span>
+                        <span class="badge hd">HD</span>
+                        <span class="badge free">FREE</span>
+                    </div>
+                </div>
 
-            <!-- Search Section -->
-            <section class="glass-card" style="margin-bottom: var(--space-xl); padding: var(--space-lg);">
-                <div style="display: flex; align-items: center; gap: var(--space-sm); margin-bottom: var(--space-md);">
-                    <i class="fas fa-search" style="color: var(--text-muted);"></i>
-                    <input type="text" id="channel-search" placeholder="Search channels..." style="flex: 1; background: var(--glass-bg); border: 1px solid var(--glass-border); border-radius: var(--radius-md); padding: var(--space-sm); color: var(--text-primary); font-size: 1rem;">
-                    <button id="filter-btn" style="background: var(--primary-blue); color: white; border: none; border-radius: var(--radius-md); padding: var(--space-sm) var(--space-md); cursor: pointer; transition: all var(--transition-fast);">
-                        <i class="fas fa-filter"></i>
-                        Filter
-                    </button>
+                <!-- Channels Television -->
+                <div class="channel-card" data-url="https://www.youtube.com/embed/W8nThq62Vb4?autoplay=1&mute=1" data-name="Channels Television">
+                    <div class="channel-header">
+                        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/c7/Channels_TV_logo.png/512px-Channels_TV_logo.png" alt="Channels Television" class="channel-logo">
+                        <div class="channel-info">
+                            <h3 class="channel-name">Channels Television</h3>
+                            <p class="channel-description">Nigeria's independent news channel</p>
+                        </div>
+                    </div>
+                    <div class="channel-badges">
+                        <span class="badge live">● LIVE</span>
+                        <span class="badge hd">HD</span>
+                        <span class="badge free">FREE</span>
+                    </div>
                 </div>
-                
-                <!-- Quick Filter Tags -->
-                <div style="display: flex; flex-wrap: wrap; gap: var(--space-xs);">
-                    <button class="filter-tag active" data-category="all" style="background: var(--primary-blue); color: white; border: none; border-radius: 20px; padding: var(--space-xs) var(--space-sm); font-size: 0.875rem; cursor: pointer; transition: all var(--transition-fast);">
-                        All Channels
-                    </button>
-                    <button class="filter-tag" data-category="news" style="background: var(--glass-bg); color: var(--text-primary); border: 1px solid var(--glass-border); border-radius: 20px; padding: var(--space-xs) var(--space-sm); font-size: 0.875rem; cursor: pointer; transition: all var(--transition-fast);">
-                        News
-                    </button>
-                    <button class="filter-tag" data-category="international" style="background: var(--glass-bg); color: var(--text-primary); border: 1px solid var(--glass-border); border-radius: 20px; padding: var(--space-xs) var(--space-sm); font-size: 0.875rem; cursor: pointer; transition: all var(--transition-fast);">
-                        International
-                    </button>
-                    <button class="filter-tag" data-category="local" style="background: var(--glass-bg); color: var(--text-primary); border: 1px solid var(--glass-border); border-radius: 20px; padding: var(--space-xs) var(--space-sm); font-size: 0.875rem; cursor: pointer; transition: all var(--transition-fast);">
-                        Local Kenya
-                    </button>
-                    <button class="filter-tag" data-category="documentary" style="background: var(--glass-bg); color: var(--text-primary); border: 1px solid var(--glass-border); border-radius: 20px; padding: var(--space-xs) var(--space-sm); font-size: 0.875rem; cursor: pointer; transition: all var(--transition-fast);">
-                        Documentary
-                    </button>
-                </div>
-            </section>
+            </div>
+        </section>
 
-            <!-- Channels Grid -->
-            <section style="margin-bottom: var(--space-xl);">
-                <div id="channels-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: var(--space-md); justify-items: center;">
-                    <!-- Channel cards will be inserted here by JavaScript -->
+        <!-- Business & Economics -->
+        <section class="category" data-category="business">
+            <h2 class="category-title">💼 Business & Economics</h2>
+            <div class="channel-grid">
+                <!-- Business Insider -->
+                <div class="channel-card" data-url="https://www.youtube.com/embed/6GKrs5XYSCs?autoplay=1&mute=1" data-name="Business Insider">
+                    <div class="channel-header">
+                        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/8/8c/Business_Insider_Logo.svg/512px-Business_Insider_Logo.svg.png" alt="Business Insider" class="channel-logo">
+                        <div class="channel-info">
+                            <h3 class="channel-name">Business Insider</h3>
+                            <p class="channel-description">Business news and analysis</p>
+                        </div>
+                    </div>
+                    <div class="channel-badges">
+                        <span class="badge live">● LIVE</span>
+                        <span class="badge hd">HD</span>
+                        <span class="badge free">FREE</span>
+                    </div>
                 </div>
-            </section>
-        </div>
-    </main>
+
+                <!-- CNBC -->
+                <div class="channel-card" data-url="https://www.youtube.com/embed/HulW2o23sR8?autoplay=1&mute=1" data-name="CNBC">
+                    <div class="channel-header">
+                        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/e/e3/CNBC_logo.svg/512px-CNBC_logo.svg.png" alt="CNBC" class="channel-logo">
+                        <div class="channel-info">
+                            <h3 class="channel-name">CNBC</h3>
+                            <p class="channel-description">Business and financial news network</p>
+                        </div>
+                    </div>
+                    <div class="channel-badges">
+                        <span class="badge live">● LIVE</span>
+                        <span class="badge hd">HD</span>
+                        <span class="badge free">FREE</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Sports -->
+        <section class="category" data-category="sports">
+            <h2 class="category-title">⚽ Sports</h2>
+            <div class="channel-grid">
+                <!-- Optus Sport -->
+                <div class="channel-card" data-url="https://www.youtube.com/embed/DEjiP-xYIy0?autoplay=1&mute=1" data-name="Optus Sport">
+                    <div class="channel-header">
+                        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/c9/Optus_logo.svg/512px-Optus_logo.svg.png" alt="Optus Sport" class="channel-logo">
+                        <div class="channel-info">
+                            <h3 class="channel-name">Optus Sport</h3>
+                            <p class="channel-description">Australian sports streaming service</p>
+                        </div>
+                    </div>
+                    <div class="channel-badges">
+                        <span class="badge live">● LIVE</span>
+                        <span class="badge hd">HD</span>
+                        <span class="badge free">FREE</span>
+                    </div>
+                </div>
+
+                <!-- BL Football Talks -->
+                <div class="channel-card" data-url="https://www.youtube.com/embed/vvrGD17Kt74?autoplay=1&mute=1" data-name="BL Football Talks">
+                    <div class="channel-header">
+                        <img src="https://via.placeholder.com/512x512/1a1a1a/ffffff?text=⚽" alt="BL Football Talks" class="channel-logo">
+                        <div class="channel-info">
+                            <h3 class="channel-name">BL Football Talks</h3>
+                            <p class="channel-description">Football discussion and analysis</p>
+                        </div>
+                    </div>
+                    <div class="channel-badges">
+                        <span class="badge live">● LIVE</span>
+                        <span class="badge hd">HD</span>
+                        <span class="badge free">FREE</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Documentary & Educational -->
+        <section class="category" data-category="documentary">
+            <h2 class="category-title">🎓 Documentary & Educational</h2>
+            <div class="channel-grid">
+                <!-- United Nations -->
+                <div class="channel-card" data-url="https://www.youtube.com/embed/wfAa1GiNdgM?autoplay=1&mute=1" data-name="United Nations">
+                    <div class="channel-header">
+                        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/2/2f/Small_Flag_of_the_United_Nations_ZP.svg/512px-Small_Flag_of_the_United_Nations_ZP.svg.png" alt="United Nations" class="channel-logo">
+                        <div class="channel-info">
+                            <h3 class="channel-name">United Nations</h3>
+                            <p class="channel-description">UN official broadcasts and documentaries</p>
+                        </div>
+                    </div>
+                    <div class="channel-badges">
+                        <span class="badge live">● LIVE</span>
+                        <span class="badge hd">HD</span>
+                        <span class="badge free">FREE</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Special Interest -->
+        <section class="category" data-category="special">
+            <h2 class="category-title">🌐 Special Interest</h2>
+            <div class="channel-grid">
+                <!-- Earthcam -->
+                <div class="channel-card" data-url="https://www.youtube.com/embed/rnXIjl_Rzy4?autoplay=1&mute=1" data-name="EarthCam">
+                    <div class="channel-header">
+                        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/8/8a/EarthCam_logo.svg/512px-EarthCam_logo.svg.png" alt="EarthCam" class="channel-logo">
+                        <div class="channel-info">
+                            <h3 class="channel-name">EarthCam</h3>
+                            <p class="channel-description">Live cameras from around the world</p>
+                        </div>
+                    </div>
+                    <div class="channel-badges">
+                        <span class="badge live">● LIVE</span>
+                        <span class="badge hd">HD</span>
+                        <span class="badge free">FREE</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
 
     <!-- Video Player Overlay -->
-    <div id="video-overlay" class="video-overlay">
-        <div class="video-player-container">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--space-md);">
-                <div style="display: flex; align-items: center; gap: var(--space-sm);">
-                    <img id="current-channel-logo" src="" alt="" style="width: 50px; height: 50px; border-radius: var(--radius-sm); object-fit: contain; background: white; padding: 4px;">
-                    <div>
-                        <h3 id="current-channel" style="font-size: 1.5rem; font-weight: 700; margin-bottom: 4px; color: var(--text-primary);">Channel Name</h3>
-                        <p id="current-category" style="font-size: 1rem; color: var(--text-secondary);">Category</p>
-                    </div>
+    <div class="video-overlay" id="videoOverlay">
+        <div class="video-container">
+            <div class="video-header">
+                <div class="video-title">
+                    <span class="badge live">● LIVE</span>
+                    <span id="currentChannelName">Loading...</span>
                 </div>
-                <div style="display: flex; align-items: center; gap: var(--space-sm);">
-                    <div style="display: flex; align-items: center; gap: var(--space-xs); padding: var(--space-xs) var(--space-sm); background: var(--glass-bg); border-radius: 20px; border: 1px solid var(--glass-border);">
-                        <div style="width: 8px; height: 8px; background: var(--accent-red); border-radius: 50%; animation: pulse 2s infinite;"></div>
-                        <span style="font-size: 0.875rem; color: var(--text-secondary); font-weight: 600;">LIVE</span>
-                    </div>
-                    <button id="fullscreen-btn" style="background: var(--glass-bg); color: var(--text-primary); border: 1px solid var(--glass-border); border-radius: var(--radius-sm); padding: var(--space-sm); cursor: pointer; transition: all var(--transition-fast);">
-                        <i class="fas fa-expand"></i>
-                    </button>
-                    <button id="close-player" style="background: var(--accent-red); color: white; border: none; border-radius: var(--radius-sm); padding: var(--space-sm) var(--space-md); cursor: pointer; font-size: 0.875rem; font-weight: 600; transition: all var(--transition-fast);">
-                        <i class="fas fa-times"></i> Close
-                    </button>
-                </div>
-            </div>
-            
-            <div id="video-container" style="position: relative; width: 100%; height: 0; padding-bottom: 56.25%; border-radius: var(--radius-lg); overflow: hidden; background: #000; box-shadow: var(--shadow-xl);">
-                <iframe id="youtube-player" 
-                        style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none;"
-                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                        allowfullscreen>
-                </iframe>
-                <div id="player-loading" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: white; text-align: center; display: block;">
-                    <div class="loading-spinner" style="width: 40px; height: 40px; margin: 0 auto var(--space-sm);"></div>
-                    <p>Loading stream...</p>
-                </div>
-            </div>
-            
-            <div style="display: flex; justify-content: center; gap: var(--space-sm); margin-top: var(--space-md); flex-wrap: wrap;">
-                <button id="prev-channel" style="background: var(--glass-bg); color: var(--text-primary); border: 1px solid var(--glass-border); border-radius: var(--radius-md); padding: var(--space-sm) var(--space-md); cursor: pointer; transition: all var(--transition-fast); display: flex; align-items: center; gap: var(--space-xs);">
-                    <i class="fas fa-chevron-left"></i> Previous
-                </button>
-                <button id="quality-toggle" style="background: var(--glass-bg); color: var(--text-primary); border: 1px solid var(--glass-border); border-radius: var(--radius-md); padding: var(--space-sm) var(--space-md); cursor: pointer; transition: all var(--transition-fast);">
-                    <i class="fas fa-cog"></i> Quality
-                </button>
-                <button id="next-channel" style="background: var(--glass-bg); color: var(--text-primary); border: 1px solid var(--glass-border); border-radius: var(--radius-md); padding: var(--space-sm) var(--space-md); cursor: pointer; transition: all var(--transition-fast); display: flex; align-items: center; gap: var(--space-xs);">
-                    Next <i class="fas fa-chevron-right"></i>
+                <button class="close-btn" id="closeVideo" aria-label="Close video">
+                    <i class="fas fa-times"></i>
                 </button>
             </div>
+            <div class="loading" id="videoLoading">
+                <div class="spinner"></div>
+                <span>Loading stream...</span>
+            </div>
+            <iframe class="video-player" id="videoPlayer" src="" allowfullscreen allow="autoplay; fullscreen"></iframe>
         </div>
     </div>
 
-    <!-- Scroll to Top Button -->
-    <button id="scroll-top" style="position: fixed; bottom: var(--space-lg); right: var(--space-lg); width: 50px; height: 50px; background: var(--primary-blue); color: white; border: none; border-radius: 50%; cursor: pointer; display: none; z-index: 1000; transition: all var(--transition-fast); box-shadow: var(--shadow-lg);">
-        <i class="fas fa-arrow-up"></i>
-    </button>
-
-    <!-- Footer -->
-    <footer style="background: var(--glass-bg); backdrop-filter: var(--backdrop-blur); border-top: 1px solid var(--glass-border); padding: var(--space-lg) 0; margin-top: var(--space-xl);">
-        <div class="container">
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: var(--space-lg); margin-bottom: var(--space-lg);">
-                <div>
-                    <h4 style="font-size: 1.125rem; font-weight: 600; margin-bottom: var(--space-sm);">Brightlens Live TV</h4>
-                    <p style="color: var(--text-secondary); line-height: 1.6;">
-                        Watch premium news channels streaming live 24/7. High-quality video and audio with instant playback.
-                    </p>
-                </div>
-                <div>
-                    <h4 style="font-size: 1.125rem; font-weight: 600; margin-bottom: var(--space-sm);">Features</h4>
-                    <ul style="list-style: none; color: var(--text-secondary); line-height: 1.8;">
-                        <li><i class="fas fa-check" style="color: var(--success-green); margin-right: var(--space-xs);"></i> HD Quality Streaming</li>
-                        <li><i class="fas fa-check" style="color: var(--success-green); margin-right: var(--space-xs);"></i> No Ads or Interruptions</li>
-                        <li><i class="fas fa-check" style="color: var(--success-green); margin-right: var(--space-xs);"></i> Mobile Responsive</li>
-                        <li><i class="fas fa-check" style="color: var(--success-green); margin-right: var(--space-xs);"></i> Fast Channel Switching</li>
-                    </ul>
-                </div>
-                <div>
-                    <h4 style="font-size: 1.125rem; font-weight: 600; margin-bottom: var(--space-sm);">Connect With Us</h4>
-                    <div style="display: flex; flex-direction: column; gap: var(--space-xs);">
-                        <a href="https://instagram.com/philipkilonzo.ke" target="_blank" style="color: var(--text-secondary); text-decoration: none; display: flex; align-items: center; gap: var(--space-xs); transition: color var(--transition-fast); padding: var(--space-xs); border-radius: var(--radius-sm);">
-                            <i class="fab fa-instagram"></i>
-                            @philipkilonzo.ke
-                        </a>
-                        <a href="https://wa.me/254791943551" target="_blank" style="color: var(--text-secondary); text-decoration: none; display: flex; align-items: center; gap: var(--space-xs); transition: color var(--transition-fast); padding: var(--space-xs); border-radius: var(--radius-sm);">
-                            <i class="fab fa-whatsapp"></i>
-                            +254 791 943 551
-                        </a>
-                    </div>
-                </div>
-            </div>
-            <div style="text-align: center; padding-top: var(--space-lg); border-top: 1px solid var(--glass-border); color: var(--text-secondary);">
-                <p>&copy; 2025 Brightlens News - Live TV Streaming. All rights reserved.</p>
-            </div>
-        </div>
-    </footer>
-
-    <!-- JavaScript -->
     <script>
-        // Enhanced channel data with proper logos and improved URLs
-        const channels = [
-            {
-                id: 'cnn-live',
-                name: 'CNN International',
-                description: 'Breaking news and analysis from CNN International',
-                logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/6/66/CNN_International_logo.svg/120px-CNN_International_logo.svg.png',
-                fallbackLogo: '📰',
-                category: 'International News',
-                url: 'https://www.youtube.com/embed/XOacA3RYrXk',
-                quality: 'HD',
-                language: 'English',
-                type: 'news'
-            },
-            {
-                id: 'bbc-news',
-                name: 'BBC News',
-                description: 'BBC World Service Live',
-                logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/7/75/BBC_News_red_logo.svg/120px-BBC_News_red_logo.svg.png',
-                fallbackLogo: '🇬🇧',
-                category: 'International News',
-                url: 'https://www.youtube.com/embed/9Auq9mYxFEE',
-                quality: 'HD',
-                language: 'English',
-                type: 'news'
-            },
-            {
-                id: 'al-jazeera',
-                name: 'Al Jazeera English',
-                description: 'Breaking news and analysis from around the world',
-                logo: 'https://upload.wikimedia.org/wikipedia/en/thumb/f/f2/Aljazeera_eng.svg/120px-Aljazeera_eng.svg.png',
-                fallbackLogo: '🌍',
-                category: 'International News',
-                url: 'https://www.youtube.com/embed/gCNeDWCI0vo',
-                quality: 'HD',
-                language: 'English',
-                type: 'news'
-            },
-            {
-                id: 'citizen-tv',
-                name: 'Citizen TV Kenya',
-                description: 'Kenya\'s leading television station',
-                logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/8/86/Citizen_TV_logo.png/120px-Citizen_TV_logo.png',
-                fallbackLogo: '🇰🇪',
-                category: 'Local News',
-                url: 'https://www.youtube.com/embed/gzw1hoiBK6Q',
-                quality: 'HD',
-                language: 'English/Swahili',
-                type: 'local'
-            },
-            {
-                id: 'ktn-news',
-                name: 'KTN News',
-                description: 'Kenya Television Network News',
-                logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/c/c5/KTN_logo.png/120px-KTN_logo.png',
-                fallbackLogo: '📺',
-                category: 'Local News',
-                url: 'https://www.youtube.com/embed/Au1KkxlGvGs',
-                quality: 'HD',
-                language: 'English/Swahili',
-                type: 'local'
-            },
-            {
-                id: 'ntv-kenya',
-                name: 'NTV Kenya',
-                description: 'Nation Television - Premier news and entertainment',
-                logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/1/1c/NTV_%28Kenya%29_logo.svg/120px-NTV_%28Kenya%29_logo.svg.png',
-                fallbackLogo: '🏛️',
-                category: 'Local News',
-                url: 'https://www.youtube.com/embed/74t0979nG6U',
-                quality: 'HD',
-                language: 'English/Swahili',
-                type: 'local'
-            },
-            {
-                id: 'france24',
-                name: 'France 24 English',
-                description: 'French international news channel',
-                logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/8/8a/France24.svg/120px-France24.svg.png',
-                fallbackLogo: '🇫🇷',
-                category: 'International News',
-                url: 'https://www.youtube.com/embed/tkDUSbvSExg',
-                quality: 'HD',
-                language: 'English',
-                type: 'international'
-            },
-            {
-                id: 'dw-news',
-                name: 'DW News',
-                description: 'Deutsche Welle - German international broadcaster',
-                logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/7/75/Deutsche_Welle_symbol_2012.svg/120px-Deutsche_Welle_symbol_2012.svg.png',
-                fallbackLogo: '🇩🇪',
-                category: 'International News',
-                url: 'https://www.youtube.com/embed/pqabxBKzZ6M',
-                quality: 'HD',
-                language: 'English',
-                type: 'international'
-            },
-            {
-                id: 'euronews',
-                name: 'Euronews',
-                description: 'European perspective on world news',
-                logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/c/c5/Euronews_2016_logo.svg/120px-Euronews_2016_logo.svg.png',
-                fallbackLogo: '🇪🇺',
-                category: 'International News',
-                url: 'https://www.youtube.com/embed/pykz0DEwvUs',
-                quality: 'HD',
-                language: 'English',
-                type: 'international'
-            },
-            {
-                id: 'nat-geo',
-                name: 'National Geographic',
-                description: 'Explore the world with National Geographic',
-                logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/f/fc/Natgeologo.svg/120px-Natgeologo.svg.png',
-                fallbackLogo: '🌎',
-                category: 'Documentary',
-                url: 'https://www.youtube.com/embed/Cy0s_bxzqkw',
-                quality: 'HD',
-                language: 'English',
-                type: 'documentary'
-            },
-            {
-                id: 'love-nature',
-                name: 'Love Nature',
-                description: 'Stunning 4K nature documentaries',
-                logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/b/b5/Love_Nature_logo.svg/120px-Love_Nature_logo.svg.png',
-                fallbackLogo: '🌿',
-                category: 'Nature & Wildlife',
-                url: 'https://www.youtube.com/embed/daqB3i9WYIY',
-                quality: '4K',
-                language: 'English',
-                type: 'documentary'
-            },
-            {
-                id: 'sky-news',
-                name: 'Sky News',
-                description: 'Latest breaking news from Sky News',
-                logo: 'https://upload.wikimedia.org/wikipedia/en/thumb/9/9a/Sky_News_logo.svg/120px-Sky_News_logo.svg.png',
-                fallbackLogo: '☁️',
-                category: 'International News',
-                url: 'https://www.youtube.com/embed/9Auq9mYxFEE',
-                quality: 'HD',
-                language: 'English',
-                type: 'international'
+        // JavaScript for video player functionality
+        class LiveTVPlayer {
+            constructor() {
+                this.videoOverlay = document.getElementById('videoOverlay');
+                this.videoPlayer = document.getElementById('videoPlayer');
+                this.videoLoading = document.getElementById('videoLoading');
+                this.currentChannelName = document.getElementById('currentChannelName');
+                this.closeBtn = document.getElementById('closeVideo');
+                this.searchInput = document.getElementById('searchInput');
+                this.categoryFilter = document.getElementById('categoryFilter');
+                
+                this.init();
             }
-        ];
 
-        let currentChannelIndex = 0;
-        let filteredChannels = [...channels];
+            init() {
+                this.bindEvents();
+                this.setupSearch();
+                this.setupFilter();
+            }
 
-        // DOM Elements
-        const channelsGrid = document.getElementById('channels-grid');
-        const videoOverlay = document.getElementById('video-overlay');
-        const youtubePlayer = document.getElementById('youtube-player');
-        const currentChannelElement = document.getElementById('current-channel');
-        const currentCategoryElement = document.getElementById('current-category');
-        const currentChannelLogo = document.getElementById('current-channel-logo');
-        const playerLoading = document.getElementById('player-loading');
-        const closePlayerBtn = document.getElementById('close-player');
-        const prevChannelBtn = document.getElementById('prev-channel');
-        const nextChannelBtn = document.getElementById('next-channel');
-        const fullscreenBtn = document.getElementById('fullscreen-btn');
-        const scrollTopBtn = document.getElementById('scroll-top');
-        const loadingScreen = document.getElementById('loading-screen');
-        const channelSearch = document.getElementById('channel-search');
-        const filterTags = document.querySelectorAll('.filter-tag');
-
-        // Initialize the app
-        function init() {
-            renderChannels();
-            setupEventListeners();
-            
-            // Hide loading screen after content loads
-            setTimeout(() => {
-                loadingScreen.classList.add('hidden');
-            }, 1500);
-        }
-
-        // Render channel cards with improved design
-        function renderChannels() {
-            channelsGrid.innerHTML = filteredChannels.map((channel, index) => `
-                <div class="channel-card glass-card" data-index="${index}" style="
-                    padding: var(--space-md);
-                    cursor: pointer;
-                    transition: all var(--transition-normal);
-                    max-width: 380px;
-                    width: 100%;
-                " onmouseover="this.style.transform='translateY(-8px)'; this.style.boxShadow='var(--shadow-xl)'" 
-                   onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='var(--shadow-lg)'">
-                    
-                    <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: var(--space-md);">
-                        <div style="display: flex; align-items: center; gap: var(--space-sm);">
-                            <div style="position: relative; width: 60px; height: 60px; border-radius: var(--radius-md); overflow: hidden; background: white; display: flex; align-items: center; justify-content: center; box-shadow: var(--shadow-sm);">
-                                <img src="${channel.logo}" alt="${channel.name}" 
-                                     style="width: 100%; height: 100%; object-fit: contain; padding: 4px;"
-                                     onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
-                                <div style="display: none; font-size: 2rem; align-items: center; justify-content: center; width: 100%; height: 100%;">${channel.fallbackLogo}</div>
-                            </div>
-                            <div>
-                                <h3 style="font-size: 1.125rem; font-weight: 600; margin-bottom: 0.25rem; color: var(--text-primary);">${channel.name}</h3>
-                                <span style="font-size: 0.75rem; color: var(--text-secondary); background: var(--glass-bg); padding: 0.25rem 0.5rem; border-radius: 12px; border: 1px solid var(--glass-border);">${channel.category}</span>
-                            </div>
-                        </div>
-                        <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 0.25rem;">
-                            <span style="font-size: 0.75rem; color: var(--accent-red); font-weight: 600; display: flex; align-items: center; gap: 0.25rem; background: rgba(220, 38, 38, 0.1); padding: 0.25rem 0.5rem; border-radius: 12px;">
-                                <div style="width: 6px; height: 6px; background: var(--accent-red); border-radius: 50%; animation: pulse 2s infinite;"></div>
-                                LIVE
-                            </span>
-                            <span style="font-size: 0.75rem; color: var(--text-secondary); background: var(--glass-bg); padding: 0.25rem 0.5rem; border-radius: 12px;">${channel.quality}</span>
-                        </div>
-                    </div>
-                    
-                    <p style="color: var(--text-secondary); font-size: 0.875rem; margin-bottom: var(--space-md); line-height: 1.5;">${channel.description}</p>
-                    
-                    <div style="display: flex; justify-content: space-between; align-items: center;">
-                        <div style="display: flex; flex-direction: column; gap: 0.25rem;">
-                            <span style="font-size: 0.75rem; color: var(--text-secondary);">
-                                <i class="fas fa-globe" style="margin-right: 4px;"></i>
-                                ${channel.language}
-                            </span>
-                            <span style="font-size: 0.75rem; color: var(--text-secondary);">
-                                <i class="fas fa-signal" style="margin-right: 4px;"></i>
-                                ${channel.quality} Quality
-                            </span>
-                        </div>
-                        <button style="
-                            background: var(--primary-blue);
-                            color: white;
-                            border: none;
-                            border-radius: var(--radius-md);
-                            padding: var(--space-sm) var(--space-md);
-                            font-size: 0.875rem;
-                            font-weight: 600;
-                            cursor: pointer;
-                            transition: all var(--transition-fast);
-                            display: flex;
-                            align-items: center;
-                            gap: var(--space-xs);
-                            box-shadow: var(--shadow-sm);
-                        " onmouseover="this.style.background='var(--primary-blue-dark)'; this.style.transform='scale(1.05)'" 
-                           onmouseout="this.style.background='var(--primary-blue)'; this.style.transform='scale(1)'">
-                            <i class="fas fa-play"></i>
-                            Watch Now
-                        </button>
-                    </div>
-                </div>
-            `).join('');
-        }
-
-        // Enhanced event listeners
-        function setupEventListeners() {
-            // Channel selection - immediately open video player
-            channelsGrid.addEventListener('click', (e) => {
-                const channelCard = e.target.closest('.channel-card');
-                if (channelCard) {
-                    const index = parseInt(channelCard.dataset.index);
-                    playChannel(index);
-                }
-            });
-
-            // Search functionality
-            channelSearch.addEventListener('input', (e) => {
-                const searchTerm = e.target.value.toLowerCase();
-                filterChannels(searchTerm, getActiveFilter());
-            });
-
-            // Filter tags
-            filterTags.forEach(tag => {
-                tag.addEventListener('click', () => {
-                    filterTags.forEach(t => {
-                        t.classList.remove('active');
-                        t.style.background = 'var(--glass-bg)';
-                        t.style.color = 'var(--text-primary)';
+            bindEvents() {
+                // Channel card clicks
+                document.querySelectorAll('.channel-card').forEach(card => {
+                    card.addEventListener('click', () => this.playChannel(card));
+                    card.addEventListener('keydown', (e) => {
+                        if (e.key === 'Enter' || e.key === ' ') {
+                            e.preventDefault();
+                            this.playChannel(card);
+                        }
                     });
-                    tag.classList.add('active');
-                    tag.style.background = 'var(--primary-blue)';
-                    tag.style.color = 'white';
+                    card.setAttribute('tabindex', '0');
+                });
+
+                // Close video events
+                this.closeBtn.addEventListener('click', () => this.closeVideo());
+                this.videoOverlay.addEventListener('click', (e) => {
+                    if (e.target === this.videoOverlay) {
+                        this.closeVideo();
+                    }
+                });
+
+                // Keyboard shortcuts
+                document.addEventListener('keydown', (e) => {
+                    if (e.key === 'Escape' && this.videoOverlay.classList.contains('active')) {
+                        this.closeVideo();
+                    }
+                });
+
+                // Prevent body scrolling when video is open
+                this.videoOverlay.addEventListener('wheel', (e) => {
+                    e.preventDefault();
+                }, { passive: false });
+            }
+
+            playChannel(card) {
+                const url = card.dataset.url;
+                const name = card.dataset.name;
+
+                if (!url) return;
+
+                // Show overlay and loading
+                this.videoOverlay.classList.add('active');
+                this.videoLoading.style.display = 'flex';
+                this.videoPlayer.style.display = 'none';
+                this.currentChannelName.textContent = name;
+                
+                // Prevent body scroll
+                document.body.style.overflow = 'hidden';
+
+                // Load video
+                this.videoPlayer.src = url;
+                
+                // Show video when loaded
+                setTimeout(() => {
+                    this.videoLoading.style.display = 'none';
+                    this.videoPlayer.style.display = 'block';
+                }, 1500);
+            }
+
+            closeVideo() {
+                this.videoOverlay.classList.remove('active');
+                this.videoPlayer.src = '';
+                document.body.style.overflow = '';
+                
+                // Reset loading state
+                setTimeout(() => {
+                    this.videoLoading.style.display = 'flex';
+                    this.videoPlayer.style.display = 'none';
+                }, 300);
+            }
+
+            setupSearch() {
+                this.searchInput.addEventListener('input', () => {
+                    const query = this.searchInput.value.toLowerCase();
+                    this.filterChannels(query);
+                });
+            }
+
+            setupFilter() {
+                this.categoryFilter.addEventListener('change', () => {
+                    const category = this.categoryFilter.value;
+                    this.filterByCategory(category);
+                });
+            }
+
+            filterChannels(query) {
+                const channelCards = document.querySelectorAll('.channel-card');
+                
+                channelCards.forEach(card => {
+                    const name = card.dataset.name.toLowerCase();
+                    const description = card.querySelector('.channel-description').textContent.toLowerCase();
                     
-                    const category = tag.dataset.category;
-                    filterChannels(channelSearch.value.toLowerCase(), category);
+                    if (name.includes(query) || description.includes(query)) {
+                        card.style.display = 'block';
+                        card.style.animation = 'fadeIn 0.3s ease-out';
+                    } else {
+                        card.style.display = 'none';
+                    }
                 });
-            });
 
-            // Player controls
-            closePlayerBtn.addEventListener('click', closePlayer);
-            prevChannelBtn.addEventListener('click', () => playChannel(currentChannelIndex - 1));
-            nextChannelBtn.addEventListener('click', () => playChannel(currentChannelIndex + 1));
-            
-            // Fullscreen toggle
-            fullscreenBtn.addEventListener('click', toggleFullscreen);
+                this.updateCategoryVisibility();
+            }
 
-            // Close player when clicking outside
-            videoOverlay.addEventListener('click', (e) => {
-                if (e.target === videoOverlay) {
-                    closePlayer();
-                }
-            });
-
-            // Scroll to top
-            window.addEventListener('scroll', () => {
-                if (window.scrollY > 300) {
-                    scrollTopBtn.style.display = 'block';
+            filterByCategory(category) {
+                const categories = document.querySelectorAll('.category');
+                
+                if (category === 'all') {
+                    categories.forEach(cat => cat.style.display = 'block');
                 } else {
-                    scrollTopBtn.style.display = 'none';
+                    categories.forEach(cat => {
+                        if (cat.dataset.category === category) {
+                            cat.style.display = 'block';
+                        } else {
+                            cat.style.display = 'none';
+                        }
+                    });
                 }
-            });
+            }
 
-            scrollTopBtn.addEventListener('click', () => {
-                window.scrollTo({ top: 0, behavior: 'smooth' });
-            });
-
-            // Theme selector
-            const themeSelect = document.getElementById('themeSelect');
-            themeSelect.addEventListener('change', (e) => {
-                document.body.setAttribute('data-theme', e.target.value);
-                localStorage.setItem('selectedTheme', e.target.value);
-            });
-
-            // Load saved theme
-            const savedTheme = localStorage.getItem('selectedTheme') || 'default';
-            themeSelect.value = savedTheme;
-            document.body.setAttribute('data-theme', savedTheme);
-
-            // Keyboard shortcuts
-            document.addEventListener('keydown', (e) => {
-                if (videoOverlay.classList.contains('active')) {
-                    if (e.key === 'Escape') closePlayer();
-                    if (e.key === 'ArrowLeft') playChannel(currentChannelIndex - 1);
-                    if (e.key === 'ArrowRight') playChannel(currentChannelIndex + 1);
-                    if (e.key === 'f' || e.key === 'F') toggleFullscreen();
-                }
-            });
-        }
-
-        // Filter channels
-        function filterChannels(searchTerm, category) {
-            filteredChannels = channels.filter(channel => {
-                const matchesSearch = channel.name.toLowerCase().includes(searchTerm) || 
-                                    channel.description.toLowerCase().includes(searchTerm) ||
-                                    channel.category.toLowerCase().includes(searchTerm);
-                const matchesCategory = category === 'all' || channel.type === category;
-                return matchesSearch && matchesCategory;
-            });
-            renderChannels();
-        }
-
-        // Get active filter
-        function getActiveFilter() {
-            const activeTag = document.querySelector('.filter-tag.active');
-            return activeTag ? activeTag.dataset.category : 'all';
-        }
-
-        // Enhanced play channel function - immediate video player
-        function playChannel(index) {
-            if (index < 0) index = filteredChannels.length - 1;
-            if (index >= filteredChannels.length) index = 0;
-            
-            currentChannelIndex = index;
-            const channel = filteredChannels[index];
-            
-            // Show video overlay immediately
-            videoOverlay.classList.add('active');
-            document.body.style.overflow = 'hidden'; // Prevent background scrolling
-            
-            // Show loading
-            playerLoading.style.display = 'block';
-            
-            // Update player info
-            const embedUrl = `${channel.url}?autoplay=1&mute=0&controls=1&rel=0&modestbranding=1&playsinline=1`;
-            youtubePlayer.src = embedUrl;
-            currentChannelElement.textContent = channel.name;
-            currentCategoryElement.textContent = channel.category;
-            
-            // Update logo
-            currentChannelLogo.src = channel.logo;
-            currentChannelLogo.onerror = function() {
-                this.style.display = 'none';
-                const fallback = document.createElement('div');
-                fallback.textContent = channel.fallbackLogo;
-                fallback.style.cssText = 'width: 50px; height: 50px; display: flex; align-items: center; justify-content: center; font-size: 2rem; background: white; border-radius: var(--radius-sm);';
-                this.parentNode.insertBefore(fallback, this.nextSibling);
-            };
-            
-            // Hide loading after delay
-            setTimeout(() => {
-                playerLoading.style.display = 'none';
-            }, 2000);
-        }
-
-        // Close player
-        function closePlayer() {
-            youtubePlayer.src = '';
-            videoOverlay.classList.remove('active');
-            document.body.style.overflow = 'auto'; // Restore scrolling
-        }
-
-        // Toggle fullscreen
-        function toggleFullscreen() {
-            const videoContainer = document.getElementById('video-container');
-            if (!document.fullscreenElement) {
-                videoContainer.requestFullscreen().catch(err => {
-                    console.log(`Error attempting to enable fullscreen: ${err.message}`);
+            updateCategoryVisibility() {
+                const categories = document.querySelectorAll('.category');
+                
+                categories.forEach(category => {
+                    const visibleCards = category.querySelectorAll('.channel-card[style*="display: block"], .channel-card:not([style*="display: none"])');
+                    
+                    if (visibleCards.length === 0) {
+                        category.style.display = 'none';
+                    } else {
+                        category.style.display = 'block';
+                    }
                 });
-                fullscreenBtn.innerHTML = '<i class="fas fa-compress"></i>';
-            } else {
-                document.exitFullscreen();
-                fullscreenBtn.innerHTML = '<i class="fas fa-expand"></i>';
             }
         }
-
-        // Add pulse animation and responsive styles
-        const style = document.createElement('style');
-        style.textContent = `
-            @keyframes pulse {
-                0%, 100% { opacity: 1; transform: scale(1); }
-                50% { opacity: 0.7; transform: scale(1.1); }
-            }
-            
-            .filter-tag:hover {
-                background: var(--primary-blue) !important;
-                color: white !important;
-                transform: scale(1.05);
-            }
-            
-            @media (max-width: 768px) {
-                #channels-grid {
-                    grid-template-columns: 1fr !important;
-                    max-width: 400px;
-                    margin: 0 auto;
-                }
-                
-                .container {
-                    padding: 0 var(--space-sm);
-                }
-                
-                h2 {
-                    font-size: 2rem !important;
-                }
-                
-                .header > .container > div {
-                    flex-direction: column;
-                    gap: var(--space-sm);
-                    align-items: stretch;
-                }
-                
-                .header > .container > div > div {
-                    justify-content: center;
-                }
-                
-                .video-player-container {
-                    height: 100vh;
-                    display: flex;
-                    flex-direction: column;
-                }
-                
-                .video-player-container > div:first-child {
-                    flex-direction: column;
-                    gap: var(--space-sm);
-                    align-items: stretch;
-                }
-                
-                .video-player-container > div:first-child > div:last-child {
-                    justify-content: center;
-                }
-                
-                .video-player-container #video-container {
-                    flex: 1;
-                    padding-bottom: 0;
-                    height: auto;
-                }
-            }
-            
-            @media (max-width: 480px) {
-                .channel-card {
-                    padding: var(--space-sm) !important;
-                }
-                
-                .channel-card h3 {
-                    font-size: 1rem !important;
-                }
-            }
-        `;
-        document.head.appendChild(style);
 
         // Initialize when DOM is loaded
-        if (document.readyState === 'loading') {
-            document.addEventListener('DOMContentLoaded', init);
-        } else {
-            init();
-        }
-    </script>
+        document.addEventListener('DOMContentLoaded', () => {
+            new LiveTVPlayer();
+        });
 
-    <!-- Additional theme support -->
-    <script src="js/themes.js"></script>
+        // Add smooth scroll behavior
+        document.documentElement.style.scrollBehavior = 'smooth';
+    </script>
 </body>
 </html>
