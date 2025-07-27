@@ -306,10 +306,10 @@ class MovieApp {
     // Popular Movies Functionality
     async loadPopularMovies() {
         const popularTitles = [
-            'Avengers Endgame', 'Spider-Man No Way Home', 'The Batman', 'Top Gun Maverick',
-            'Black Panther', 'Dune', 'No Time to Die', 'Fast X', 'Guardians of the Galaxy',
-            'John Wick 4', 'Scream VI', 'The Super Mario Bros Movie', 'Avatar The Way of Water',
-            'Doctor Strange', 'Thor Love and Thunder', 'Jurassic World Dominion'
+            'Deadpool Wolverine', 'Inside Out 2', 'Dune Part Two', 'Sonic the Hedgehog 3',
+            'Moana 2', 'Wicked', 'Gladiator II', 'Mufasa The Lion King',
+            'A Complete Unknown', 'Nosferatu', 'Conclave', 'Anora',
+            'The Substance', 'Emilia Perez', 'Babygirl', 'A Real Pain'
         ];
         
         try {
