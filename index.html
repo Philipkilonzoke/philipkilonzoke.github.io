@@ -151,22 +151,39 @@
         
         .news-ticker {
             position: relative;
-            overflow: hidden;
+            overflow-x: auto;
+            overflow-y: hidden;
             background: white;
             border-radius: var(--radius-lg);
             box-shadow: var(--shadow-md);
             padding: 1rem 0;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+        }
+        
+        .news-ticker::-webkit-scrollbar {
+            display: none;
         }
         
         .ticker-content {
             display: flex;
             gap: 2rem;
-            animation: scroll-left 180s linear infinite;
+            animation: scroll-left 90s linear infinite;
             padding: 0 1rem;
             will-change: transform;
+            cursor: grab;
+            user-select: none;
+        }
+        
+        .ticker-content:active {
+            cursor: grabbing;
         }
         
         .ticker-content:hover {
+            animation-play-state: paused;
+        }
+        
+        .ticker-content.dragging {
             animation-play-state: paused;
         }
         
@@ -389,7 +406,7 @@
             }
             
             .ticker-content {
-                animation-duration: 120s;
+                animation-duration: 60s;
             }
             
             .ticker-item {
@@ -426,7 +443,7 @@
             }
             
             .ticker-content {
-                animation-duration: 100s;
+                animation-duration: 45s;
             }
             
             .ticker-item {
@@ -1031,6 +1048,96 @@
             }
         }
         
+        // Touch/Swipe functionality for ticker
+        function setupTickerInteraction() {
+            const ticker = document.getElementById('news-ticker');
+            const tickerContent = ticker?.querySelector('.ticker-content');
+            if (!ticker || !tickerContent) return;
+            
+            let isDragging = false;
+            let startX = 0;
+            let scrollLeft = 0;
+            let isInteracting = false;
+            
+            // Pause animation when user starts interacting
+            function pauseAnimation() {
+                isInteracting = true;
+                tickerContent.classList.add('dragging');
+            }
+            
+            // Resume animation after user stops interacting
+            function resumeAnimation() {
+                setTimeout(() => {
+                    isInteracting = false;
+                    tickerContent.classList.remove('dragging');
+                }, 3000); // Resume after 3 seconds
+            }
+            
+            // Mouse events for desktop
+            ticker.addEventListener('mousedown', (e) => {
+                isDragging = true;
+                pauseAnimation();
+                startX = e.pageX - ticker.offsetLeft;
+                scrollLeft = ticker.scrollLeft;
+                e.preventDefault();
+            });
+            
+            document.addEventListener('mousemove', (e) => {
+                if (!isDragging) return;
+                e.preventDefault();
+                const x = e.pageX - ticker.offsetLeft;
+                const walk = (x - startX) * 1.5;
+                ticker.scrollLeft = scrollLeft - walk;
+            });
+            
+            document.addEventListener('mouseup', () => {
+                if (isDragging) {
+                    isDragging = false;
+                    resumeAnimation();
+                }
+            });
+            
+            // Touch events for mobile
+            ticker.addEventListener('touchstart', (e) => {
+                isDragging = true;
+                pauseAnimation();
+                startX = e.touches[0].pageX - ticker.offsetLeft;
+                scrollLeft = ticker.scrollLeft;
+            }, { passive: true });
+            
+            ticker.addEventListener('touchmove', (e) => {
+                if (!isDragging) return;
+                const x = e.touches[0].pageX - ticker.offsetLeft;
+                const walk = (x - startX) * 1.5;
+                ticker.scrollLeft = scrollLeft - walk;
+            }, { passive: true });
+            
+            ticker.addEventListener('touchend', () => {
+                if (isDragging) {
+                    isDragging = false;
+                    resumeAnimation();
+                }
+            }, { passive: true });
+            
+            // Handle wheel scrolling
+            ticker.addEventListener('wheel', (e) => {
+                if (Math.abs(e.deltaX) > Math.abs(e.deltaY)) {
+                    e.preventDefault();
+                    pauseAnimation();
+                    ticker.scrollLeft += e.deltaX;
+                    resumeAnimation();
+                }
+            });
+            
+            // Prevent article clicks when dragging
+            ticker.addEventListener('click', (e) => {
+                if (isInteracting) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                }
+            }, true);
+        }
+        
         // Initialize homepage
         document.addEventListener('DOMContentLoaded', function() {
             // Hide loading screen
@@ -1039,7 +1146,12 @@
             }, 1000);
             
             // Load breaking news
-            loadBreakingNews();
+            loadBreakingNews().then(() => {
+                // Setup ticker interaction after content is loaded
+                setTimeout(() => {
+                    setupTickerInteraction();
+                }, 500);
+            });
             
             // Setup sidebar functionality
             const mobileToggle = document.querySelector('.mobile-menu-toggle');
