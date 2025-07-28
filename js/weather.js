@@ -172,13 +172,17 @@ class WeatherDashboard {
                 const lat = parseFloat(btn.getAttribute('data-lat'));
                 const lon = parseFloat(btn.getAttribute('data-lon'));
                 
-                if (lat && lon && city) {
+                console.log(`City button clicked: ${city}, lat: ${lat}, lon: ${lon}`);
+                
+                if (!isNaN(lat) && !isNaN(lon) && city) {
                     // Use coordinates directly for faster loading
                     this.searchLocationByCoords(lat, lon, {
                         name: city,
                         country: country,
                         admin1: ''
                     });
+                } else {
+                    console.error(`Invalid coordinates for ${city}: lat=${lat}, lon=${lon}`);
                 }
             });
         });
