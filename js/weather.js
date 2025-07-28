@@ -73,8 +73,28 @@ class WeatherDashboard {
         this.loadUserPreferences();
         this.setupEventListeners();
         this.setupAutoRefresh();
-        await this.loadDefaultLocation();
+        
+        // Show welcome state initially instead of trying to load location
+        this.showWelcome();
+        
         this.updateLastUpdated();
+    }
+
+    /**
+     * Show welcome state
+     */
+    showWelcome() {
+        this.hideError();
+        this.hideLoading();
+        this.hideWeather();
+        document.getElementById('weather-welcome').style.display = 'block';
+    }
+
+    /**
+     * Hide welcome state
+     */
+    hideWelcome() {
+        document.getElementById('weather-welcome').style.display = 'none';
     }
 
     /**
@@ -112,19 +132,10 @@ class WeatherDashboard {
      * Setup event listeners
      */
     setupEventListeners() {
-        // Unit toggle
-        document.getElementById('unit-toggle')?.addEventListener('click', () => {
-            this.toggleUnit();
-        });
-
-        // Refresh button
-        document.getElementById('refresh-btn')?.addEventListener('click', () => {
-            this.refreshWeatherData();
-        });
-
-        // Search functionality with autocomplete
+        // Search functionality
         const searchInput = document.getElementById('city-input');
         const searchBtn = document.getElementById('search-btn');
+        const locationBtn = document.getElementById('location-btn');
         
         if (searchInput) {
             searchInput.addEventListener('input', (e) => {
@@ -133,43 +144,93 @@ class WeatherDashboard {
             
             searchInput.addEventListener('keypress', (e) => {
                 if (e.key === 'Enter') {
+                    e.preventDefault();
                     this.searchLocation(e.target.value);
                 }
             });
-            
-            // Hide suggestions when clicking outside
-            document.addEventListener('click', (e) => {
-                if (!searchInput.contains(e.target) && !document.getElementById('search-suggestions').contains(e.target)) {
-                    this.hideSuggestions();
-                }
-            });
         }
-
+        
         if (searchBtn) {
             searchBtn.addEventListener('click', () => {
-                const query = searchInput.value.trim();
-                if (query) {
-                    this.searchLocation(query);
+                const query = searchInput?.value;
+                if (query) this.searchLocation(query);
+            });
+        }
+        
+        if (locationBtn) {
+            locationBtn.addEventListener('click', () => {
+                this.getCurrentLocation();
+            });
+        }
+
+        // Quick city buttons with optimized coordinates
+        const cityButtons = document.querySelectorAll('.city-btn');
+        cityButtons.forEach(btn => {
+            btn.addEventListener('click', () => {
+                const city = btn.getAttribute('data-city');
+                const country = btn.getAttribute('data-country');
+                const lat = parseFloat(btn.getAttribute('data-lat'));
+                const lon = parseFloat(btn.getAttribute('data-lon'));
+                
+                if (lat && lon && city) {
+                    // Use coordinates directly for faster loading
+                    this.searchLocationByCoords(lat, lon, {
+                        name: city,
+                        country: country,
+                        admin1: ''
+                    });
+                }
+            });
+        });
+
+        // Unit toggle
+        const unitToggle = document.getElementById('unit-toggle');
+        if (unitToggle) {
+            unitToggle.addEventListener('click', () => {
+                this.toggleUnit();
+            });
+        }
+
+        // Refresh button
+        const refreshBtn = document.getElementById('refresh-btn');
+        if (refreshBtn) {
+            refreshBtn.addEventListener('click', () => {
+                if (this.currentLocation) {
+                    this.fetchWeatherData(this.currentLocation.latitude, this.currentLocation.longitude);
                 }
             });
         }
 
-        // Geolocation button
-        document.getElementById('location-btn')?.addEventListener('click', () => {
-            this.getCurrentLocation();
-        });
-
-        // Quick city buttons
-        document.querySelectorAll('.city-btn').forEach(btn => {
-            btn.addEventListener('click', () => {
-                const cityData = btn.dataset.city;
-                this.searchLocation(cityData);
-            });
-        });
-
         // Retry button
-        document.getElementById('retry-btn')?.addEventListener('click', () => {
-            this.refreshWeatherData();
+        const retryBtn = document.getElementById('retry-btn');
+        if (retryBtn) {
+            retryBtn.addEventListener('click', () => {
+                if (this.currentLocation) {
+                    this.fetchWeatherData(this.currentLocation.latitude, this.currentLocation.longitude);
+                } else {
+                    this.showWelcome();
+                }
+            });
+        }
+
+        // Suggestion clicks
+        document.addEventListener('click', (e) => {
+            if (e.target.classList.contains('suggestion-item')) {
+                const lat = parseFloat(e.target.getAttribute('data-lat'));
+                const lon = parseFloat(e.target.getAttribute('data-lon'));
+                const name = e.target.getAttribute('data-name');
+                const country = e.target.getAttribute('data-country');
+                const admin1 = e.target.getAttribute('data-admin1');
+                
+                this.searchLocationByCoords(lat, lon, {
+                    name,
+                    country,
+                    admin1
+                });
+                
+                this.hideSuggestions();
+                if (searchInput) searchInput.value = `${name}, ${country}`;
+            }
         });
     }
 
@@ -191,13 +252,14 @@ class WeatherDashboard {
     }
 
     /**
-     * Load default location (saved location or geolocation)
+     * Load default location (saved location or show welcome)
      */
     async loadDefaultLocation() {
         if (this.currentLocation) {
             await this.fetchWeatherData(this.currentLocation.latitude, this.currentLocation.longitude);
         } else {
-            this.getCurrentLocation();
+            // Show welcome instead of trying geolocation immediately
+            this.showWelcome();
         }
     }
 
@@ -245,6 +307,11 @@ class WeatherDashboard {
         suggestions.forEach(suggestion => {
             const item = document.createElement('div');
             item.className = 'suggestion-item';
+            item.setAttribute('data-lat', suggestion.latitude);
+            item.setAttribute('data-lon', suggestion.longitude);
+            item.setAttribute('data-name', suggestion.name);
+            item.setAttribute('data-country', suggestion.country);
+            item.setAttribute('data-admin1', suggestion.admin1);
             item.innerHTML = `
                 <i class="fas fa-map-marker-alt suggestion-icon"></i>
                 <div class="suggestion-text">
@@ -310,6 +377,9 @@ class WeatherDashboard {
             country: locationData?.country || '',
             admin1: locationData?.admin1 || ''
         };
+        
+        // Hide welcome state when starting to fetch data
+        this.hideWelcome();
         
         this.saveUserPreferences();
         await this.fetchWeatherData(lat, lon);
@@ -397,36 +467,45 @@ class WeatherDashboard {
     }
 
     /**
-     * Fetch weather data from Open-Meteo API
+     * Fetch weather data from Open-Meteo API (optimized for speed)
      */
     async fetchWeatherData(latitude, longitude) {
         this.showLoading();
         
         try {
-            // Current weather and forecast
+            // Optimized weather parameters for faster response
             const weatherParams = new URLSearchParams({
                 latitude: latitude,
                 longitude: longitude,
-                current: 'temperature_2m,relative_humidity_2m,apparent_temperature,is_day,precipitation,rain,showers,snowfall,weather_code,cloud_cover,pressure_msl,surface_pressure,wind_speed_10m,wind_direction_10m,wind_gusts_10m',
-                hourly: 'temperature_2m,relative_humidity_2m,dew_point_2m,apparent_temperature,precipitation_probability,precipitation,rain,showers,snowfall,snow_depth,weather_code,pressure_msl,surface_pressure,cloud_cover,visibility,evapotranspiration,et0_fao_evapotranspiration,vapour_pressure_deficit,wind_speed_10m,wind_direction_10m,wind_gusts_10m,temperature_80m,temperature_120m,temperature_180m,soil_temperature_0cm,soil_temperature_6cm,soil_temperature_18cm,soil_temperature_54cm,soil_moisture_0_1cm,soil_moisture_1_3cm,soil_moisture_3_9cm,soil_moisture_9_27cm,soil_moisture_27_81cm',
-                daily: 'weather_code,temperature_2m_max,temperature_2m_min,apparent_temperature_max,apparent_temperature_min,sunrise,sunset,daylight_duration,sunshine_duration,uv_index_max,precipitation_sum,rain_sum,showers_sum,snowfall_sum,precipitation_hours,precipitation_probability_max,wind_speed_10m_max,wind_gusts_10m_max,wind_direction_10m_dominant,shortwave_radiation_sum,et0_fao_evapotranspiration',
+                current: 'temperature_2m,relative_humidity_2m,apparent_temperature,is_day,precipitation,weather_code,cloud_cover,pressure_msl,wind_speed_10m,wind_direction_10m,wind_gusts_10m',
+                hourly: 'temperature_2m,relative_humidity_2m,apparent_temperature,precipitation_probability,weather_code,pressure_msl,cloud_cover,visibility,wind_speed_10m,wind_direction_10m,uv_index',
+                daily: 'weather_code,temperature_2m_max,temperature_2m_min,apparent_temperature_max,apparent_temperature_min,sunrise,sunset,uv_index_max,precipitation_sum,wind_speed_10m_max,wind_gusts_10m_max,wind_direction_10m_dominant',
                 timezone: 'auto',
                 forecast_days: 7
             });
 
-            const weatherResponse = await fetch(`${this.weatherAPI}?${weatherParams}`);
-            const weatherData = await weatherResponse.json();
+            // Use Promise.allSettled for parallel requests
+            const [weatherResult, airQualityResult] = await Promise.allSettled([
+                fetch(`${this.weatherAPI}?${weatherParams}`),
+                this.fetchAirQuality(latitude, longitude)
+            ]);
 
-            if (weatherResponse.ok) {
+            if (weatherResult.status === 'fulfilled' && weatherResult.value.ok) {
+                const weatherData = await weatherResult.value.json();
                 this.weatherData = weatherData;
-                await this.fetchAirQuality(latitude, longitude);
+                
+                // Hide welcome and show weather data
+                this.hideWelcome();
                 this.renderWeatherData();
                 this.updatePageTitle();
                 this.updateBackground();
                 this.hideLoading();
                 this.updateLastUpdated();
             } else {
-                throw new Error(weatherData.reason || 'Failed to fetch weather data');
+                const errorData = weatherResult.status === 'fulfilled' ? 
+                    await weatherResult.value.json() : 
+                    { reason: 'Network error' };
+                throw new Error(errorData.reason || 'Failed to fetch weather data');
             }
             
         } catch (error) {
@@ -436,14 +515,14 @@ class WeatherDashboard {
     }
 
     /**
-     * Fetch air quality data
+     * Fetch air quality data (optimized for parallel processing)
      */
     async fetchAirQuality(latitude, longitude) {
         try {
             const aqParams = new URLSearchParams({
                 latitude: latitude,
                 longitude: longitude,
-                current: 'pm10,pm2_5,carbon_monoxide,nitrogen_dioxide,sulphur_dioxide,ozone,aerosol_optical_depth,dust,uv_index,european_aqi,us_aqi',
+                current: 'pm10,pm2_5,carbon_monoxide,nitrogen_dioxide,sulphur_dioxide,ozone,us_aqi',
                 timezone: 'auto'
             });
 
