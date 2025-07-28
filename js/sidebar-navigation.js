@@ -93,10 +93,10 @@ class SidebarNavigation {
                 id: 'food'
             },
             { 
-                href: 'movies.html', 
-                icon: 'fas fa-video', 
-                text: 'Movies',
-                id: 'movies'
+                href: 'showtime.html', 
+                icon: 'fas fa-film', 
+                text: 'Showtime',
+                id: 'showtime'
             },
             { 
                 href: 'crypto.html', 
