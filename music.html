@@ -403,33 +403,21 @@
     <script>
         // Initialize the music page
         document.addEventListener('DOMContentLoaded', function() {
-            // Hide loading screen
+            // Hide loading screen properly
             setTimeout(() => {
-                document.getElementById('loading-screen').classList.add('hidden');
+                const loadingScreen = document.getElementById('loading-screen');
+                if (loadingScreen) {
+                    loadingScreen.classList.add('hidden');
+                    setTimeout(() => {
+                        loadingScreen.style.display = 'none';
+                    }, 300);
+                }
             }, 1000);
 
             // Initialize simple music functionality
             if (typeof SimpleMusicHub !== 'undefined') {
                 SimpleMusicHub.init();
             }
-            
-            // Sidebar functionality is now handled by sidebar-navigation.js
-            }
-            
-            if (sidebarClose) {
-                sidebarClose.addEventListener('click', () => {
-                    sidebar?.classList.remove('open');
-                });
-            }
-            
-            // Close sidebar when clicking outside
-            document.addEventListener('click', (e) => {
-                if (sidebar?.classList.contains('open') && 
-                    !sidebar.contains(e.target) && 
-                    !mobileToggle?.contains(e.target)) {
-                    sidebar.classList.remove('open');
-                }
-            });
         });
     </script>
 </body>

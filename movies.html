@@ -1106,10 +1106,16 @@
     <script src="js/category-news.js"></script>
     <script src="movies.js"></script>
     <script>
-        // Hide main loading screen
+        // Hide main loading screen properly
         document.addEventListener('DOMContentLoaded', function() {
             setTimeout(() => {
-                document.getElementById('loading-screen').classList.add('hidden');
+                const loadingScreen = document.getElementById('loading-screen');
+                if (loadingScreen) {
+                    loadingScreen.classList.add('hidden');
+                    setTimeout(() => {
+                        loadingScreen.style.display = 'none';
+                    }, 300);
+                }
             }, 800);
         });
     </script>
