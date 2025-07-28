@@ -272,24 +272,6 @@
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             window.categoryNews = new CategoryNews('kenya');
-            
-            // Sidebar functionality is now handled by sidebar-navigation.js
-            }
-            
-            if (sidebarClose) {
-                sidebarClose.addEventListener('click', () => {
-                    sidebar?.classList.remove('open');
-                });
-            }
-            
-            // Close sidebar when clicking outside
-            document.addEventListener('click', (e) => {
-                if (sidebar?.classList.contains('open') && 
-                    !sidebar.contains(e.target) && 
-                    !mobileToggle?.contains(e.target)) {
-                    sidebar.classList.remove('open');
-                }
-            });
         });
     </script>
 </body>
