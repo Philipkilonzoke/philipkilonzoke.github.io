@@ -476,50 +476,75 @@ class WeatherDashboard {
     async fetchWeatherData(latitude, longitude) {
         this.showLoading();
         
+        // Validate coordinates
+        if (!latitude || !longitude || isNaN(latitude) || isNaN(longitude)) {
+            this.showError('Invalid coordinates provided.');
+            return;
+        }
+        
         try {
             // Optimized weather parameters for faster response
             const weatherParams = new URLSearchParams({
-                latitude: latitude,
-                longitude: longitude,
+                latitude: latitude.toString(),
+                longitude: longitude.toString(),
                 current: 'temperature_2m,relative_humidity_2m,apparent_temperature,is_day,precipitation,weather_code,cloud_cover,pressure_msl,wind_speed_10m,wind_direction_10m,wind_gusts_10m',
                 hourly: 'temperature_2m,relative_humidity_2m,apparent_temperature,precipitation_probability,weather_code,pressure_msl,cloud_cover,visibility,wind_speed_10m,wind_direction_10m,uv_index',
                 daily: 'weather_code,temperature_2m_max,temperature_2m_min,apparent_temperature_max,apparent_temperature_min,sunrise,sunset,uv_index_max,precipitation_sum,wind_speed_10m_max,wind_gusts_10m_max,wind_direction_10m_dominant',
                 timezone: 'auto',
-                forecast_days: 7
+                forecast_days: '7'
             });
 
-            // Use Promise.allSettled for parallel requests
-            const [weatherResult, airQualityResult] = await Promise.allSettled([
-                fetch(`${this.weatherAPI}?${weatherParams}`),
-                this.fetchAirQuality(latitude, longitude)
-            ]);
+            console.log('Fetching weather data for:', { latitude, longitude });
+            console.log('API URL:', `${this.weatherAPI}?${weatherParams}`);
 
-            if (weatherResult.status === 'fulfilled' && weatherResult.value.ok) {
-                const weatherData = await weatherResult.value.json();
-                console.log('Weather API response:', weatherData);
-                this.weatherData = weatherData;
-                
-                // Hide welcome and show weather data
-                this.hideWelcome();
-                this.renderWeatherData();
-                this.updatePageTitle();
-                this.updateBackground();
-                this.hideLoading();
-                this.updateLastUpdated();
-            } else {
-                console.error('Weather API request failed:', weatherResult);
-                const errorData = weatherResult.status === 'fulfilled' ? 
-                    await weatherResult.value.json() : 
-                    { reason: 'Network error' };
-                console.error('Error data:', errorData);
-                throw new Error(errorData.reason || 'Failed to fetch weather data');
+            // Make the weather API request
+            const response = await fetch(`${this.weatherAPI}?${weatherParams}`, {
+                method: 'GET',
+                headers: {
+                    'Accept': 'application/json',
+                },
+            });
+
+            console.log('Weather API response status:', response.status);
+
+            if (!response.ok) {
+                const errorText = await response.text();
+                console.error('Weather API error response:', errorText);
+                throw new Error(`Weather API returned ${response.status}: ${errorText}`);
             }
+
+            const weatherData = await response.json();
+            console.log('Weather API response data:', weatherData);
+
+            // Validate the response structure
+            if (!weatherData || !weatherData.current) {
+                throw new Error('Invalid weather data structure received from API');
+            }
+
+            this.weatherData = weatherData;
+            
+            // Fetch air quality data in parallel (non-blocking)
+            this.fetchAirQuality(latitude, longitude).catch(error => {
+                console.warn('Air quality data fetch failed:', error);
+                // Don't fail the whole operation for air quality
+            });
+            
+            // Hide welcome and show weather data
+            this.hideWelcome();
+            this.hideError();
+            this.renderWeatherData();
+            this.updatePageTitle();
+            this.updateBackground();
+            this.hideLoading();
+            this.updateLastUpdated();
+            
+            console.log('Weather data successfully processed and displayed');
             
         } catch (error) {
             console.error('Weather fetch failed:', error);
-            console.error('API URL was:', `${this.weatherAPI}?${weatherParams}`);
-            console.error('Coordinates:', { latitude, longitude });
-            this.showError(`Failed to fetch weather data: ${error.message}`);
+            console.error('Coordinates were:', { latitude, longitude });
+            this.hideLoading();
+            this.showError(`Unable to fetch weather data. Please try again or check your internet connection.`);
         }
     }
 
@@ -557,12 +582,44 @@ class WeatherDashboard {
                 throw new Error('Weather data is missing or invalid');
             }
             
-            this.renderCurrentWeather();
-            this.renderHourlyForecast();
-            this.renderDailyForecast();
-            this.renderAirQuality();
-            this.renderTemperatureChart();
+            // Show sections first
             this.showWeatherSections();
+            
+            // Render each component with error handling
+            try {
+                this.renderCurrentWeather();
+                console.log('Current weather rendered');
+            } catch (error) {
+                console.error('Error rendering current weather:', error);
+            }
+            
+            try {
+                this.renderHourlyForecast();
+                console.log('Hourly forecast rendered');
+            } catch (error) {
+                console.error('Error rendering hourly forecast:', error);
+            }
+            
+            try {
+                this.renderDailyForecast();
+                console.log('Daily forecast rendered');
+            } catch (error) {
+                console.error('Error rendering daily forecast:', error);
+            }
+            
+            try {
+                this.renderAirQuality();
+                console.log('Air quality rendered');
+            } catch (error) {
+                console.error('Error rendering air quality:', error);
+            }
+            
+            try {
+                this.renderTemperatureChart();
+                console.log('Temperature chart rendered');
+            } catch (error) {
+                console.error('Error rendering temperature chart:', error);
+            }
             
             console.log('Weather data rendered successfully');
         } catch (error) {
@@ -578,22 +635,21 @@ class WeatherDashboard {
         const current = this.weatherData.current;
         const daily = this.weatherData.daily;
         
-        // Check if essential DOM elements exist
-        const requiredElements = [
-            'current-city', 'current-datetime', 'coordinates', 
-            'current-weather-icon', 'current-description',
-            'current-temp', 'temp-unit-symbol', 'feels-like-temp'
-        ];
+        console.log('Rendering current weather with data:', current);
         
-        for (const elementId of requiredElements) {
-            if (!document.getElementById(elementId)) {
-                throw new Error(`Required DOM element not found: ${elementId}`);
+        // Helper function to safely update element
+        const safeUpdate = (elementId, value, property = 'textContent') => {
+            const element = document.getElementById(elementId);
+            if (element) {
+                element[property] = value;
+            } else {
+                console.warn(`Element not found: ${elementId}`);
             }
-        }
+        };
         
         // Location info
-        document.getElementById('current-city').textContent = 
-            `${this.currentLocation.name}${this.currentLocation.country ? ', ' + this.currentLocation.country : ''}`;
+        safeUpdate('current-city', 
+            `${this.currentLocation.name}${this.currentLocation.country ? ', ' + this.currentLocation.country : ''}`);
         
         // Current date and time
         const now = new Date();
@@ -605,53 +661,55 @@ class WeatherDashboard {
             hour: '2-digit',
             minute: '2-digit'
         };
-        document.getElementById('current-datetime').textContent = now.toLocaleDateString('en-US', timeOptions);
+        safeUpdate('current-datetime', now.toLocaleDateString('en-US', timeOptions));
         
         // Coordinates
-        document.getElementById('coordinates').textContent = 
-            `${this.currentLocation.latitude.toFixed(4)}°, ${this.currentLocation.longitude.toFixed(4)}°`;
+        safeUpdate('coordinates', 
+            `${this.currentLocation.latitude.toFixed(4)}°, ${this.currentLocation.longitude.toFixed(4)}°`);
 
         // Weather icon and description
         const weatherCode = current.weather_code;
         const weatherInfo = this.weatherCodes[weatherCode] || this.weatherCodes[0];
         
-        document.getElementById('current-weather-icon').className = `weather-icon ${weatherInfo.icon}`;
-        document.getElementById('current-description').textContent = weatherInfo.description;
+        safeUpdate('current-weather-icon', `weather-icon ${weatherInfo.icon}`, 'className');
+        safeUpdate('current-description', weatherInfo.description);
 
         // Temperature
         const temp = this.convertTemperature(current.temperature_2m);
         const feelsLike = this.convertTemperature(current.apparent_temperature);
         
-        document.getElementById('current-temp').textContent = Math.round(temp);
-        document.getElementById('temp-unit-symbol').textContent = this.currentUnit === 'celsius' ? 'C' : 'F';
-        document.getElementById('feels-like-temp').textContent = Math.round(feelsLike);
-        document.getElementById('feels-like-unit').textContent = this.currentUnit === 'celsius' ? 'C' : 'F';
+        safeUpdate('current-temp', Math.round(temp));
+        safeUpdate('temp-unit-symbol', this.currentUnit === 'celsius' ? 'C' : 'F');
+        safeUpdate('feels-like-temp', Math.round(feelsLike));
+        safeUpdate('feels-like-unit', this.currentUnit === 'celsius' ? 'C' : 'F');
 
         // Weather details
-        document.getElementById('wind-speed').textContent = `${Math.round(current.wind_speed_10m)} km/h`;
-        document.getElementById('wind-direction').textContent = this.getWindDirection(current.wind_direction_10m);
-        document.getElementById('humidity').textContent = `${current.relative_humidity_2m}%`;
-        document.getElementById('pressure').textContent = `${Math.round(current.pressure_msl)} hPa`;
-        document.getElementById('visibility').textContent = `10 km`; // Open-Meteo doesn't provide visibility in basic plan
-        document.getElementById('cloud-cover').textContent = `${current.cloud_cover}%`;
+        safeUpdate('wind-speed', `${Math.round(current.wind_speed_10m)} km/h`);
+        safeUpdate('wind-direction', this.getWindDirection(current.wind_direction_10m));
+        safeUpdate('humidity', `${current.relative_humidity_2m}%`);
+        safeUpdate('pressure', `${Math.round(current.pressure_msl)} hPa`);
+        safeUpdate('visibility', `10 km`); // Open-Meteo doesn't provide visibility in basic plan
+        safeUpdate('cloud-cover', `${current.cloud_cover}%`);
 
         // UV Index
-        const uvIndex = daily.uv_index_max[0] || 0;
-        document.getElementById('uv-index').textContent = Math.round(uvIndex);
-        document.getElementById('uv-description').textContent = this.getUVDescription(uvIndex);
+        const uvIndex = daily.uv_index_max ? daily.uv_index_max[0] || 0 : 0;
+        safeUpdate('uv-index', Math.round(uvIndex));
+        safeUpdate('uv-description', this.getUVDescription(uvIndex));
 
         // Sunrise and sunset
-        const sunrise = new Date(daily.sunrise[0]);
-        const sunset = new Date(daily.sunset[0]);
-        
-        document.getElementById('sunrise-time').textContent = sunrise.toLocaleTimeString('en-US', { 
-            hour: '2-digit', 
-            minute: '2-digit' 
-        });
-        document.getElementById('sunset-time').textContent = sunset.toLocaleTimeString('en-US', { 
-            hour: '2-digit', 
-            minute: '2-digit' 
-        });
+        if (daily.sunrise && daily.sunset) {
+            const sunrise = new Date(daily.sunrise[0]);
+            const sunset = new Date(daily.sunset[0]);
+            
+            safeUpdate('sunrise-time', sunrise.toLocaleTimeString('en-US', { 
+                hour: '2-digit', 
+                minute: '2-digit' 
+            }));
+            safeUpdate('sunset-time', sunset.toLocaleTimeString('en-US', { 
+                hour: '2-digit', 
+                minute: '2-digit' 
+            }));
+        }
     }
 
     /**
@@ -740,20 +798,34 @@ class WeatherDashboard {
      * Render air quality information
      */
     renderAirQuality() {
-        if (!this.weatherData.airQuality) {
-            document.getElementById('air-quality').style.display = 'none';
+        const airQualitySection = document.getElementById('air-quality');
+        
+        if (!this.weatherData.airQuality || !this.weatherData.airQuality.current) {
+            if (airQualitySection) {
+                airQualitySection.style.display = 'none';
+            }
             return;
         }
 
         const airQuality = this.weatherData.airQuality.current;
         const aqi = airQuality.european_aqi || airQuality.us_aqi || 0;
         
-        document.getElementById('aqi-value').textContent = Math.round(aqi);
-        document.getElementById('aqi-label').textContent = this.getAQIDescription(aqi);
-        document.getElementById('pm25').textContent = airQuality.pm2_5 ? `${Math.round(airQuality.pm2_5)} μg/m³` : '--';
-        document.getElementById('pm10').textContent = airQuality.pm10 ? `${Math.round(airQuality.pm10)} μg/m³` : '--';
+        // Helper function to safely update element
+        const safeUpdate = (elementId, value, property = 'textContent') => {
+            const element = document.getElementById(elementId);
+            if (element) {
+                element[property] = value;
+            }
+        };
         
-        document.getElementById('air-quality').style.display = 'block';
+        safeUpdate('aqi-value', Math.round(aqi));
+        safeUpdate('aqi-label', this.getAQIDescription(aqi));
+        safeUpdate('pm25', airQuality.pm2_5 ? `${Math.round(airQuality.pm2_5)} μg/m³` : '--');
+        safeUpdate('pm10', airQuality.pm10 ? `${Math.round(airQuality.pm10)} μg/m³` : '--');
+        
+        if (airQualitySection) {
+            airQualitySection.style.display = 'block';
+        }
     }
 
     /**
@@ -761,7 +833,14 @@ class WeatherDashboard {
      */
     renderTemperatureChart() {
         const canvas = document.getElementById('temperature-chart');
-        if (!canvas) return;
+        const chartsSection = document.getElementById('weather-charts');
+        
+        if (!canvas || !this.weatherData.hourly || !this.weatherData.hourly.time) {
+            if (chartsSection) {
+                chartsSection.style.display = 'none';
+            }
+            return;
+        }
 
         const ctx = canvas.getContext('2d');
         const hourlyData = this.weatherData.hourly;
@@ -775,16 +854,28 @@ class WeatherDashboard {
         const labels = [];
         const temperatures = [];
         
-        for (let i = 0; i < 24; i++) {
-            const time = new Date(hourlyData.time[i]);
-            labels.push(time.toLocaleTimeString('en-US', { hour: '2-digit' }));
-            temperatures.push(this.convertTemperature(hourlyData.temperature_2m[i]));
+        const maxHours = Math.min(24, hourlyData.time.length);
+        
+        for (let i = 0; i < maxHours; i++) {
+            if (hourlyData.time[i] && hourlyData.temperature_2m[i] !== undefined) {
+                const time = new Date(hourlyData.time[i]);
+                labels.push(time.toLocaleTimeString('en-US', { hour: '2-digit' }));
+                temperatures.push(this.convertTemperature(hourlyData.temperature_2m[i]));
+            }
         }
 
-        // Simple canvas chart implementation
-        this.drawTemperatureChart(ctx, canvas, labels, temperatures);
-        
-        document.getElementById('weather-charts').style.display = 'block';
+        if (temperatures.length > 0) {
+            // Simple canvas chart implementation
+            this.drawTemperatureChart(ctx, canvas, labels, temperatures);
+            
+            if (chartsSection) {
+                chartsSection.style.display = 'block';
+            }
+        } else {
+            if (chartsSection) {
+                chartsSection.style.display = 'none';
+            }
+        }
     }
 
     /**
@@ -918,17 +1009,40 @@ class WeatherDashboard {
         document.getElementById('weather-error').style.display = 'block';
         document.getElementById('error-message').textContent = message;
         this.hideWeatherSections();
+        this.hideWelcome();
+    }
+
+    /**
+     * Hide error state
+     */
+    hideError() {
+        document.getElementById('weather-error').style.display = 'none';
     }
 
     /**
      * Hide weather sections
      */
     hideWeatherSections() {
-        document.getElementById('current-weather').style.display = 'none';
-        document.getElementById('hourly-forecast').style.display = 'none';
-        document.getElementById('daily-forecast').style.display = 'none';
-        document.getElementById('weather-charts').style.display = 'none';
-        document.getElementById('air-quality').style.display = 'none';
+        const sections = ['current-weather', 'hourly-forecast', 'daily-forecast', 'weather-charts', 'air-quality'];
+        sections.forEach(sectionId => {
+            const element = document.getElementById(sectionId);
+            if (element) {
+                element.style.display = 'none';
+            }
+        });
+    }
+
+    /**
+     * Show weather sections
+     */
+    showWeatherSections() {
+        const sections = ['current-weather', 'hourly-forecast', 'daily-forecast', 'weather-charts', 'air-quality'];
+        sections.forEach(sectionId => {
+            const element = document.getElementById(sectionId);
+            if (element) {
+                element.style.display = 'block';
+            }
+        });
     }
 
     /**
