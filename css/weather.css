@@ -700,51 +700,73 @@
     color: var(--text-muted);
 }
 
-/* Daily Forecast */
+/* Daily Forecast - Horizontal Layout like Hourly */
 .daily-container {
     display: flex;
-    flex-direction: column;
     gap: 1rem;
+    overflow-x: auto;
+    padding: 1rem 0;
+    scroll-behavior: smooth;
+    -webkit-overflow-scrolling: touch;
+}
+
+.daily-container::-webkit-scrollbar {
+    height: 8px;
+}
+
+.daily-container::-webkit-scrollbar-track {
+    background: var(--border-color);
+    border-radius: 4px;
+}
+
+.daily-container::-webkit-scrollbar-thumb {
+    background: var(--primary-color);
+    border-radius: 4px;
 }
 
 .daily-item {
-    display: flex;
-    align-items: center;
+    flex: 0 0 160px;
     background: var(--surface-color);
     border: 1px solid var(--border-color);
     border-radius: 16px;
-    padding: 1.5rem;
+    padding: 1.5rem 1rem;
+    text-align: center;
     transition: var(--weather-transition);
     cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-between;
+    min-height: 220px;
 }
 
 .daily-item:hover {
-    transform: translateY(-3px);
+    transform: translateY(-5px);
     background: var(--surface-color);
 }
 
 .daily-day {
-    flex: 0 0 120px;
     font-weight: 600;
     color: var(--text-color);
+    margin-bottom: 1rem;
+    font-size: 0.9rem;
 }
 
 .daily-icon {
-    flex: 0 0 60px;
-    text-align: center;
-    font-size: 2rem;
+    font-size: 2.5rem;
     color: var(--primary-color);
+    margin-bottom: 1rem;
 }
 
 .daily-description {
-    flex: 1;
     color: var(--text-muted);
-    margin-left: 1rem;
+    margin-bottom: 1rem;
+    font-size: 0.85rem;
+    text-align: center;
 }
 
 .daily-temps {
-    flex: 0 0 120px;
-    text-align: right;
+    margin-bottom: 1rem;
 }
 
 .daily-high {
@@ -798,7 +820,15 @@
 
 .chart-container {
     position: relative;
-    height: 300px;
+    height: 250px;
+    width: 100%;
+    overflow: hidden;
+}
+
+.chart-container canvas {
+    width: 100% !important;
+    height: 100% !important;
+    max-width: 100%;
 }
 
 /* Air Quality Section */
@@ -922,12 +952,21 @@
     }
     
     .daily-item {
-        flex-wrap: wrap;
-        gap: 1rem;
+        flex: 0 0 140px;
+        min-height: 200px;
+        padding: 1rem 0.5rem;
     }
     
     .daily-day {
-        flex: 1 1 100%;
+        font-size: 0.8rem;
+    }
+    
+    .daily-icon {
+        font-size: 2rem;
+    }
+    
+    .daily-description {
+        font-size: 0.75rem;
     }
     
     .air-quality-content {
@@ -946,6 +985,18 @@
         width: 100%;
         justify-content: center;
         gap: 0.75rem;
+    }
+    
+    .chart-container {
+        height: 200px;
+    }
+    
+    .chart-card {
+        padding: 1rem;
+    }
+    
+    .chart-header h3 {
+        font-size: 1.1rem;
     }
     
     .city-btn {

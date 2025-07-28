@@ -966,17 +966,24 @@ class WeatherDashboard {
      * Draw temperature chart on canvas
      */
     drawTemperatureChart(ctx, canvas, labels, temperatures) {
-        const width = canvas.width = canvas.offsetWidth * window.devicePixelRatio;
-        const height = canvas.height = canvas.offsetHeight * window.devicePixelRatio;
-        ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
+        // Set canvas size properly
+        const rect = canvas.getBoundingClientRect();
+        const dpr = window.devicePixelRatio || 1;
         
-        const chartWidth = canvas.offsetWidth - 80;
-        const chartHeight = canvas.offsetHeight - 80;
+        canvas.width = rect.width * dpr;
+        canvas.height = rect.height * dpr;
+        
+        ctx.scale(dpr, dpr);
+        canvas.style.width = rect.width + 'px';
+        canvas.style.height = rect.height + 'px';
+        
+        const chartWidth = rect.width - 80;
+        const chartHeight = rect.height - 80;
         const startX = 40;
         const startY = 40;
         
         // Clear canvas
-        ctx.clearRect(0, 0, canvas.offsetWidth, canvas.offsetHeight);
+        ctx.clearRect(0, 0, rect.width, rect.height);
         
         // Find min and max temperatures
         const minTemp = Math.min(...temperatures);
