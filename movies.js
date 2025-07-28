@@ -306,18 +306,45 @@ class MovieApp {
     // Popular Movies Functionality
     async loadPopularMovies() {
         const popularTitles = [
+            // Major 2025 Blockbusters
             'Captain America Brave New World', 'Superman', 'Thunderbolts', 'F1 The Movie',
             'Mission Impossible The Final Reckoning', 'Ballerina', '28 Years Later', 'How to Train Your Dragon',
             'Jurassic World Rebirth', 'The Fantastic Four First Steps', 'Mickey 17', 'M3GAN 2.0',
-            'Karate Kid Legends', 'The Accountant 2', 'Final Destination Bloodlines', 'Snow White'
+            'Karate Kid Legends', 'The Accountant 2', 'Final Destination Bloodlines', 'Snow White',
+            
+            // Action & Adventure 2025
+            'Den of Thieves Pantera', 'Nobody 2', 'The Running Man', 'Sinners', 'Wolf Man',
+            'Until Dawn', 'The Monkey', 'Warfare', 'Black Bag', 'A Working Man',
+            'Havoc', 'The Amateur', 'Flight Risk', 'Love Hurts', 'The Gorge',
+            
+            // Horror & Thriller 2025
+            'Heart Eyes', 'Companion', 'I Know What You Did Last Summer', 'The Strangers Chapter 2',
+            'Fear Street Prom Queen', 'Hurry Up Tomorrow', 'Death of a Unicorn', 'The Ritual',
+            'Clown in a Cornfield', 'Bambi The Reckoning', 'Five Nights at Freddys 2',
+            
+            // Comedy & Drama 2025
+            'Bridget Jones Mad About the Boy', 'You\'re Cordially Invited', 'Kinda Pregnant',
+            'The Pickup', 'Nonnas', 'Another Simple Favor', 'Honey Don\'t', 'The Roses',
+            'Freakier Friday', 'Happy Gilmore 2', 'The Naked Gun', 'Riff Raff',
+            
+            // Animation & Family 2025
+            'Lilo & Stitch', 'Elio', 'The Bad Guys 2', 'Smurfs', 'The SpongeBob Movie Search for Squarepants',
+            'Zootopia 2', 'A Minecraft Movie', 'Plankton The Movie', 'How to Train Your Dragon',
+            
+            // Sci-Fi & Fantasy 2025
+            'Tron Ares', 'The Electric State', 'Avatar Fire and Ash', 'Cold Storage',
+            'The Legend of Ochi', 'Predator Badlands', 'Star Trek Section 31',
+            
+            // Biographical & Historical 2025
+            'Michael', 'One Battle After Another', 'The King of Kings', 'Monte Cassino',
+            'Back in Action', 'The Life of Chuck', 'Eden', 'The Phoenician Scheme'
         ];
         
         try {
             this.showLoadingPopular();
             
-            // Load a subset of popular movies (8 movies for better performance)
-            const selectedTitles = popularTitles.slice(0, 8);
-            const moviePromises = selectedTitles.map(title => this.fetchMovieForPopular(title));
+            // Load all movies for comprehensive display (increased from 8 to 50+)
+            const moviePromises = popularTitles.map(title => this.fetchMovieForPopular(title));
             const movies = await Promise.all(moviePromises);
             
             // Filter out failed requests
@@ -327,7 +354,7 @@ class MovieApp {
             
         } catch (error) {
             console.error('Error loading popular movies:', error);
-            this.popularMoviesGrid.innerHTML = '<p>Unable to load popular movies at the moment.</p>';
+            this.popularMoviesGrid.innerHTML = '<p>Unable to load 2025 movies at the moment.</p>';
         } finally {
             this.hideLoadingPopular();
         }
@@ -351,8 +378,16 @@ class MovieApp {
     
     displayPopularMovies(movies) {
         if (!movies || movies.length === 0) {
-            this.popularMoviesGrid.innerHTML = '<p>No popular movies available at the moment.</p>';
+            this.popularMoviesGrid.innerHTML = '<p>No 2025 movies available at the moment.</p>';
             return;
+        }
+        
+        // Show movie count indicator
+        const countIndicator = document.getElementById('movie-count-indicator');
+        const movieCount = document.getElementById('movie-count');
+        if (countIndicator && movieCount) {
+            movieCount.textContent = movies.length;
+            countIndicator.style.display = 'inline-block';
         }
         
         const moviesHTML = movies.map(movie => this.createPopularMovieCard(movie)).join('');
@@ -372,12 +407,22 @@ class MovieApp {
             ? movie.Poster.replace('SX300', 'SX500') // Higher quality poster
             : 'https://via.placeholder.com/200x300/e2e8f0/64748b?text=No+Poster';
         
+        const rating = movie.imdbRating && movie.imdbRating !== 'N/A' 
+            ? `<div class="popular-movie-rating">⭐ ${movie.imdbRating}</div>` 
+            : '';
+            
+        const genre = movie.Genre && movie.Genre !== 'N/A' 
+            ? `<div class="popular-movie-genre">${movie.Genre.split(',')[0].trim()}</div>` 
+            : '';
+        
         return `
             <div class="popular-movie-card" data-title="${movie.Title}">
                 <img src="${poster}" alt="${movie.Title}" class="popular-movie-poster" loading="lazy">
                 <div class="popular-movie-info">
                     <div class="popular-movie-title">${movie.Title}</div>
                     <div class="popular-movie-year">${movie.Year}</div>
+                    ${rating}
+                    ${genre}
                 </div>
             </div>
         `;

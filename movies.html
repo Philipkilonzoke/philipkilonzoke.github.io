@@ -312,10 +312,34 @@
         
         .popular-movies-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
             gap: 1.5rem;
             margin-top: 2rem;
-            max-width: 1000px;
+            max-height: 70vh;
+            overflow-y: auto;
+            padding: 1.5rem;
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            background: var(--surface-color);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        
+        .popular-movies-grid::-webkit-scrollbar {
+            width: 8px;
+        }
+        
+        .popular-movies-grid::-webkit-scrollbar-track {
+            background: var(--border-color);
+            border-radius: 4px;
+        }
+        
+        .popular-movies-grid::-webkit-scrollbar-thumb {
+            background: var(--primary-color);
+            border-radius: 4px;
+        }
+        
+        .popular-movies-grid::-webkit-scrollbar-thumb:hover {
+            background: #1d4ed8;
         }
         
         .popular-movie-card {
@@ -364,16 +388,88 @@
             font-weight: 500;
         }
         
+        .popular-movie-rating {
+            color: #f59e0b;
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin-top: 0.25rem;
+        }
+        
+        .popular-movie-genre {
+            color: #64748b;
+            font-size: 0.8rem;
+            margin-top: 0.25rem;
+            background: var(--border-color);
+            padding: 0.2rem 0.5rem;
+            border-radius: 10px;
+            display: inline-block;
+        }
+        
         .loading-popular {
             text-align: center;
-            padding: 2rem 0;
+            padding: 3rem;
             color: #64748b;
+            background: var(--surface-color);
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+            margin-top: 2rem;
         }
         
         .loading-popular .fa-spinner {
             animation: spin 1s linear infinite;
-            font-size: 1.5rem;
-            margin-bottom: 0.5rem;
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            color: var(--primary-color);
+        }
+        
+        .loading-popular p {
+            font-size: 1.1rem;
+            font-weight: 500;
+        }
+        
+        /* Movie count indicator */
+        .movie-count-indicator {
+            text-align: center;
+            margin-bottom: 1rem;
+            padding: 0.75rem 1.5rem;
+            background: linear-gradient(135deg, var(--primary-color), #1e40af);
+            color: white;
+            border-radius: 25px;
+            font-weight: 600;
+            display: inline-block;
+            box-shadow: 0 2px 8px rgba(37, 99, 235, 0.3);
+        }
+        
+        /* Responsive adjustments for movie grid */
+        @media (max-width: 1024px) {
+            .popular-movies-grid {
+                grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+                max-height: 60vh;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .popular-movies-grid {
+                grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+                gap: 1rem;
+                padding: 1rem;
+                max-height: 50vh;
+            }
+            
+            .popular-movie-poster {
+                height: 220px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .popular-movies-grid {
+                grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+                gap: 0.75rem;
+            }
+            
+            .popular-movie-poster {
+                height: 200px;
+            }
         }
         
         /* Search autocomplete */
@@ -634,8 +730,12 @@
                 <!-- Welcome State with Latest Movies -->
                 <div id="welcome-state" class="welcome-state">
                     <div class="welcome-icon">🎭</div>
-                    <h2>Discover Popular 2025 Movies</h2>
-                    <p>Click on any 2025 movie below to get detailed information or search for any movie above!</p>
+                    <h2>Discover 50+ Popular 2025 Movies</h2>
+                    <p>Browse through our comprehensive collection of 2025 releases! Scroll through the cards below to find your favorite movies or search for any specific title above.</p>
+                    
+                    <div id="movie-count-indicator" class="movie-count-indicator" style="display: none;">
+                        <i class="fas fa-film"></i> <span id="movie-count">0</span> Movies Loaded
+                    </div>
                     
                     <div id="popular-movies" class="popular-movies-grid">
                         <!-- Popular movies will be loaded here -->
@@ -643,7 +743,7 @@
                     
                     <div id="loading-popular" class="loading-popular" style="display: none;">
                         <i class="fas fa-spinner fa-spin"></i>
-                        <p>Loading popular movies...</p>
+                        <p>Loading 50+ 2025 movies...</p>
                     </div>
                 </div>
                 
