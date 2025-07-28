@@ -355,18 +355,52 @@ class WeatherDashboard {
         this.showLoading();
         
         try {
-            const response = await fetch(`${this.geocodingAPI}?name=${encodeURIComponent(query)}&count=1&language=en&format=json`);
+            // Create timeout for geocoding request
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
+
+            const geocodingUrl = `${this.geocodingAPI}?name=${encodeURIComponent(query)}&count=1&language=en&format=json`;
+            console.log('Searching for location:', query, 'URL:', geocodingUrl);
+
+            const response = await fetch(geocodingUrl, {
+                method: 'GET',
+                headers: {
+                    'Accept': 'application/json',
+                    'User-Agent': 'BrightlensNewsWeatherApp/1.0'
+                },
+                signal: controller.signal
+            });
+            
+            clearTimeout(timeoutId);
+
+            if (!response.ok) {
+                throw new Error(`Geocoding API returned ${response.status}: ${response.statusText}`);
+            }
+
             const data = await response.json();
+            console.log('Geocoding response:', data);
             
             if (data.results && data.results.length > 0) {
                 const location = data.results[0];
+                console.log('Found location:', location);
                 await this.searchLocationByCoords(location.latitude, location.longitude, location);
             } else {
+                this.hideLoading();
                 this.showError('Location not found. Please try a different search term.');
             }
         } catch (error) {
             console.error('Search failed:', error);
-            this.showError('Failed to search for location. Please check your internet connection.');
+            this.hideLoading();
+            
+            let errorMessage = 'Failed to search for location. ';
+            if (error.name === 'AbortError') {
+                errorMessage += 'The search timed out. Please try again.';
+            } else if (error.message.includes('NetworkError') || error.message.includes('Failed to fetch')) {
+                errorMessage += 'Please check your internet connection and try again.';
+            } else {
+                errorMessage += 'Please try again.';
+            }
+            this.showError(errorMessage);
         }
     }
 
@@ -495,56 +529,87 @@ class WeatherDashboard {
             });
 
             console.log('Fetching weather data for:', { latitude, longitude });
-            console.log('API URL:', `${this.weatherAPI}?${weatherParams}`);
+            const apiUrl = `${this.weatherAPI}?${weatherParams}`;
+            console.log('API URL:', apiUrl);
 
-            // Make the weather API request
-            const response = await fetch(`${this.weatherAPI}?${weatherParams}`, {
-                method: 'GET',
-                headers: {
-                    'Accept': 'application/json',
-                },
-            });
+            // Create an AbortController for timeout handling
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 15000); // 15 second timeout
 
-            console.log('Weather API response status:', response.status);
+            try {
+                // Make the weather API request with timeout
+                const response = await fetch(apiUrl, {
+                    method: 'GET',
+                    headers: {
+                        'Accept': 'application/json',
+                        'User-Agent': 'BrightlensNewsWeatherApp/1.0'
+                    },
+                    signal: controller.signal
+                });
 
-            if (!response.ok) {
-                const errorText = await response.text();
-                console.error('Weather API error response:', errorText);
-                throw new Error(`Weather API returned ${response.status}: ${errorText}`);
+                clearTimeout(timeoutId);
+                console.log('Weather API response status:', response.status);
+
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    console.error('Weather API error response:', errorText);
+                    throw new Error(`Weather API returned ${response.status}: ${response.statusText || errorText}`);
+                }
+
+                const weatherData = await response.json();
+                console.log('Weather API response data:', weatherData);
+
+                // Validate the response structure
+                if (!weatherData || !weatherData.current) {
+                    throw new Error('Invalid weather data structure received from API');
+                }
+
+                this.weatherData = weatherData;
+                
+                // Fetch air quality data in parallel (non-blocking)
+                this.fetchAirQuality(latitude, longitude).catch(error => {
+                    console.warn('Air quality data fetch failed:', error);
+                    // Don't fail the whole operation for air quality
+                });
+                
+                // Hide welcome and show weather data
+                this.hideWelcome();
+                this.hideError();
+                this.renderWeatherData();
+                this.updatePageTitle();
+                this.updateBackground();
+                this.hideLoading();
+                this.updateLastUpdated();
+                
+                console.log('Weather data successfully processed and displayed');
+                
+            } catch (fetchError) {
+                clearTimeout(timeoutId);
+                
+                if (fetchError.name === 'AbortError') {
+                    throw new Error('Request timed out. Please check your internet connection and try again.');
+                }
+                throw fetchError;
             }
-
-            const weatherData = await response.json();
-            console.log('Weather API response data:', weatherData);
-
-            // Validate the response structure
-            if (!weatherData || !weatherData.current) {
-                throw new Error('Invalid weather data structure received from API');
-            }
-
-            this.weatherData = weatherData;
-            
-            // Fetch air quality data in parallel (non-blocking)
-            this.fetchAirQuality(latitude, longitude).catch(error => {
-                console.warn('Air quality data fetch failed:', error);
-                // Don't fail the whole operation for air quality
-            });
-            
-            // Hide welcome and show weather data
-            this.hideWelcome();
-            this.hideError();
-            this.renderWeatherData();
-            this.updatePageTitle();
-            this.updateBackground();
-            this.hideLoading();
-            this.updateLastUpdated();
-            
-            console.log('Weather data successfully processed and displayed');
             
         } catch (error) {
             console.error('Weather fetch failed:', error);
             console.error('Coordinates were:', { latitude, longitude });
             this.hideLoading();
-            this.showError(`Unable to fetch weather data. Please try again or check your internet connection.`);
+            
+            // Provide more specific error messages
+            let errorMessage = 'Unable to fetch weather data. ';
+            if (error.message.includes('timed out')) {
+                errorMessage += 'The request timed out. Please check your internet connection and try again.';
+            } else if (error.message.includes('NetworkError') || error.message.includes('Failed to fetch')) {
+                errorMessage += 'Network error. Please check your internet connection and try again.';
+            } else if (error.message.includes('Invalid weather data')) {
+                errorMessage += 'The weather service returned invalid data. Please try again later.';
+            } else {
+                errorMessage += error.message || 'Please try again or check your internet connection.';
+            }
+            
+            this.showError(errorMessage);
         }
     }
 
@@ -554,17 +619,33 @@ class WeatherDashboard {
     async fetchAirQuality(latitude, longitude) {
         try {
             const aqParams = new URLSearchParams({
-                latitude: latitude,
-                longitude: longitude,
+                latitude: latitude.toString(),
+                longitude: longitude.toString(),
                 current: 'pm10,pm2_5,carbon_monoxide,nitrogen_dioxide,sulphur_dioxide,ozone,us_aqi',
                 timezone: 'auto'
             });
 
-            const response = await fetch(`${this.airQualityAPI}?${aqParams}`);
+            // Create timeout for air quality request
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout for air quality
+
+            const response = await fetch(`${this.airQualityAPI}?${aqParams}`, {
+                method: 'GET',
+                headers: {
+                    'Accept': 'application/json',
+                    'User-Agent': 'BrightlensNewsWeatherApp/1.0'
+                },
+                signal: controller.signal
+            });
+            
+            clearTimeout(timeoutId);
             const data = await response.json();
             
-            if (response.ok) {
+            if (response.ok && data) {
                 this.weatherData.airQuality = data;
+                console.log('Air quality data fetched successfully');
+            } else {
+                console.warn('Air quality API returned non-OK response:', response.status);
             }
         } catch (error) {
             console.warn('Air quality data unavailable:', error);
