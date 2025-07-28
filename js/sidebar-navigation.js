@@ -405,9 +405,24 @@ let sidebarNavInstance = null;
 // Initialize sidebar navigation when DOM is loaded
 document.addEventListener('DOMContentLoaded', () => {
     if (!sidebarNavInstance) {
-        sidebarNavInstance = new SidebarNavigation();
-        window.sidebarNav = sidebarNavInstance;
-        console.log('🎉 Sidebar navigation ready');
+        // Delay sidebar initialization slightly to avoid conflicts with CategoryNews
+        setTimeout(() => {
+            // Check if there's an active loading screen that might be managed by CategoryNews
+            const loadingScreen = document.getElementById('loading-screen');
+            if (loadingScreen && !loadingScreen.classList.contains('hidden')) {
+                console.log('⏳ Waiting for loading screen to complete before initializing sidebar...');
+                // Wait a bit longer if loading screen is still active
+                setTimeout(() => {
+                    sidebarNavInstance = new SidebarNavigation();
+                    window.sidebarNav = sidebarNavInstance;
+                    console.log('🎉 Sidebar navigation ready (after loading screen)');
+                }, 500);
+            } else {
+                sidebarNavInstance = new SidebarNavigation();
+                window.sidebarNav = sidebarNavInstance;
+                console.log('🎉 Sidebar navigation ready');
+            }
+        }, 100);
     }
 });
 
