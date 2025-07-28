@@ -290,20 +290,12 @@ class SidebarNavigation {
             }
         });
 
-        // Handle sidebar link clicks - INSTANT navigation
+        // Handle sidebar link clicks - INSTANT navigation (no delays or transitions)
         const sidebarLinks = this.sidebar?.querySelectorAll('.sidebar-link');
         sidebarLinks?.forEach(link => {
-            link.addEventListener('click', (e) => {
-                const href = link.getAttribute('href');
-                const currentPage = window.location.pathname.split('/').pop() || 'index.html';
-                
-                // Only handle if it's a different page
-                if (href && href !== currentPage) {
-                    // Close sidebar immediately
-                    this.closeSidebar();
-                    // Let the browser handle navigation naturally - NO preventDefault, NO delays
-                    console.log('🔄 Navigating to:', href);
-                }
+            link.addEventListener('click', () => {
+                // Just close sidebar - let browser handle navigation instantly
+                this.closeSidebar();
             });
         });
 
@@ -315,10 +307,6 @@ class SidebarNavigation {
             this.sidebar.classList.add('open');
             this.backdrop.classList.add('show');
             document.body.style.overflow = 'hidden';
-            
-            // Add entrance animation
-            this.sidebar.style.animation = 'slideInLeft 0.4s cubic-bezier(0.4, 0, 0.2, 1)';
-            console.log('📱 Sidebar opened');
         }
     }
 
@@ -327,14 +315,6 @@ class SidebarNavigation {
             this.sidebar.classList.remove('open');
             this.backdrop.classList.remove('show');
             document.body.style.overflow = '';
-            
-            // Reset animation
-            setTimeout(() => {
-                if (this.sidebar) {
-                    this.sidebar.style.animation = '';
-                }
-            }, 400);
-            console.log('📱 Sidebar closed');
         }
     }
 
@@ -343,9 +323,7 @@ class SidebarNavigation {
     // Browser handles navigation naturally now
 
     addPageTransitions() {
-        // REMOVED: Page transitions that interfere with browser navigation
-        // Browser handles page loading naturally now
-        console.log('ℹ️ Page transitions disabled for better navigation');
+        // No page transitions - instant navigation like before
     }
 
     // Compatibility check to ensure no conflicts with existing functionality
@@ -405,6 +383,19 @@ class SidebarNavigation {
         this.currentPage = this.getCurrentPage();
         this.init();
         this.updateActiveLink();
+    }
+
+    // Cleanup method to remove any residual loading indicators or transitions
+    cleanup() {
+        // Remove any leftover loading indicators
+        const loaders = document.querySelectorAll('.page-transition-loader');
+        loaders.forEach(loader => loader.remove());
+        
+        // Reset body styles that might interfere with navigation
+        document.body.style.opacity = '';
+        document.body.style.transition = '';
+        
+        console.log('🧹 Sidebar cleanup completed');
     }
 }
 

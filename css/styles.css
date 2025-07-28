@@ -172,7 +172,7 @@ body {
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
     border-right: 1px solid rgba(226, 232, 240, 0.8);
-    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: left 0.2s ease;
     z-index: 200;
     overflow-y: auto;
     overflow-x: hidden;
@@ -196,7 +196,7 @@ body {
     z-index: 150;
     opacity: 0;
     visibility: hidden;
-    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: opacity 0.15s ease, visibility 0.15s ease;
 }
 
 .sidebar-backdrop.show {
@@ -270,7 +270,7 @@ body {
     text-decoration: none;
     color: var(--text-muted);
     border-radius: 0.75rem;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: background 0.1s ease, color 0.1s ease;
     font-weight: 500;
     font-size: 0.9rem;
     letter-spacing: -0.01em;
@@ -279,49 +279,22 @@ body {
     margin: 0.125rem 0;
 }
 
-.sidebar-link::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: linear-gradient(135deg, rgba(37, 99, 235, 0.1) 0%, rgba(59, 130, 246, 0.1) 100%);
-    opacity: 0;
-    transition: opacity 0.3s ease;
-    z-index: -1;
-}
-
-.sidebar-link:hover::before {
-    opacity: 1;
-}
-
 .sidebar-link:hover,
 .sidebar-link.active {
-    background: linear-gradient(135deg, rgba(37, 99, 235, 0.1) 0%, rgba(59, 130, 246, 0.05) 100%);
+    background: rgba(37, 99, 235, 0.1);
     color: var(--primary-color);
-    transform: translateX(4px);
-    border-left: 3px solid var(--primary-color);
-    padding-left: calc(1rem - 3px);
 }
 
 .sidebar-link.active {
-    background: linear-gradient(135deg, rgba(37, 99, 235, 0.15) 0%, rgba(59, 130, 246, 0.1) 100%);
+    background: rgba(37, 99, 235, 0.15);
     color: var(--primary-color);
     font-weight: 600;
-    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.15);
 }
 
 .sidebar-link i {
     font-size: 1.1rem;
     width: 1.25rem;
     text-align: center;
-    transition: transform 0.3s ease;
-}
-
-.sidebar-link:hover i,
-.sidebar-link.active i {
-    transform: scale(1.1);
 }
 
 .sidebar-divider {
@@ -396,31 +369,7 @@ body {
     background: rgba(100, 116, 139, 0.5);
 }
 
-/* Animation for sidebar opening */
-@keyframes slideInLeft {
-    from {
-        transform: translateX(-100%);
-        opacity: 0;
-    }
-    to {
-        transform: translateX(0);
-        opacity: 1;
-    }
-}
-
-.sidebar.open {
-    animation: slideInLeft 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-/* Link hover animations */
-.sidebar-link {
-    background-size: 200% 100%;
-    background-position: 100% 0;
-}
-
-.sidebar-link:hover {
-    background-position: 0 0;
-}
+/* Sidebar opens instantly - no animations */
 
 /* Main Content */
 .main {
