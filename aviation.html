@@ -384,9 +384,15 @@
             loadFlightData();
             startAutoRefresh();
             
-            // Hide loading screen
+            // Hide loading screen properly
             setTimeout(() => {
-                document.getElementById('loading-screen').classList.add('hidden');
+                const loadingScreen = document.getElementById('loading-screen');
+                if (loadingScreen) {
+                    loadingScreen.classList.add('hidden');
+                    setTimeout(() => {
+                        loadingScreen.style.display = 'none';
+                    }, 300);
+                }
             }, 1000);
         }
 
