@@ -935,22 +935,37 @@ class WeatherDashboard {
         }
 
         // Prepare data for next 24 hours
-        const labels = [];
-        const temperatures = [];
-        
+        const chartData = [];
+        const feelsLikeData = [];
+        const precipitationData = [];
         const maxHours = Math.min(24, hourlyData.time.length);
         
         for (let i = 0; i < maxHours; i++) {
             if (hourlyData.time[i] && hourlyData.temperature_2m[i] !== undefined) {
                 const time = new Date(hourlyData.time[i]);
-                labels.push(time.toLocaleTimeString('en-US', { hour: '2-digit' }));
-                temperatures.push(this.convertTemperature(hourlyData.temperature_2m[i]));
+                const temp = this.convertTemperature(hourlyData.temperature_2m[i]);
+                const feelsLike = this.convertTemperature(hourlyData.apparent_temperature[i] || hourlyData.temperature_2m[i]);
+                const precipitation = hourlyData.precipitation_probability[i] || 0;
+                
+                chartData.push({
+                    x: time,
+                    y: temp
+                });
+                
+                feelsLikeData.push({
+                    x: time,
+                    y: feelsLike
+                });
+
+                precipitationData.push({
+                    x: time,
+                    y: precipitation
+                });
             }
         }
 
-        if (temperatures.length > 0) {
-            // Simple canvas chart implementation
-            this.drawTemperatureChart(ctx, canvas, labels, temperatures);
+        if (chartData.length > 0) {
+            this.createAdvancedChart(ctx, chartData, feelsLikeData, precipitationData);
             
             if (chartsSection) {
                 chartsSection.style.display = 'block';
@@ -963,96 +978,242 @@ class WeatherDashboard {
     }
 
     /**
-     * Draw temperature chart on canvas
+     * Create advanced Chart.js temperature chart
      */
-    drawTemperatureChart(ctx, canvas, labels, temperatures) {
-        // Set canvas size properly
-        const rect = canvas.getBoundingClientRect();
-        const dpr = window.devicePixelRatio || 1;
+    createAdvancedChart(ctx, temperatureData, feelsLikeData, precipitationData) {
+        // Get CSS custom properties for theming
+        const primaryColor = getComputedStyle(document.documentElement).getPropertyValue('--primary-color') || '#2563eb';
+        const textColor = getComputedStyle(document.documentElement).getPropertyValue('--text-color') || '#1e293b';
+        const textMuted = getComputedStyle(document.documentElement).getPropertyValue('--text-muted') || '#64748b';
+        const borderColor = getComputedStyle(document.documentElement).getPropertyValue('--border-color') || '#e2e8f0';
         
-        canvas.width = rect.width * dpr;
-        canvas.height = rect.height * dpr;
-        
-        ctx.scale(dpr, dpr);
-        canvas.style.width = rect.width + 'px';
-        canvas.style.height = rect.height + 'px';
-        
-        const chartWidth = rect.width - 80;
-        const chartHeight = rect.height - 80;
-        const startX = 40;
-        const startY = 40;
-        
-        // Clear canvas
-        ctx.clearRect(0, 0, rect.width, rect.height);
-        
-        // Find min and max temperatures
-        const minTemp = Math.min(...temperatures);
-        const maxTemp = Math.max(...temperatures);
-        const tempRange = maxTemp - minTemp || 1;
-        
-        // Draw grid lines
-        ctx.strokeStyle = getComputedStyle(document.documentElement).getPropertyValue('--border-color') || '#e2e8f0';
-        ctx.lineWidth = 1;
-        
-        // Horizontal grid lines
-        for (let i = 0; i <= 5; i++) {
-            const y = startY + (chartHeight / 5) * i;
-            ctx.beginPath();
-            ctx.moveTo(startX, y);
-            ctx.lineTo(startX + chartWidth, y);
-            ctx.stroke();
-        }
-        
-        // Vertical grid lines
-        for (let i = 0; i <= 6; i++) {
-            const x = startX + (chartWidth / 6) * i;
-            ctx.beginPath();
-            ctx.moveTo(x, startY);
-            ctx.lineTo(x, startY + chartHeight);
-            ctx.stroke();
-        }
-        
-        // Draw temperature line
-        ctx.strokeStyle = getComputedStyle(document.documentElement).getPropertyValue('--primary-color') || '#2563eb';
-        ctx.lineWidth = 3;
-        ctx.beginPath();
-        
-        for (let i = 0; i < temperatures.length; i++) {
-            const x = startX + (chartWidth / (temperatures.length - 1)) * i;
-            const y = startY + chartHeight - ((temperatures[i] - minTemp) / tempRange) * chartHeight;
-            
-            if (i === 0) {
-                ctx.moveTo(x, y);
-            } else {
-                ctx.lineTo(x, y);
+        this.chart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                datasets: [
+                    {
+                        label: 'Temperature',
+                        data: temperatureData,
+                        borderColor: primaryColor,
+                        backgroundColor: primaryColor + '20',
+                        borderWidth: 3,
+                        fill: true,
+                        tension: 0.4,
+                        pointBackgroundColor: primaryColor,
+                        pointBorderColor: '#ffffff',
+                        pointBorderWidth: 2,
+                        pointRadius: 5,
+                        pointHoverRadius: 8,
+                        pointHoverBackgroundColor: primaryColor,
+                        pointHoverBorderColor: '#ffffff',
+                        pointHoverBorderWidth: 3,
+                        yAxisID: 'temperature'
+                    },
+                    {
+                        label: 'Feels Like',
+                        data: feelsLikeData,
+                        borderColor: '#f59e0b',
+                        backgroundColor: 'transparent',
+                        borderWidth: 2,
+                        borderDash: [5, 5],
+                        fill: false,
+                        tension: 0.4,
+                        pointBackgroundColor: '#f59e0b',
+                        pointBorderColor: '#ffffff',
+                        pointBorderWidth: 2,
+                        pointRadius: 4,
+                        pointHoverRadius: 6,
+                        yAxisID: 'temperature'
+                    },
+                    {
+                        label: 'Precipitation %',
+                        data: precipitationData,
+                        borderColor: '#06b6d4',
+                        backgroundColor: '#06b6d4' + '30',
+                        borderWidth: 2,
+                        fill: true,
+                        tension: 0.3,
+                        pointBackgroundColor: '#06b6d4',
+                        pointBorderColor: '#ffffff',
+                        pointBorderWidth: 2,
+                        pointRadius: 3,
+                        pointHoverRadius: 5,
+                        yAxisID: 'precipitation'
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                interaction: {
+                    intersect: false,
+                    mode: 'index'
+                },
+                plugins: {
+                    title: {
+                        display: true,
+                        text: '24-Hour Temperature & Precipitation Trend',
+                        color: textColor,
+                        font: {
+                            size: 16,
+                            weight: '600',
+                            family: 'Inter, sans-serif'
+                        },
+                        padding: {
+                            bottom: 20
+                        }
+                    },
+                    legend: {
+                        display: true,
+                        position: 'top',
+                        labels: {
+                            color: textColor,
+                            font: {
+                                family: 'Inter, sans-serif',
+                                size: 12
+                            },
+                            usePointStyle: true,
+                            pointStyle: 'circle',
+                            padding: 20
+                        }
+                    },
+                    tooltip: {
+                        backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                        titleColor: '#ffffff',
+                        bodyColor: '#ffffff',
+                        borderColor: borderColor,
+                        borderWidth: 1,
+                        cornerRadius: 8,
+                        displayColors: true,
+                        titleFont: {
+                            family: 'Inter, sans-serif',
+                            size: 14,
+                            weight: '600'
+                        },
+                        bodyFont: {
+                            family: 'Inter, sans-serif',
+                            size: 12
+                        },
+                        callbacks: {
+                            title: function(context) {
+                                const date = new Date(context[0].parsed.x);
+                                return date.toLocaleTimeString('en-US', { 
+                                    hour: '2-digit', 
+                                    minute: '2-digit',
+                                    hour12: true 
+                                });
+                            },
+                            label: function(context) {
+                                if (context.datasetIndex === 2) {
+                                    return `${context.dataset.label}: ${Math.round(context.parsed.y)}%`;
+                                } else {
+                                    return `${context.dataset.label}: ${Math.round(context.parsed.y)}°`;
+                                }
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    x: {
+                        type: 'time',
+                        time: {
+                            unit: 'hour',
+                            displayFormats: {
+                                hour: 'HH:mm'
+                            }
+                        },
+                        title: {
+                            display: true,
+                            text: 'Time',
+                            color: textMuted,
+                            font: {
+                                family: 'Inter, sans-serif',
+                                size: 12,
+                                weight: '500'
+                            }
+                        },
+                        grid: {
+                            color: borderColor,
+                            lineWidth: 1
+                        },
+                        ticks: {
+                            color: textMuted,
+                            font: {
+                                family: 'Inter, sans-serif',
+                                size: 11
+                            },
+                            maxTicksLimit: 8
+                        }
+                    },
+                    temperature: {
+                        type: 'linear',
+                        position: 'left',
+                        title: {
+                            display: true,
+                            text: `Temperature (°${this.currentUnit === 'celsius' ? 'C' : 'F'})`,
+                            color: textMuted,
+                            font: {
+                                family: 'Inter, sans-serif',
+                                size: 12,
+                                weight: '500'
+                            }
+                        },
+                        grid: {
+                            color: borderColor,
+                            lineWidth: 1
+                        },
+                        ticks: {
+                            color: textMuted,
+                            font: {
+                                family: 'Inter, sans-serif',
+                                size: 11
+                            },
+                            callback: function(value) {
+                                return Math.round(value) + '°';
+                            }
+                        }
+                    },
+                    precipitation: {
+                        type: 'linear',
+                        position: 'right',
+                        min: 0,
+                        max: 100,
+                        title: {
+                            display: true,
+                            text: 'Precipitation (%)',
+                            color: '#06b6d4',
+                            font: {
+                                family: 'Inter, sans-serif',
+                                size: 12,
+                                weight: '500'
+                            }
+                        },
+                        grid: {
+                            display: false
+                        },
+                        ticks: {
+                            color: '#06b6d4',
+                            font: {
+                                family: 'Inter, sans-serif',
+                                size: 11
+                            },
+                            callback: function(value) {
+                                return value + '%';
+                            }
+                        }
+                    }
+                },
+                animation: {
+                    duration: 1500,
+                    easing: 'easeInOutQuart'
+                },
+                elements: {
+                    point: {
+                        hoverBorderWidth: 3
+                    }
+                }
             }
-        }
-        ctx.stroke();
-        
-        // Draw temperature points and labels
-        ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--primary-color') || '#2563eb';
-        ctx.font = '12px Inter, sans-serif';
-        ctx.textAlign = 'center';
-        
-        for (let i = 0; i < temperatures.length; i += 4) { // Show every 4th hour
-            const x = startX + (chartWidth / (temperatures.length - 1)) * i;
-            const y = startY + chartHeight - ((temperatures[i] - minTemp) / tempRange) * chartHeight;
-            
-            // Draw point
-            ctx.beginPath();
-            ctx.arc(x, y, 4, 0, 2 * Math.PI);
-            ctx.fill();
-            
-            // Draw temperature label
-            ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--text-color') || '#1e293b';
-            ctx.fillText(`${Math.round(temperatures[i])}°`, x, y - 10);
-            
-            // Draw time label
-            ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--text-muted') || '#64748b';
-            ctx.fillText(labels[i], x, startY + chartHeight + 20);
-            
-            ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--primary-color') || '#2563eb';
-        }
+        });
     }
 
     /**

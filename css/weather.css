@@ -820,8 +820,11 @@
 
 .chart-container {
     position: relative;
-    height: 250px;
+    height: 350px;
     width: 100%;
+    padding: 1rem;
+    background: var(--surface-color);
+    border-radius: 16px;
     overflow: hidden;
 }
 
@@ -829,6 +832,7 @@
     width: 100% !important;
     height: 100% !important;
     max-width: 100%;
+    border-radius: 12px;
 }
 
 /* Air Quality Section */
@@ -988,7 +992,8 @@
     }
     
     .chart-container {
-        height: 200px;
+        height: 280px;
+        padding: 0.5rem;
     }
     
     .chart-card {
