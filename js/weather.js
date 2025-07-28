@@ -106,7 +106,10 @@ class WeatherDashboard {
         
         if (savedUnit) {
             this.currentUnit = savedUnit;
-            document.getElementById('unit-display').textContent = savedUnit === 'celsius' ? '°C' : '°F';
+            const unitDisplay = document.getElementById('unit-display');
+            if (unitDisplay) {
+                unitDisplay.textContent = savedUnit === 'celsius' ? '°C' : '°F';
+            }
         }
         
         if (savedLocation) {
@@ -1131,7 +1134,10 @@ class WeatherDashboard {
      */
     toggleUnit() {
         this.currentUnit = this.currentUnit === 'celsius' ? 'fahrenheit' : 'celsius';
-        document.getElementById('unit-display').textContent = this.currentUnit === 'celsius' ? '°C' : '°F';
+        const unitDisplay = document.getElementById('unit-display');
+        if (unitDisplay) {
+            unitDisplay.textContent = this.currentUnit === 'celsius' ? '°C' : '°F';
+        }
         this.saveUserPreferences();
         
         if (this.weatherData) {
@@ -1207,7 +1213,10 @@ class WeatherDashboard {
             minute: '2-digit',
             second: '2-digit'
         });
-        document.getElementById('last-updated-time').textContent = timeString;
+        const lastUpdatedElement = document.getElementById('last-updated');
+        if (lastUpdatedElement) {
+            lastUpdatedElement.textContent = timeString;
+        }
     }
 
     /**
