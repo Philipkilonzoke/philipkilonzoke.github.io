@@ -259,7 +259,15 @@ class NewsAPI {
                 this.fetchFromKTN()
             ];
 
-            const results = await Promise.allSettled(promises);
+            // Add timeout to prevent long loading times
+            const timeoutPromise = new Promise((_, reject) => 
+                setTimeout(() => reject(new Error('Kenya news fetch timeout')), 8000)
+            );
+            
+            const results = await Promise.race([
+                Promise.allSettled(promises),
+                timeoutPromise
+            ]);
             
             // Combine results from all sources
             let allArticles = [];
