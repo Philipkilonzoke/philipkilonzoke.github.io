@@ -6,13 +6,16 @@ class MovieApp {
     constructor() {
         this.searchInput = document.getElementById('movie-search');
         this.searchBtn = document.getElementById('search-btn');
-        this.welcomeState = document.getElementById('welcome-state');
         this.loadingState = document.getElementById('loading-movie');
         this.errorState = document.getElementById('error-message');
         this.movieResult = document.getElementById('movie-result');
         this.errorText = document.getElementById('error-text');
         this.autocompleteDropdown = document.getElementById('autocomplete-dropdown');
         this.popularMoviesGrid = document.getElementById('popular-movies');
+        this.actionMoviesGrid = document.getElementById('action-movies');
+        this.comedyMoviesGrid = document.getElementById('comedy-movies');
+        this.dramaMoviesGrid = document.getElementById('drama-movies');
+        this.searchResultsGrid = document.getElementById('search-movies-scroll');
         this.loadingPopular = document.getElementById('loading-popular');
         
         this.currentSearch = '';
@@ -21,13 +24,21 @@ class MovieApp {
         this.selectedIndex = -1;
         this.suggestions = [];
         
+        // Movie categories for Netflix-style sections
+        this.movieCategories = {
+            popular: ['Avengers', 'Spider-Man', 'Batman', 'Superman', 'Iron Man', 'Thor', 'Captain America', 'Black Panther'],
+            action: ['John Wick', 'Fast Furious', 'Mission Impossible', 'Die Hard', 'Rambo', 'Terminator', 'Mad Max', 'Matrix'],
+            comedy: ['Deadpool', 'Guardians Galaxy', 'Anchorman', 'Dumb Dumber', 'Ace Ventura', 'Austin Powers', 'Rush Hour', 'Scary Movie'],
+            drama: ['Forrest Gump', 'Shawshank Redemption', 'Titanic', 'Green Mile', 'Good Will Hunting', 'Beautiful Mind', 'Pursuit Happiness', 'Social Network']
+        };
+        
         this.init();
     }
     
     init() {
         this.setupEventListeners();
-        this.loadPopularMovies();
-        this.showWelcomeState();
+        this.loadAllMovieSections();
+        this.hideLoading();
     }
     
     setupEventListeners() {
@@ -402,25 +413,25 @@ class MovieApp {
         });
     }
     
-    createPopularMovieCard(movie) {
+    createMovieCard(movie) {
         const poster = movie.Poster && movie.Poster !== 'N/A' 
             ? movie.Poster.replace('SX300', 'SX500') // Higher quality poster
-            : 'https://via.placeholder.com/200x300/e2e8f0/64748b?text=No+Poster';
+            : 'https://via.placeholder.com/200x280/e2e8f0/64748b?text=No+Poster';
         
         const rating = movie.imdbRating && movie.imdbRating !== 'N/A' 
-            ? `<div class="popular-movie-rating">⭐ ${movie.imdbRating}</div>` 
+            ? `<span class="movie-rating"><i class="fas fa-star"></i> ${movie.imdbRating}</span>` 
             : '';
             
         const genre = movie.Genre && movie.Genre !== 'N/A' 
-            ? `<div class="popular-movie-genre">${movie.Genre.split(',')[0].trim()}</div>` 
+            ? `<div class="movie-genre">${movie.Genre.split(',')[0].trim()}</div>` 
             : '';
         
         return `
-            <div class="popular-movie-card" data-title="${movie.Title}">
-                <img src="${poster}" alt="${movie.Title}" class="popular-movie-poster" loading="lazy">
-                <div class="popular-movie-info">
-                    <div class="popular-movie-title">${movie.Title}</div>
-                    <div class="popular-movie-year">${movie.Year}</div>
+            <div class="movie-card" data-title="${movie.Title}">
+                <img src="${poster}" alt="${movie.Title}" class="movie-poster" loading="lazy">
+                <div class="movie-info">
+                    <div class="movie-title">${movie.Title}</div>
+                    <div class="movie-year">${movie.Year}</div>
                     ${rating}
                     ${genre}
                 </div>
@@ -428,14 +439,69 @@ class MovieApp {
         `;
     }
     
+    // Netflix-style loading functions
+    async loadAllMovieSections() {
+        this.showLoadingPopular();
+        
+        try {
+            // Load popular movies
+            await this.loadMoviesByCategory('popular', this.popularMoviesGrid);
+            
+            // Load action movies
+            await this.loadMoviesByCategory('action', this.actionMoviesGrid);
+            
+            // Load comedy movies
+            await this.loadMoviesByCategory('comedy', this.comedyMoviesGrid);
+            
+            // Load drama movies
+            await this.loadMoviesByCategory('drama', this.dramaMoviesGrid);
+            
+        } catch (error) {
+            console.error('Error loading movie sections:', error);
+        } finally {
+            this.hideLoadingPopular();
+        }
+    }
+    
+    async loadMoviesByCategory(category, container) {
+        const movieTitles = this.movieCategories[category];
+        const movies = [];
+        
+        for (const title of movieTitles) {
+            try {
+                const url = `${OMDB_BASE_URL}?apikey=${OMDB_API_KEY}&t=${encodeURIComponent(title)}`;
+                const response = await fetch(url);
+                const movie = await response.json();
+                
+                if (movie.Response === 'True') {
+                    movies.push(movie);
+                }
+                
+                // Small delay to avoid hitting API limits
+                await new Promise(resolve => setTimeout(resolve, 100));
+            } catch (error) {
+                console.error(`Error loading ${title}:`, error);
+            }
+        }
+        
+        if (movies.length > 0) {
+            container.innerHTML = movies.map(movie => this.createMovieCard(movie)).join('');
+            
+            // Add click event listeners
+            container.querySelectorAll('.movie-card').forEach((card, index) => {
+                card.addEventListener('click', () => {
+                    this.searchMovie(movies[index].Title);
+                });
+            });
+        }
+    }
+    
     showLoadingPopular() {
         this.loadingPopular.style.display = 'block';
-        this.popularMoviesGrid.style.display = 'none';
     }
     
     hideLoadingPopular() {
         this.loadingPopular.style.display = 'none';
-        this.popularMoviesGrid.style.display = 'grid';
     }
     
     // Autocomplete Functionality
@@ -594,3 +660,15 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }, 500);
 });
+
+// Netflix-style scroll functionality
+function scrollMovies(section, direction) {
+    const container = document.getElementById(`${section}-movies`);
+    const scrollAmount = 400;
+    
+    if (direction === 'left') {
+        container.scrollBy({ left: -scrollAmount, behavior: 'smooth' });
+    } else {
+        container.scrollBy({ left: scrollAmount, behavior: 'smooth' });
+    }
+}

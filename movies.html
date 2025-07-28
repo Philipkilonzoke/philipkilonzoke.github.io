@@ -40,30 +40,73 @@
     <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"></noscript>
     
     <style>
-        /* Movies specific styles */
+        /* Netflix-style Movies Layout */
         .movies-hero {
-            background: linear-gradient(135deg, #1e3a8a, #3b82f6);
+            background: linear-gradient(to bottom, rgba(0,0,0,0.4), rgba(0,0,0,0.7)), url('https://images.unsplash.com/photo-1489599735734-79b4736ce2a7?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80');
+            background-size: cover;
+            background-position: center;
             color: white;
-            padding: 3rem 0;
-            text-align: center;
+            padding: 8rem 0 4rem;
+            text-align: left;
             position: relative;
-            overflow: hidden;
-        }
-        
-        .movies-hero::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text y="30" font-size="15" opacity="0.1">🎬🍿🎭🎪🎯🎨🎸🎹</text><text y="60" font-size="15" opacity="0.1">🌟📽️🎦🎻🎺🎫🎤🎧</text><text y="90" font-size="15" opacity="0.1">🏆🎊🎉🎈🎀🎁🎂🎃</text></svg>');
-            pointer-events: none;
+            min-height: 70vh;
+            display: flex;
+            align-items: center;
         }
         
         .movies-hero-content {
             position: relative;
             z-index: 1;
+            max-width: 600px;
+        }
+        
+        .hero-title {
+            font-size: 3.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+        }
+        
+        .hero-description {
+            font-size: 1.25rem;
+            margin-bottom: 2rem;
+            opacity: 0.9;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+        }
+        
+        .hero-buttons {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+        
+        .hero-btn {
+            padding: 1rem 2rem;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .hero-btn.primary {
+            background: white;
+            color: black;
+        }
+        
+        .hero-btn.secondary {
+            background: rgba(255,255,255,0.2);
+            color: white;
+            backdrop-filter: blur(10px);
+        }
+        
+        .hero-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
         }
         
         .search-section {
@@ -310,89 +353,178 @@
             color: var(--primary-color);
         }
         
-        .popular-movies-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-            gap: 1.5rem;
-            margin-top: 2rem;
-            max-height: 70vh;
-            overflow-y: auto;
-            padding: 1.5rem;
-            border: 1px solid var(--border-color);
-            border-radius: 12px;
-            background: var(--surface-color);
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        /* Netflix-style Movie Sections */
+        .movie-section {
+            margin: 3rem 0;
         }
         
-        .popular-movies-grid::-webkit-scrollbar {
-            width: 8px;
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            padding: 0 1rem;
         }
         
-        .popular-movies-grid::-webkit-scrollbar-track {
+        .section-title {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--text-color);
+        }
+        
+        .view-all-btn {
+            color: var(--primary-color);
+            text-decoration: none;
+            font-weight: 600;
+            transition: opacity 0.3s ease;
+        }
+        
+        .view-all-btn:hover {
+            opacity: 0.8;
+        }
+        
+        .movies-row {
+            position: relative;
+            padding: 0 1rem;
+        }
+        
+        .movies-scroll {
+            display: flex;
+            gap: 1rem;
+            overflow-x: auto;
+            scroll-behavior: smooth;
+            padding-bottom: 1rem;
+            -webkit-overflow-scrolling: touch;
+        }
+        
+        .movies-scroll::-webkit-scrollbar {
+            height: 8px;
+        }
+        
+        .movies-scroll::-webkit-scrollbar-track {
             background: var(--border-color);
             border-radius: 4px;
         }
         
-        .popular-movies-grid::-webkit-scrollbar-thumb {
+        .movies-scroll::-webkit-scrollbar-thumb {
             background: var(--primary-color);
             border-radius: 4px;
         }
         
-        .popular-movies-grid::-webkit-scrollbar-thumb:hover {
+        .movies-scroll::-webkit-scrollbar-thumb:hover {
             background: #1d4ed8;
         }
         
-        .popular-movie-card {
+        .movie-card {
+            flex: 0 0 200px;
             background: var(--surface-color);
-            border: 1px solid var(--border-color);
             border-radius: 12px;
             overflow: hidden;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
             cursor: pointer;
-            transition: all 0.3s ease;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            position: relative;
+            border: 1px solid var(--border-color);
         }
         
-        .popular-movie-card:hover {
-            transform: translateY(-4px);
+        .movie-card:hover {
+            transform: scale(1.05);
             box-shadow: 0 8px 25px rgba(0,0,0,0.15);
-            border-color: var(--primary-color);
+            z-index: 10;
         }
         
-        .popular-movie-poster {
+        .movie-poster {
             width: 100%;
-            height: 250px;
+            height: 280px;
             object-fit: cover;
             transition: transform 0.3s ease;
         }
         
-        .popular-movie-card:hover .popular-movie-poster {
-            transform: scale(1.05);
+        .movie-card:hover .movie-poster {
+            transform: scale(1.1);
         }
         
-        .popular-movie-info {
+        .movie-info {
             padding: 1rem;
-            text-align: center;
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(transparent, rgba(0,0,0,0.8));
+            color: white;
+            opacity: 0;
+            transition: opacity 0.3s ease;
         }
         
-        .popular-movie-title {
+        .movie-card:hover .movie-info {
+            opacity: 1;
+        }
+        
+        .movie-title {
             font-weight: 600;
             font-size: 1rem;
-            color: var(--text-color);
             margin-bottom: 0.5rem;
-            line-height: 1.3;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
         }
         
-        .popular-movie-year {
-            color: var(--primary-color);
+        .movie-year {
             font-size: 0.9rem;
-            font-weight: 500;
+            opacity: 0.8;
+            margin-bottom: 0.5rem;
         }
         
-        .popular-movie-rating {
-            color: #f59e0b;
-            font-size: 0.85rem;
+        .movie-rating {
+            color: #fbbf24;
             font-weight: 600;
-            margin-top: 0.25rem;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+        }
+        
+        .movie-genre {
+            font-size: 0.8rem;
+            opacity: 0.7;
+            margin-top: 0.5rem;
+        }
+        
+        /* Scroll Navigation Buttons */
+        .scroll-btn {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(0,0,0,0.7);
+            color: white;
+            border: none;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            cursor: pointer;
+            z-index: 10;
+            opacity: 0;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+        }
+        
+        .movies-row:hover .scroll-btn {
+            opacity: 1;
+        }
+        
+        .scroll-btn:hover {
+            background: rgba(0,0,0,0.9);
+            transform: translateY(-50%) scale(1.1);
+        }
+        
+        .scroll-btn.prev {
+            left: -25px;
+        }
+        
+        .scroll-btn.next {
+            right: -25px;
         }
         
         .popular-movie-genre {
@@ -440,35 +572,58 @@
             box-shadow: 0 2px 8px rgba(37, 99, 235, 0.3);
         }
         
-        /* Responsive adjustments for movie grid */
-        @media (max-width: 1024px) {
-            .popular-movies-grid {
-                grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-                max-height: 60vh;
-            }
-        }
-        
+        /* Responsive Design */
         @media (max-width: 768px) {
-            .popular-movies-grid {
-                grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-                gap: 1rem;
-                padding: 1rem;
-                max-height: 50vh;
+            .hero-title {
+                font-size: 2.5rem;
             }
             
-            .popular-movie-poster {
+            .hero-buttons {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .section-title {
+                font-size: 1.5rem;
+            }
+            
+            .movie-card {
+                flex: 0 0 160px;
+            }
+            
+            .movie-poster {
                 height: 220px;
+            }
+            
+            .scroll-btn {
+                display: none;
             }
         }
         
         @media (max-width: 480px) {
-            .popular-movies-grid {
-                grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-                gap: 0.75rem;
+            .hero-title {
+                font-size: 2rem;
             }
             
-            .popular-movie-poster {
+            .movies-hero {
+                padding: 4rem 0 2rem;
+                min-height: 50vh;
+            }
+            
+            .movie-card {
+                flex: 0 0 140px;
+            }
+            
+            .movie-poster {
                 height: 200px;
+            }
+            
+            .section-header {
+                padding: 0 0.5rem;
+            }
+            
+            .movies-row {
+                padding: 0 0.5rem;
             }
         }
         
@@ -697,12 +852,22 @@
 
     <!-- Main Content -->
     <main class="main">
-        <!-- Movies Hero Section -->
+        <!-- Netflix-style Hero Section -->
         <section class="movies-hero">
             <div class="container">
                 <div class="movies-hero-content">
-                    <h1>🎬 Discover 2025 Movies</h1>
-                    <p>Search and explore the latest 2025 releases and upcoming films from around the world</p>
+                    <h1 class="hero-title">Brightlens Cinema</h1>
+                    <p class="hero-description">Discover movies, explore trailers, and find detailed information about your favorite films from around the world.</p>
+                    <div class="hero-buttons">
+                        <button class="hero-btn primary">
+                            <i class="fas fa-play"></i>
+                            Explore Movies
+                        </button>
+                        <button class="hero-btn secondary">
+                            <i class="fas fa-info-circle"></i>
+                            More Info
+                        </button>
+                    </div>
                 </div>
             </div>
         </section>
@@ -724,28 +889,104 @@
             </div>
         </section>
 
-        <!-- Movie Results Section -->
+        <!-- Netflix-style Movie Sections -->
         <section class="results-section">
             <div class="container">
-                <!-- Welcome State with Latest Movies -->
-                <div id="welcome-state" class="welcome-state">
-                    <div class="welcome-icon">🎭</div>
-                    <h2>Discover 50+ Popular 2025 Movies</h2>
-                    <p>Browse through our comprehensive collection of 2025 releases! Scroll through the cards below to find your favorite movies or search for any specific title above.</p>
-                    
-                    <div id="movie-count-indicator" class="movie-count-indicator" style="display: none;">
-                        <i class="fas fa-film"></i> <span id="movie-count">0</span> Movies Loaded
+                <!-- Search Results (Hidden by default) -->
+                <div id="search-results" class="movie-section" style="display: none;">
+                    <div class="section-header">
+                        <h2 class="section-title">Search Results</h2>
                     </div>
-                    
-                    <div id="popular-movies" class="popular-movies-grid">
-                        <!-- Popular movies will be loaded here -->
-                    </div>
-                    
-                    <div id="loading-popular" class="loading-popular" style="display: none;">
-                        <i class="fas fa-spinner fa-spin"></i>
-                        <p>Loading 50+ 2025 movies...</p>
+                    <div class="movies-row">
+                        <div id="search-movies-scroll" class="movies-scroll">
+                            <!-- Search results will be inserted here -->
+                        </div>
                     </div>
                 </div>
+
+                <!-- Popular Movies Section -->
+                <div id="popular-section" class="movie-section">
+                    <div class="section-header">
+                        <h2 class="section-title">🔥 Popular Movies</h2>
+                        <a href="#" class="view-all-btn">View All</a>
+                    </div>
+                    <div class="movies-row">
+                        <button class="scroll-btn prev" onclick="scrollMovies('popular', 'left')">
+                            <i class="fas fa-chevron-left"></i>
+                        </button>
+                        <div id="popular-movies" class="movies-scroll">
+                            <!-- Popular movies will be loaded here -->
+                        </div>
+                        <button class="scroll-btn next" onclick="scrollMovies('popular', 'right')">
+                            <i class="fas fa-chevron-right"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Action Movies Section -->
+                <div id="action-section" class="movie-section">
+                    <div class="section-header">
+                        <h2 class="section-title">💥 Action Movies</h2>
+                        <a href="#" class="view-all-btn">View All</a>
+                    </div>
+                    <div class="movies-row">
+                        <button class="scroll-btn prev" onclick="scrollMovies('action', 'left')">
+                            <i class="fas fa-chevron-left"></i>
+                        </button>
+                        <div id="action-movies" class="movies-scroll">
+                            <!-- Action movies will be loaded here -->
+                        </div>
+                        <button class="scroll-btn next" onclick="scrollMovies('action', 'right')">
+                            <i class="fas fa-chevron-right"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Comedy Movies Section -->
+                <div id="comedy-section" class="movie-section">
+                    <div class="section-header">
+                        <h2 class="section-title">😄 Comedy Movies</h2>
+                        <a href="#" class="view-all-btn">View All</a>
+                    </div>
+                    <div class="movies-row">
+                        <button class="scroll-btn prev" onclick="scrollMovies('comedy', 'left')">
+                            <i class="fas fa-chevron-left"></i>
+                        </button>
+                        <div id="comedy-movies" class="movies-scroll">
+                            <!-- Comedy movies will be loaded here -->
+                        </div>
+                        <button class="scroll-btn next" onclick="scrollMovies('comedy', 'right')">
+                            <i class="fas fa-chevron-right"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Drama Movies Section -->
+                <div id="drama-section" class="movie-section">
+                    <div class="section-header">
+                        <h2 class="section-title">🎭 Drama Movies</h2>
+                        <a href="#" class="view-all-btn">View All</a>
+                    </div>
+                    <div class="movies-row">
+                        <button class="scroll-btn prev" onclick="scrollMovies('drama', 'left')">
+                            <i class="fas fa-chevron-left"></i>
+                        </button>
+                        <div id="drama-movies" class="movies-scroll">
+                            <!-- Drama movies will be loaded here -->
+                        </div>
+                        <button class="scroll-btn next" onclick="scrollMovies('drama', 'right')">
+                            <i class="fas fa-chevron-right"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Loading State -->
+                <div id="loading-popular" class="loading-popular" style="display: none;">
+                    <i class="fas fa-spinner fa-spin"></i>
+                    <p>Loading movies...</p>
+                </div>
+            </div>
+        </section>
                 
                 <!-- Loading State -->
                 <div id="loading-movie" class="loading-movie" style="display: none;">
