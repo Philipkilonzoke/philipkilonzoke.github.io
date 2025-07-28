@@ -851,7 +851,7 @@ class WeatherDashboard {
             const minTemp = this.convertTemperature(dailyData.temperature_2m_min[i]);
             const weatherCode = dailyData.weather_code[i];
             const weatherInfo = this.weatherCodes[weatherCode] || this.weatherCodes[0];
-            const precipitation = dailyData.precipitation_probability_max[i] || 0;
+            const precipitation = dailyData.precipitation_sum[i] || 0;
             const windSpeed = dailyData.wind_speed_10m_max[i] || 0;
 
             const dayName = i === 0 ? 'Today' : date.toLocaleDateString('en-US', { weekday: 'long' });
@@ -869,7 +869,7 @@ class WeatherDashboard {
                     <span class="daily-low">${Math.round(minTemp)}°</span>
                 </div>
                 <div class="daily-details">
-                    <div>${precipitation}% rain</div>
+                    <div>${precipitation.toFixed(1)}mm rain</div>
                     <div>${Math.round(windSpeed)} km/h wind</div>
                 </div>
             `;
