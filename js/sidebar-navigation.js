@@ -290,14 +290,19 @@ class SidebarNavigation {
             }
         });
 
-        // Handle sidebar link clicks with smooth transitions
+        // Handle sidebar link clicks - INSTANT navigation
         const sidebarLinks = this.sidebar?.querySelectorAll('.sidebar-link');
         sidebarLinks?.forEach(link => {
             link.addEventListener('click', (e) => {
                 const href = link.getAttribute('href');
-                if (href && href !== window.location.pathname.split('/').pop()) {
-                    e.preventDefault();
-                    this.navigateToPage(href);
+                const currentPage = window.location.pathname.split('/').pop() || 'index.html';
+                
+                // Only handle if it's a different page
+                if (href && href !== currentPage) {
+                    // Close sidebar immediately
+                    this.closeSidebar();
+                    // Let the browser handle navigation naturally - NO preventDefault, NO delays
+                    console.log('🔄 Navigating to:', href);
                 }
             });
         });
@@ -333,62 +338,14 @@ class SidebarNavigation {
         }
     }
 
-    navigateToPage(url) {
-        // Add loading indicator
-        this.showLoadingIndicator();
-        
-        // Close sidebar
-        this.closeSidebar();
-        
-        // Add page transition
-        document.body.style.opacity = '0.7';
-        document.body.style.transition = 'opacity 0.3s ease';
-        
-        console.log('🔄 Navigating to:', url);
-        
-        // Navigate after a short delay for smooth transition
-        setTimeout(() => {
-            window.location.href = url;
-        }, 150);
-    }
-
-    showLoadingIndicator() {
-        // Remove existing loader if present
-        const existingLoader = document.querySelector('.page-transition-loader');
-        if (existingLoader) {
-            existingLoader.remove();
-        }
-
-        // Create a subtle loading indicator
-        const loader = document.createElement('div');
-        loader.className = 'page-transition-loader';
-        loader.innerHTML = '<div class="loading-spinner-small"></div>';
-        loader.style.cssText = `
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            z-index: 9999;
-            background: rgba(255, 255, 255, 0.9);
-            padding: 1rem;
-            border-radius: 0.5rem;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-        `;
-        document.body.appendChild(loader);
-    }
+    // REMOVED: navigateToPage method - was causing delays
+    // REMOVED: showLoadingIndicator method - was causing loading spinners
+    // Browser handles navigation naturally now
 
     addPageTransitions() {
-        // Add smooth page load animation
-        if (document.readyState === 'loading') {
-            document.addEventListener('DOMContentLoaded', () => {
-                document.body.style.opacity = '0';
-                document.body.style.transition = 'opacity 0.5s ease';
-                
-                setTimeout(() => {
-                    document.body.style.opacity = '1';
-                }, 50);
-            });
-        }
+        // REMOVED: Page transitions that interfere with browser navigation
+        // Browser handles page loading naturally now
+        console.log('ℹ️ Page transitions disabled for better navigation');
     }
 
     // Compatibility check to ensure no conflicts with existing functionality
