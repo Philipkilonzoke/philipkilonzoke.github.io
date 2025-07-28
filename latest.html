@@ -142,6 +142,9 @@
                 <a href="astronomy.html" class="sidebar-link">
                     <i class="fas fa-rocket"></i> Astronomy 🚀
                 </a>
+                <a href="aviation.html" class="sidebar-link">
+                    <i class="fas fa-plane"></i> Aviation ✈️
+                </a>
                 <div class="sidebar-divider"></div>
                 <a href="weather.html" class="sidebar-link">
                     <i class="fas fa-cloud-sun"></i> Weather
@@ -334,6 +337,32 @@
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             window.categoryNews = new CategoryNews('latest');
+            
+            // Setup sidebar functionality
+            const mobileToggle = document.querySelector('.mobile-menu-toggle');
+            const sidebar = document.querySelector('.sidebar');
+            const sidebarClose = document.querySelector('.sidebar-close');
+            
+            if (mobileToggle) {
+                mobileToggle.addEventListener('click', () => {
+                    sidebar?.classList.add('open');
+                });
+            }
+            
+            if (sidebarClose) {
+                sidebarClose.addEventListener('click', () => {
+                    sidebar?.classList.remove('open');
+                });
+            }
+            
+            // Close sidebar when clicking outside
+            document.addEventListener('click', (e) => {
+                if (sidebar?.classList.contains('open') && 
+                    !sidebar.contains(e.target) && 
+                    !mobileToggle?.contains(e.target)) {
+                    sidebar.classList.remove('open');
+                }
+            });
         });
     </script>
 </body>
