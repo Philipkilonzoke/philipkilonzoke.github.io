@@ -167,8 +167,7 @@ class ShowtimeApp {
             
             return data;
         } catch (error) {
-            console.warn('API unavailable, using mock data:', error);
-            this.showToast('Using demo content (API unavailable)', 'warning');
+            console.warn('API unavailable, using fallback data:', error);
             return this.getMockData(endpoint);
         }
     }
