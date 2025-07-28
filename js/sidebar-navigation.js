@@ -6,13 +6,16 @@ class SidebarNavigation {
         this.mobileToggle = null;
         this.sidebarClose = null;
         this.currentPage = this.getCurrentPage();
+        this.isInitialized = false;
         this.init();
     }
 
     getCurrentPage() {
         const path = window.location.pathname;
         const filename = path.split('/').pop() || 'index.html';
-        return filename.replace('.html', '') || 'index';
+        const pageName = filename.replace('.html', '') || 'index';
+        console.log('Current page detected:', pageName);
+        return pageName;
     }
 
     getNavigationItems() {
@@ -140,7 +143,7 @@ class SidebarNavigation {
             } else {
                 const isActive = this.currentPage === item.id ? 'active' : '';
                 navHTML += `
-                    <a href="${item.href}" class="sidebar-link ${isActive}">
+                    <a href="${item.href}" class="sidebar-link ${isActive}" data-page="${item.id}">
                         <i class="${item.icon}"></i> ${item.text}
                     </a>
                 `;
@@ -179,22 +182,47 @@ class SidebarNavigation {
                     </div>
                 `;
                 headerContent.insertAdjacentHTML('beforeend', toggleHTML);
+                console.log('✅ Mobile toggle button created');
+            } else {
+                console.warn('⚠️ Header content not found - mobile toggle not created');
             }
+        } else {
+            console.log('ℹ️ Mobile toggle already exists');
         }
     }
 
     init() {
+        // Prevent multiple initializations
+        if (this.isInitialized) {
+            console.log('⚠️ Sidebar already initialized');
+            return;
+        }
+
+        console.log('🚀 Initializing sidebar navigation for page:', this.currentPage);
+
+        // Run compatibility check
+        if (!this.checkCompatibility()) {
+            console.error('❌ Compatibility issues detected - sidebar may not work properly');
+        }
+
         // Remove existing sidebar if present
         const existingSidebar = document.querySelector('.sidebar');
         const existingBackdrop = document.querySelector('.sidebar-backdrop');
-        if (existingSidebar) existingSidebar.remove();
-        if (existingBackdrop) existingBackdrop.remove();
+        if (existingSidebar) {
+            existingSidebar.remove();
+            console.log('🗑️ Removed existing sidebar');
+        }
+        if (existingBackdrop) {
+            existingBackdrop.remove();
+            console.log('🗑️ Removed existing backdrop');
+        }
 
         // Ensure mobile toggle exists
         this.ensureMobileToggle();
 
         // Insert sidebar HTML
         document.body.insertAdjacentHTML('afterbegin', this.createSidebarHTML());
+        console.log('✅ Sidebar HTML inserted');
 
         // Get DOM elements
         this.sidebar = document.getElementById('sidebar');
@@ -202,11 +230,19 @@ class SidebarNavigation {
         this.mobileToggle = document.getElementById('mobile-menu-toggle');
         this.sidebarClose = document.getElementById('sidebar-close');
 
+        if (!this.sidebar || !this.backdrop) {
+            console.error('❌ Failed to find sidebar elements');
+            return;
+        }
+
         // Bind events
         this.bindEvents();
 
         // Add smooth page transitions
         this.addPageTransitions();
+
+        this.isInitialized = true;
+        console.log('✅ Sidebar navigation initialized successfully');
     }
 
     bindEvents() {
@@ -217,6 +253,9 @@ class SidebarNavigation {
                 e.stopPropagation();
                 this.openSidebar();
             });
+            console.log('✅ Mobile toggle event bound');
+        } else {
+            console.warn('⚠️ Mobile toggle not found');
         }
 
         // Close button click
@@ -255,12 +294,15 @@ class SidebarNavigation {
         const sidebarLinks = this.sidebar?.querySelectorAll('.sidebar-link');
         sidebarLinks?.forEach(link => {
             link.addEventListener('click', (e) => {
-                if (link.href && link.href !== window.location.href) {
+                const href = link.getAttribute('href');
+                if (href && href !== window.location.pathname.split('/').pop()) {
                     e.preventDefault();
-                    this.navigateToPage(link.href);
+                    this.navigateToPage(href);
                 }
             });
         });
+
+        console.log('✅ All sidebar events bound');
     }
 
     openSidebar() {
@@ -271,6 +313,7 @@ class SidebarNavigation {
             
             // Add entrance animation
             this.sidebar.style.animation = 'slideInLeft 0.4s cubic-bezier(0.4, 0, 0.2, 1)';
+            console.log('📱 Sidebar opened');
         }
     }
 
@@ -286,6 +329,7 @@ class SidebarNavigation {
                     this.sidebar.style.animation = '';
                 }
             }, 400);
+            console.log('📱 Sidebar closed');
         }
     }
 
@@ -300,6 +344,8 @@ class SidebarNavigation {
         document.body.style.opacity = '0.7';
         document.body.style.transition = 'opacity 0.3s ease';
         
+        console.log('🔄 Navigating to:', url);
+        
         // Navigate after a short delay for smooth transition
         setTimeout(() => {
             window.location.href = url;
@@ -307,6 +353,12 @@ class SidebarNavigation {
     }
 
     showLoadingIndicator() {
+        // Remove existing loader if present
+        const existingLoader = document.querySelector('.page-transition-loader');
+        if (existingLoader) {
+            existingLoader.remove();
+        }
+
         // Create a subtle loading indicator
         const loader = document.createElement('div');
         loader.className = 'page-transition-loader';
@@ -327,14 +379,54 @@ class SidebarNavigation {
 
     addPageTransitions() {
         // Add smooth page load animation
-        document.addEventListener('DOMContentLoaded', () => {
-            document.body.style.opacity = '0';
-            document.body.style.transition = 'opacity 0.5s ease';
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', () => {
+                document.body.style.opacity = '0';
+                document.body.style.transition = 'opacity 0.5s ease';
+                
+                setTimeout(() => {
+                    document.body.style.opacity = '1';
+                }, 50);
+            });
+        }
+    }
+
+    // Compatibility check to ensure no conflicts with existing functionality
+    checkCompatibility() {
+        try {
+            // Check if critical page elements exist
+            const header = document.querySelector('.header');
+            const main = document.querySelector('.main, main, .container');
             
-            setTimeout(() => {
-                document.body.style.opacity = '1';
-            }, 50);
-        });
+            if (!header) {
+                console.warn('⚠️ Header element not found - page structure may be different');
+            }
+            
+            if (!main) {
+                console.warn('⚠️ Main content area not found - page structure may be different');
+            }
+            
+            // Check for conflicting scripts or elements
+            const existingSidebars = document.querySelectorAll('aside:not(#sidebar)');
+            if (existingSidebars.length > 0) {
+                console.log('ℹ️ Found existing sidebar elements - ensuring no conflicts');
+            }
+            
+            // Ensure FontAwesome is loaded for icons
+            const faLoaded = document.querySelector('link[href*="font-awesome"]') || 
+                           document.querySelector('script[src*="font-awesome"]') ||
+                           window.FontAwesome;
+            
+            if (!faLoaded) {
+                console.warn('⚠️ FontAwesome may not be loaded - icons might not display');
+            }
+            
+            console.log('✅ Compatibility check completed');
+            return true;
+        } catch (error) {
+            console.error('❌ Compatibility check failed:', error);
+            return false;
+        }
     }
 
     // Method to update active link when page changes
@@ -342,22 +434,58 @@ class SidebarNavigation {
         const links = this.sidebar?.querySelectorAll('.sidebar-link');
         links?.forEach(link => {
             link.classList.remove('active');
-            const href = link.getAttribute('href');
-            const linkId = href ? href.replace('.html', '') : '';
-            if (linkId === this.currentPage || 
-                (this.currentPage === 'index' && href === 'index.html')) {
+            const dataPage = link.getAttribute('data-page');
+            if (dataPage === this.currentPage) {
                 link.classList.add('active');
+                console.log('✅ Active link set for:', dataPage);
             }
         });
     }
+
+    // Method to refresh the sidebar (useful for dynamic updates)
+    refresh() {
+        this.isInitialized = false;
+        this.currentPage = this.getCurrentPage();
+        this.init();
+        this.updateActiveLink();
+    }
 }
+
+// Prevent multiple initializations
+let sidebarNavInstance = null;
 
 // Initialize sidebar navigation when DOM is loaded
 document.addEventListener('DOMContentLoaded', () => {
-    window.sidebarNav = new SidebarNavigation();
+    if (!sidebarNavInstance) {
+        sidebarNavInstance = new SidebarNavigation();
+        window.sidebarNav = sidebarNavInstance;
+        console.log('🎉 Sidebar navigation ready');
+    }
 });
 
 // Reinitialize if needed (for dynamic content)
 window.initSidebarNavigation = () => {
-    window.sidebarNav = new SidebarNavigation();
+    if (sidebarNavInstance) {
+        sidebarNavInstance.refresh();
+    } else {
+        sidebarNavInstance = new SidebarNavigation();
+        window.sidebarNav = sidebarNavInstance;
+    }
+};
+
+// Debug function for troubleshooting
+window.debugSidebar = () => {
+    console.log('🔍 Sidebar Debug Info:');
+    console.log('Current page:', sidebarNavInstance?.currentPage);
+    console.log('Sidebar element:', !!sidebarNavInstance?.sidebar);
+    console.log('Mobile toggle:', !!sidebarNavInstance?.mobileToggle);
+    console.log('Is initialized:', sidebarNavInstance?.isInitialized);
+    
+    const navItems = sidebarNavInstance?.getNavigationItems();
+    console.log('Navigation items:', navItems?.length);
+    navItems?.forEach(item => {
+        if (!item.divider) {
+            console.log(`- ${item.text} (${item.id})`);
+        }
+    });
 };
