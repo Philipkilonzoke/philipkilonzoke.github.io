@@ -492,6 +492,7 @@ class WeatherDashboard {
 
             if (weatherResult.status === 'fulfilled' && weatherResult.value.ok) {
                 const weatherData = await weatherResult.value.json();
+                console.log('Weather API response:', weatherData);
                 this.weatherData = weatherData;
                 
                 // Hide welcome and show weather data
@@ -502,14 +503,18 @@ class WeatherDashboard {
                 this.hideLoading();
                 this.updateLastUpdated();
             } else {
+                console.error('Weather API request failed:', weatherResult);
                 const errorData = weatherResult.status === 'fulfilled' ? 
                     await weatherResult.value.json() : 
                     { reason: 'Network error' };
+                console.error('Error data:', errorData);
                 throw new Error(errorData.reason || 'Failed to fetch weather data');
             }
             
         } catch (error) {
             console.error('Weather fetch failed:', error);
+            console.error('API URL was:', `${this.weatherAPI}?${weatherParams}`);
+            console.error('Coordinates:', { latitude, longitude });
             this.showError(`Failed to fetch weather data: ${error.message}`);
         }
     }
@@ -541,12 +546,25 @@ class WeatherDashboard {
      * Render all weather data
      */
     renderWeatherData() {
-        this.renderCurrentWeather();
-        this.renderHourlyForecast();
-        this.renderDailyForecast();
-        this.renderAirQuality();
-        this.renderTemperatureChart();
-        this.showWeatherSections();
+        try {
+            console.log('Starting to render weather data...', this.weatherData);
+            
+            if (!this.weatherData || !this.weatherData.current) {
+                throw new Error('Weather data is missing or invalid');
+            }
+            
+            this.renderCurrentWeather();
+            this.renderHourlyForecast();
+            this.renderDailyForecast();
+            this.renderAirQuality();
+            this.renderTemperatureChart();
+            this.showWeatherSections();
+            
+            console.log('Weather data rendered successfully');
+        } catch (error) {
+            console.error('Error rendering weather data:', error);
+            this.showError(`Failed to display weather data: ${error.message}`);
+        }
     }
 
     /**
@@ -555,6 +573,19 @@ class WeatherDashboard {
     renderCurrentWeather() {
         const current = this.weatherData.current;
         const daily = this.weatherData.daily;
+        
+        // Check if essential DOM elements exist
+        const requiredElements = [
+            'current-city', 'current-datetime', 'coordinates', 
+            'current-weather-icon', 'current-description',
+            'current-temp', 'temp-unit-symbol', 'feels-like-temp'
+        ];
+        
+        for (const elementId of requiredElements) {
+            if (!document.getElementById(elementId)) {
+                throw new Error(`Required DOM element not found: ${elementId}`);
+            }
+        }
         
         // Location info
         document.getElementById('current-city').textContent = 
