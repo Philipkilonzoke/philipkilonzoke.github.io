@@ -2,17 +2,17 @@
 
 /* Weather-specific variables that work with site themes */
 .weather-page {
-    --weather-glass-bg: rgba(255, 255, 255, 0.1);
-    --weather-glass-border: rgba(255, 255, 255, 0.2);
-    --weather-backdrop-blur: blur(20px);
+    --weather-glass-bg: var(--surface-color);
+    --weather-glass-border: var(--border-color);
+    --weather-backdrop-blur: none;
     --weather-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
     --weather-transition: all 0.3s ease;
 }
 
 /* Theme integration for weather backgrounds */
 [data-theme="dark"] .weather-page {
-    --weather-glass-bg: rgba(15, 23, 42, 0.3);
-    --weather-glass-border: rgba(148, 163, 184, 0.2);
+    --weather-glass-bg: var(--surface-color);
+    --weather-glass-border: var(--border-color);
     --weather-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
 }
 
@@ -25,7 +25,7 @@
     height: 100%;
     z-index: -1;
     transition: var(--weather-transition);
-    opacity: 0.8;
+    opacity: 0.2;
 }
 
 .weather-background.sunny {
@@ -55,7 +55,7 @@
     width: 100%;
     height: 100%;
     background: var(--background-color);
-    opacity: 0.7;
+    opacity: 0.95;
     transition: var(--weather-transition);
 }
 
@@ -93,7 +93,6 @@
 /* Glass Card Effect */
 .glass-card {
     background: var(--weather-glass-bg);
-    backdrop-filter: var(--weather-backdrop-blur);
     border: 1px solid var(--weather-glass-border);
     border-radius: 20px;
     padding: 2rem;
@@ -145,15 +144,14 @@
 }
 
 .control-btn {
-    background: var(--weather-glass-bg);
-    border: 1px solid var(--weather-glass-border);
+    background: var(--surface-color);
+    border: 1px solid var(--border-color);
     border-radius: 12px;
     padding: 0.75rem 1rem;
     color: var(--text-color);
     cursor: pointer;
     transition: var(--weather-transition);
     font-weight: 600;
-    backdrop-filter: var(--weather-backdrop-blur);
 }
 
 .control-btn:hover {
@@ -463,8 +461,8 @@
 }
 
 .detail-card {
-    background: var(--weather-glass-bg);
-    border: 1px solid var(--weather-glass-border);
+    background: var(--surface-color);
+    border: 1px solid var(--border-color);
     border-radius: 12px;
     padding: 1.5rem;
     display: flex;
@@ -517,8 +515,8 @@
 .sun-times {
     display: flex;
     justify-content: space-around;
-    background: var(--weather-glass-bg);
-    border: 1px solid var(--weather-glass-border);
+    background: var(--surface-color);
+    border: 1px solid var(--border-color);
     border-radius: 12px;
     padding: 1.5rem;
 }
@@ -598,8 +596,8 @@
 
 .hourly-item {
     flex: 0 0 120px;
-    background: var(--weather-glass-bg);
-    border: 1px solid var(--weather-glass-border);
+    background: var(--surface-color);
+    border: 1px solid var(--border-color);
     border-radius: 16px;
     padding: 1.5rem 1rem;
     text-align: center;
@@ -647,8 +645,8 @@
 .daily-item {
     display: flex;
     align-items: center;
-    background: var(--weather-glass-bg);
-    border: 1px solid var(--weather-glass-border);
+    background: var(--surface-color);
+    border: 1px solid var(--border-color);
     border-radius: 16px;
     padding: 1.5rem;
     transition: var(--weather-transition);
@@ -712,11 +710,10 @@
 }
 
 .chart-card {
-    background: var(--weather-glass-bg);
-    border: 1px solid var(--weather-glass-border);
+    background: var(--surface-color);
+    border: 1px solid var(--border-color);
     border-radius: 20px;
     padding: 2rem;
-    backdrop-filter: var(--weather-backdrop-blur);
 }
 
 .chart-header {
@@ -990,7 +987,7 @@
 .theme-option:hover,
 .theme-option.active {
     border-color: var(--primary-color);
-    background: var(--weather-glass-bg);
+    background: var(--surface-color);
 }
 
 .theme-preview {
