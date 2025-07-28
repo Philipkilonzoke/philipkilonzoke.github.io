@@ -32,6 +32,9 @@
     <link rel="preload" href="css/styles.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
     <link rel="preload" href="css/themes.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
     <noscript><link rel="stylesheet" href="css/styles.css"><link rel="stylesheet" href="css/themes.css"></noscript>
+    
+    <!-- Sidebar Navigation Script -->
+    <script src="js/sidebar-navigation.js" defer></script>
     <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
     <noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"></noscript>
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -81,81 +84,12 @@
                         </button>
                     </div>
                 </nav>
-                <div class="mobile-menu-toggle">
-                    <i class="fas fa-bars"></i>
-                </div>
+                
             </div>
         </div>
     </header>
 
-    <!-- Sidebar -->
-    <aside class="sidebar">
-        <div class="sidebar-content">
-            <div class="sidebar-header">
-                <h3>Categories</h3>
-                <button class="sidebar-close">
-                    <i class="fas fa-times"></i>
-                </button>
-            </div>
-            <nav class="sidebar-nav">
-                <a href="index.html" class="sidebar-link">
-                    <i class="fas fa-home"></i> Homepage
-                </a>
-                <a href="latest.html" class="sidebar-link">
-                    <i class="fas fa-bolt"></i> Breaking News
-                </a>
-                <a href="kenya.html" class="sidebar-link active">
-                    <i class="fas fa-flag"></i> Kenyan News
-                </a>
-                <a href="world.html" class="sidebar-link">
-                    <i class="fas fa-globe"></i> World News
-                </a>
-                <a href="entertainment.html" class="sidebar-link">
-                    <i class="fas fa-film"></i> Entertainment
-                </a>
-                <a href="technology.html" class="sidebar-link">
-                    <i class="fas fa-microchip"></i> Technology
-                </a>
-                <a href="business.html" class="sidebar-link">
-                    <i class="fas fa-chart-line"></i> Business
-                </a>
-                <a href="sports.html" class="sidebar-link">
-                    <i class="fas fa-football-ball"></i> Sports
-                </a>
-                <a href="health.html" class="sidebar-link">
-                    <i class="fas fa-heartbeat"></i> Health
-                </a>
-                <a href="lifestyle.html" class="sidebar-link">
-                    <i class="fas fa-spa"></i> Lifestyle
-                </a>
-                <a href="music.html" class="sidebar-link">
-                    <i class="fas fa-music"></i> Music
-                </a>
-                <a href="food.html" class="sidebar-link">
-                    <i class="fas fa-utensils"></i> Food & Recipes
-                </a>
-                <a href="movies.html" class="sidebar-link">
-                    <i class="fas fa-video"></i> Movies
-                </a>
-                <a href="crypto.html" class="sidebar-link">
-                    <i class="fas fa-coins"></i> Crypto 🪙
-                </a>
-                <a href="astronomy.html" class="sidebar-link">
-                    <i class="fas fa-rocket"></i> Astronomy 🚀
-                </a>
-                <a href="aviation.html" class="sidebar-link">
-                    <i class="fas fa-plane"></i> Aviation ✈️
-                </a>
-                <div class="sidebar-divider"></div>
-                <a href="weather.html" class="sidebar-link">
-                    <i class="fas fa-cloud-sun"></i> Weather
-                </a>
-                <a href="live-tv.html" class="sidebar-link">
-                    <i class="fas fa-tv"></i> Live TV
-                </a>
-            </nav>
-        </div>
-    </aside>
+    
 
     <!-- Main Content -->
     <main class="main">
@@ -339,15 +273,7 @@
         document.addEventListener('DOMContentLoaded', () => {
             window.categoryNews = new CategoryNews('kenya');
             
-            // Setup sidebar functionality
-            const mobileToggle = document.querySelector('.mobile-menu-toggle');
-            const sidebar = document.querySelector('.sidebar');
-            const sidebarClose = document.querySelector('.sidebar-close');
-            
-            if (mobileToggle) {
-                mobileToggle.addEventListener('click', () => {
-                    sidebar?.classList.add('open');
-                });
+            // Sidebar functionality is now handled by sidebar-navigation.js
             }
             
             if (sidebarClose) {
