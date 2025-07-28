@@ -456,6 +456,9 @@ class ShowtimeApp {
         const html = items.map(item => this.createContentCard(item)).join('');
         container.innerHTML = html;
         
+        // Initialize image optimization
+        this.initializeImageOptimization(container);
+        
         // Add fade-in animation
         container.classList.add('fade-in');
     }
@@ -466,19 +469,37 @@ class ShowtimeApp {
         
         const html = items.map(item => this.createContentCard(item)).join('');
         container.insertAdjacentHTML('beforeend', html);
+        
+        // Initialize image optimization for new items
+        this.initializeImageOptimization(container);
     }
 
     createContentCard(item) {
         const isWatched = this.watchedMovies.includes(item.id);
         const type = item.type || (item.title_type === 'tv' ? 'series' : 'movie');
+        const cardId = `card-${item.id}-${Math.random().toString(36).substr(2, 9)}`;
+        
+        // Optimize image URL for faster loading
+        const optimizedPoster = this.optimizeImageUrl(item.poster || item.image);
+        const fallbackImage = 'https://via.placeholder.com/300x450/1a1a1a/ffffff?text=Loading...';
         
         return `
-            <div class="content-card" onclick="window.showtime.showDetails('${item.id}', '${type}')">
+            <div class="content-card" id="${cardId}" onclick="window.showtime.showDetails('${item.id}', '${type}')">
                 <div class="card-poster">
-                    <img src="${item.poster || item.image || 'https://via.placeholder.com/300x450?text=No+Image'}" 
-                         alt="${item.title}" 
-                         loading="lazy"
-                         onerror="this.src='https://via.placeholder.com/300x450?text=No+Image'">
+                    <div class="image-container">
+                        <div class="image-placeholder">
+                            <i class="fas fa-film"></i>
+                            <span>Loading...</span>
+                        </div>
+                        <img src="${fallbackImage}" 
+                             data-src="${optimizedPoster}" 
+                             alt="${item.title}" 
+                             class="poster-image lazy-load"
+                             loading="lazy"
+                             decoding="async"
+                             onload="window.showtime.handleImageLoad(this)"
+                             onerror="window.showtime.handleImageError(this, '${item.title}')">
+                    </div>
                     ${item.rating ? `
                         <div class="card-rating">
                             <i class="fas fa-star"></i>
@@ -498,6 +519,178 @@ class ShowtimeApp {
                 </div>
             </div>
         `;
+    }
+
+    // Image Optimization Methods
+    optimizeImageUrl(originalUrl) {
+        if (!originalUrl) return this.getGenericPoster();
+        
+        // For TMDB images, optimize the size for faster loading
+        if (originalUrl.includes('tmdb.org')) {
+            // Use w300 instead of w500 for card view (faster loading)
+            return originalUrl.replace('/w500/', '/w300/');
+        }
+        
+        return originalUrl;
+    }
+
+    getGenericPoster(title = 'No Image') {
+        return `https://via.placeholder.com/300x450/2a2a2a/ffffff?text=${encodeURIComponent(title)}`;
+    }
+
+    handleImageLoad(img) {
+        const container = img.closest('.image-container');
+        const placeholder = container.querySelector('.image-placeholder');
+        
+        // Hide placeholder and show image with fade-in effect
+        if (placeholder) {
+            placeholder.style.display = 'none';
+        }
+        img.classList.add('loaded');
+        
+        // Progressive enhancement: load higher quality version if available
+        const highResUrl = img.dataset.highRes;
+        if (highResUrl && img.dataset.src !== highResUrl) {
+            this.loadHigherQuality(img, highResUrl);
+        }
+    }
+
+    handleImageError(img, title) {
+        const container = img.closest('.image-container');
+        const placeholder = container.querySelector('.image-placeholder');
+        
+        // Show fallback image
+        img.src = this.getGenericPoster(title);
+        img.classList.add('error');
+        
+        if (placeholder) {
+            placeholder.innerHTML = `
+                <i class="fas fa-exclamation-triangle"></i>
+                <span>Image unavailable</span>
+            `;
+        }
+        
+        console.warn(`Failed to load image for: ${title}`);
+    }
+
+    loadHigherQuality(img, highResUrl) {
+        // Preload higher quality image
+        const highResImg = new Image();
+        highResImg.onload = () => {
+            img.src = highResUrl;
+            img.classList.add('high-quality');
+        };
+        highResImg.src = highResUrl;
+    }
+
+    // Advanced Image Optimization System
+    initializeImageOptimization(container) {
+        // Initialize intersection observer for lazy loading
+        if (!this.imageObserver) {
+            this.setupIntersectionObserver();
+        }
+
+        // Find all lazy load images in the container
+        const lazyImages = container.querySelectorAll('.lazy-load');
+        lazyImages.forEach(img => {
+            this.imageObserver.observe(img);
+        });
+
+        // Preload critical images (first few visible ones)
+        this.preloadCriticalImages(container);
+
+        // Setup image optimization events
+        this.setupImageOptimizationEvents(container);
+    }
+
+    setupIntersectionObserver() {
+        const options = {
+            root: null,
+            rootMargin: '50px', // Start loading 50px before entering viewport
+            threshold: 0.1
+        };
+
+        this.imageObserver = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    const img = entry.target;
+                    this.loadImage(img);
+                    this.imageObserver.unobserve(img);
+                }
+            });
+        }, options);
+    }
+
+    loadImage(img) {
+        const realSrc = img.dataset.src;
+        if (realSrc) {
+            // Create a new image to preload
+            const tempImg = new Image();
+            tempImg.onload = () => {
+                img.src = realSrc;
+                img.classList.remove('lazy-load');
+                img.classList.add('loading-complete');
+            };
+            tempImg.onerror = () => {
+                this.handleImageError(img, img.alt);
+            };
+            tempImg.src = realSrc;
+        }
+    }
+
+    preloadCriticalImages(container) {
+        // Preload first 6 images that are likely to be visible immediately
+        const criticalImages = container.querySelectorAll('.lazy-load');
+        const criticalCount = Math.min(6, criticalImages.length);
+        
+        for (let i = 0; i < criticalCount; i++) {
+            const img = criticalImages[i];
+            // Add slight delay to avoid overwhelming the browser
+            setTimeout(() => {
+                this.loadImage(img);
+            }, i * 50);
+        }
+    }
+
+    setupImageOptimizationEvents(container) {
+        // Add connection-aware loading
+        if ('connection' in navigator) {
+            const connection = navigator.connection;
+            
+            // Adjust image quality based on connection speed
+            if (connection.effectiveType === '2g' || connection.effectiveType === 'slow-2g') {
+                container.classList.add('low-bandwidth');
+                this.optimizeForLowBandwidth(container);
+            }
+        }
+
+        // Handle visibility change to pause/resume loading
+        document.addEventListener('visibilitychange', () => {
+            if (document.hidden) {
+                this.pauseImageLoading();
+            } else {
+                this.resumeImageLoading();
+            }
+        });
+    }
+
+    optimizeForLowBandwidth(container) {
+        const images = container.querySelectorAll('.lazy-load');
+        images.forEach(img => {
+            // Use smaller images for slow connections
+            const originalSrc = img.dataset.src;
+            if (originalSrc && originalSrc.includes('tmdb.org')) {
+                img.dataset.src = originalSrc.replace('/w300/', '/w200/');
+            }
+        });
+    }
+
+    pauseImageLoading() {
+        this.imageLoadingPaused = true;
+    }
+
+    resumeImageLoading() {
+        this.imageLoadingPaused = false;
     }
 
     renderGenresGrid(genres) {
