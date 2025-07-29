@@ -141,11 +141,26 @@ class CategoryNews {
             console.log(`Loading ${this.category} news...`);
             
             // Load news for all categories using the standard API
-            console.log(`Loading ${this.category} news...`);
             const articles = await this.newsAPI.fetchNews(this.category, 100);
             
-            if (articles && articles.length > 0) {
-                this.allArticles = articles;
+            // Supplement with Mediastack API for Kenya and Sports categories
+            let supplementalArticles = [];
+            if ((this.category === 'kenya' || this.category === 'sports') && window.MediastackSupplement) {
+                try {
+                    const mediastackSupplement = new window.MediastackSupplement();
+                    supplementalArticles = await mediastackSupplement.getSupplementalArticles(this.category, 20);
+                    console.log(`Mediastack supplement: Added ${supplementalArticles.length} additional ${this.category} articles`);
+                } catch (error) {
+                    console.warn('Mediastack supplement failed:', error);
+                }
+            }
+            
+            // Combine articles and remove duplicates
+            const allArticles = [...(articles || []), ...supplementalArticles];
+            const uniqueArticles = this.removeDuplicates(allArticles);
+            
+            if (uniqueArticles && uniqueArticles.length > 0) {
+                this.allArticles = uniqueArticles;
                 this.renderNews();
                 this.updateArticleCount();
                 this.updateLastUpdated();
@@ -306,6 +321,22 @@ class CategoryNews {
         const documentHeight = document.documentElement.scrollHeight;
         
         return scrollTop + windowHeight >= documentHeight - 1000;
+    }
+
+    /**
+     * Remove duplicate articles based on title and URL
+     */
+    removeDuplicates(articles) {
+        const seen = new Set();
+        return articles.filter(article => {
+            if (!article.title || !article.url) return false;
+            
+            const key = `${article.title.toLowerCase().trim()}-${article.url}`;
+            if (seen.has(key)) return false;
+            
+            seen.add(key);
+            return true;
+        });
     }
 }
 
