@@ -15,7 +15,7 @@ class MediastackSupplement {
     /**
      * Fetch Kenya-specific news from Mediastack
      */
-    async fetchKenyaNews(limit = 20) {
+    async fetchKenyaNews(limit = 50) {
         const cacheKey = `kenya_${limit}`;
         
         // Check cache first
@@ -27,7 +27,9 @@ class MediastackSupplement {
         }
 
         try {
-            const url = `${this.baseUrl}?access_key=${this.apiKey}&countries=ke&languages=en&limit=${Math.min(limit, 25)}&sort=published_desc`;
+            // Fetch maximum articles allowed by Mediastack (100 per request)
+            const maxLimit = Math.min(limit, 100);
+            const url = `${this.baseUrl}?access_key=${this.apiKey}&countries=ke&languages=en&limit=${maxLimit}&sort=published_desc`;
             
             const response = await fetch(url);
             if (!response.ok) {
@@ -60,7 +62,7 @@ class MediastackSupplement {
     /**
      * Fetch Sports-specific news from Mediastack
      */
-    async fetchSportsNews(limit = 20) {
+    async fetchSportsNews(limit = 50) {
         const cacheKey = `sports_${limit}`;
         
         // Check cache first
@@ -72,7 +74,9 @@ class MediastackSupplement {
         }
 
         try {
-            const url = `${this.baseUrl}?access_key=${this.apiKey}&categories=sports&languages=en&limit=${Math.min(limit, 25)}&sort=published_desc`;
+            // Fetch maximum articles allowed by Mediastack (100 per request)
+            const maxLimit = Math.min(limit, 100);
+            const url = `${this.baseUrl}?access_key=${this.apiKey}&categories=sports&languages=en&limit=${maxLimit}&sort=published_desc`;
             
             const response = await fetch(url);
             if (!response.ok) {
@@ -124,7 +128,7 @@ class MediastackSupplement {
     /**
      * Get supplemental articles for a specific category
      */
-    async getSupplementalArticles(category, limit = 20) {
+    async getSupplementalArticles(category, limit = 50) {
         switch(category.toLowerCase()) {
             case 'kenya':
                 return await this.fetchKenyaNews(limit);

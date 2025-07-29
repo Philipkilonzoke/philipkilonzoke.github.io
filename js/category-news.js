@@ -148,7 +148,7 @@ class CategoryNews {
             if ((this.category === 'kenya' || this.category === 'sports') && window.MediastackSupplement) {
                 try {
                     const mediastackSupplement = new window.MediastackSupplement();
-                    supplementalArticles = await mediastackSupplement.getSupplementalArticles(this.category, 20);
+                    supplementalArticles = await mediastackSupplement.getSupplementalArticles(this.category, 50);
                     console.log(`Mediastack supplement: Added ${supplementalArticles.length} additional ${this.category} articles`);
                 } catch (error) {
                     console.warn('Mediastack supplement failed:', error);
@@ -158,6 +158,9 @@ class CategoryNews {
             // Combine articles and remove duplicates
             const allArticles = [...(articles || []), ...supplementalArticles];
             const uniqueArticles = this.removeDuplicates(allArticles);
+            
+            // Sort by published date (most recent first)
+            uniqueArticles.sort((a, b) => new Date(b.publishedAt) - new Date(a.publishedAt));
             
             if (uniqueArticles && uniqueArticles.length > 0) {
                 this.allArticles = uniqueArticles;
