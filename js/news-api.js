@@ -818,27 +818,10 @@ class NewsAPI {
      */
     async fetchFromTechCrunch() {
         try {
-            const sampleArticles = [
-                {
-                    title: "Revolutionary AI Chip Architecture Achieves 10x Performance Boost in Machine Learning Tasks",
-                    description: "A breakthrough in semiconductor design introduces a novel AI chip architecture that delivers unprecedented performance improvements for machine learning workloads. The new design features specialized neural processing units, advanced memory hierarchies, and optimized data pathways that collectively achieve 10x faster training times while reducing power consumption by 40%. Major tech companies are already expressing interest in licensing this technology for their next-generation AI systems.",
-                    url: "https://techcrunch.com/ai-chip-architecture-breakthrough-performance",
-                    urlToImage: "https://images.unsplash.com/photo-1518709268805-4e9042af2176?w=400",
-                    publishedAt: new Date(Date.now() - Math.random() * 3600000).toISOString(),
-                    source: "TechCrunch",
-                    category: "technology"
-                },
-                {
-                    title: "Quantum Computing Startup Secures $200M Series C to Build Commercial Quantum Processors",
-                    description: "Leading quantum computing company closes massive funding round to accelerate development of fault-tolerant quantum processors for commercial applications. The investment will fund expansion of manufacturing facilities, recruitment of top quantum physicists, and partnerships with enterprise customers in finance, pharmaceuticals, and logistics. The company's quantum advantage demonstrations have shown potential for solving complex optimization problems exponentially faster than classical computers.",
-                    url: "https://techcrunch.com/quantum-computing-startup-series-c-funding",
-                    urlToImage: "https://images.unsplash.com/photo-1635070041078-e363dbe005cb?w=400",
-                    publishedAt: new Date(Date.now() - Math.random() * 7200000).toISOString(),
-                    source: "TechCrunch",
-                    category: "technology"
-                }
-            ];
-            return sampleArticles;
+            // TODO: Implement actual TechCrunch RSS/API integration
+            // For now, return empty array to ensure only real-time news is displayed
+            console.log('TechCrunch: Real-time tech integration pending');
+            return [];
         } catch (error) {
             console.error('TechCrunch fetch error:', error);
             return [];
@@ -850,27 +833,10 @@ class NewsAPI {
      */
     async fetchFromTheVerge() {
         try {
-            const sampleArticles = [
-                {
-                    title: "Next-Generation Smartphone Displays Feature Revolutionary Micro-LED Technology",
-                    description: "Consumer electronics manufacturers unveil smartphones with groundbreaking micro-LED displays that offer unprecedented brightness, color accuracy, and energy efficiency. The new display technology provides perfect blacks, infinite contrast ratios, and 50% longer battery life compared to current OLED screens. Production challenges have been overcome through innovative manufacturing processes, making mass adoption feasible for flagship devices launching next year.",
-                    url: "https://theverge.com/smartphone-micro-led-display-technology",
-                    urlToImage: "https://images.unsplash.com/photo-1512499617640-c74ae3a79d37?w=400",
-                    publishedAt: new Date(Date.now() - Math.random() * 5400000).toISOString(),
-                    source: "The Verge",
-                    category: "technology"
-                },
-                {
-                    title: "Brain-Computer Interface Enables Paralyzed Patients to Control Smart Home Devices",
-                    description: "Medical technology breakthrough allows patients with severe paralysis to control smart home systems through direct neural interfaces. The non-invasive brain-computer interface technology interprets neural signals to operate lights, temperature controls, entertainment systems, and communication devices. Clinical trials demonstrate 95% accuracy in intention recognition, significantly improving quality of life for patients with mobility limitations.",
-                    url: "https://theverge.com/brain-computer-interface-smart-home-control",
-                    urlToImage: "https://images.unsplash.com/photo-1559757175-0eb30cd8c063?w=400",
-                    publishedAt: new Date(Date.now() - Math.random() * 9000000).toISOString(),
-                    source: "The Verge",
-                    category: "technology"
-                }
-            ];
-            return sampleArticles;
+            // TODO: Implement actual The Verge RSS/API integration
+            // For now, return empty array to ensure only real-time news is displayed
+            console.log('The Verge: Real-time tech integration pending');
+            return [];
         } catch (error) {
             console.error('The Verge fetch error:', error);
             return [];
@@ -2029,59 +1995,10 @@ class NewsAPI {
      */
     async fetchFromSportsAPIs() {
         try {
-            const articles = [];
-            
-            // Generate comprehensive sports articles for major leagues
-            const sportsData = [
-                {
-                    title: "NBA Trade Deadline: Star Players on the Move",
-                    description: "Multiple All-Star players are reportedly available as the NBA trade deadline approaches, with contending teams looking to make final moves.",
-                    url: "https://nba.com/news/trade-deadline-2025",
-                    urlToImage: "https://images.unsplash.com/photo-1546519638-68e109498ffc?w=400",
-                    publishedAt: new Date(Date.now() - 30 * 60 * 1000).toISOString(),
-                    source: "NBA.com",
-                    category: "sports"
-                },
-                {
-                    title: "NFL Draft Prospects: Top College Players to Watch",
-                    description: "Scouting reports highlight the most promising college football players expected to make an impact in the upcoming NFL draft.",
-                    url: "https://nfl.com/draft/prospects-2025",
-                    urlToImage: "https://images.unsplash.com/photo-1577223625816-7546f13df25d?w=400",
-                    publishedAt: new Date(Date.now() - 45 * 60 * 1000).toISOString(),
-                    source: "NFL.com",
-                    category: "sports"
-                },
-                {
-                    title: "Premier League Championship Race Heats Up",
-                    description: "The English Premier League title race remains wide open with multiple teams still in contention for the championship.",
-                    url: "https://premierleague.com/championship-race",
-                    urlToImage: "https://images.unsplash.com/photo-1574629810360-7efbbe195018?w=400",
-                    publishedAt: new Date(Date.now() - 60 * 60 * 1000).toISOString(),
-                    source: "Premier League",
-                    category: "sports"
-                },
-                {
-                    title: "MLB Spring Training: Teams Prepare for New Season",
-                    description: "Major League Baseball teams are gearing up for the upcoming season with intensive spring training programs.",
-                    url: "https://mlb.com/spring-training-2025",
-                    urlToImage: "https://images.unsplash.com/photo-1566577739112-5180d4bf9390?w=400",
-                    publishedAt: new Date(Date.now() - 90 * 60 * 1000).toISOString(),
-                    source: "MLB.com",
-                    category: "sports"
-                },
-                {
-                    title: "NHL Stanley Cup Playoffs: Bracket Predictions",
-                    description: "Hockey analysts weigh in on potential Stanley Cup playoff matchups and championship contenders.",
-                    url: "https://nhl.com/stanley-cup-predictions",
-                    urlToImage: "https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=400",
-                    publishedAt: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
-                    source: "NHL.com",
-                    category: "sports"
-                }
-            ];
-
-            articles.push(...sportsData);
-            return articles;
+            // TODO: Implement actual sports API integration (TheSportsDB, etc.)
+            // For now, return empty array to ensure only real-time news is displayed
+            console.log('Sports APIs: Real-time sports integration pending');
+            return [];
         } catch (error) {
             console.error('Sports APIs error:', error);
             return [];
@@ -2093,29 +2010,10 @@ class NewsAPI {
      */
     async fetchFromSportsNewsAPI() {
         try {
-            const articles = [];
-            
-            // Generate comprehensive sports articles covering multiple sports
-            const sportsCategories = [
-                'Basketball', 'Football', 'Baseball', 'Hockey', 'Soccer', 'Tennis', 'Golf', 'Olympics'
-            ];
-
-            for (let i = 0; i < 15; i++) {
-                const sport = sportsCategories[Math.floor(Math.random() * sportsCategories.length)];
-                const timeOffset = Math.random() * 12 * 60 * 60 * 1000; // Random time within 12 hours
-                
-                articles.push({
-                    title: this.generateSportsTitle(sport),
-                    description: this.generateSportsDescription(sport),
-                    url: `https://sports.example.com/news/${sport.toLowerCase()}/${i + 1}`,
-                    urlToImage: this.getSportsImage(sport.toLowerCase()),
-                    publishedAt: new Date(Date.now() - timeOffset).toISOString(),
-                    source: 'Sports News API',
-                    category: 'sports'
-                });
-            }
-            
-            return articles;
+            // TODO: Implement actual Sports News API integration
+            // For now, return empty array to ensure only real-time news is displayed
+            console.log('Sports News API: Real-time sports integration pending');
+            return [];
         } catch (error) {
             console.error('Sports News API error:', error);
             return [];
@@ -2127,65 +2025,10 @@ class NewsAPI {
      */
     async fetchFromRapidSports() {
         try {
-            const articles = [];
-            
-            // Real-time sports news covering major events
-            const realTimeSports = [
-                {
-                    title: "College Basketball March Madness: Bracket Busters Emerge",
-                    description: "Cinderella teams continue their surprising runs in the NCAA tournament, creating the most unpredictable March Madness in recent memory.",
-                    url: "https://ncaa.com/march-madness-upsets",
-                    urlToImage: "https://images.unsplash.com/photo-1546519638-68e109498ffc?w=400",
-                    publishedAt: new Date(Date.now() - 15 * 60 * 1000).toISOString(),
-                    source: "NCAA",
-                    category: "sports"
-                },
-                {
-                    title: "Tennis Grand Slam: Defending Champion Advances",
-                    description: "The reigning champion continues their title defense with a commanding victory in the quarterfinals.",
-                    url: "https://tennis.com/grand-slam-quarters",
-                    urlToImage: "https://images.unsplash.com/photo-1551698618-1dfe5d97d256?w=400",
-                    publishedAt: new Date(Date.now() - 25 * 60 * 1000).toISOString(),
-                    source: "Tennis.com",
-                    category: "sports"
-                },
-                {
-                    title: "Olympic Training Centers Report Record Attendance",
-                    description: "Athletes from around the world are training at unprecedented levels as they prepare for the upcoming Olympic Games.",
-                    url: "https://olympics.com/training-centers",
-                    urlToImage: "https://images.unsplash.com/photo-1461896836934-ffe607ba8211?w=400",
-                    publishedAt: new Date(Date.now() - 35 * 60 * 1000).toISOString(),
-                    source: "Olympics.com",
-                    category: "sports"
-                },
-                {
-                    title: "Golf Major Championship: Leaderboard Shakeup",
-                    description: "A dramatic third round has reshuffled the leaderboard at this year's major championship.",
-                    url: "https://golf.com/major-championship",
-                    urlToImage: "https://images.unsplash.com/photo-1535131749006-b7f58c99034b?w=400",
-                    publishedAt: new Date(Date.now() - 45 * 60 * 1000).toISOString(),
-                    source: "Golf.com",
-                    category: "sports"
-                }
-            ];
-
-            articles.push(...realTimeSports);
-            
-            // Add more dynamic sports content
-            for (let i = 0; i < 10; i++) {
-                const timeOffset = Math.random() * 8 * 60 * 60 * 1000; // Random time within 8 hours
-                articles.push({
-                    title: this.generateDynamicSportsTitle(),
-                    description: this.generateDynamicSportsDescription(),
-                    url: `https://sports.rapidapi.com/news/${Date.now()}-${i}`,
-                    urlToImage: this.getRandomSportsImage(),
-                    publishedAt: new Date(Date.now() - timeOffset).toISOString(),
-                    source: 'RapidSports',
-                    category: 'sports'
-                });
-            }
-            
-            return articles;
+            // TODO: Implement actual RapidAPI Sports integration
+            // For now, return empty array to ensure only real-time news is displayed
+            console.log('RapidSports: Real-time sports integration pending');
+            return [];
         } catch (error) {
             console.error('RapidSports API error:', error);
             return [];
@@ -3087,36 +2930,10 @@ class NewsAPI {
      */
     async fetchFromSkySports() {
         try {
-            const sampleArticles = [
-                {
-                    title: "Premier League Transfer Window: Record-Breaking Deals Transform European Football",
-                    description: "The January transfer window has shattered spending records as Premier League clubs invest unprecedented amounts in new talent. Manchester City leads with a £150 million acquisition spree, while Arsenal and Chelsea follow closely with strategic signings. The transfer activity reflects clubs' determination to secure Champions League qualification and strengthen squad depth for the remainder of the season. Several marquee players have completed moves that will reshape competitive dynamics across multiple leagues. Financial Fair Play regulations are being tested as clubs balance ambitious spending with compliance requirements.",
-                    url: "https://skysports.com/premier-league-transfer-window-record-deals",
-                    urlToImage: "https://images.unsplash.com/photo-1574629810360-7efbbe195018?w=400",
-                    publishedAt: new Date(Date.now() - Math.random() * 3600000).toISOString(),
-                    source: "Sky Sports",
-                    category: "sports"
-                },
-                {
-                    title: "NFL Playoffs Deliver Historic Performances as Championship Race Intensifies",
-                    description: "The NFL playoff picture has been transformed by extraordinary individual performances and team achievements that have redefined championship expectations. Multiple records were broken in last weekend's games, including passing yards, rushing touchdowns, and defensive statistics. Several underdogs have emerged as legitimate Super Bowl contenders, creating the most competitive playoff race in recent memory. Coaching strategies have evolved significantly, with innovative play-calling and tactical adjustments becoming decisive factors. Fan engagement has reached new heights as unexpected storylines capture national attention.",
-                    url: "https://skysports.com/nfl-playoffs-historic-performances-championship",
-                    urlToImage: "https://images.unsplash.com/photo-1577223625816-7546f13df25d?w=400",
-                    publishedAt: new Date(Date.now() - Math.random() * 7200000).toISOString(),
-                    source: "Sky Sports",
-                    category: "sports"
-                },
-                {
-                    title: "Formula 1 Technology Revolution: Advanced Aerodynamics Reshape Racing Dynamics",
-                    description: "Formula 1 teams have unveiled revolutionary aerodynamic innovations that are fundamentally changing race strategies and competitive balance. Advanced computational fluid dynamics and wind tunnel testing have produced unprecedented downforce efficiency gains. Multiple constructors report significant improvements in cornering speeds and straight-line performance through these technological advances. The regulations changes have created opportunities for previously struggling teams to challenge established hierarchy. Driver adaptation to new car characteristics has become a crucial factor in determining championship outcomes.",
-                    url: "https://skysports.com/formula-1-technology-aerodynamics-racing",
-                    urlToImage: "https://images.unsplash.com/photo-1558618047-3c8c76ca7d13?w=400",
-                    publishedAt: new Date(Date.now() - Math.random() * 10800000).toISOString(),
-                    source: "Sky Sports",
-                    category: "sports"
-                }
-            ];
-            return sampleArticles;
+            // TODO: Implement actual Sky Sports RSS/API integration
+            // For now, return empty array to ensure only real-time news is displayed
+            console.log('Sky Sports: Real-time sports integration pending');
+            return [];
         } catch (error) {
             console.error('Sky Sports fetch error:', error);
             return [];
@@ -3128,36 +2945,10 @@ class NewsAPI {
      */
     async fetchFromBBCSport() {
         try {
-            const sampleArticles = [
-                {
-                    title: "Olympic Preparation Reaches Peak as Athletes Showcase World-Record Potential",
-                    description: "Olympic athletes across multiple disciplines are achieving performances that suggest world records could fall at the upcoming Games. Swimming, track and field, and gymnastics have produced particularly impressive results during recent international competitions. Training methodologies incorporating advanced sports science and technology are enabling athletes to reach previously unattainable performance levels. National teams are reporting unprecedented depth in competitive talent, creating intense selection competition. The Olympic village preparations are incorporating enhanced health protocols and performance optimization facilities.",
-                    url: "https://bbc.com/sport/olympics-preparation-world-record-potential",
-                    urlToImage: "https://images.unsplash.com/photo-1461896836934-ffe607ba8211?w=400",
-                    publishedAt: new Date(Date.now() - Math.random() * 5400000).toISOString(),
-                    source: "BBC Sport",
-                    category: "sports"
-                },
-                {
-                    title: "Women's Football Achieves Unprecedented Global Growth and Investment",
-                    description: "Women's football has experienced explosive growth in viewership, participation, and financial investment across all major leagues worldwide. Television audiences have increased by 300% over the past two years, while corporate sponsorship deals have reached record levels. Professional leagues in Europe, North America, and Asia are expanding rapidly with new teams and enhanced player compensation packages. Youth participation rates are soaring as grassroots programs receive substantial funding increases. The development is reshaping the entire football ecosystem and creating new career opportunities for female athletes.",
-                    url: "https://bbc.com/sport/womens-football-global-growth-investment",
-                    urlToImage: "https://images.unsplash.com/photo-1574629810360-7efbbe195018?w=400",
-                    publishedAt: new Date(Date.now() - Math.random() * 9000000).toISOString(),
-                    source: "BBC Sport",
-                    category: "sports"
-                },
-                {
-                    title: "Tennis Grand Slam Innovation: Court Technology Enhances Player Performance Analysis",
-                    description: "Tennis Grand Slam tournaments have integrated cutting-edge court technology that provides unprecedented insights into player performance and strategy. Advanced ball-tracking systems, court sensors, and biomechanical analysis tools are revolutionizing how matches are analyzed and understood. Players and coaches now have access to real-time data about shot placement, movement patterns, and physical exertion levels. Broadcasting has been enhanced with detailed statistics and predictive analytics that engage viewers more deeply. The technology is also improving officiating accuracy and reducing controversial calls.",
-                    url: "https://bbc.com/sport/tennis-grand-slam-court-technology",
-                    urlToImage: "https://images.unsplash.com/photo-1551698618-1dfe5d97d256?w=400",
-                    publishedAt: new Date(Date.now() - Math.random() * 12600000).toISOString(),
-                    source: "BBC Sport",
-                    category: "sports"
-                }
-            ];
-            return sampleArticles;
+            // TODO: Implement actual BBC Sport RSS/API integration
+            // For now, return empty array to ensure only real-time news is displayed
+            console.log('BBC Sport: Real-time sports integration pending');
+            return [];
         } catch (error) {
             console.error('BBC Sport fetch error:', error);
             return [];
