@@ -1572,14 +1572,17 @@ class NewsAPI {
      * Get sample articles for fallback when APIs fail
      */
     getSampleArticles(category, source = 'News API') {
+        // Return empty arrays for Kenya, sports, and health categories to ensure only real-time news
+        if (category === 'kenya' || category === 'sports' || category === 'health') {
+            return [];
+        }
+
         // Use extended articles database for comprehensive fallback
         if (typeof ExtendedArticlesDB !== 'undefined') {
             const extendedDB = new ExtendedArticlesDB();
             switch(category) {
                 case 'latest':
                     return extendedDB.getExtendedLatestNews(source);
-                case 'kenya':
-                    return extendedDB.getExtendedKenyaNews(source);
                 case 'world':
                     return extendedDB.getExtendedWorldNews(source);
                 case 'entertainment':
@@ -1588,20 +1591,11 @@ class NewsAPI {
                     return extendedDB.getExtendedTechnologyNews(source);
                 case 'business':
                     return extendedDB.getExtendedBusinessNews(source);
-                case 'sports':
-                    return extendedDB.getExtendedSportsNews(source);
-                case 'health':
-                    return extendedDB.getExtendedHealthNews(source);
                 case 'lifestyle':
                     return extendedDB.getExtendedLifestyleNews(source);
                 default:
                     return extendedDB.getExtendedLatestNews(source);
             }
-        }
-
-        // Return empty arrays for Kenya, sports, and health categories to ensure only real-time news
-        if (category === 'kenya' || category === 'sports' || category === 'health') {
-            return [];
         }
         
         // Fallback to basic articles if extended DB not available
@@ -1780,26 +1774,7 @@ class NewsAPI {
                 }
             ],
             sports: [],
-            health: [
-                {
-                    title: "Revolutionary Gene Therapy Shows Promise",
-                    description: "Clinical trials demonstrate significant improvement in treating genetic disorders.",
-                    url: "https://example.com/gene-therapy",
-                    urlToImage: "https://images.unsplash.com/photo-1559757175-0eb30cd8c063?w=400",
-                    publishedAt: new Date().toISOString(),
-                    source: source,
-                    category: "health"
-                },
-                {
-                    title: "Mental Health Awareness Campaigns Gain Momentum",
-                    description: "Global initiative promotes mental wellness and reduces stigma around mental health issues.",
-                    url: "https://example.com/mental-health",
-                    urlToImage: "https://images.unsplash.com/photo-1559757148-5c350d0d3c56?w=400",
-                    publishedAt: new Date(Date.now() - 3600000).toISOString(),
-                    source: source,
-                    category: "health"
-                }
-            ]
+            health: []
         };
 
         // Return empty array - only real-time news should be displayed
