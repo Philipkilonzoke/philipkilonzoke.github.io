@@ -1521,7 +1521,7 @@ class NewsAPI {
             );
         } catch (error) {
             console.error('Original Health news fetch error:', error);
-            return this.getSampleArticles('health', 'Enhanced Health News');
+            return [];
         }
     }
 
@@ -1599,8 +1599,8 @@ class NewsAPI {
             }
         }
 
-        // Return empty arrays for Kenya and sports categories to ensure only real-time news
-        if (category === 'kenya' || category === 'sports') {
+        // Return empty arrays for Kenya, sports, and health categories to ensure only real-time news
+        if (category === 'kenya' || category === 'sports' || category === 'health') {
             return [];
         }
         
