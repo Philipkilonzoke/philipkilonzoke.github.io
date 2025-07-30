@@ -2593,18 +2593,10 @@ class NewsAPI {
      */
     async fetchFromMayoClinicNews() {
         try {
-            const sampleArticles = [
-                {
-                    title: "Mayo Clinic Pioneers Personalized Medicine Using AI and Genetic Analysis",
-                    description: "Mayo Clinic has developed a revolutionary personalized medicine platform that combines artificial intelligence with comprehensive genetic analysis to create individualized treatment plans for complex diseases. The system analyzes patients' genetic profiles, medical history, lifestyle factors, and real-time health data to predict treatment responses and optimize therapy selection. Initial implementation in cancer care has improved treatment effectiveness by 45% while reducing adverse effects by 60%. The platform can identify optimal drug dosages, predict potential side effects, and recommend preventive measures based on individual genetic predispositions. Mayo Clinic plans to expand this approach across all medical specialties, potentially transforming how healthcare is delivered globally.",
-                    url: "https://mayoclinic.org/news/personalized-medicine-ai-genetics",
-                    urlToImage: "https://images.unsplash.com/photo-1559757148-5c350d0d3c56?w=400",
-                    publishedAt: new Date(Date.now() - Math.random() * 7200000).toISOString(),
-                    source: "Mayo Clinic",
-                    category: "health"
-                }
-            ];
-            return sampleArticles;
+            // TODO: Implement actual Mayo Clinic News RSS/API integration
+            // For now, return empty array to ensure only real-time news is displayed
+            console.log('Mayo Clinic News: Real-time health news integration pending');
+            return [];
         } catch (error) {
             console.error('Mayo Clinic fetch error:', error);
             return [];
@@ -2616,18 +2608,10 @@ class NewsAPI {
      */
     async fetchFromJohnsHopkinsHealth() {
         try {
-            const sampleArticles = [
-                {
-                    title: "Johns Hopkins Develops Liquid Biopsy Test for Early Cancer Detection",
-                    description: "Researchers at Johns Hopkins have created a revolutionary liquid biopsy test that can detect over 50 types of cancer from a simple blood draw, often before symptoms appear. The test, called CancerSEEK-2, analyzes circulating tumor DNA and protein biomarkers to identify cancer presence and location with 99% specificity. Large-scale trials with 100,000 participants showed the test can detect early-stage cancers that traditional screening methods often miss. This breakthrough could enable routine cancer screening as part of annual checkups, potentially saving millions of lives through early detection. The test is expected to receive FDA approval within two years and could revolutionize cancer screening worldwide.",
-                    url: "https://hopkinsmedicine.org/news/liquid-biopsy-early-cancer-detection",
-                    urlToImage: "https://images.unsplash.com/photo-1559757148-5c350d0d3c56?w=400",
-                    publishedAt: new Date(Date.now() - Math.random() * 4200000).toISOString(),
-                    source: "Johns Hopkins",
-                    category: "health"
-                }
-            ];
-            return sampleArticles;
+            // TODO: Implement actual Johns Hopkins Health News RSS/API integration
+            // For now, return empty array to ensure only real-time news is displayed
+            console.log('Johns Hopkins Health News: Real-time health news integration pending');
+            return [];
         } catch (error) {
             console.error('Johns Hopkins fetch error:', error);
             return [];
@@ -2639,18 +2623,10 @@ class NewsAPI {
      */
     async fetchFromNIHNews() {
         try {
-            const sampleArticles = [
-                {
-                    title: "NIH Launches Largest Precision Medicine Initiative in History",
-                    description: "The National Institutes of Health has launched the largest precision medicine research initiative in history, enrolling 10 million diverse participants to advance personalized healthcare. The All of Us Research Program will collect comprehensive health data including genetics, lifestyle, environment, and medical records to understand how individual differences affect health and disease. This massive dataset will enable researchers to develop targeted treatments for specific populations and identify genetic factors that influence drug responses. The initiative emphasizes inclusion of underrepresented communities to ensure precision medicine benefits all populations. Early findings have already led to new insights about genetic variants affecting medication effectiveness and disease susceptibility.",
-                    url: "https://nih.gov/news/precision-medicine-initiative-largest",
-                    urlToImage: "https://images.unsplash.com/photo-1559757148-5c350d0d3c56?w=400",
-                    publishedAt: new Date(Date.now() - Math.random() * 8100000).toISOString(),
-                    source: "NIH",
-                    category: "health"
-                }
-            ];
-            return sampleArticles;
+            // TODO: Implement actual NIH News RSS/API integration
+            // For now, return empty array to ensure only real-time news is displayed
+            console.log('NIH News: Real-time health news integration pending');
+            return [];
         } catch (error) {
             console.error('NIH fetch error:', error);
             return [];
@@ -2662,18 +2638,10 @@ class NewsAPI {
      */
     async fetchFromNatureHealth() {
         try {
-            const sampleArticles = [
-                {
-                    title: "CRISPR Gene Editing Successfully Treats Sickle Cell Disease in Clinical Trial",
-                    description: "A groundbreaking clinical trial using CRISPR gene editing has successfully treated sickle cell disease, with patients showing sustained improvement for over three years post-treatment. The therapy modifies patients' bone marrow cells to produce healthy hemoglobin, effectively curing the genetic disorder. All 45 trial participants have remained free of painful sickle cell crises and no longer require blood transfusions. The treatment involves extracting patients' bone marrow cells, editing the faulty gene responsible for sickle cell disease, and reinfusing the corrected cells. This represents the first successful application of CRISPR technology to cure an inherited genetic disorder in humans, paving the way for treating thousands of other genetic diseases.",
-                    url: "https://nature.com/articles/crispr-sickle-cell-treatment-success",
-                    urlToImage: "https://images.unsplash.com/photo-1559757148-5c350d0d3c56?w=400",
-                    publishedAt: new Date(Date.now() - Math.random() * 6300000).toISOString(),
-                    source: "Nature Medicine",
-                    category: "health"
-                }
-            ];
-            return sampleArticles;
+            // TODO: Implement actual Nature Health RSS/API integration
+            // For now, return empty array to ensure only real-time news is displayed
+            console.log('Nature Health: Real-time health news integration pending');
+            return [];
         } catch (error) {
             console.error('Nature Health fetch error:', error);
             return [];
@@ -2685,18 +2653,10 @@ class NewsAPI {
      */
     async fetchFromPubMedNews() {
         try {
-            const sampleArticles = [
-                {
-                    title: "Meta-Analysis Reveals Vitamin C Reduces Common Cold Duration by 23%",
-                    description: "A comprehensive meta-analysis of 150 studies involving over 200,000 participants has confirmed that vitamin C supplementation significantly reduces common cold duration and severity. The analysis, published in leading medical journals, shows that regular vitamin C intake reduces cold duration by an average of 23% and symptom severity by 15%. The protective effects are most pronounced in people exposed to physical stress or cold environments. Researchers recommend daily vitamin C supplementation of 200mg for optimal immune support, particularly during winter months and periods of increased stress. This evidence-based research provides clear guidance for vitamin C use in cold prevention and treatment.",
-                    url: "https://pubmed.ncbi.nlm.nih.gov/vitamin-c-cold-meta-analysis",
-                    urlToImage: "https://images.unsplash.com/photo-1584017911766-d451b3d0e843?w=400",
-                    publishedAt: new Date(Date.now() - Math.random() * 10800000).toISOString(),
-                    source: "PubMed",
-                    category: "health"
-                }
-            ];
-            return sampleArticles;
+            // TODO: Implement actual PubMed News RSS/API integration
+            // For now, return empty array to ensure only real-time news is displayed
+            console.log('PubMed News: Real-time health news integration pending');
+            return [];
         } catch (error) {
             console.error('PubMed fetch error:', error);
             return [];
@@ -2708,18 +2668,10 @@ class NewsAPI {
      */
     async fetchFromMedscapeNews() {
         try {
-            const sampleArticles = [
-                {
-                    title: "New Migraine Treatment Shows 95% Effectiveness in Preventing Attacks",
-                    description: "A revolutionary new migraine treatment has demonstrated 95% effectiveness in preventing migraine attacks in clinical trials, offering hope for millions of chronic migraine sufferers worldwide. The treatment uses targeted nerve stimulation combined with personalized medication protocols based on individual migraine patterns. Trial participants experienced an average reduction of 90% in migraine frequency and 85% in severity when attacks did occur. The therapy adapts to each patient's unique migraine triggers and patterns, providing truly personalized treatment. Most participants were able to discontinue previous migraine medications while maintaining excellent headache control. The treatment is expected to receive regulatory approval within 18 months.",
-                    url: "https://medscape.com/news/migraine-treatment-95-percent-effective",
-                    urlToImage: "https://images.unsplash.com/photo-1559757148-5c350d0d3c56?w=400",
-                    publishedAt: new Date(Date.now() - Math.random() * 5400000).toISOString(),
-                    source: "Medscape",
-                    category: "health"
-                }
-            ];
-            return sampleArticles;
+            // TODO: Implement actual Medscape News RSS/API integration
+            // For now, return empty array to ensure only real-time news is displayed
+            console.log('Medscape News: Real-time health news integration pending');
+            return [];
         } catch (error) {
             console.error('Medscape fetch error:', error);
             return [];
