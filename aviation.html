@@ -356,6 +356,7 @@
     </div>
 
     <!-- Scripts -->
+    <script src="js/themes.js"></script>
     <script>
         // Aviation-specific variables
         let allFlights = [];
@@ -510,17 +511,17 @@
             document.body.setAttribute('data-theme', theme);
         }
 
-                 async function loadFlightData(forceRefresh = false) {
-             const loadingElement = document.getElementById('flight-loading');
-             const errorElement = document.getElementById('flight-error');
-             const containerElement = document.getElementById('flights-container');
-             const noResultsElement = document.getElementById('no-results');
+        async function loadFlightData(forceRefresh = false) {
+            const loadingElement = document.getElementById('flight-loading');
+            const errorElement = document.getElementById('flight-error');
+            const containerElement = document.getElementById('flights-container');
+            const noResultsElement = document.getElementById('no-results');
 
-             // Show loading state
-             loadingElement.style.display = 'block';
-             errorElement.style.display = 'none';
-             containerElement.style.display = 'none';
-             noResultsElement.style.display = 'none';
+            // Show loading state
+            loadingElement.style.display = 'block';
+            errorElement.style.display = 'none';
+            containerElement.style.display = 'none';
+            noResultsElement.style.display = 'none';
 
              try {
                  // Try direct API call first
