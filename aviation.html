@@ -102,41 +102,65 @@
         <div class="container">
             <!-- Category Title -->
             <div class="category-header">
-                <h2 id="category-title">Aviation News</h2>
+                <h2 id="category-title">Live Aviation Data</h2>
                 <div class="category-meta">
-                    <span id="article-count">Loading articles...</span>
+                    <span id="flight-count">Loading flights...</span>
                     <span id="last-updated"></span>
                 </div>
             </div>
 
-            <!-- News Loading -->
-            <div id="news-loading" class="news-loading">
-                <div class="loading-spinner-small"></div>
-                <p>Fetching aviation news...</p>
+            <!-- Aviation Controls -->
+            <div class="aviation-controls">
+                <div class="search-filter-container">
+                    <div class="search-container">
+                        <input type="text" id="flight-search" placeholder="Search by airline, flight number, or airport code..." class="search-input">
+                        <button id="search-btn" class="search-btn">
+                            <i class="fas fa-search"></i>
+                        </button>
+                    </div>
+                    <div class="filter-container">
+                        <select id="status-filter" class="status-filter">
+                            <option value="">All Statuses</option>
+                            <option value="active">Active</option>
+                            <option value="landed">Landed</option>
+                            <option value="cancelled">Cancelled</option>
+                            <option value="scheduled">Scheduled</option>
+                            <option value="delayed">Delayed</option>
+                        </select>
+                    </div>
+                    <div class="refresh-container">
+                        <button id="refresh-btn" class="refresh-btn" title="Refresh flight data">
+                            <i class="fas fa-sync-alt"></i>
+                        </button>
+                        <span class="auto-refresh-indicator">
+                            <i class="fas fa-clock"></i>
+                            Auto-refresh: <span id="refresh-countdown">60</span>s
+                        </span>
+                    </div>
+                </div>
             </div>
 
-            <!-- News Error -->
-            <div id="news-error" class="news-error" style="display: none;">
+            <!-- Flight Loading -->
+            <div id="flight-loading" class="news-loading">
+                <div class="loading-spinner-small"></div>
+                <p>Fetching live flight data...</p>
+            </div>
+
+            <!-- Flight Error -->
+            <div id="flight-error" class="news-error" style="display: none;">
                 <div class="error-content">
                     <i class="fas fa-exclamation-triangle"></i>
-                    <h3>Unable to Load News</h3>
-                    <p id="error-message">We're having trouble connecting to our news sources. Please check your internet connection and try again.</p>
+                    <h3>Unable to Load Flight Data</h3>
+                    <p id="error-message">We're having trouble connecting to aviation data sources. Please check your internet connection and try again.</p>
                     <button id="retry-button" class="retry-button">
                         <i class="fas fa-redo"></i> Try Again
                     </button>
                 </div>
             </div>
 
-            <!-- News Grid -->
-            <div id="news-grid" class="news-grid" style="display: none;">
-                <!-- News articles will be populated here -->
-            </div>
-
-            <!-- Load More Button -->
-            <div class="load-more-container" style="display: none;">
-                <button id="load-more" class="load-more-button">
-                    <i class="fas fa-plus-circle"></i> Load More Articles
-                </button>
+            <!-- Flights Grid -->
+            <div id="flights-container" class="news-grid" style="display: none;">
+                <!-- Flight cards will be populated here -->
             </div>
 
             <!-- No Results -->
@@ -357,19 +381,22 @@
         function initializeAviationApp() {
             setupEventListeners();
             loadSavedTheme();
-            loadFlightData();
+            loadFlightData().then(() => {
+                hideLoadingScreen();
+            }).catch(() => {
+                hideLoadingScreen();
+            });
             startAutoRefresh();
-            
-            // Hide loading screen properly
-            setTimeout(() => {
-                const loadingScreen = document.getElementById('loading-screen');
-                if (loadingScreen) {
-                    loadingScreen.classList.add('hidden');
-                    setTimeout(() => {
-                        loadingScreen.style.display = 'none';
-                    }, 300);
-                }
-            }, 1000);
+        }
+
+        function hideLoadingScreen() {
+            const loadingScreen = document.getElementById('loading-screen');
+            if (loadingScreen) {
+                loadingScreen.classList.add('hidden');
+                setTimeout(() => {
+                    loadingScreen.style.display = 'none';
+                }, 300);
+            }
         }
 
         function setupEventListeners() {
