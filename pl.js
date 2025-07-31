@@ -15,14 +15,18 @@
 
 class PremierLeagueHub {
     constructor() {
-        // API Configuration - Using the provided API key
+        // API Configuration - Using the provided API key (Note: API may have limitations)
         this.apiConfig = {
-            baseUrl: 'https://football98.p.rapidapi.com/premierleague',
+            baseUrl: 'https://football98.p.rapidapi.com',
             headers: {
                 'X-RapidAPI-Key': 'ae4e25a429msh705d766798d8b37p1ee7b0jsn69396605aae8',
                 'X-RapidAPI-Host': 'football98.p.rapidapi.com'
             }
         };
+
+        // Flag to track if API is working
+        this.apiWorking = false;
+        this.apiTested = false;
 
         // Team mapping for API calls
         this.teamMapping = {
@@ -136,12 +140,93 @@ class PremierLeagueHub {
     async loadInitialData() {
         console.log('📥 Loading initial Premier League data...');
         
+        // First test if API is working
+        await this.testApiConnection();
+        
         // Load default team standings and Manchester City squad
         await Promise.all([
             this.loadStandings(),
             this.loadTeamSquad('Man'), // Manchester City by default
             this.loadTodaysMatches()
         ]);
+    }
+
+    /**
+     * Test API connection to see if it's working
+     */
+    async testApiConnection() {
+        if (this.apiTested) return;
+        
+        console.log('🔍 Testing API connection...');
+        
+        try {
+            // Try multiple common endpoints to see if any work
+            const testEndpoints = [
+                '/leagues',
+                '/competitions',
+                '/premier-league',
+                '/premierleague',
+                '/teams',
+                '/fixtures'
+            ];
+
+            for (const endpoint of testEndpoints) {
+                try {
+                    const response = await fetch(`${this.apiConfig.baseUrl}${endpoint}`, {
+                        method: 'GET',
+                        headers: this.apiConfig.headers
+                    });
+                    
+                    if (response.ok) {
+                        console.log(`✅ API working with endpoint: ${endpoint}`);
+                        this.apiWorking = true;
+                        this.apiConfig.workingEndpoint = endpoint;
+                        break;
+                    }
+                } catch (error) {
+                    // Continue testing other endpoints
+                    continue;
+                }
+            }
+            
+            this.apiTested = true;
+            
+            if (!this.apiWorking) {
+                console.warn('⚠️ API connection failed - using fallback data');
+                this.showApiWarning();
+            }
+            
+        } catch (error) {
+            console.error('❌ API test failed:', error);
+            this.apiTested = true;
+            this.showApiWarning();
+        }
+    }
+
+    /**
+     * Show API warning to users
+     */
+    showApiWarning() {
+        const warningHTML = `
+            <div id="api-warning" style="position: fixed; top: 80px; left: 50%; transform: translateX(-50%); background: #fef3c7; color: #92400e; padding: 1rem 2rem; border-radius: 8px; border: 1px solid #f59e0b; z-index: 10000; max-width: 500px; text-align: center; box-shadow: var(--shadow-lg);">
+                <div style="display: flex; align-items: center; gap: 0.5rem; justify-content: center; margin-bottom: 0.5rem;">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <strong>API Connection Issue</strong>
+                </div>
+                <p style="margin: 0; font-size: 0.9rem;">The football98 API is currently unavailable. Showing sample data for demonstration.</p>
+                <button onclick="document.getElementById('api-warning').remove()" style="margin-top: 0.5rem; padding: 0.25rem 0.75rem; background: #d97706; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 0.8rem;">
+                    Got it
+                </button>
+            </div>
+        `;
+        
+        document.body.insertAdjacentHTML('beforeend', warningHTML);
+        
+        // Auto-remove after 10 seconds
+        setTimeout(() => {
+            const warningElement = document.getElementById('api-warning');
+            if (warningElement) warningElement.remove();
+        }, 10000);
     }
 
     /**
@@ -279,27 +364,80 @@ class PremierLeagueHub {
                 </div>
             `;
 
-            // Make API call
-            const response = await this.makeApiCall(`/table/squadname/${teamCode}`);
+            // If API is not working, show sample data immediately
+            if (!this.apiWorking) {
+                setTimeout(() => {
+                    this.displaySampleSquad(teamCode);
+                }, 1000);
+                return;
+            }
+
+            // Try API call if API is working
+            const response = await this.makeApiCall(`/premierleague/table/squadname/${teamCode}`);
             
             if (response && Array.isArray(response) && response.length > 0) {
                 this.currentSquad = response;
                 this.allPlayers = [...this.allPlayers, ...response]; // Add to searchable players
                 this.displaySquad(response);
             } else {
-                this.displaySquadFallback(teamCode);
+                this.displaySampleSquad(teamCode);
             }
 
         } catch (error) {
             console.error('❌ Error loading squad:', error);
-            this.displaySquadFallback(teamCode);
+            this.displaySampleSquad(teamCode);
         }
     }
 
-         /**
-      * Display squad data
-      */
-     displaySquad(players) {
+    /**
+     * Display sample squad data when API is unavailable
+     */
+    displaySampleSquad(teamCode) {
+        const teamName = this.teamMapping[teamCode] || teamCode;
+        
+        // Sample squad data for demonstration
+        const sampleSquads = {
+            'Man': [
+                { player_name: 'Erling Haaland', jersey_number: 9, position: 'Forward', age: 23, nationality: 'Norway' },
+                { player_name: 'Kevin De Bruyne', jersey_number: 17, position: 'Midfielder', age: 32, nationality: 'Belgium' },
+                { player_name: 'Phil Foden', jersey_number: 47, position: 'Midfielder', age: 23, nationality: 'England' },
+                { player_name: 'Ruben Dias', jersey_number: 3, position: 'Defender', age: 26, nationality: 'Portugal' },
+                { player_name: 'Ederson', jersey_number: 31, position: 'Goalkeeper', age: 30, nationality: 'Brazil' }
+            ],
+            'Ars': [
+                { player_name: 'Bukayo Saka', jersey_number: 7, position: 'Winger', age: 22, nationality: 'England' },
+                { player_name: 'Martin Ødegaard', jersey_number: 8, position: 'Midfielder', age: 25, nationality: 'Norway' },
+                { player_name: 'Gabriel Jesus', jersey_number: 9, position: 'Forward', age: 26, nationality: 'Brazil' },
+                { player_name: 'William Saliba', jersey_number: 2, position: 'Defender', age: 22, nationality: 'France' },
+                { player_name: 'Aaron Ramsdale', jersey_number: 1, position: 'Goalkeeper', age: 25, nationality: 'England' }
+            ],
+            'Liv': [
+                { player_name: 'Mohamed Salah', jersey_number: 11, position: 'Forward', age: 31, nationality: 'Egypt' },
+                { player_name: 'Virgil van Dijk', jersey_number: 4, position: 'Defender', age: 32, nationality: 'Netherlands' },
+                { player_name: 'Sadio Mané', jersey_number: 10, position: 'Forward', age: 31, nationality: 'Senegal' },
+                { player_name: 'Jordan Henderson', jersey_number: 14, position: 'Midfielder', age: 33, nationality: 'England' },
+                { player_name: 'Alisson', jersey_number: 1, position: 'Goalkeeper', age: 30, nationality: 'Brazil' }
+            ]
+        };
+
+        const squadData = sampleSquads[teamCode] || [
+            { player_name: 'Sample Player 1', jersey_number: 10, position: 'Forward', age: 25, nationality: 'England' },
+            { player_name: 'Sample Player 2', jersey_number: 7, position: 'Midfielder', age: 27, nationality: 'Spain' },
+            { player_name: 'Sample Player 3', jersey_number: 4, position: 'Defender', age: 29, nationality: 'France' },
+            { player_name: 'Sample Player 4', jersey_number: 1, position: 'Goalkeeper', age: 28, nationality: 'Germany' }
+        ];
+
+        // Add to searchable players
+        this.allPlayers = [...this.allPlayers, ...squadData];
+        
+        // Display the sample squad
+        this.displaySquad(squadData, true);
+    }
+
+                   /**
+       * Display squad data
+       */
+      displaySquad(players, isSampleData = false) {
          const container = document.getElementById('squad-container');
          if (!container) return;
 
@@ -349,6 +487,7 @@ class PremierLeagueHub {
                  </div>
                  <div style="margin-top: 1rem; text-align: center; font-size: 0.9rem; color: var(--text-muted);">
                      <i class="fas fa-info-circle"></i> Showing ${validPlayers.length} players
+                     ${isSampleData ? '<br><span style="color: #d97706; font-size: 0.8rem;"><i class="fas fa-exclamation-triangle"></i> Sample data (API unavailable)</span>' : ''}
                  </div>
              `;
              
