@@ -420,75 +420,6 @@
                 height: 300px;
             }
         }
-        /* Fun Fact Banner */
-        .crypto-fun-fact {
-            background: linear-gradient(90deg, #f59e0b 0%, #f97316 100%);
-            color: #fff;
-            padding: 0.75rem 1.5rem;
-            border-radius: 12px;
-            margin-bottom: 1.5rem;
-            font-size: 1.1rem;
-            font-weight: 500;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.07);
-            text-align: center;
-            animation: funFactFadeIn 1s;
-        }
-        @keyframes funFactFadeIn {
-            from { opacity: 0; transform: translateY(-10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        /* Sparkline Chart */
-        .crypto-sparkline {
-            width: 80px;
-            height: 28px;
-            display: inline-block;
-            vertical-align: middle;
-        }
-        /* Watchlist Star */
-        .watchlist-star {
-            font-size: 1.3rem;
-            color: #f59e0b;
-            cursor: pointer;
-            transition: transform 0.2s;
-        }
-        .watchlist-star.active {
-            color: #fbbf24;
-            text-shadow: 0 0 8px #f59e0b99;
-            transform: scale(1.2) rotate(-10deg);
-        }
-        /* Animated Coin Icon */
-        .crypto-card.trending .crypto-icon {
-            animation: coinPulse 1.2s infinite alternate;
-            box-shadow: 0 0 12px 2px #f59e0b55;
-        }
-        @keyframes coinPulse {
-            0% { transform: scale(1) rotate(0deg); }
-            100% { transform: scale(1.12) rotate(10deg); }
-        }
-        /* 3D News Card Hover */
-        .news-card {
-            transition: transform 0.3s cubic-bezier(.25,.8,.25,1), box-shadow 0.3s;
-        }
-        .news-card:hover {
-            transform: perspective(600px) rotateY(6deg) scale(1.03);
-            box-shadow: 0 12px 32px rgba(245,158,11,0.15);
-        }
-        /* Watchlist Filter Button */
-        .watchlist-toggle-btn {
-            background: #fff7ed;
-            color: #f59e0b;
-            border: 1.5px solid #f59e0b;
-            border-radius: 50px;
-            padding: 0.5rem 1.2rem;
-            font-weight: 600;
-            margin-left: 1rem;
-            cursor: pointer;
-            transition: background 0.2s, color 0.2s;
-        }
-        .watchlist-toggle-btn.active {
-            background: #f59e0b;
-            color: #fff;
-        }
     </style>
 </head>
 <body>
@@ -545,8 +476,6 @@
         <div class="crypto-header">
             <div class="container">
                 <div class="crypto-header-content">
-                    <!-- Fun Fact Banner -->
-                    <div id="crypto-fun-fact" class="crypto-fun-fact"></div>
                     <h1 class="crypto-title">
                         <span>💹 Live Crypto Market Updates</span>
                     </h1>
@@ -570,9 +499,6 @@
                         <button id="refresh-btn" class="refresh-btn">
                             <i class="fas fa-sync-alt"></i>
                             Refresh Now
-                        </button>
-                        <button id="watchlist-toggle" class="watchlist-toggle-btn" title="Show Watchlist Only">
-                            <i class="fas fa-star"></i> Watchlist
                         </button>
                     </div>
                 </div>
@@ -801,23 +727,6 @@
     <script src="js/themes.js" defer></script>
     <script src="js/main.js" defer></script>
     <script>
-        // Fun Facts Array
-        const cryptoFunFacts = [
-            "Did you know? The first Bitcoin transaction was for two pizzas in 2010!",
-            "Ethereum was crowdfunded in 2014 and launched in 2015.",
-            "Dogecoin started as a meme but now sponsors NASCAR cars!",
-            "The total supply of Bitcoin is capped at 21 million coins.",
-            "NFTs (Non-Fungible Tokens) exploded in popularity in 2021.",
-            "Satoshi Nakamoto, Bitcoin's creator, is still anonymous.",
-            "Solana can process over 50,000 transactions per second!",
-            "The first real-world Bitcoin purchase was for 10,000 BTC.",
-            "Binance Coin (BNB) is used to pay fees on the Binance exchange.",
-            "Cardano uses a proof-of-stake consensus called Ouroboros."
-        ];
-        function showRandomFunFact() {
-            const fact = cryptoFunFacts[Math.floor(Math.random() * cryptoFunFacts.length)];
-            document.getElementById('crypto-fun-fact').textContent = fact;
-        }
         // Crypto Market Data Manager
         class CryptoMarket {
             constructor() {
@@ -828,7 +737,6 @@
                 this.filteredData = [];
                 this.chart = null;
                 this.refreshInterval = null;
-                this.showWatchlistOnly = false; // New property for watchlist filter
                 
                 this.coinIcons = {
                     'BTC': '₿',
@@ -866,8 +774,6 @@
                     'TON': 'Toncoin'
                 };
                 
-                this.watchlist = JSON.parse(localStorage.getItem('cryptoWatchlist') || '[]');
-                
                 this.init();
             }
             
@@ -877,7 +783,6 @@
                 this.startAutoRefresh();
                 this.initChart();
                 this.loadCryptoNews();
-                showRandomFunFact(); // Show a fun fact on load
             }
             
             async loadCryptoData() {
@@ -947,9 +852,7 @@
                 grid.innerHTML = this.filteredData.map(coin => {
                     const isPositive = coin.change >= 0;
                     const trendClass = Math.abs(coin.change) > 5 ? (isPositive ? 'trending' : 'declining') : '';
-                    const isWatched = this.watchlist.includes(coin.symbol);
-                    // Generate mock sparkline data
-                    const sparklinePoints = Array.from({length: 12}, () => (coin.price + (Math.random() - 0.5) * 0.05 * coin.price));
+                    
                     return `
                         <div class="crypto-card ${trendClass}">
                             <div class="crypto-header-card">
@@ -963,12 +866,8 @@
                                 <div class="crypto-change ${isPositive ? 'positive' : 'negative'}">
                                     ${isPositive ? '+' : ''}${coin.change.toFixed(2)}%
                                 </div>
-                                <span class="watchlist-star${isWatched ? ' active' : ''}" data-symbol="${coin.symbol}" title="Add to Watchlist">
-                                    <i class="fas fa-star"></i>
-                                </span>
                             </div>
                             <div class="crypto-price">$${coin.price.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 6})}</div>
-                            <canvas class="crypto-sparkline" data-points='${JSON.stringify(sparklinePoints)}'></canvas>
                             <div class="crypto-meta">
                                 <span>24h Volume</span>
                                 <span>${isPositive ? '📈' : '📉'} ${Math.abs(coin.change).toFixed(1)}%</span>
@@ -976,42 +875,6 @@
                         </div>
                     `;
                 }).join('');
-                this.renderSparklines();
-                this.setupWatchlistStars();
-            }
-            
-            renderSparklines() {
-                document.querySelectorAll('.crypto-sparkline').forEach(canvas => {
-                    const points = JSON.parse(canvas.getAttribute('data-points'));
-                    const ctx = canvas.getContext('2d');
-                    ctx.clearRect(0, 0, canvas.width, canvas.height);
-                    ctx.beginPath();
-                    const min = Math.min(...points), max = Math.max(...points);
-                    points.forEach((pt, i) => {
-                        const x = (i / (points.length - 1)) * canvas.width;
-                        const y = canvas.height - ((pt - min) / (max - min + 0.0001)) * canvas.height;
-                        if (i === 0) ctx.moveTo(x, y);
-                        else ctx.lineTo(x, y);
-                    });
-                    ctx.strokeStyle = '#f59e0b';
-                    ctx.lineWidth = 2;
-                    ctx.stroke();
-                });
-            }
-            
-            setupWatchlistStars() {
-                document.querySelectorAll('.watchlist-star').forEach(star => {
-                    star.onclick = () => {
-                        const symbol = star.getAttribute('data-symbol');
-                        if (this.watchlist.includes(symbol)) {
-                            this.watchlist = this.watchlist.filter(s => s !== symbol);
-                        } else {
-                            this.watchlist.push(symbol);
-                        }
-                        localStorage.setItem('cryptoWatchlist', JSON.stringify(this.watchlist));
-                        this.renderCryptoCards();
-                    };
-                });
             }
             
             setupEventListeners() {
@@ -1047,16 +910,6 @@
                         this.updateChart(e.target.dataset.period);
                     });
                 });
-
-                // Watchlist toggle
-                const watchlistToggle = document.getElementById('watchlist-toggle');
-                if (watchlistToggle) {
-                    watchlistToggle.onclick = () => {
-                        this.showWatchlistOnly = !this.showWatchlistOnly;
-                        watchlistToggle.classList.toggle('active', this.showWatchlistOnly);
-                        this.filterCoins(document.getElementById('crypto-search').value, document.getElementById('sort-filter').value);
-                    };
-                }
             }
             
             filterCoins(searchTerm, sortOption) {
@@ -1087,11 +940,6 @@
                     case 'name':
                         filtered.sort((a, b) => a.name.localeCompare(b.name));
                         break;
-                }
-                
-                // Watchlist filter
-                if (this.showWatchlistOnly) {
-                    filtered = filtered.filter(coin => this.watchlist.includes(coin.symbol));
                 }
                 
                 this.filteredData = filtered;
