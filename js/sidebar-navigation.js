@@ -69,6 +69,12 @@ class SidebarNavigation {
                 id: 'sports'
             },
             { 
+                href: 'premierleague.html', 
+                icon: 'fas fa-trophy', 
+                text: 'Premier League ⚽',
+                id: 'premierleague'
+            },
+            { 
                 href: 'health.html', 
                 icon: 'fas fa-heartbeat', 
                 text: 'Health',
