@@ -134,19 +134,24 @@
                  padding: 1rem;
              }
              
-             /* Mobile search layout */
-             div[style*="display: flex; gap: 1rem; align-items: center;"] {
-                 flex-direction: column !important;
-                 gap: 0.75rem !important;
-             }
-             
-             div[style*="display: flex; gap: 1rem; align-items: center;"] input {
-                 width: 100% !important;
-             }
-             
-             div[style*="display: flex; gap: 1rem; align-items: center;"] button {
-                 width: 100% !important;
-             }
+                           /* Mobile search layout */
+              .search-form {
+                  flex-direction: column !important;
+                  align-items: stretch !important;
+              }
+              
+              .search-form input {
+                  min-width: auto !important;
+                  width: 100% !important;
+              }
+              
+              .search-form > div {
+                  justify-content: center !important;
+              }
+              
+              .search-form button {
+                  flex: 1 !important;
+              }
          }
          
          @media (max-width: 480px) {
@@ -289,15 +294,17 @@
                 <!-- Search Section -->
                 <div class="pl-section" style="margin-bottom: 2rem;">
                     <h2><i class="fas fa-search"></i> Search Players</h2>
-                    <div style="display: flex; gap: 1rem; align-items: center;">
+                    <div class="search-form" style="display: flex; gap: 1rem; align-items: center; flex-wrap: wrap;">
                         <input type="text" id="player-search" placeholder="Search for a player by name..." 
-                               style="flex: 1; padding: 0.75rem; border: 1px solid var(--border-color); border-radius: var(--radius-md); font-size: 1rem;">
-                        <button id="search-btn" style="padding: 0.75rem 1.5rem; background: #3c1053; color: white; border: none; border-radius: var(--radius-md); cursor: pointer;">
-                            <i class="fas fa-search"></i> Search
-                        </button>
-                        <button id="clear-search" style="padding: 0.75rem 1rem; background: #6b7280; color: white; border: none; border-radius: var(--radius-md); cursor: pointer;">
-                            <i class="fas fa-times"></i>
-                        </button>
+                               style="flex: 1; min-width: 250px; padding: 0.75rem; border: 1px solid var(--border-color); border-radius: var(--radius-md); font-size: 1rem;">
+                        <div style="display: flex; gap: 0.5rem;">
+                            <button id="search-btn" style="padding: 0.75rem 1.5rem; background: #3c1053; color: white; border: none; border-radius: var(--radius-md); cursor: pointer; white-space: nowrap;">
+                                <i class="fas fa-search"></i> Search
+                            </button>
+                            <button id="clear-search" style="padding: 0.75rem 1rem; background: #6b7280; color: white; border: none; border-radius: var(--radius-md); cursor: pointer;">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
                     </div>
                     <div id="search-results" style="margin-top: 1rem;"></div>
                 </div>
