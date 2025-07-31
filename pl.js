@@ -142,15 +142,70 @@ class PremierLeagueHub {
     async loadInitialData() {
         console.log('📥 Loading initial Premier League data...');
         
-        // First test if API is working
-        await this.testApiConnection();
+        // Initialize event listeners
+        this.initializeEventListeners();
         
         // Load default team standings and Manchester City squad
         await Promise.all([
             this.loadStandings(),
-            this.loadTeamSquad('Man'), // Manchester City by default
+            this.loadTeamSquad('Manchester City'), // Manchester City by default
             this.loadTodaysMatches()
         ]);
+
+        // Hide loading screen
+        setTimeout(() => {
+            const loadingScreen = document.getElementById('loading-screen');
+            if (loadingScreen) {
+                loadingScreen.classList.add('hidden');
+            }
+        }, 1500);
+    }
+
+    /**
+     * Initialize event listeners
+     */
+    initializeEventListeners() {
+        // Team selection dropdown
+        const teamSelect = document.getElementById('team-select');
+        if (teamSelect) {
+            teamSelect.addEventListener('change', (e) => {
+                const selectedTeam = e.target.value;
+                if (selectedTeam) {
+                    console.log(`🔄 Loading squad for: ${selectedTeam}`);
+                    this.loadTeamSquad(selectedTeam);
+                    
+                    // Update squad title
+                    const squadTitle = document.getElementById('squad-title');
+                    if (squadTitle) {
+                        squadTitle.innerHTML = `<i class="fas fa-users"></i> ${selectedTeam} Squad`;
+                    }
+                }
+            });
+        }
+
+        // Search functionality
+        const searchBtn = document.getElementById('search-btn');
+        const clearBtn = document.getElementById('clear-search');
+        const searchInput = document.getElementById('player-search');
+
+        if (searchBtn && searchInput) {
+            searchBtn.addEventListener('click', () => {
+                this.searchPlayers(searchInput.value.trim());
+            });
+
+            searchInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    this.searchPlayers(searchInput.value.trim());
+                }
+            });
+        }
+
+        if (clearBtn && searchInput) {
+            clearBtn.addEventListener('click', () => {
+                searchInput.value = '';
+                this.clearSearch();
+            });
+        }
     }
 
     /**
@@ -453,68 +508,95 @@ class PremierLeagueHub {
                    /**
        * Display squad data
        */
-      displaySquad(players, isSampleData = false) {
-         const container = document.getElementById('squad-container');
-         if (!container) return;
+            displaySquad(players, isSampleData = false) {
+        const container = document.getElementById('squad-container');
+        if (!container) return;
 
-         try {
-             // Check if players data is valid
-             if (!Array.isArray(players) || players.length === 0) {
-                 this.displaySquadFallback();
-                 return;
-             }
+        try {
+            // Check if players data is valid
+            if (!Array.isArray(players) || players.length === 0) {
+                this.displaySquadFallback();
+                return;
+            }
 
-             // Filter out any invalid player entries
-             const validPlayers = players.filter(player => 
-                 player && (player.player_name || player.name || player.firstName)
-             );
+            // Filter out any invalid player entries - TheSportsDB format
+            const validPlayers = players.filter(player => 
+                player && (player.strPlayer || player.player_name || player.name || player.firstName)
+            );
 
-             if (validPlayers.length === 0) {
-                 this.displaySquadFallback();
-                 return;
-             }
+            if (validPlayers.length === 0) {
+                this.displaySquadFallback();
+                return;
+            }
 
-             const squadHTML = `
-                 <div class="squad-grid" style="display: grid; gap: 1rem;">
-                     ${validPlayers.map(player => {
-                         // Handle different possible field names from API
-                         const playerName = player.player_name || player.name || player.firstName || 'Unknown Player';
-                         const jerseyNumber = player.jersey_number || player.number || player.shirtNumber || '??';
-                         const position = player.position || player.pos || 'N/A';
-                         const age = player.age || player.dateOfBirth || 'N/A';
-                         const nationality = player.nationality || player.country || 'Unknown';
-                         
-                         return `
-                         <div class="player-card" style="padding: 1rem; background: var(--background-color); border: 1px solid var(--border-color); border-radius: 8px; transition: all 0.3s ease; cursor: pointer;" onclick="this.classList.toggle('expanded')">
-                             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
-                                 <h4 style="color: var(--text-color); margin: 0; font-size: 1.1rem; font-weight: 600;">${playerName}</h4>
-                                 <span style="background: #3c1053; color: white; padding: 0.25rem 0.5rem; border-radius: 50%; font-weight: bold; min-width: 30px; text-align: center; font-size: 0.9rem;">${jerseyNumber}</span>
-                             </div>
-                             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; font-size: 0.9rem; color: var(--text-muted);">
-                                 <div><strong>Position:</strong> ${position}</div>
-                                 <div><strong>Age:</strong> ${age}</div>
-                                 <div style="grid-column: 1 / -1;"><strong>Nationality:</strong> ${nationality}</div>
-                             </div>
-                             <div style="margin-top: 0.5rem; font-size: 0.8rem; color: var(--text-muted); opacity: 0.7;">
-                                 <i class="fas fa-mouse-pointer"></i> Click for details
-                             </div>
-                         </div>
-                     `;}).join('')}
-                 </div>
-                 <div style="margin-top: 1rem; text-align: center; font-size: 0.9rem; color: var(--text-muted);">
-                     <i class="fas fa-info-circle"></i> Showing ${validPlayers.length} players
-                     ${isSampleData ? '<br><span style="color: #d97706; font-size: 0.8rem;"><i class="fas fa-exclamation-triangle"></i> Sample data (API unavailable)</span>' : ''}
-                 </div>
-             `;
-             
-             container.innerHTML = squadHTML;
-             this.addPlayerCardListeners();
-             console.log(`✅ Squad displayed with ${validPlayers.length} players`);
-         } catch (error) {
-             console.error('❌ Error displaying squad:', error);
-             this.displaySquadFallback();
-         }
-     }
+            const squadHTML = `
+                <div class="squad-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1.5rem;">
+                    ${validPlayers.map(player => {
+                        // Handle TheSportsDB API format
+                        const playerName = player.strPlayer || player.player_name || player.name || player.firstName || 'Unknown Player';
+                        const jerseyNumber = player.strNumber || player.jersey_number || player.number || player.shirtNumber || '??';
+                        const position = player.strPosition || player.position || player.pos || 'N/A';
+                        const nationality = player.strNationality || player.nationality || player.country || 'Unknown';
+                        const height = player.strHeight || 'N/A';
+                        const weight = player.strWeight || 'N/A';
+                        const birthDate = player.dateBorn || player.dateOfBirth || 'N/A';
+                        const playerImage = player.strThumb || player.strCutout || '';
+                        
+                        return `
+                        <div class="player-card" style="padding: 1.25rem; background: var(--surface-color); border: 1px solid var(--border-color); border-radius: 12px; transition: all 0.3s ease; cursor: pointer; box-shadow: var(--shadow-sm); position: relative; overflow: hidden;" onclick="this.classList.toggle('expanded')">
+                            ${playerImage ? `<div style="position: absolute; top: 0; right: 0; width: 60px; height: 60px; background-image: url('${playerImage}'); background-size: cover; background-position: center; border-radius: 0 12px 0 12px; opacity: 0.3;"></div>` : ''}
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; position: relative; z-index: 1;">
+                                <h4 style="color: var(--text-color); margin: 0; font-size: 1.1rem; font-weight: 600; line-height: 1.3;">${playerName}</h4>
+                                <span style="background: var(--primary-color); color: white; padding: 0.4rem 0.6rem; border-radius: 8px; font-weight: bold; min-width: 35px; text-align: center; font-size: 0.9rem; box-shadow: var(--shadow-sm);">${jerseyNumber}</span>
+                            </div>
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; font-size: 0.9rem; color: var(--text-muted); margin-bottom: 1rem;">
+                                <div style="display: flex; flex-direction: column;">
+                                    <strong style="color: var(--text-color); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 0.25rem;">Position</strong>
+                                    <span>${position}</span>
+                                </div>
+                                <div style="display: flex; flex-direction: column;">
+                                    <strong style="color: var(--text-color); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 0.25rem;">Nationality</strong>
+                                    <span>${nationality}</span>
+                                </div>
+                                ${height !== 'N/A' ? `
+                                <div style="display: flex; flex-direction: column;">
+                                    <strong style="color: var(--text-color); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 0.25rem;">Height</strong>
+                                    <span>${height}</span>
+                                </div>
+                                ` : ''}
+                                ${birthDate !== 'N/A' ? `
+                                <div style="display: flex; flex-direction: column;">
+                                    <strong style="color: var(--text-color); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 0.25rem;">Born</strong>
+                                    <span>${new Date(birthDate).getFullYear() || birthDate}</span>
+                                </div>
+                                ` : ''}
+                            </div>
+                            <div style="padding: 0.75rem; background: var(--background-color); border-radius: 8px; text-align: center; font-size: 0.8rem; color: var(--text-muted); border: 1px solid var(--border-color);">
+                                <i class="fas fa-mouse-pointer"></i> Click for more details
+                            </div>
+                        </div>
+                    `;}).join('')}
+                </div>
+                <div style="margin-top: 2rem; text-align: center; padding: 1.5rem; background: var(--surface-color); border-radius: 12px; border: 1px solid var(--border-color);">
+                    <div style="display: flex; align-items: center; justify-content: center; gap: 0.5rem; margin-bottom: 0.5rem;">
+                        <i class="fas fa-users" style="color: var(--primary-color);"></i>
+                        <span style="font-weight: 600; color: var(--text-color);">Squad Overview</span>
+                    </div>
+                    <p style="margin: 0; font-size: 0.9rem; color: var(--text-muted);">
+                        Showing ${validPlayers.length} players
+                        ${isSampleData ? '<br><span style="color: #d97706; font-size: 0.8rem; margin-top: 0.5rem; display: inline-block;"><i class="fas fa-exclamation-triangle"></i> Sample data (Live API data loading...)</span>' : '<br><span style="color: var(--primary-color); font-size: 0.8rem; margin-top: 0.5rem; display: inline-block;"><i class="fas fa-check-circle"></i> Live data from TheSportsDB</span>'}
+                    </p>
+                </div>
+            `;
+            
+            container.innerHTML = squadHTML;
+            this.addPlayerCardListeners();
+            console.log(`✅ Squad displayed with ${validPlayers.length} players`);
+        } catch (error) {
+            console.error('❌ Error displaying squad:', error);
+            this.displaySquadFallback();
+        }
+    }
 
      /**
       * Add event listeners to player cards for enhanced interactivity
@@ -548,23 +630,117 @@ class PremierLeagueHub {
     /**
      * Display fallback squad message
      */
-    displaySquadFallback(teamCode = null) {
+    displaySquadFallback(teamName = null) {
         const container = document.getElementById('squad-container');
         if (!container) return;
 
-        const teamName = teamCode ? this.teamMapping[teamCode] || teamCode : 'the selected team';
+        const displayName = teamName || 'the selected team';
         
         container.innerHTML = `
-            <div style="text-align: center; padding: 2rem; background: #fef3c7; border-radius: 8px; border: 1px solid #f59e0b;">
-                <i class="fas fa-users" style="color: #d97706; font-size: 2rem; margin-bottom: 1rem;"></i>
-                <h3 style="color: #92400e; margin-bottom: 0.5rem;">Squad Data Unavailable</h3>
-                <p style="color: #b45309;">Unable to load squad information for ${teamName}.</p>
-                <p style="color: #b45309; font-size: 0.9rem; margin-top: 0.5rem;">This may be due to API limitations or team not found.</p>
-                <button onclick="location.reload()" style="margin-top: 1rem; padding: 0.5rem 1rem; background: #d97706; color: white; border: none; border-radius: 6px; cursor: pointer;">
+            <div style="text-align: center; padding: 2rem; background: var(--surface-color); border-radius: 12px; border: 1px solid var(--border-color);">
+                <i class="fas fa-users" style="color: var(--text-muted); font-size: 2rem; margin-bottom: 1rem;"></i>
+                <h3 style="color: var(--text-color); margin-bottom: 0.5rem;">Squad Data Unavailable</h3>
+                <p style="color: var(--text-muted);">Unable to load squad information for ${displayName}.</p>
+                <p style="color: var(--text-muted); font-size: 0.9rem; margin-top: 0.5rem;">This may be due to API limitations or team not found.</p>
+                <button onclick="location.reload()" style="margin-top: 1rem; padding: 0.75rem 1.5rem; background: var(--primary-color); color: white; border: none; border-radius: 8px; cursor: pointer;">
                     <i class="fas fa-refresh"></i> Try Again
                 </button>
             </div>
         `;
+    }
+
+    /**
+     * Search for players across loaded squads
+     */
+    searchPlayers(query) {
+        if (!query || query.length < 2) {
+            alert('Please enter at least 2 characters to search');
+            return;
+        }
+
+        console.log(`🔍 Searching for players: "${query}"`);
+        
+        const container = document.getElementById('squad-container');
+        if (!container) return;
+
+        // Show searching state
+        container.innerHTML = `
+            <div style="text-align: center; padding: 2rem;">
+                <div class="loading-spinner-small"></div>
+                <p>Searching for "${query}"...</p>
+            </div>
+        `;
+
+        // Simulate search across current squad
+        setTimeout(() => {
+            if (this.currentSquad && this.currentSquad.length > 0) {
+                const results = this.currentSquad.filter(player => {
+                    const playerName = player.strPlayer || player.player_name || player.name || '';
+                    const position = player.strPosition || player.position || '';
+                    const nationality = player.strNationality || player.nationality || '';
+                    
+                    return playerName.toLowerCase().includes(query.toLowerCase()) ||
+                           position.toLowerCase().includes(query.toLowerCase()) ||
+                           nationality.toLowerCase().includes(query.toLowerCase());
+                });
+
+                if (results.length > 0) {
+                    // Update squad title to show search results
+                    const squadTitle = document.getElementById('squad-title');
+                    if (squadTitle) {
+                        squadTitle.innerHTML = `<i class="fas fa-search"></i> Search Results for "${query}"`;
+                    }
+                    
+                    this.displaySquad(results);
+                } else {
+                    container.innerHTML = `
+                        <div style="text-align: center; padding: 2rem; background: var(--surface-color); border-radius: 12px; border: 1px solid var(--border-color);">
+                            <i class="fas fa-search" style="color: var(--text-muted); font-size: 2rem; margin-bottom: 1rem;"></i>
+                            <h3 style="color: var(--text-color); margin-bottom: 0.5rem;">No Results Found</h3>
+                            <p style="color: var(--text-muted);">No players found matching "${query}"</p>
+                            <button onclick="window.plHub.clearSearch()" style="margin-top: 1rem; padding: 0.75rem 1.5rem; background: var(--primary-color); color: white; border: none; border-radius: 8px; cursor: pointer;">
+                                <i class="fas fa-arrow-left"></i> Back to Squad
+                            </button>
+                        </div>
+                    `;
+                }
+            } else {
+                container.innerHTML = `
+                    <div style="text-align: center; padding: 2rem; background: var(--surface-color); border-radius: 12px; border: 1px solid var(--border-color);">
+                        <i class="fas fa-info-circle" style="color: var(--text-muted); font-size: 2rem; margin-bottom: 1rem;"></i>
+                        <h3 style="color: var(--text-color); margin-bottom: 0.5rem;">No Squad Loaded</h3>
+                        <p style="color: var(--text-muted);">Please select a team first to search players</p>
+                    </div>
+                `;
+            }
+        }, 1000);
+    }
+
+    /**
+     * Clear search and show full squad
+     */
+    clearSearch() {
+        const searchInput = document.getElementById('player-search');
+        if (searchInput) {
+            searchInput.value = '';
+        }
+
+        // Get current team selection
+        const teamSelect = document.getElementById('team-select');
+        const selectedTeam = teamSelect ? teamSelect.value : 'Manchester City';
+        
+        // Update squad title back to team name
+        const squadTitle = document.getElementById('squad-title');
+        if (squadTitle) {
+            squadTitle.innerHTML = `<i class="fas fa-users"></i> ${selectedTeam} Squad`;
+        }
+
+        // Show full squad again
+        if (this.currentSquad && this.currentSquad.length > 0) {
+            this.displaySquad(this.currentSquad);
+        } else {
+            this.loadTeamSquad(selectedTeam);
+        }
     }
 
     /**

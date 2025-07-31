@@ -12,7 +12,7 @@
     
     <!-- Open Graph Meta Tags -->
     <meta property="og:title" content="Premier League - Brightlens News">
-    <meta property="og:description" content="Live Premier League standings, player stats, and match updates.">
+    <meta property="og:description" content="Get the latest Premier League standings, player stats, and match updates from England's top football division.">
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://philipkilonzoke.github.io/premierleague">
     
@@ -27,163 +27,7 @@
         .loading-spinner{width:60px;height:60px;border:4px solid rgba(255,255,255,0.3);border-top:4px solid white;border-radius:50%;animation:spin 1s linear infinite;margin:0 auto 1rem}
         @keyframes spin{0%{transform:rotate(0deg)}100%{transform:rotate(360deg)}}
         .header{background:var(--surface-color);border-bottom:1px solid var(--border-color);position:sticky;top:0;z-index:100}
-        
-                 /* Premier League Colors */
-         .pl-primary { color: #3c1053; }
-         .pl-secondary { color: #e90052; }
-         .pl-accent { color: #00ff85; }
-         .pl-bg-primary { background-color: #3c1053; }
-         .pl-bg-secondary { background-color: #e90052; }
-         .pl-bg-accent { background-color: #00ff85; }
-         
-         /* Theme compatibility overrides */
-         [data-theme="dark"] .pl-section {
-             background: var(--surface-color);
-             border-color: var(--border-color);
-         }
-         
-         [data-theme="dark"] .pl-section h2 {
-             color: var(--text-color);
-         }
-         
-         [data-theme="dark"] .player-card,
-         [data-theme="dark"] .table-row {
-             background: var(--surface-color) !important;
-             border-color: var(--border-color) !important;
-             color: var(--text-color) !important;
-         }
-         
-         /* Smooth transitions for theme changes */
-         .pl-section, .player-card, .table-row {
-             transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease;
-         }
-         
-         /* Hover effects that work across themes */
-         .player-card:hover, .table-row:hover {
-             background: var(--primary-color) !important;
-             color: white !important;
-             transform: translateY(-2px);
-             box-shadow: var(--shadow-lg);
-         }
-         
-         /* Loading spinner theme compatibility */
-         .loading-spinner-small {
-             border-color: var(--border-color);
-             border-top-color: var(--primary-color);
-         }
-        
-        /* Premier League specific styles */
-        .pl-hero {
-            background: linear-gradient(135deg, #3c1053, #e90052);
-            color: white;
-            padding: 2rem 0;
-            text-align: center;
-            position: relative;
-            overflow: hidden;
-        }
-        
-        .pl-hero::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="20" cy="20" r="2" fill="white" opacity="0.1"/><circle cx="80" cy="80" r="2" fill="white" opacity="0.1"/><circle cx="60" cy="30" r="1" fill="white" opacity="0.1"/></svg>');
-            pointer-events: none;
-        }
-        
-        .pl-content {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 2rem;
-            margin-top: 2rem;
-        }
-        
-        .pl-section {
-            background: var(--surface-color);
-            border-radius: var(--radius-lg);
-            padding: 1.5rem;
-            box-shadow: var(--shadow-sm);
-            border: 1px solid var(--border-color);
-        }
-        
-        .pl-section h2 {
-            color: #3c1053;
-            margin-bottom: 1rem;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-        
-                 @media (max-width: 768px) {
-             .pl-content {
-                 grid-template-columns: 1fr;
-                 gap: 1rem;
-             }
-             
-             .pl-hero h1 {
-                 font-size: 2rem !important;
-             }
-             
-             .pl-hero p {
-                 font-size: 1rem !important;
-             }
-             
-             .pl-section {
-                 padding: 1rem;
-             }
-             
-                           /* Mobile search layout */
-              .search-form {
-                  flex-direction: column !important;
-                  align-items: stretch !important;
-              }
-              
-              .search-form input {
-                  min-width: auto !important;
-                  width: 100% !important;
-              }
-              
-              .search-form > div {
-                  justify-content: center !important;
-              }
-              
-              .search-form button {
-                  flex: 1 !important;
-              }
-         }
-         
-         @media (max-width: 480px) {
-             .container {
-                 padding: 0 0.75rem;
-             }
-             
-             .pl-section {
-                 padding: 0.75rem;
-             }
-             
-             .pl-hero {
-                 padding: 1.5rem 0;
-             }
-         }
-         
-         /* Enhanced mobile responsiveness for tables */
-         @media (max-width: 640px) {
-             .table-header, .table-row {
-                 font-size: 0.875rem !important;
-             }
-             
-             .table-header {
-                 grid-template-columns: 30px 1fr 30px 30px 30px 30px !important;
-             }
-             
-             .table-row {
-                 grid-template-columns: 30px 1fr 30px 30px 30px 30px !important;
-             }
-         }
     </style>
-    
     <!-- Non-Critical CSS Files -->
     <link rel="preload" href="css/styles.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
     <link rel="preload" href="css/themes.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
@@ -203,8 +47,8 @@
     <div id="loading-screen" class="loading-screen">
         <div class="loading-container">
             <div class="loading-spinner"></div>
-            <h2>Loading Premier League...</h2>
-            <p>Fetching latest football data</p>
+            <h2>Brightlens News</h2>
+            <p>Loading Premier League data...</p>
         </div>
     </div>
 
@@ -213,59 +57,32 @@
         <div class="container">
             <div class="header-content">
                 <div class="logo">
-                    <a href="index.html">
-                        <h1>Brightlens News</h1>
-                        <span class="tagline">Premier League Hub</span>
-                    </a>
+                    <h1><a href="/" style="color: inherit; text-decoration: none;"><i class="fas fa-newspaper"></i> Brightlens News</a></h1>
                 </div>
-                <nav class="header-nav">
-                    <div class="theme-controls">
-                        <button id="theme-toggle" class="theme-btn" title="Toggle theme">
-                            <i class="fas fa-moon"></i>
+                <nav class="nav">
+                    <div class="nav-links">
+                        <a href="/" class="nav-link">Home</a>
+                        <a href="/latest" class="nav-link">Breaking</a>
+                        <a href="/kenya" class="nav-link">Kenya</a>
+                        <a href="/world" class="nav-link">World</a>
+                        <a href="/entertainment" class="nav-link">Entertainment</a>
+                        <a href="/technology" class="nav-link">Technology</a>
+                        <a href="/business" class="nav-link">Business</a>
+                        <a href="/sports" class="nav-link">Sports</a>
+                        <a href="/premierleague" class="nav-link active">Premier League</a>
+                        <a href="/health" class="nav-link">Health</a>
+                        <a href="/lifestyle" class="nav-link">Lifestyle</a>
+                        <a href="/music" class="nav-link">Music</a>
+                        <a href="/food" class="nav-link">Food</a>
+                        <a href="/showtime" class="nav-link">Showtime</a>
+                        <a href="/crypto" class="nav-link">Crypto</a>
+                        <a href="/astronomy" class="nav-link">Astronomy</a>
+                        <a href="/aviation" class="nav-link">Aviation</a>
+                    </div>
+                    <div class="nav-controls">
+                        <button id="theme-toggle" class="theme-toggle" title="Change Theme">
+                            <i class="fas fa-palette"></i>
                         </button>
-                        <div class="theme-dropdown">
-                            <button class="theme-dropdown-btn" title="More themes">
-                                <i class="fas fa-palette"></i>
-                            </button>
-                            <div class="theme-dropdown-content">
-                                <button class="theme-option" data-theme="light">
-                                    <i class="fas fa-sun"></i> Light
-                                </button>
-                                <button class="theme-option" data-theme="dark">
-                                    <i class="fas fa-moon"></i> Dark
-                                </button>
-                                <button class="theme-option" data-theme="blue">
-                                    <i class="fas fa-water"></i> Ocean
-                                </button>
-                                <button class="theme-option" data-theme="green">
-                                    <i class="fas fa-leaf"></i> Forest
-                                </button>
-                                <button class="theme-option" data-theme="purple">
-                                    <i class="fas fa-magic"></i> Purple
-                                </button>
-                                <button class="theme-option" data-theme="orange">
-                                    <i class="fas fa-fire"></i> Sunset
-                                </button>
-                                <button class="theme-option" data-theme="red">
-                                    <i class="fas fa-heart"></i> Rose
-                                </button>
-                                <button class="theme-option" data-theme="teal">
-                                    <i class="fas fa-fish"></i> Teal
-                                </button>
-                                <button class="theme-option" data-theme="yellow">
-                                    <i class="fas fa-sun"></i> Gold
-                                </button>
-                                <button class="theme-option" data-theme="pink">
-                                    <i class="fas fa-heart"></i> Pink
-                                </button>
-                                <button class="theme-option" data-theme="indigo">
-                                    <i class="fas fa-star"></i> Indigo
-                                </button>
-                                <button class="theme-option" data-theme="gray">
-                                    <i class="fas fa-cloud"></i> Slate
-                                </button>
-                            </div>
-                        </div>
                     </div>
                 </nav>
             </div>
@@ -274,102 +91,118 @@
 
     <!-- Main Content -->
     <main class="main">
-        <!-- Hero Section -->
-        <section class="pl-hero">
-            <div class="container">
-                <div style="position: relative; z-index: 1;">
-                    <h1 style="font-size: 2.5rem; margin-bottom: 0.5rem;">
-                        <i class="fas fa-trophy"></i> Premier League Hub
-                    </h1>
-                    <p style="font-size: 1.1rem; opacity: 0.9;">
-                        Live standings, player stats, and match updates from England's top flight
-                    </p>
+        <div class="container">
+            <!-- Category Header -->
+            <div class="category-header">
+                <h2 id="category-title">Premier League Hub</h2>
+                <div class="category-meta">
+                    <div class="category-description">
+                        <p>Live standings, player stats, team squads, and match updates from England's Premier League</p>
+                    </div>
+                    <div class="category-stats">
+                        <div class="stat">
+                            <i class="fas fa-trophy"></i>
+                            <span>20 Teams</span>
+                        </div>
+                        <div class="stat">
+                            <i class="fas fa-users"></i>
+                            <span>500+ Players</span>
+                        </div>
+                        <div class="stat">
+                            <i class="fas fa-clock"></i>
+                            <span>Live Updates</span>
+                        </div>
+                    </div>
                 </div>
             </div>
-        </section>
 
-        <!-- Premier League Content -->
-        <section class="content-section">
-            <div class="container">
-                <!-- Search Section -->
-                <div class="pl-section" style="margin-bottom: 2rem;">
-                    <h2><i class="fas fa-search"></i> Search Players</h2>
-                    <div class="search-form" style="display: flex; gap: 1rem; align-items: center; flex-wrap: wrap;">
-                        <input type="text" id="player-search" placeholder="Search for a player by name..." 
-                               style="flex: 1; min-width: 250px; padding: 0.75rem; border: 1px solid var(--border-color); border-radius: var(--radius-md); font-size: 1rem;">
-                        <div style="display: flex; gap: 0.5rem;">
-                            <button id="search-btn" style="padding: 0.75rem 1.5rem; background: #3c1053; color: white; border: none; border-radius: var(--radius-md); cursor: pointer; white-space: nowrap;">
+            <!-- Premier League Content -->
+            <div class="pl-content">
+                <!-- Team Selection -->
+                <section class="content-section">
+                    <div class="section-header">
+                        <h3><i class="fas fa-shield-alt"></i> Select Team</h3>
+                        <p>Choose a Premier League team to view their squad</p>
+                    </div>
+                    <div class="team-selector">
+                        <select id="team-select" class="form-select">
+                            <option value="Manchester City">Manchester City</option>
+                            <option value="Arsenal">Arsenal</option>
+                            <option value="Liverpool">Liverpool</option>
+                            <option value="Chelsea">Chelsea</option>
+                            <option value="Manchester United">Manchester United</option>
+                            <option value="Tottenham Hotspur">Tottenham Hotspur</option>
+                            <option value="Newcastle United">Newcastle United</option>
+                            <option value="Brighton & Hove Albion">Brighton & Hove Albion</option>
+                            <option value="Aston Villa">Aston Villa</option>
+                            <option value="West Ham United">West Ham United</option>
+                            <option value="Crystal Palace">Crystal Palace</option>
+                            <option value="Fulham">Fulham</option>
+                            <option value="Wolverhampton Wanderers">Wolverhampton Wanderers</option>
+                            <option value="Everton">Everton</option>
+                            <option value="Brentford">Brentford</option>
+                            <option value="AFC Bournemouth">AFC Bournemouth</option>
+                            <option value="Nottingham Forest">Nottingham Forest</option>
+                            <option value="Leicester City">Leicester City</option>
+                            <option value="Ipswich Town">Ipswich Town</option>
+                            <option value="Southampton">Southampton</option>
+                        </select>
+                    </div>
+                </section>
+
+                <!-- Player Search -->
+                <section class="content-section">
+                    <div class="section-header">
+                        <h3><i class="fas fa-search"></i> Player Search</h3>
+                        <p>Search for players across Premier League teams</p>
+                    </div>
+                    <div class="search-container">
+                        <div class="search-form">
+                            <input type="text" id="player-search" placeholder="Search for a player by name..." class="form-input">
+                            <button id="search-btn" class="btn btn-primary">
                                 <i class="fas fa-search"></i> Search
                             </button>
-                            <button id="clear-search" style="padding: 0.75rem 1rem; background: #6b7280; color: white; border: none; border-radius: var(--radius-md); cursor: pointer;">
-                                <i class="fas fa-times"></i>
+                            <button id="clear-search" class="btn btn-secondary">
+                                <i class="fas fa-times"></i> Clear
                             </button>
                         </div>
                     </div>
-                    <div id="search-results" style="margin-top: 1rem;"></div>
-                </div>
+                </section>
 
-                <div class="pl-content">
-                    <!-- Team Standings -->
-                    <div class="pl-section">
-                        <h2><i class="fas fa-list-ol"></i> League Table</h2>
-                        <div id="standings-container">
-                            <div class="loading-spinner-small"></div>
-                            <p>Loading Premier League standings...</p>
-                        </div>
+                <!-- Team Squad -->
+                <section class="content-section">
+                    <div class="section-header">
+                        <h3 id="squad-title"><i class="fas fa-users"></i> Manchester City Squad</h3>
+                        <p>Current players and their positions</p>
                     </div>
+                    <div id="squad-container" class="squad-container">
+                        <!-- Squad data will be loaded here -->
+                    </div>
+                </section>
 
-                    <!-- Live Matches -->
-                    <div class="pl-section">
-                        <h2><i class="fas fa-clock"></i> Today's Matches</h2>
-                        <div id="matches-container">
-                            <div class="loading-spinner-small"></div>
-                            <p>Loading match information...</p>
-                        </div>
+                <!-- Current Standings -->
+                <section class="content-section">
+                    <div class="section-header">
+                        <h3><i class="fas fa-table"></i> Premier League Table</h3>
+                        <p>Current season standings and team performance</p>
                     </div>
+                    <div id="standings-container" class="standings-container">
+                        <!-- Standings will be loaded here -->
+                    </div>
+                </section>
 
-                    <!-- Player Squad -->
-                    <div class="pl-section">
-                        <h2><i class="fas fa-users"></i> Manchester City Squad</h2>
-                        <div id="squad-container">
-                            <div class="loading-spinner-small"></div>
-                            <p>Loading squad information...</p>
-                        </div>
+                <!-- Live Matches -->
+                <section class="content-section">
+                    <div class="section-header">
+                        <h3><i class="fas fa-futbol"></i> Match Updates</h3>
+                        <p>Latest match results and upcoming fixtures</p>
                     </div>
-
-                    <!-- Team Selection -->
-                    <div class="pl-section">
-                        <h2><i class="fas fa-shield-alt"></i> Select Team</h2>
-                        <select id="team-select" style="width: 100%; padding: 0.75rem; border: 1px solid var(--border-color); border-radius: var(--radius-md); font-size: 1rem; margin-bottom: 1rem;">
-                            <option value="">Choose a team...</option>
-                            <option value="Man">Manchester City</option>
-                            <option value="Ars">Arsenal</option>
-                            <option value="Liv">Liverpool</option>
-                            <option value="Che">Chelsea</option>
-                            <option value="Tot">Tottenham</option>
-                            <option value="New">Newcastle United</option>
-                            <option value="Manu">Manchester United</option>
-                            <option value="Wes">West Ham United</option>
-                            <option value="Bri">Brighton</option>
-                            <option value="Ast">Aston Villa</option>
-                            <option value="Ful">Fulham</option>
-                            <option value="Wol">Wolverhampton</option>
-                            <option value="Cry">Crystal Palace</option>
-                            <option value="Eve">Everton</option>
-                            <option value="Bre">Brentford</option>
-                            <option value="Not">Nottingham Forest</option>
-                            <option value="Bou">Bournemouth</option>
-                            <option value="Bur">Burnley</option>
-                            <option value="She">Sheffield United</option>
-                            <option value="Lut">Luton Town</option>
-                        </select>
-                        <button id="load-team-btn" style="width: 100%; padding: 0.75rem; background: #e90052; color: white; border: none; border-radius: var(--radius-md); cursor: pointer; font-size: 1rem;">
-                            <i class="fas fa-download"></i> Load Team Squad
-                        </button>
+                    <div id="matches-container" class="matches-container">
+                        <!-- Match data will be loaded here -->
                     </div>
-                </div>
+                </section>
             </div>
-        </section>
+        </div>
     </main>
 
     <!-- Footer -->
@@ -377,89 +210,61 @@
         <div class="container">
             <div class="footer-content">
                 <div class="footer-section">
-                    <h4><i class="fas fa-info-circle"></i> About Premier League Hub</h4>
-                    <p>Your comprehensive source for Premier League data, standings, and player information powered by real-time API data.</p>
-                    <div class="footer-stats">
-                        <div class="stat-item">
-                            <div class="stat-number">20</div>
-                            <div class="stat-label">Teams</div>
-                        </div>
-                        <div class="stat-item">
-                            <div class="stat-number">38</div>
-                            <div class="stat-label">Matches</div>
-                        </div>
-                        <div class="stat-item">
-                            <div class="stat-number">500+</div>
-                            <div class="stat-label">Players</div>
-                        </div>
+                    <h4>Brightlens News</h4>
+                    <p>Your trusted source for Premier League updates and comprehensive football coverage.</p>
+                    <div class="footer-social">
+                        <a href="#" class="social-link"><i class="fab fa-twitter"></i></a>
+                        <a href="#" class="social-link"><i class="fab fa-facebook"></i></a>
+                        <a href="#" class="social-link"><i class="fab fa-instagram"></i></a>
+                        <a href="#" class="social-link"><i class="fab fa-youtube"></i></a>
                     </div>
                 </div>
                 <div class="footer-section">
-                    <h4><i class="fas fa-list-ul"></i> Premier League Teams</h4>
+                    <h4>Categories</h4>
                     <div class="footer-links">
-                        <a href="#" class="footer-link pl-team-link" data-team="Man">
-                            <i class="fas fa-shield-alt"></i> Manchester City
+                        <a href="/technology" data-category="technology" class="footer-link">
+                            <i class="fas fa-microchip"></i> Technology
                         </a>
-                        <a href="#" class="footer-link pl-team-link" data-team="Ars">
-                            <i class="fas fa-shield-alt"></i> Arsenal
+                        <a href="/sports" data-category="sports" class="footer-link">
+                            <i class="fas fa-futbol"></i> Sports
                         </a>
-                        <a href="#" class="footer-link pl-team-link" data-team="Liv">
-                            <i class="fas fa-shield-alt"></i> Liverpool
+                        <a href="/premierleague" data-category="premierleague" class="footer-link">
+                            <i class="fas fa-trophy"></i> Premier League
                         </a>
-                        <a href="#" class="footer-link pl-team-link" data-team="Che">
-                            <i class="fas fa-shield-alt"></i> Chelsea
-                        </a>
-                        <a href="#" class="footer-link pl-team-link" data-team="Tot">
-                            <i class="fas fa-shield-alt"></i> Tottenham
-                        </a>
-                        <a href="#" class="footer-link pl-team-link" data-team="Manu">
-                            <i class="fas fa-shield-alt"></i> Manchester United
+                        <a href="/business" data-category="business" class="footer-link">
+                            <i class="fas fa-chart-line"></i> Business
                         </a>
                     </div>
                 </div>
                 <div class="footer-section">
-                    <h4><i class="fas fa-share-alt"></i> Connect With Us</h4>
-                    <div class="social-links">
-                        <a href="https://instagram.com/philipkilonzo.ke" target="_blank" rel="noopener noreferrer" class="social-link instagram">
-                            <div class="social-icon">
-                                <i class="fab fa-instagram"></i>
-                            </div>
-                            <div class="social-info">
-                                <span class="social-platform">Instagram</span>
-                                <span class="social-handle">@philipkilonzo.ke</span>
-                            </div>
-                        </a>
-                        <a href="https://wa.me/254791943551" target="_blank" rel="noopener noreferrer" class="social-link whatsapp">
-                            <div class="social-icon">
-                                <i class="fab fa-whatsapp"></i>
-                            </div>
-                            <div class="social-info">
-                                <span class="social-platform">WhatsApp</span>
-                                <span class="social-handle">+254 791 943 551</span>
-                            </div>
-                        </a>
+                    <h4>Quick Links</h4>
+                    <div class="footer-links">
+                        <a href="/" class="footer-link">Home</a>
+                        <a href="/latest" class="footer-link">Breaking News</a>
+                        <a href="/about" class="footer-link">About Us</a>
+                        <a href="/contact" class="footer-link">Contact</a>
                     </div>
-                    <div class="footer-newsletter">
-                        <h5>Premier League Updates</h5>
-                        <p>Get the latest Premier League news and updates</p>
-                        <div class="newsletter-form">
-                            <input type="email" placeholder="Enter your email">
-                            <button type="submit">
-                                <i class="fas fa-paper-plane"></i>
-                            </button>
-                        </div>
+                </div>
+                <div class="footer-section">
+                    <h4>Newsletter</h4>
+                    <p>Get the latest Premier League updates delivered to your inbox.</p>
+                    <div class="newsletter">
+                        <input type="email" placeholder="Enter your email" class="newsletter-input">
+                        <button class="newsletter-btn">
+                            <i class="fas fa-paper-plane"></i>
+                        </button>
                     </div>
                 </div>
             </div>
             <div class="footer-bottom">
                 <div class="footer-bottom-content">
                     <div class="footer-copyright">
-                        <p>&copy; 2025 Brightlens News - Premier League Hub. All rights reserved.</p>
+                        <p>&copy; 2025 Brightlens News. All rights reserved.</p>
                     </div>
                     <div class="footer-links-bottom">
-                        <a href="index.html">Homepage</a>
-                        <a href="sports.html">Sports</a>
-                        <a href="#">API Source</a>
+                        <a href="#">Privacy Policy</a>
+                        <a href="#">Terms of Service</a>
+                        <a href="#">Contact</a>
                     </div>
                 </div>
             </div>
@@ -468,20 +273,12 @@
     </footer>
 
     <!-- JavaScript -->
-    <script src="js/themes.js" defer></script>
-    <script src="pl.js" defer></script>
+    <script src="js/themes.js"></script>
+    <script src="pl.js"></script>
     <script>
-        // Initialize Premier League page when DOM is loaded
-        document.addEventListener('DOMContentLoaded', function() {
-            console.log('🏆 Premier League page initialized');
-            
-            // Hide loading screen after a brief delay
-            setTimeout(() => {
-                const loadingScreen = document.getElementById('loading-screen');
-                if (loadingScreen) {
-                    loadingScreen.classList.add('hidden');
-                }
-            }, 1000);
+        document.addEventListener('DOMContentLoaded', () => {
+            // Initialize Premier League Hub
+            window.plHub = new PremierLeagueHub();
         });
     </script>
 </body>
