@@ -1,12 +1,8 @@
 // js/push-notifications.js
 
 window.OneSignalDeferred = window.OneSignalDeferred || [];
-OneSignalDeferred.push(function(OneSignal) {
-  OneSignal.init({
-    // IMPORTANT: Replace "YOUR_ONESIGNAL_APP_ID" with your actual OneSignal App ID.
-    // You can get this from your OneSignal account dashboard.
-    appId: "YOUR_ONESIGNAL_APP_ID",
-    // The "Typical Site" setup in OneSignal will automatically handle the rest,
-    // including the permission prompt.
+OneSignalDeferred.push(async function(OneSignal) {
+  await OneSignal.init({
+    appId: "e5df4d1e-82bb-46da-93e6-d262531b5e1e",
   });
 });
