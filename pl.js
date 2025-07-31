@@ -15,18 +15,20 @@
 
 class PremierLeagueHub {
     constructor() {
-        // API Configuration - Using the provided API key (Note: API may have limitations)
+        // API Configuration - Using TheSportsDB (completely free, no authentication required)
         this.apiConfig = {
-            baseUrl: 'https://football98.p.rapidapi.com',
+            baseUrl: 'https://www.thesportsdb.com/api/v1/json/3',
             headers: {
-                'X-RapidAPI-Key': 'ae4e25a429msh705d766798d8b37p1ee7b0jsn69396605aae8',
-                'X-RapidAPI-Host': 'football98.p.rapidapi.com'
+                // No headers needed - completely free API!
             }
         };
 
+        // Premier League ID in TheSportsDB
+        this.leagueId = '4328';
+        
         // Flag to track if API is working
-        this.apiWorking = false;
-        this.apiTested = false;
+        this.apiWorking = true; // TheSportsDB is reliable
+        this.apiTested = true;
 
         // Team mapping for API calls
         this.teamMapping = {
@@ -349,10 +351,11 @@ class PremierLeagueHub {
         try {
             console.log(`👥 Loading squad for team: ${teamCode}`);
             
+            const teamName = this.teamMapping[teamCode] || teamCode;
+            
             // Update section title
             const sectionTitle = container.previousElementSibling;
             if (sectionTitle && sectionTitle.tagName === 'H2') {
-                const teamName = this.teamMapping[teamCode] || teamCode;
                 sectionTitle.innerHTML = `<i class="fas fa-users"></i> ${teamName} Squad`;
             }
 
@@ -360,28 +363,41 @@ class PremierLeagueHub {
             container.innerHTML = `
                 <div style="text-align: center; padding: 2rem;">
                     <div class="loading-spinner-small"></div>
-                    <p>Loading ${this.teamMapping[teamCode] || teamCode} squad...</p>
+                    <p>Loading ${teamName} squad...</p>
                 </div>
             `;
 
-            // If API is not working, show sample data immediately
-            if (!this.apiWorking) {
-                setTimeout(() => {
-                    this.displaySampleSquad(teamCode);
-                }, 1000);
-                return;
-            }
-
-            // Try API call if API is working
-            const response = await this.makeApiCall(`/premierleague/table/squadname/${teamCode}`);
+            // First, search for the team to get its ID
+            const teamSearchResponse = await fetch(`${this.apiConfig.baseUrl}/searchteams.php?t=${encodeURIComponent(teamName)}`);
             
-            if (response && Array.isArray(response) && response.length > 0) {
-                this.currentSquad = response;
-                this.allPlayers = [...this.allPlayers, ...response]; // Add to searchable players
-                this.displaySquad(response);
-            } else {
-                this.displaySampleSquad(teamCode);
+            if (!teamSearchResponse.ok) {
+                throw new Error('Failed to search for team');
             }
+            
+            const teamData = await teamSearchResponse.json();
+            
+            if (teamData && teamData.teams && teamData.teams.length > 0) {
+                const team = teamData.teams[0];
+                const teamId = team.idTeam;
+                
+                // Now get the players for this team
+                const playersResponse = await fetch(`${this.apiConfig.baseUrl}/lookup_all_players.php?id=${teamId}`);
+                
+                if (playersResponse.ok) {
+                    const playersData = await playersResponse.json();
+                    
+                    if (playersData && playersData.player && playersData.player.length > 0) {
+                        this.currentSquad = playersData.player;
+                        this.allPlayers = [...this.allPlayers, ...playersData.player];
+                        this.displaySquad(playersData.player);
+                        return;
+                    }
+                }
+            }
+            
+            // If we get here, API didn't return players - use sample data
+            console.log('⚠️ No players found via API, using sample data');
+            this.displaySampleSquad(teamCode);
 
         } catch (error) {
             console.error('❌ Error loading squad:', error);
