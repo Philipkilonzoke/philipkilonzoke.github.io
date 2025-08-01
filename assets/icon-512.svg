@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#1e1e1e;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#2563eb;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  <rect width="512" height="512" rx="64" fill="url(#bg)"/>
+  <g transform="translate(256, 256)">
+    <!-- Newspaper icon -->
+    <rect x="-85" y="-106" width="170" height="212" rx="12" fill="white" opacity="0.9"/>
+    <rect x="-75" y="-96" width="150" height="20" fill="#1e1e1e" rx="4"/>
+    <rect x="-75" y="-64" width="106" height="10" fill="#1e1e1e" rx="3"/>
+    <rect x="-75" y="-44" width="128" height="10" fill="#1e1e1e" rx="3"/>
+    <rect x="-75" y="-24" width="96" height="10" fill="#1e1e1e" rx="3"/>
+    <rect x="-75" y="-4" width="117" height="10" fill="#1e1e1e" rx="3"/>
+    <rect x="-75" y="16" width="101" height="10" fill="#1e1e1e" rx="3"/>
+    <rect x="-75" y="36" width="112" height="10" fill="#1e1e1e" rx="3"/>
+    <rect x="-75" y="56" width="93" height="10" fill="#1e1e1e" rx="3"/>
+    <rect x="-75" y="76" width="133" height="10" fill="#1e1e1e" rx="3"/>
+    <rect x="-75" y="96" width="108" height="10" fill="#1e1e1e" rx="3"/>
+    <!-- News lines -->
+    <line x1="-53" y1="-80" x2="53" y2="-80" stroke="#2563eb" stroke-width="6"/>
+    <line x1="-53" y1="-60" x2="53" y2="-60" stroke="#2563eb" stroke-width="6"/>
+    <!-- Decorative elements -->
+    <circle cx="-40" cy="20" r="8" fill="#2563eb" opacity="0.6"/>
+    <circle cx="40" cy="40" r="6" fill="#2563eb" opacity="0.4"/>
+  </g>
+</svg>
