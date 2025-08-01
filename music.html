@@ -3,57 +3,139 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Music Hub - Brightlens News</title>
+    <title>Music Discovery Hub 2025 - Brightlens News</title>
     
     <!-- SEO Meta Tags -->
-    <meta name="description" content="Discover the latest music news, trending songs, new releases, and music industry updates from top artists worldwide.">
-    <meta name="keywords" content="music news, trending songs, new releases, hip-hop, afrobeats, amapiano, r&b, pop, dancehall, music industry, Brightlens">
+    <meta name="description" content="Discover the latest music trends, real-time charts, trending artists, and immersive music experiences. Your ultimate music discovery platform for 2025.">
+    <meta name="keywords" content="music discovery, trending music 2025, music charts, new releases, music news, streaming, artists, albums, playlists, Brightlens">
     <meta name="author" content="Philip Kilonzo">
     
     <!-- Open Graph Meta Tags -->
-    <meta property="og:title" content="Music Hub - Brightlens News">
-    <meta property="og:description" content="Discover the latest music news, trending songs, and new releases from top artists worldwide.">
+    <meta property="og:title" content="Music Discovery Hub 2025 - Brightlens News">
+    <meta property="og:description" content="Discover the latest music trends, real-time charts, and immersive music experiences.">
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://philipkilonzoke.github.io/music">
+    <meta property="og:image" content="https://philipkilonzoke.github.io/assets/music-hub-2025.jpg">
     
-    <!-- Critical CSS Inline for Faster Loading -->
-    <style>
-        *{margin:0;padding:0;box-sizing:border-box}
-        :root{--primary-color:#2563eb;--background-color:#ffffff;--text-color:#1e293b;--surface-color:#f8fafc;--border-color:#e2e8f0}
-        body{font-family:'Inter',system-ui,sans-serif;background:var(--background-color);color:var(--text-color);line-height:1.6}
-        .loading-screen{position:fixed;top:0;left:0;width:100%;height:100%;background:var(--primary-color);display:flex;align-items:center;justify-content:center;z-index:9999;transition:opacity 0.3s}
-        .loading-screen.hidden{opacity:0;visibility:hidden}
-        .loading-container{text-align:center;color:white}
-        .loading-spinner{width:60px;height:60px;border:4px solid rgba(255,255,255,0.3);border-top:4px solid white;border-radius:50%;animation:spin 1s linear infinite;margin:0 auto 1rem}
-        @keyframes spin{0%{transform:rotate(0deg)}100%{transform:rotate(360deg)}}
-        .header{background:var(--surface-color);border-bottom:1px solid var(--border-color);position:sticky;top:0;z-index:100}
-    </style>
-    <!-- Non-Critical CSS Files -->
-    <link rel="preload" href="css/styles.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
-    <link rel="preload" href="css/themes.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
-    <link rel="preload" href="css/music.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
-    <noscript><link rel="stylesheet" href="css/styles.css">
-    
-    <!-- Sidebar Navigation Script -->
-    <script src="js/sidebar-navigation.js" defer></script><link rel="stylesheet" href="css/themes.css"><link rel="stylesheet" href="css/music.css"></noscript>
-    <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
-    <noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"></noscript>
-
-    <!-- OneSignal SDK -->
-    <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
-    <script src="js/push-notifications.js" defer></script>
+    <!-- Preload Critical Resources -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link rel="preload" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@400;500;600;700;800&display=swap" as="style" onload="this.onload=null;this.rel='stylesheet'">
-    <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@400;500;600;700;800&display=swap"></noscript>
+    <link rel="preconnect" href="https://ws.audioscrobbler.com">
+    <link rel="preconnect" href="https://api.deezer.com">
+    
+    <!-- Critical CSS Inline for Ultra-Fast Loading -->
+    <style>
+        :root {
+            --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --accent-gradient: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            --dark-gradient: linear-gradient(135deg, #434343 0%, #000000 100%);
+            --glass-bg: rgba(255, 255, 255, 0.1);
+            --glass-border: rgba(255, 255, 255, 0.2);
+            --text-primary: #ffffff;
+            --text-secondary: rgba(255, 255, 255, 0.8);
+            --surface-dark: rgba(0, 0, 0, 0.3);
+            --neon-purple: #b794f6;
+            --neon-pink: #f093fb;
+            --neon-blue: #63b3ed;
+        }
+        
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--dark-gradient);
+            color: var(--text-primary);
+            overflow-x: hidden;
+            line-height: 1.6;
+        }
+        
+        .loading-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: var(--primary-gradient);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            transition: opacity 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        .loading-screen.hidden {
+            opacity: 0;
+            visibility: hidden;
+        }
+        
+        .loading-content {
+            text-align: center;
+            color: white;
+        }
+        
+        .loading-logo {
+            font-size: 3rem;
+            font-weight: 800;
+            margin-bottom: 1rem;
+            background: linear-gradient(45deg, #fff, #f0f0f0);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: pulse 2s infinite;
+        }
+        
+        .loading-spinner {
+            width: 60px;
+            height: 60px;
+            border: 4px solid rgba(255, 255, 255, 0.3);
+            border-top: 4px solid white;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 2rem;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+        
+        .header {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--glass-border);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+    </style>
+    
+    <!-- Modern Font Loading -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Poppins:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    
+    <!-- Font Awesome 6 - Latest Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    
+    <!-- Main Stylesheets -->
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/themes.css">
+    <link rel="stylesheet" href="css/music-2025.css">
+    
+    <!-- OneSignal Push Notifications -->
+    <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
+    <script src="js/push-notifications.js" defer></script>
 </head>
 <body>
     <!-- Loading Screen -->
     <div id="loading-screen" class="loading-screen">
-        <div class="loading-container">
+        <div class="loading-content">
+            <div class="loading-logo">🎵 MUSIC HUB</div>
             <div class="loading-spinner"></div>
-            <h2>Brightlens Music</h2>
-            <p>Tuning up the vibes...</p>
+            <h2>Loading the Future of Music</h2>
+            <p>Connecting to the beat of 2025...</p>
         </div>
     </div>
 
@@ -62,7 +144,9 @@
         <div class="container">
             <div class="header-content">
                 <div class="logo">
-                    <h1><a href="/" style="color: inherit; text-decoration: none;"><i class="fas fa-newspaper"></i> Brightlens News</a></h1>
+                    <h1><a href="/" style="color: inherit; text-decoration: none;">
+                        <i class="fas fa-newspaper"></i> Brightlens News
+                    </a></h1>
                 </div>
                 <nav class="nav">
                     <div class="nav-links">
@@ -93,188 +177,287 @@
         </div>
     </header>
 
-    <!-- Main Content -->
-    <main class="main music-main">
+    <!-- Hero Section -->
+    <section class="hero-section">
+        <div class="hero-bg">
+            <div class="hero-particles"></div>
+            <div class="hero-waves"></div>
+        </div>
         <div class="container">
-            <!-- Music Header -->
-            <div class="music-header">
-                <div class="music-title">
-                    <h1><i class="fas fa-music"></i> Music Hub</h1>
-                    <p>Your gateway to a world of sound. Discover and listen.</p>
-                </div>
-                <!-- Search Bar -->
-                <div class="music-search">
-                    <div class="search-container">
-                        <i class="fas fa-search"></i>
-                        <input type="text" id="music-search-input" placeholder="Search for songs or artists...">
-                        <button class="search-clear" id="search-clear-btn" style="display: none;">
-                            <i class="fas fa-times"></i>
-                        </button>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Music Controls -->
-            <div class="music-controls">
-                <div class="genre-section">
-                    <div class="genre-tabs" id="genre-tabs">
-                        <!-- Genre tabs will be populated by JS -->
-                    </div>
-                </div>
-                <div class="filter-section">
-                    <div class="filter-controls">
-                        <button class="filter-btn active" data-filter="all">
-                            <i class="fas fa-th"></i> All
-                        </button>
-                        <button class="filter-btn" data-filter="favorites">
-                            <i class="fas fa-heart"></i> Favorites
-                        </button>
-                        <button class="shuffle-btn" id="shuffle-btn">
-                            <i class="fas fa-random"></i> Shuffle
-                        </button>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Music Sections -->
-            <section class="music-sections">
-                <!-- Trending Tracks -->
-                <div class="music-section" id="trending-section">
-                    <div class="section-header">
-                        <h2><i class="fas fa-fire"></i> Trending Tracks</h2>
-                        <button class="view-all-btn" data-section="trending">View All</button>
-                    </div>
-                    <div class="songs-grid" id="trending-grid">
-                        <!-- Trending tracks will be populated here -->
-                    </div>
-                </div>
-
-                <!-- Top Charts -->
-                <div class="music-section" id="charts-section">
-                    <div class="section-header">
-                        <h2><i class="fas fa-chart-line"></i> Top Charts</h2>
-                        <button class="view-all-btn" data-section="charts">View All</button>
-                    </div>
-                    <div class="songs-grid" id="charts-grid">
-                        <!-- Chart tracks will be populated here -->
-                    </div>
-                </div>
-
-                <!-- New Releases -->
-                <div class="music-section" id="releases-section">
-                    <div class="section-header">
-                        <h2><i class="fas fa-star"></i> New Releases</h2>
-                        <button class="view-all-btn" data-section="releases">View All</button>
-                    </div>
-                    <div class="songs-grid" id="releases-grid">
-                        <!-- New releases will be populated here -->
-                    </div>
-                </div>
-
-                <!-- Search Results / All Music -->
-                <div class="music-section" id="main-section">
-                    <div class="section-header">
-                        <h2 id="main-section-title"><i class="fas fa-music"></i> All Music</h2>
-                        <div class="section-meta">
-                            <span id="results-count">Loading...</span>
+            <div class="hero-content">
+                <div class="hero-text">
+                    <h1 class="hero-title">
+                        <span class="gradient-text">Music Discovery Hub</span>
+                        <span class="year-badge">2025</span>
+                    </h1>
+                    <p class="hero-subtitle">Discover trending music, real-time charts, and immersive experiences</p>
+                    <div class="hero-stats">
+                        <div class="stat-item">
+                            <div class="stat-number" id="total-tracks">0</div>
+                            <div class="stat-label">Tracks Discovered</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-number" id="active-listeners">0</div>
+                            <div class="stat-label">Active Listeners</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-number" id="genres-explored">0</div>
+                            <div class="stat-label">Genres Available</div>
                         </div>
                     </div>
-                    <div class="songs-grid" id="music-grid">
-                        <!-- Music cards will be injected here by JS -->
+                </div>
+                <div class="hero-visual">
+                    <div class="floating-album">
+                        <img id="hero-album-art" src="assets/default.svg" alt="Featured Album">
+                        <div class="vinyl-effect"></div>
                     </div>
-                    <div class="load-more-container" style="display: none;">
-                        <button id="load-more-btn" class="load-more-btn">
-                            <i class="fas fa-plus-circle"></i> Load More
-                        </button>
+                </div>
+            </div>
+            
+            <!-- Hero Search -->
+            <div class="hero-search">
+                <div class="search-container">
+                    <i class="fas fa-search search-icon"></i>
+                    <input type="text" id="global-search" placeholder="Search artists, tracks, albums... Discover your next favorite song">
+                    <div class="search-suggestions" id="search-suggestions"></div>
+                    <button class="voice-search-btn" id="voice-search" title="Voice Search">
+                        <i class="fas fa-microphone"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <div class="container">
+            
+            <!-- Quick Access Dashboard -->
+            <section class="dashboard-section">
+                <div class="dashboard-grid">
+                    <div class="dashboard-card trending-card">
+                        <div class="card-header">
+                            <h3><i class="fas fa-fire"></i> Trending Now</h3>
+                            <span class="live-indicator">LIVE</span>
+                        </div>
+                        <div class="trending-tracks" id="trending-tracks">
+                            <!-- Populated by JS -->
+                        </div>
+                    </div>
+                    
+                    <div class="dashboard-card charts-card">
+                        <div class="card-header">
+                            <h3><i class="fas fa-chart-line"></i> Global Charts</h3>
+                            <select id="chart-region" class="region-selector">
+                                <option value="global">Global</option>
+                                <option value="us">United States</option>
+                                <option value="uk">United Kingdom</option>
+                                <option value="de">Germany</option>
+                                <option value="ke">Kenya</option>
+                            </select>
+                        </div>
+                        <div class="chart-tracks" id="chart-tracks">
+                            <!-- Populated by JS -->
+                        </div>
+                    </div>
+                    
+                    <div class="dashboard-card discover-card">
+                        <div class="card-header">
+                            <h3><i class="fas fa-compass"></i> Discover</h3>
+                            <button class="refresh-btn" id="refresh-discover">
+                                <i class="fas fa-sync-alt"></i>
+                            </button>
+                        </div>
+                        <div class="discover-content" id="discover-content">
+                            <!-- Populated by JS -->
+                        </div>
                     </div>
                 </div>
             </section>
 
-            <!-- Loading and Error States -->
-            <div id="loading-indicator" class="loading-indicator" style="display: none;">
-                <div class="loading-spinner"></div>
-                <p>Loading amazing music...</p>
-            </div>
-            <div id="error-message" class="error-message" style="display: none;">
-                <i class="fas fa-exclamation-triangle"></i>
-                <h3>Could not load music</h3>
-                <p>Please check your connection and try again.</p>
-                <button id="retry-btn" class="retry-btn">
-                    <i class="fas fa-redo"></i> Try Again
-                </button>
-            </div>
+            <!-- Genre Explorer -->
+            <section class="genre-section">
+                <div class="section-header">
+                    <h2><i class="fas fa-music"></i> Explore Genres</h2>
+                    <div class="genre-filters">
+                        <button class="filter-btn active" data-filter="all">All</button>
+                        <button class="filter-btn" data-filter="popular">Popular</button>
+                        <button class="filter-btn" data-filter="emerging">Emerging</button>
+                    </div>
+                </div>
+                <div class="genre-grid" id="genre-grid">
+                    <!-- Populated by JS -->
+                </div>
+            </section>
+
+            <!-- Music Player Section -->
+            <section class="player-section">
+                <div class="section-header">
+                    <h2><i class="fas fa-play-circle"></i> Now Playing</h2>
+                    <div class="player-controls-header">
+                        <button class="header-control" id="queue-toggle">
+                            <i class="fas fa-list"></i> Queue
+                        </button>
+                        <button class="header-control" id="lyrics-toggle">
+                            <i class="fas fa-quote-right"></i> Lyrics
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="music-player-container">
+                    <div class="player-main">
+                        <div class="album-art-section">
+                            <div class="album-art-container">
+                                <img id="current-album-art" src="assets/default.svg" alt="Album Art">
+                                <div class="vinyl-animation"></div>
+                                <div class="audio-visualizer" id="audio-visualizer">
+                                    <div class="visualizer-bars">
+                                        <div class="bar"></div>
+                                        <div class="bar"></div>
+                                        <div class="bar"></div>
+                                        <div class="bar"></div>
+                                        <div class="bar"></div>
+                                        <div class="bar"></div>
+                                        <div class="bar"></div>
+                                        <div class="bar"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="player-info">
+                            <div class="track-info">
+                                <h3 id="current-track-title">Select a track to start listening</h3>
+                                <p id="current-artist-name">Discover amazing music</p>
+                                <div class="track-meta">
+                                    <span id="current-album-name"></span>
+                                    <span id="current-year"></span>
+                                </div>
+                            </div>
+                            
+                            <div class="player-controls">
+                                <div class="control-row-1">
+                                    <button class="control-btn" id="shuffle-btn" title="Shuffle">
+                                        <i class="fas fa-random"></i>
+                                    </button>
+                                    <button class="control-btn" id="prev-btn" title="Previous">
+                                        <i class="fas fa-step-backward"></i>
+                                    </button>
+                                    <button class="play-pause-btn" id="play-pause-btn" title="Play/Pause">
+                                        <i class="fas fa-play"></i>
+                                    </button>
+                                    <button class="control-btn" id="next-btn" title="Next">
+                                        <i class="fas fa-step-forward"></i>
+                                    </button>
+                                    <button class="control-btn" id="repeat-btn" title="Repeat">
+                                        <i class="fas fa-redo"></i>
+                                    </button>
+                                </div>
+                                
+                                <div class="progress-section">
+                                    <span class="time-display" id="current-time">0:00</span>
+                                    <div class="progress-container">
+                                        <input type="range" id="progress-bar" class="progress-bar" value="0" min="0" max="100">
+                                    </div>
+                                    <span class="time-display" id="total-time">0:00</span>
+                                </div>
+                                
+                                <div class="control-row-2">
+                                    <button class="control-btn" id="favorite-btn" title="Add to Favorites">
+                                        <i class="far fa-heart"></i>
+                                    </button>
+                                    <button class="control-btn" id="share-btn" title="Share">
+                                        <i class="fas fa-share-alt"></i>
+                                    </button>
+                                    <div class="volume-control">
+                                        <button class="control-btn" id="volume-btn" title="Volume">
+                                            <i class="fas fa-volume-up"></i>
+                                        </button>
+                                        <input type="range" id="volume-slider" class="volume-slider" value="50" min="0" max="100">
+                                    </div>
+                                    <button class="control-btn" id="fullscreen-btn" title="Fullscreen Player">
+                                        <i class="fas fa-expand"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Queue Panel -->
+                    <div class="queue-panel" id="queue-panel">
+                        <div class="queue-header">
+                            <h4>Play Queue</h4>
+                            <button class="clear-queue-btn" id="clear-queue">Clear</button>
+                        </div>
+                        <div class="queue-list" id="queue-list">
+                            <!-- Populated by JS -->
+                        </div>
+                    </div>
+                    
+                    <!-- Lyrics Panel -->
+                    <div class="lyrics-panel" id="lyrics-panel">
+                        <div class="lyrics-header">
+                            <h4>Lyrics</h4>
+                            <button class="lyrics-close-btn" id="lyrics-close">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                        <div class="lyrics-content" id="lyrics-content">
+                            <p>Select a track to view lyrics</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <audio id="audio-element" preload="metadata"></audio>
+            </section>
+
+            <!-- Music Grid -->
+            <section class="music-grid-section">
+                <div class="section-header">
+                    <h2><i class="fas fa-th-large"></i> Music Library</h2>
+                    <div class="view-options">
+                        <button class="view-btn active" data-view="grid">
+                            <i class="fas fa-th"></i>
+                        </button>
+                        <button class="view-btn" data-view="list">
+                            <i class="fas fa-list"></i>
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="filter-tabs">
+                    <button class="tab-btn active" data-category="all">All Music</button>
+                    <button class="tab-btn" data-category="new-releases">New Releases</button>
+                    <button class="tab-btn" data-category="top-tracks">Top Tracks</button>
+                    <button class="tab-btn" data-category="favorites">My Favorites</button>
+                </div>
+                
+                <div class="music-grid" id="music-grid">
+                    <!-- Populated by JS -->
+                </div>
+                
+                <div class="load-more-section">
+                    <button class="load-more-btn" id="load-more-btn">
+                        <i class="fas fa-plus-circle"></i> Load More Music
+                    </button>
+                </div>
+            </section>
+
+            <!-- Artist Spotlight -->
+            <section class="artist-section">
+                <div class="section-header">
+                    <h2><i class="fas fa-star"></i> Artist Spotlight</h2>
+                    <button class="refresh-btn" id="refresh-artists">
+                        <i class="fas fa-sync-alt"></i> Refresh
+                    </button>
+                </div>
+                <div class="artist-carousel" id="artist-carousel">
+                    <!-- Populated by JS -->
+                </div>
+            </section>
+
         </div>
     </main>
-
-    <!-- Audio Player -->
-    <div id="audio-player-container" class="audio-player-container">
-        <div class="audio-player">
-            <div class="track-info">
-                <img id="player-artwork" src="assets/default.svg" alt="Album art" class="track-artwork">
-                <div class="track-details">
-                    <p id="player-track-title">Select a song</p>
-                    <p id="player-artist-name">...</p>
-                </div>
-                <button id="favorite-btn" class="favorite-btn" title="Add to favorites">
-                    <i class="far fa-heart"></i>
-                </button>
-            </div>
-            <div class="player-main">
-                <div class="player-controls">
-                    <button id="player-shuffle-btn" class="control-btn" title="Shuffle">
-                        <i class="fas fa-random"></i>
-                    </button>
-                    <button id="player-prev-btn" class="control-btn">
-                        <i class="fas fa-step-backward"></i>
-                    </button>
-                    <button id="player-play-pause-btn" class="play-pause-btn">
-                        <i class="fas fa-play"></i>
-                    </button>
-                    <button id="player-next-btn" class="control-btn">
-                        <i class="fas fa-step-forward"></i>
-                    </button>
-                    <button id="player-repeat-btn" class="control-btn" title="Repeat">
-                        <i class="fas fa-redo"></i>
-                    </button>
-                </div>
-                <div class="progress-container">
-                    <span id="current-time">0:00</span>
-                    <input type="range" id="progress-bar" value="0" min="0" max="100" class="progress-bar">
-                    <span id="total-duration">0:30</span>
-                </div>
-            </div>
-            <div class="player-extras">
-                <button id="queue-btn" class="extra-btn" title="Queue">
-                    <i class="fas fa-list"></i>
-                </button>
-                <div class="volume-control">
-                    <button id="volume-btn" class="extra-btn" title="Volume">
-                        <i class="fas fa-volume-up"></i>
-                    </button>
-                    <input type="range" id="volume-bar" value="50" min="0" max="100" class="volume-bar">
-                </div>
-                <button id="fullscreen-btn" class="extra-btn" title="Minimize player">
-                    <i class="fas fa-compress"></i>
-                </button>
-            </div>
-            <audio id="audio-element"></audio>
-        </div>
-    </div>
-
-    <!-- Theme Selector Modal -->
-    <div id="theme-modal" class="theme-modal">
-        <div class="theme-modal-content">
-            <div class="theme-modal-header">
-                <h3>Choose Theme</h3>
-                <button class="theme-modal-close">
-                    <i class="fas fa-times"></i>
-                </button>
-            </div>
-            <div class="theme-grid">
-                <!-- Theme options are populated by js/themes.js -->
-            </div>
-        </div>
-    </div>
 
     <!-- Footer -->
     <footer class="footer">
@@ -409,9 +592,42 @@
         <div class="footer-glow"></div>
     </footer>
 
+    <!-- Theme Selector Modal -->
+    <div id="theme-modal" class="theme-modal">
+        <div class="theme-modal-content">
+            <div class="theme-modal-header">
+                <h3>Choose Theme</h3>
+                <button class="theme-modal-close">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="theme-grid">
+                <!-- Theme options are populated by js/themes.js -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading States -->
+    <div class="global-loader" id="global-loader">
+        <div class="loader-content">
+            <div class="music-note-loader">♪</div>
+            <p>Loading amazing music...</p>
+        </div>
+    </div>
+
+    <!-- Toast Notifications -->
+    <div class="toast-container" id="toast-container"></div>
+
     <!-- Scripts -->
     <script src="js/sidebar-navigation.js" defer></script>
     <script src="js/themes.js" defer></script>
-    <script src="js/music.js" defer></script>
+    <script src="js/music-hub-2025.js" defer></script>
+    
+    <!-- Service Worker for Offline Support -->
+    <script>
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('/sw.js').catch(console.error);
+        }
+    </script>
 </body>
 </html>
