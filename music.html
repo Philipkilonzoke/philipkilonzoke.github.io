@@ -293,13 +293,10 @@
             <!-- Music Player Section -->
             <section class="player-section">
                 <div class="section-header">
-                    <h2><i class="fas fa-play-circle"></i> Now Playing</h2>
+                    <h2><i class="fas fa-info-circle"></i> Track Information</h2>
                     <div class="player-controls-header">
-                        <button class="header-control" id="queue-toggle">
-                            <i class="fas fa-list"></i> Queue
-                        </button>
-                        <button class="header-control" id="lyrics-toggle">
-                            <i class="fas fa-quote-right"></i> Lyrics
+                        <button class="header-control" id="refresh-discover">
+                            <i class="fas fa-sync-alt"></i> Refresh
                         </button>
                     </div>
                 </div>
@@ -327,8 +324,8 @@
                         
                         <div class="player-info">
                             <div class="track-info">
-                                <h3 id="current-track-title">Select a track to start listening</h3>
-                                <p id="current-artist-name">Discover amazing music</p>
+                                <h3 id="current-track-title">Select a track to view details</h3>
+                                <p id="current-artist-name">Browse the music library below</p>
                                 <div class="track-meta">
                                     <span id="current-album-name"></span>
                                     <span id="current-year"></span>
@@ -336,79 +333,23 @@
                             </div>
                             
                             <div class="player-controls">
-                                <div class="control-row-1">
-                                    <button class="control-btn" id="shuffle-btn" title="Shuffle">
-                                        <i class="fas fa-random"></i>
-                                    </button>
-                                    <button class="control-btn" id="prev-btn" title="Previous">
-                                        <i class="fas fa-step-backward"></i>
-                                    </button>
-                                    <button class="play-pause-btn" id="play-pause-btn" title="Play/Pause">
-                                        <i class="fas fa-play"></i>
-                                    </button>
-                                    <button class="control-btn" id="next-btn" title="Next">
-                                        <i class="fas fa-step-forward"></i>
-                                    </button>
-                                    <button class="control-btn" id="repeat-btn" title="Repeat">
-                                        <i class="fas fa-redo"></i>
-                                    </button>
-                                </div>
-                                
-                                <div class="progress-section">
-                                    <span class="time-display" id="current-time">0:00</span>
-                                    <div class="progress-container">
-                                        <input type="range" id="progress-bar" class="progress-bar" value="0" min="0" max="100">
+                                <div class="info-display">
+                                    <p class="player-note">
+                                        <i class="fas fa-info-circle"></i>
+                                        Click on any track card below to view artist and track information
+                                    </p>
+                                    <div class="feature-highlights">
+                                        <span class="feature-tag">🎵 Real-time Charts</span>
+                                        <span class="feature-tag">🔍 Voice Search</span>
+                                        <span class="feature-tag">❤️ Favorites</span>
+                                        <span class="feature-tag">🌍 Global Music</span>
                                     </div>
-                                    <span class="time-display" id="total-time">0:00</span>
-                                </div>
-                                
-                                <div class="control-row-2">
-                                    <button class="control-btn" id="favorite-btn" title="Add to Favorites">
-                                        <i class="far fa-heart"></i>
-                                    </button>
-                                    <button class="control-btn" id="share-btn" title="Share">
-                                        <i class="fas fa-share-alt"></i>
-                                    </button>
-                                    <div class="volume-control">
-                                        <button class="control-btn" id="volume-btn" title="Volume">
-                                            <i class="fas fa-volume-up"></i>
-                                        </button>
-                                        <input type="range" id="volume-slider" class="volume-slider" value="50" min="0" max="100">
-                                    </div>
-                                    <button class="control-btn" id="fullscreen-btn" title="Fullscreen Player">
-                                        <i class="fas fa-expand"></i>
-                                    </button>
                                 </div>
                             </div>
                         </div>
                     </div>
                     
-                    <!-- Queue Panel -->
-                    <div class="queue-panel" id="queue-panel">
-                        <div class="queue-header">
-                            <h4>Play Queue</h4>
-                            <button class="clear-queue-btn" id="clear-queue">Clear</button>
-                        </div>
-                        <div class="queue-list" id="queue-list">
-                            <!-- Populated by JS -->
-                        </div>
-                    </div>
-                    
-                    <!-- Lyrics Panel -->
-                    <div class="lyrics-panel" id="lyrics-panel">
-                        <div class="lyrics-header">
-                            <h4>Lyrics</h4>
-                            <button class="lyrics-close-btn" id="lyrics-close">
-                                <i class="fas fa-times"></i>
-                            </button>
-                        </div>
-                        <div class="lyrics-content" id="lyrics-content">
-                            <p>Select a track to view lyrics</p>
-                        </div>
-                    </div>
                 </div>
-                
-                <audio id="audio-element" preload="metadata"></audio>
             </section>
 
             <!-- Music Grid -->
