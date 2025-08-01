@@ -36,7 +36,7 @@ class MusicPlayer {
         this.setupEventListeners();
         this.renderGenreTabs();
         // Load initial music
-        // this.fetchMusic('latest hits'); // Temporarily disabled for debugging
+        this.fetchMusic('latest hits');
     }
 
     setupEventListeners() {
