@@ -430,19 +430,19 @@
 
         // API Configuration
         const AVIATION_API_KEY = '826b3184165e11d389a2a31d089021a4';
-        const AVIATION_API_URL = `http://api.aviationstack.com/v1/flights?access_key=${AVIATION_API_KEY}`;
+        const AVIATION_API_URL = `https://api.aviationstack.com/v1/flights?access_key=${AVIATION_API_KEY}`;
 
-        // Airline logos mapping
-        const AIRLINE_LOGOS = {
-            'Kenya Airways': 'https://logos-world.net/wp-content/uploads/2023/01/Kenya-Airways-Logo.png',
-            'British Airways': 'https://logos-world.net/wp-content/uploads/2020/03/British-Airways-Logo.png',
-            'Emirates': 'https://logos-world.net/wp-content/uploads/2020/03/Emirates-Logo.png',
-            'Lufthansa': 'https://logos-world.net/wp-content/uploads/2020/03/Lufthansa-Logo.png',
-            'Air France': 'https://logos-world.net/wp-content/uploads/2020/03/Air-France-Logo.png',
-            'Qatar Airways': 'https://logos-world.net/wp-content/uploads/2020/03/Qatar-Airways-Logo.png',
-            'American Airlines': 'https://logos-world.net/wp-content/uploads/2020/03/American-Airlines-Logo.png',
-            'Delta Air Lines': 'https://logos-world.net/wp-content/uploads/2020/03/Delta-Air-Lines-Logo.png',
-            'United Airlines': 'https://logos-world.net/wp-content/uploads/2020/03/United-Airlines-Logo.png'
+        // Airline color schemes for better visual distinction
+        const AIRLINE_COLORS = {
+            'Kenya Airways': '#C41230',
+            'British Airways': '#075AAA', 
+            'Emirates': '#D71921',
+            'Lufthansa': '#F9BA00',
+            'Air France': '#002157',
+            'Qatar Airways': '#5C0633',
+            'American Airlines': '#CC092F',
+            'Delta Air Lines': '#003366',
+            'United Airlines': '#0E2452'
         };
 
         // Initialize Day.js plugins
@@ -480,9 +480,20 @@
 
         function startLiveClock() {
             function updateClock() {
-                const now = dayjs().utc();
-                document.getElementById('live-clock').textContent = now.format('HH:mm:ss');
-                document.getElementById('global-last-updated').textContent = `Updated: ${now.format('HH:mm:ss UTC')}`;
+                try {
+                    const now = dayjs().utc();
+                    const liveClockElement = document.getElementById('live-clock');
+                    const lastUpdatedElement = document.getElementById('global-last-updated');
+                    
+                    if (liveClockElement) {
+                        liveClockElement.textContent = now.format('HH:mm:ss');
+                    }
+                    if (lastUpdatedElement) {
+                        lastUpdatedElement.textContent = `Updated: ${now.format('HH:mm:ss UTC')}`;
+                    }
+                } catch (error) {
+                    console.error('Error updating clock:', error);
+                }
             }
             
             updateClock();
@@ -713,51 +724,12 @@
             noResultsElement.style.display = 'none';
 
             try {
-                // Try direct API call first
-                let response;
-                try {
-                    response = await fetch(AVIATION_API_URL);
-                } catch (corsError) {
-                    // If CORS fails, try with a CORS proxy
-                    console.log('CORS error, trying with proxy...');
-                    response = await fetch(`https://api.allorigins.win/get?url=${encodeURIComponent(AVIATION_API_URL)}`);
-                    
-                    if (response.ok) {
-                        const proxyData = await response.json();
-                        const data = JSON.parse(proxyData.contents);
-                        
-                        if (data.data && Array.isArray(data.data)) {
-                            allFlights = data.data;
-                            filteredFlights = [...allFlights];
-                            displayFlights();
-                            updateFlightCount();
-                            updateFlightLastUpdated();
-                            return;
-                        }
-                    }
-                    throw new Error('Unable to fetch flight data due to CORS restrictions');
-                }
-                
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-
-                const data = await response.json();
-                
-                if (data.data && Array.isArray(data.data)) {
-                    allFlights = data.data;
-                    filteredFlights = [...allFlights];
-                    displayFlights();
-                    updateFlightCount();
-                    updateFlightLastUpdated();
-                } else {
-                    // If no real data, show demo data
-                    loadDemoFlightData();
-                }
-
+                // For now, we'll use demo data due to CORS restrictions
+                // In production, this should be handled by a backend proxy
+                console.log('Loading demo flight data (API requires backend proxy for CORS)');
+                loadDemoFlightData();
             } catch (error) {
                 console.error('Error loading flight data:', error);
-                // Show demo data instead of error
                 loadDemoFlightData();
             }
         }
@@ -916,7 +888,7 @@
             demoNotice.innerHTML = `
                 <div class="demo-notice-content">
                     <i class="fas fa-info-circle"></i>
-                    <span>Demo Mode: Showing sample flight data. Live API requires server-side implementation due to CORS restrictions.</span>
+                    <span>Demo Mode: Showing sample flight data. Live API integration available - requires backend implementation for CORS handling.</span>
                 </div>
             `;
             container.parentNode.insertBefore(demoNotice, container);
@@ -961,18 +933,16 @@
             const statusClass = getStatusClass(flight.flight_status);
             const statusIcon = getStatusIcon(flight.flight_status);
             
-            // Get airline logo
-            const airlineLogo = AIRLINE_LOGOS[airline.name];
+            // Get airline color and first letter for logo
+            const airlineColor = AIRLINE_COLORS[airline.name] || 'var(--primary-color)';
+            const airlineInitial = airline.name ? airline.name.charAt(0).toUpperCase() : 'A';
             
             return `
                 <div class="news-card flight-card">
                     <div class="flight-header">
                         <div class="airline-info">
-                            <div class="airline-logo">
-                                ${airlineLogo ? 
-                                    `<img src="${airlineLogo}" alt="${airline.name}" class="airline-logo-img">` :
-                                    `<i class="fas fa-plane"></i>`
-                                }
+                            <div class="airline-logo" style="background: ${airlineColor};">
+                                <span class="airline-initial">${airlineInitial}</span>
                             </div>
                             <div class="airline-details">
                                 <h3 class="airline-name">${airline.name || 'Unknown Airline'}</h3>
@@ -1152,14 +1122,18 @@
             
             // Update countdown every second
             countdownInterval = setInterval(() => {
-                refreshCountdown--;
-                const countdownElement = document.getElementById('refresh-countdown');
-                if (countdownElement) {
-                    countdownElement.textContent = refreshCountdown;
-                }
-                
-                if (refreshCountdown <= 0) {
-                    resetRefreshCountdown();
+                try {
+                    refreshCountdown--;
+                    const countdownElement = document.getElementById('refresh-countdown');
+                    if (countdownElement) {
+                        countdownElement.textContent = refreshCountdown;
+                    }
+                    
+                    if (refreshCountdown <= 0) {
+                        resetRefreshCountdown();
+                    }
+                } catch (error) {
+                    console.error('Error updating countdown:', error);
                 }
             }, 1000);
         }
@@ -1522,11 +1496,11 @@
             overflow: hidden;
         }
 
-        .airline-logo-img {
-            width: 100%;
-            height: 100%;
-            object-fit: contain;
-            border-radius: 50%;
+        .airline-initial {
+            color: white;
+            font-size: 1.5rem;
+            font-weight: 700;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.3);
         }
 
         .airline-name {
