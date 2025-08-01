@@ -5,6 +5,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Brightlens News - Your Gateway to Global Headlines</title>
     
+    <!-- PWA Meta Tags -->
+    <link rel="manifest" href="/manifest.json" />
+    <meta name="theme-color" content="#1e1e1e" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="Brightlens News" />
+    <link rel="apple-touch-icon" href="/assets/icon-192.svg" />
+    
     <!-- SEO Meta Tags -->
     <meta name="description" content="Welcome to Brightlens News - Your trusted gateway to global headlines. Stay updated with breaking news from multiple reliable sources worldwide.">
     <meta name="keywords" content="news, breaking news, Kenya news, world news, technology, business, sports, entertainment, Brightlens, homepage">
@@ -44,6 +52,21 @@
 
     <!-- Sidebar Navigation Script -->
     <script src="js/sidebar-navigation.js" defer></script>
+    
+    <!-- Service Worker Registration -->
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('/service-worker.js')
+            .then(registration => {
+              console.log('SW registered: ', registration);
+            })
+            .catch(registrationError => {
+              console.log('SW registration failed: ', registrationError);
+            });
+        });
+      }
+    </script>
     <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
     <noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"></noscript>
     <link rel="preconnect" href="https://fonts.googleapis.com">

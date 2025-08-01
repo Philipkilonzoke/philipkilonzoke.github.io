@@ -5,6 +5,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Movies & Series - Brightlens News</title>
     
+    <!-- PWA Meta Tags -->
+    <link rel="manifest" href="/manifest.json" />
+    <meta name="theme-color" content="#1e1e1e" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="Brightlens News" />
+    <link rel="apple-touch-icon" href="/assets/icon-192.svg" />
+    
     <!-- SEO Meta Tags -->
     <meta name="description" content="Discover trending movies, TV series, and entertainment content with IMDB ratings, reviews, and detailed information.">
     <meta name="keywords" content="movies, series, TV shows, IMDB, ratings, entertainment, trending, popular, upcoming, Brightlens">
@@ -715,5 +723,20 @@
     <script src="js/theme-toggle.js"></script>
     <script src="js/sidebar-navigation.js"></script>
     <script src="js/movies-series.js"></script>
+    
+    <!-- Service Worker Registration -->
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('/service-worker.js')
+            .then(registration => {
+              console.log('SW registered: ', registration);
+            })
+            .catch(registrationError => {
+              console.log('SW registration failed: ', registrationError);
+            });
+        });
+      }
+    </script>
 </body>
 </html>
