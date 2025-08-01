@@ -7,7 +7,7 @@
 class MediastackSupplement {
     constructor() {
         this.apiKey = 'ea4397f277b123655ad1929cd58d41a5';
-        this.baseUrl = 'http://api.mediastack.com/v1/news';
+        this.baseUrl = 'https://api.mediastack.com/v1/news';
         this.cache = new Map();
         this.cacheTimeout = 10 * 60 * 1000; // 10 minutes cache
     }

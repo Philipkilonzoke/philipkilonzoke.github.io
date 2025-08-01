@@ -622,7 +622,7 @@ class NewsAPI {
      */
     async fetchFromMediastack(category, limit) {
         try {
-            let url = `http://api.mediastack.com/v1/news?access_key=${this.apiKeys.mediastack}&languages=en&limit=${Math.min(limit, 25)}`;
+            let url = `https://api.mediastack.com/v1/news?access_key=${this.apiKeys.mediastack}&languages=en&limit=${Math.min(limit, 25)}`;
             
             if (category === 'kenya') {
                 url += '&countries=ke';
