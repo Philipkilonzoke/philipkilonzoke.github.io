@@ -1103,16 +1103,28 @@
             }
             
             async init() {
-                await this.loadCryptoData();
-                this.setupEventListeners();
-                this.startAutoRefresh();
-                this.initChart();
+                try {
+                    await this.loadCryptoData();
+                    this.setupEventListeners();
+                    this.startAutoRefresh();
+                    this.initChart();
+                } catch (error) {
+                    console.error('Error initializing crypto market:', error);
+                    // Ensure loading screen is hidden even on error
+                    this.hideLoadingScreen();
+                }
             }
             
             async loadCryptoData() {
                 try {
                     const symbols = this.coins.join(',');
-                    const response = await fetch(`${this.baseUrl}?access_key=${this.apiKey}&symbols=${symbols}`);
+                    const controller = new AbortController();
+                    const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
+                    
+                    const response = await fetch(`${this.baseUrl}?access_key=${this.apiKey}&symbols=${symbols}`, {
+                        signal: controller.signal
+                    });
+                    clearTimeout(timeoutId);
                     const data = await response.json();
                     
                     if (data.success) {
@@ -1134,14 +1146,17 @@
                         this.filteredData = [...this.coinData];
                         this.renderCryptoCards();
                         this.updateLastUpdated();
+                        // Hide loading screen on success
+                        this.hideLoadingScreen();
                     } else {
                         throw new Error(data.error?.info || 'API request failed');
                     }
                 } catch (error) {
                     console.error('Error loading crypto data:', error);
-                    this.showErrorMessage();
                     // Load mock data as fallback
                     this.loadMockData();
+                    // Hide loading screen after fallback
+                    this.hideLoadingScreen();
                 }
             }
             
@@ -1167,6 +1182,9 @@
                 this.filteredData = [...this.coinData];
                 this.renderCryptoCards();
                 this.updateLastUpdated();
+                
+                // Show a notification that we're using demo data
+                this.showNotification('Using demo data - API connection unavailable', 'info');
             }
             
             renderCryptoCards() {
@@ -1644,6 +1662,16 @@
                 this.chart.update();
             }
             
+            hideLoadingScreen() {
+                const loadingScreen = document.getElementById('loading-screen');
+                if (loadingScreen) {
+                    loadingScreen.classList.add('hidden');
+                    setTimeout(() => {
+                        loadingScreen.style.display = 'none';
+                    }, 300);
+                }
+            }
+            
             showErrorMessage() {
                 const grid = document.getElementById('crypto-grid');
                 if (grid) {
@@ -1655,6 +1683,8 @@
                         </div>
                     `;
                 }
+                // Hide loading screen when showing error
+                this.hideLoadingScreen();
             }
         }
         
@@ -1866,6 +1896,31 @@
             color: #3b82f6;
         }
         
+        .error-message {
+            text-align: center;
+            padding: 3rem 2rem;
+            background: #fef2f2;
+            border: 1px solid #fecaca;
+            border-radius: 12px;
+            color: #991b1b;
+        }
+        
+        .error-message i {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            color: #dc2626;
+        }
+        
+        .error-message h3 {
+            margin-bottom: 1rem;
+            color: #991b1b;
+        }
+        
+        .error-message p {
+            color: #7f1d1d;
+            line-height: 1.6;
+        }
+        
         // Global functions for onclick handlers
         function showCoinDetails(symbol) {
             const coin = window.cryptoMarket?.coinData.find(c => c.symbol === symbol);
@@ -1971,19 +2026,19 @@
         
         // Initialize crypto market when DOM is loaded
         document.addEventListener('DOMContentLoaded', function() {
-            // Hide loading screen properly
+            // Initialize crypto market
+            window.cryptoMarket = new CryptoMarket();
+            
+            // Fallback: Hide loading screen after 3 seconds maximum
             setTimeout(() => {
                 const loadingScreen = document.getElementById('loading-screen');
-                if (loadingScreen) {
+                if (loadingScreen && loadingScreen.style.display !== 'none') {
                     loadingScreen.classList.add('hidden');
                     setTimeout(() => {
                         loadingScreen.style.display = 'none';
                     }, 300);
                 }
-            }, 1000);
-            
-            // Initialize crypto market
-            window.cryptoMarket = new CryptoMarket();
+            }, 3000);
         });
     </script>
 </body>
