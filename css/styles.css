@@ -521,7 +521,7 @@ body {
 }
 
 .news-title {
-    font-size: 1.125rem;
+    font-size: 1.375rem;
     font-weight: 600;
     line-height: 1.4;
     margin-bottom: 0.75rem;
@@ -534,7 +534,7 @@ body {
 
 .news-description {
     color: var(--text-color);
-    font-size: 1rem;
+    font-size: 1.125rem;
     line-height: 1.6;
     margin-bottom: 1rem;
     display: -webkit-box;
@@ -1312,11 +1312,11 @@ body {
     }
     
     .news-title {
-        font-size: 1rem;
+        font-size: 1.125rem;
     }
     
     .news-description {
-        font-size: 0.9375rem;
+        font-size: 1rem;
     }
     
     .theme-modal-content {
