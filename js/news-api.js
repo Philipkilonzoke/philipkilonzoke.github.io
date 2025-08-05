@@ -1489,7 +1489,8 @@ class NewsAPI {
             );
         } catch (error) {
             console.error('Original Technology news fetch error:', error);
-            return this.getSampleArticles('technology', 'Enhanced Technology News');
+            // Return empty array - only real-time news should be displayed
+            return [];
         }
     }
 
@@ -1572,8 +1573,8 @@ class NewsAPI {
      * Get sample articles for fallback when APIs fail
      */
     getSampleArticles(category, source = 'News API') {
-        // Return empty arrays for Kenya, sports, and health categories to ensure only real-time news
-        if (category === 'kenya' || category === 'sports' || category === 'health') {
+        // Return empty arrays for Kenya, sports, health, and technology categories to ensure only real-time news
+        if (category === 'kenya' || category === 'sports' || category === 'health' || category === 'technology') {
             return [];
         }
 
@@ -1733,26 +1734,7 @@ class NewsAPI {
                     category: "entertainment"
                 }
             ],
-            technology: [
-                {
-                    title: "AI Breakthrough in Medical Diagnosis Accuracy",
-                    description: "Researchers at Stanford University and Google DeepMind have developed a revolutionary artificial intelligence system that achieves 95% accuracy in early disease detection, surpassing human specialists in identifying over 50 different medical conditions. The AI system, trained on millions of medical images and patient records, can detect early-stage cancers, cardiovascular diseases, and neurological disorders with unprecedented precision. Clinical trials conducted across 15 hospitals showed the AI correctly identified diseases an average of 18 months earlier than traditional diagnostic methods. The technology integrates advanced machine learning algorithms with medical imaging, genetic analysis, and electronic health records to provide comprehensive diagnostic insights. Medical professionals praise the system's potential to revolutionize healthcare delivery, particularly in underserved regions where specialist access is limited, potentially saving millions of lives through early intervention.",
-                    url: "https://example.com/ai-medical",
-                    urlToImage: "https://images.unsplash.com/photo-1559757148-5c350d0d3c56?w=400",
-                    publishedAt: new Date().toISOString(),
-                    source: source,
-                    category: "technology"
-                },
-                {
-                    title: "Electric Vehicle Market Reaches New Milestone",
-                    description: "Global electric vehicle sales have exceeded 15 million units this year, marking a historic milestone as the industry surpasses all previous adoption forecasts. Revolutionary advances in battery technology, including solid-state batteries with 1000-mile range capabilities, have addressed consumer concerns about range anxiety and charging infrastructure. Major automakers including Tesla, BMW, and BYD report production backlogs extending into 2026, while new players like Rivian and Lucid Motors are capturing significant market share. Government incentives and environmental regulations have accelerated adoption, with Norway achieving 90% EV market share and China leading in absolute numbers with over 6 million EVs sold. The breakthrough in fast-charging technology, enabling 80% charge in under 10 minutes, combined with expanding charging networks, has made EVs increasingly practical for mainstream consumers. Industry analysts project EVs will represent 50% of all vehicle sales by 2027.",
-                    url: "https://example.com/ev-milestone",
-                    urlToImage: "https://images.unsplash.com/photo-1593941707882-a5bac6861d75?w=400",
-                    publishedAt: new Date(Date.now() - 3600000).toISOString(),
-                    source: source,
-                    category: "technology"
-                }
-            ],
+            technology: [],
             business: [
                 {
                     title: "Global Supply Chain Resilience Improves",
@@ -1869,17 +1851,7 @@ class NewsAPI {
                     category: "entertainment"
                 }
             ],
-            technology: [
-                {
-                    title: "Quantum Internet Prototype Successfully Tested",
-                    description: "Scientists achieve secure quantum communication over 1000km, marking major milestone in quantum computing.",
-                    url: "https://example.com/quantum-internet",
-                    urlToImage: "https://images.unsplash.com/photo-1518709268805-4e9042af2176?w=400",
-                    publishedAt: new Date(Date.now() - timeOffsets[2]).toISOString(),
-                    source: source,
-                    category: "technology"
-                }
-            ],
+            technology: [],
             business: [
                 {
                     title: "Green Finance Initiatives Gain Momentum Among Banks",
