@@ -590,13 +590,24 @@
             noResultsElement.style.display = 'none';
 
             try {
-                // For now, we'll use demo data due to CORS restrictions
-                // In production, this should be handled by a backend proxy
-                console.log('Loading demo flight data (API requires backend proxy for CORS)');
-                loadDemoFlightData();
+                // Try to fetch real aviation data from multiple sources
+                const realData = await fetchRealAviationData();
+                if (realData && realData.length > 0) {
+                    allFlights = realData;
+                    filteredFlights = [...allFlights];
+                    displayFlights();
+                    updateFlightCount();
+                    updateFlightLastUpdated();
+                    loadingElement.style.display = 'none';
+                    console.log('Loaded real aviation data:', realData.length, 'flights');
+                } else {
+                    throw new Error('No real data available');
+                }
             } catch (error) {
-                console.error('Error loading flight data:', error);
+                console.error('Error loading real flight data:', error);
+                // Fallback to demo data with clear indication
                 loadDemoFlightData();
+                showDemoDataNotice();
             }
         }
 
