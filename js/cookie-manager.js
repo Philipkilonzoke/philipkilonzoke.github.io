@@ -1,6 +1,7 @@
 /**
- * Advanced Cookie Management System for Brightlens News
- * Handles theme preferences, welcome messages, and recently viewed articles
+ * Simplified Cookie Management System for Brightlens News
+ * Handles welcome messages and recently viewed articles
+ * Theme persistence removed to avoid conflicts
  */
 
 class CookieManager {
@@ -13,7 +14,6 @@ class CookieManager {
      */
     init() {
         this.setupWelcomeMessage();
-        this.setupThemePersistence();
         this.setupRecentArticlesDisplay();
         this.setupArticleTracking();
     }
@@ -77,7 +77,7 @@ class CookieManager {
             // Show welcome message after a short delay
             setTimeout(() => {
                 this.showWelcomeMessage();
-            }, 1000);
+            }, 1500); // Increased delay to avoid conflicts
         }
     }
 
@@ -85,6 +85,11 @@ class CookieManager {
      * Display welcome message popup
      */
     showWelcomeMessage() {
+        // Check if already exists to avoid duplicates
+        if (document.querySelector('.welcome-popup')) {
+            return;
+        }
+
         // Create welcome popup
         const welcomePopup = document.createElement('div');
         welcomePopup.className = 'welcome-popup';
@@ -102,7 +107,7 @@ class CookieManager {
 
         // Add styles
         const styles = `
-            <style>
+            <style id="welcome-styles">
                 .welcome-popup {
                     position: fixed;
                     top: 0;
@@ -118,14 +123,14 @@ class CookieManager {
                 }
                 
                 .welcome-content {
-                    background: var(--surface-color);
+                    background: var(--surface-color, #f8fafc);
                     padding: 2rem;
                     border-radius: 1rem;
                     max-width: 400px;
                     width: 90%;
                     text-align: center;
-                    box-shadow: var(--shadow-lg);
-                    border: 1px solid var(--border-color);
+                    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+                    border: 1px solid var(--border-color, #e2e8f0);
                     animation: slideIn 0.3s ease;
                 }
                 
@@ -137,7 +142,7 @@ class CookieManager {
                 }
                 
                 .welcome-header h3 {
-                    color: var(--text-color);
+                    color: var(--text-color, #1e293b);
                     margin: 0;
                     font-size: 1.25rem;
                     font-weight: 600;
@@ -152,7 +157,7 @@ class CookieManager {
                     background: none;
                     border: none;
                     font-size: 1.5rem;
-                    color: var(--text-muted);
+                    color: var(--text-muted, #64748b);
                     cursor: pointer;
                     padding: 0;
                     width: 30px;
@@ -165,17 +170,17 @@ class CookieManager {
                 }
                 
                 .welcome-close:hover {
-                    background: var(--border-color);
+                    background: var(--border-color, #e2e8f0);
                 }
                 
                 .welcome-content p {
-                    color: var(--text-muted);
+                    color: var(--text-muted, #64748b);
                     margin-bottom: 1.5rem;
                     line-height: 1.5;
                 }
                 
                 .welcome-btn {
-                    background: var(--primary-color);
+                    background: var(--primary-color, #2563eb);
                     color: white;
                     border: none;
                     padding: 0.75rem 1.5rem;
@@ -186,7 +191,7 @@ class CookieManager {
                 }
                 
                 .welcome-btn:hover {
-                    background: var(--secondary-color);
+                    background: var(--secondary-color, #64748b);
                     transform: translateY(-1px);
                 }
                 
@@ -200,6 +205,11 @@ class CookieManager {
                     to { transform: translateY(0); opacity: 1; }
                 }
                 
+                @keyframes fadeOut {
+                    from { opacity: 1; }
+                    to { opacity: 0; }
+                }
+                
                 @media (max-width: 480px) {
                     .welcome-content {
                         padding: 1.5rem;
@@ -209,8 +219,10 @@ class CookieManager {
             </style>
         `;
 
-        // Add styles to head
-        document.head.insertAdjacentHTML('beforeend', styles);
+        // Add styles to head if not already added
+        if (!document.querySelector('#welcome-styles')) {
+            document.head.insertAdjacentHTML('beforeend', styles);
+        }
         
         // Add popup to body
         document.body.appendChild(welcomePopup);
@@ -230,142 +242,6 @@ class CookieManager {
         
         // Set cookie to prevent showing again
         this.setCookie('welcomeShown', 'true');
-    }
-
-    /**
-     * Setup theme persistence using cookies instead of localStorage
-     */
-    setupThemePersistence() {
-        // Migrate localStorage theme to cookie if exists
-        const localStorageTheme = localStorage.getItem('brightlens-theme');
-        if (localStorageTheme && !this.getCookie('selectedTheme')) {
-            this.setCookie('selectedTheme', localStorageTheme);
-            localStorage.removeItem('brightlens-theme');
-        }
-
-        // Apply saved theme from cookie immediately
-        const savedTheme = this.getCookie('selectedTheme') || 'default';
-        this.applyTheme(savedTheme);
-
-        // Override existing theme manager to use cookies
-        this.overrideExistingThemeManager();
-    }
-
-    /**
-     * Apply theme to document
-     * @param {string} theme - Theme name
-     */
-    applyTheme(theme) {
-        if (theme === 'default') {
-            document.documentElement.removeAttribute('data-theme');
-        } else {
-            document.documentElement.setAttribute('data-theme', theme);
-        }
-    }
-
-    /**
-     * Override existing theme manager to use cookies
-     */
-    overrideExistingThemeManager() {
-        // Wait for existing theme manager to load
-        const overrideWhenReady = () => {
-            if (window.themeManager) {
-                // Override the setTheme method
-                const originalSetTheme = window.themeManager.setTheme.bind(window.themeManager);
-                window.themeManager.setTheme = (theme, save = true) => {
-                    // Apply theme using original method
-                    originalSetTheme(theme, false); // Don't save to localStorage
-                    // Save to cookie instead
-                    if (save) {
-                        this.setCookie('selectedTheme', theme);
-                    }
-                };
-
-                // Override applySavedTheme to use cookies
-                window.themeManager.applySavedTheme = () => {
-                    const savedTheme = this.getCookie('selectedTheme') || 'default';
-                    window.themeManager.setTheme(savedTheme, false);
-                };
-            } else {
-                // If no existing theme manager, set up our own listeners
-                this.setupFallbackThemeListeners();
-            }
-        };
-
-        // Try immediately, then wait for DOM ready, then try again with delay
-        overrideWhenReady();
-        
-        if (document.readyState === 'loading') {
-            document.addEventListener('DOMContentLoaded', () => {
-                setTimeout(overrideWhenReady, 100);
-            });
-        } else {
-            setTimeout(overrideWhenReady, 100);
-        }
-    }
-
-    /**
-     * Fallback theme listeners if no existing theme manager
-     */
-    setupFallbackThemeListeners() {
-        const setupListeners = () => {
-            // Theme buttons in modal
-            const themeButtons = document.querySelectorAll('.theme-option');
-            themeButtons.forEach(button => {
-                button.addEventListener('click', (e) => {
-                    const theme = e.currentTarget.dataset.theme;
-                    if (theme) {
-                        this.setTheme(theme);
-                        // Close modal if it exists
-                        const modal = document.getElementById('theme-modal');
-                        if (modal) {
-                            modal.style.display = 'none';
-                        }
-                    }
-                });
-            });
-
-            // Theme toggle button
-            const themeToggle = document.getElementById('theme-toggle');
-            if (themeToggle) {
-                themeToggle.addEventListener('click', () => {
-                    // Check if it should open modal or toggle theme
-                    const modal = document.getElementById('theme-modal');
-                    if (modal) {
-                        modal.style.display = 'flex';
-                    } else {
-                        // Fallback to simple toggle
-                        const currentTheme = this.getCookie('selectedTheme') || 'default';
-                        const newTheme = currentTheme === 'default' ? 'dark' : 'default';
-                        this.setTheme(newTheme);
-                    }
-                });
-            }
-        };
-
-        if (document.readyState === 'loading') {
-            document.addEventListener('DOMContentLoaded', setupListeners);
-        } else {
-            setupListeners();
-        }
-    }
-
-    /**
-     * Set theme and save to cookie
-     * @param {string} theme - Theme name
-     */
-    setTheme(theme) {
-        this.applyTheme(theme);
-        this.setCookie('selectedTheme', theme);
-        
-        // Update active theme button
-        const themeButtons = document.querySelectorAll('.theme-option');
-        themeButtons.forEach(button => {
-            button.classList.remove('active');
-            if (button.dataset.theme === theme) {
-                button.classList.add('active');
-            }
-        });
     }
 
     /**
@@ -427,7 +303,7 @@ class CookieManager {
             title = linkElement.textContent.trim();
         }
 
-        return title ? title.substring(0, 100) : null; // Limit title length
+        return title ? title.substring(0, 80).trim() : null; // Limit title length
     }
 
     /**
@@ -435,8 +311,10 @@ class CookieManager {
      * @param {string} title - Article title
      */
     saveRecentArticle(title) {
-        if (title && title.length > 5) { // Only save meaningful titles
-            this.setCookie('recentArticle', title);
+        if (title && title.length > 10) { // Only save meaningful titles
+            // Clean up title
+            const cleanTitle = title.replace(/[\r\n\t]+/g, ' ').trim();
+            this.setCookie('recentArticle', cleanTitle);
         }
     }
 
@@ -444,8 +322,11 @@ class CookieManager {
      * Setup recent articles display on homepage
      */
     setupRecentArticlesDisplay() {
-        // Only show on homepage
-        if (window.location.pathname === '/' || window.location.pathname.includes('index.html')) {
+        // Only show on homepage - simplified detection
+        const path = window.location.pathname.toLowerCase();
+        const isHomepage = path === '/' || path.includes('index.html') || path === '';
+        
+        if (isHomepage) {
             const recentArticle = this.getCookie('recentArticle');
             if (recentArticle) {
                 this.displayRecentArticle(recentArticle);
@@ -460,6 +341,11 @@ class CookieManager {
     displayRecentArticle(title) {
         // Wait for page to load
         const displayBox = () => {
+            // Check if already exists
+            if (document.querySelector('.recent-article-box')) {
+                return;
+            }
+
             // Find a good place to insert the recent article box
             const heroSection = document.querySelector('.hero-section');
             const mainContent = document.querySelector('.main-content, main, .container');
@@ -483,15 +369,15 @@ class CookieManager {
 
             // Add styles for recent article box
             const styles = `
-                <style>
+                <style id="recent-article-styles">
                     .recent-article-box {
-                        background: var(--surface-color);
-                        border: 1px solid var(--border-color);
+                        background: var(--surface-color, #f8fafc);
+                        border: 1px solid var(--border-color, #e2e8f0);
                         border-radius: 0.75rem;
                         padding: 1rem;
                         margin: 1rem auto;
                         max-width: 600px;
-                        box-shadow: var(--shadow-sm);
+                        box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
                         animation: slideInUp 0.5s ease;
                     }
                     
@@ -508,7 +394,7 @@ class CookieManager {
                     
                     .recent-article-text {
                         flex: 1;
-                        color: var(--text-color);
+                        color: var(--text-color, #1e293b);
                         font-size: 0.9rem;
                         line-height: 1.4;
                     }
@@ -520,7 +406,7 @@ class CookieManager {
                     }
                     
                     .recent-article-title {
-                        color: var(--text-muted);
+                        color: var(--text-muted, #64748b);
                         font-style: italic;
                     }
                     
@@ -528,7 +414,7 @@ class CookieManager {
                         background: none;
                         border: none;
                         font-size: 1.25rem;
-                        color: var(--text-muted);
+                        color: var(--text-muted, #64748b);
                         cursor: pointer;
                         padding: 0;
                         width: 24px;
@@ -542,7 +428,7 @@ class CookieManager {
                     }
                     
                     .recent-article-close:hover {
-                        background: var(--border-color);
+                        background: var(--border-color, #e2e8f0);
                     }
                     
                     @keyframes slideInUp {
@@ -553,6 +439,17 @@ class CookieManager {
                         to { 
                             transform: translateY(0); 
                             opacity: 1; 
+                        }
+                    }
+                    
+                    @keyframes slideOutUp {
+                        from { 
+                            transform: translateY(0); 
+                            opacity: 1; 
+                        }
+                        to { 
+                            transform: translateY(-20px); 
+                            opacity: 0; 
                         }
                     }
                     
@@ -570,10 +467,7 @@ class CookieManager {
 
             // Add styles to head if not already added
             if (!document.querySelector('#recent-article-styles')) {
-                const styleElement = document.createElement('style');
-                styleElement.id = 'recent-article-styles';
-                styleElement.textContent = styles.replace(/<\/?style>/g, '');
-                document.head.appendChild(styleElement);
+                document.head.insertAdjacentHTML('beforeend', styles);
             }
 
             // Insert after hero section or at the beginning of main content
@@ -587,7 +481,7 @@ class CookieManager {
         if (document.readyState === 'loading') {
             document.addEventListener('DOMContentLoaded', displayBox);
         } else {
-            displayBox();
+            setTimeout(displayBox, 500); // Small delay to ensure page is ready
         }
     }
 
@@ -610,28 +504,3 @@ const cookieManager = new CookieManager();
 
 // Make it globally available
 window.cookieManager = cookieManager;
-
-// Add slideOutUp animation
-const additionalStyles = `
-    <style>
-        @keyframes slideOutUp {
-            from { 
-                transform: translateY(0); 
-                opacity: 1; 
-            }
-            to { 
-                transform: translateY(-20px); 
-                opacity: 0; 
-            }
-        }
-        
-        @keyframes fadeOut {
-            from { opacity: 1; }
-            to { opacity: 0; }
-        }
-    </style>
-`;
-
-document.addEventListener('DOMContentLoaded', () => {
-    document.head.insertAdjacentHTML('beforeend', additionalStyles);
-});
