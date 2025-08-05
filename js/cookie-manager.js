@@ -28,7 +28,9 @@ class CookieManager {
         const date = new Date();
         date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
         const expires = `expires=${date.toUTCString()}`;
-        document.cookie = `${name}=${value};${expires};path=/`;
+        // Encode value to handle special characters
+        const encodedValue = encodeURIComponent(value);
+        document.cookie = `${name}=${encodedValue};${expires};path=/`;
     }
 
     /**
@@ -42,7 +44,16 @@ class CookieManager {
         for (let i = 0; i < ca.length; i++) {
             let c = ca[i];
             while (c.charAt(0) === ' ') c = c.substring(1, c.length);
-            if (c.indexOf(nameEQ) === 0) return c.substring(nameEQ.length, c.length);
+            if (c.indexOf(nameEQ) === 0) {
+                // Decode value to handle special characters
+                const encodedValue = c.substring(nameEQ.length, c.length);
+                try {
+                    return decodeURIComponent(encodedValue);
+                } catch (e) {
+                    // Fallback for non-encoded values
+                    return encodedValue;
+                }
+            }
         }
         return null;
     }
@@ -225,22 +236,19 @@ class CookieManager {
      * Setup theme persistence using cookies instead of localStorage
      */
     setupThemePersistence() {
-        // Override the existing theme manager's localStorage usage
-        if (window.themeManager) {
-            // Save current localStorage theme to cookie and clear localStorage
-            const localStorageTheme = localStorage.getItem('brightlens-theme');
-            if (localStorageTheme && !this.getCookie('selectedTheme')) {
-                this.setCookie('selectedTheme', localStorageTheme);
-                localStorage.removeItem('brightlens-theme');
-            }
+        // Migrate localStorage theme to cookie if exists
+        const localStorageTheme = localStorage.getItem('brightlens-theme');
+        if (localStorageTheme && !this.getCookie('selectedTheme')) {
+            this.setCookie('selectedTheme', localStorageTheme);
+            localStorage.removeItem('brightlens-theme');
         }
 
-        // Apply saved theme from cookie
+        // Apply saved theme from cookie immediately
         const savedTheme = this.getCookie('selectedTheme') || 'default';
         this.applyTheme(savedTheme);
 
-        // Override theme switching to use cookies
-        this.setupThemeEventListeners();
+        // Override existing theme manager to use cookies
+        this.overrideExistingThemeManager();
     }
 
     /**
@@ -256,10 +264,50 @@ class CookieManager {
     }
 
     /**
-     * Setup theme event listeners
+     * Override existing theme manager to use cookies
      */
-    setupThemeEventListeners() {
-        // Wait for DOM to be ready
+    overrideExistingThemeManager() {
+        // Wait for existing theme manager to load
+        const overrideWhenReady = () => {
+            if (window.themeManager) {
+                // Override the setTheme method
+                const originalSetTheme = window.themeManager.setTheme.bind(window.themeManager);
+                window.themeManager.setTheme = (theme, save = true) => {
+                    // Apply theme using original method
+                    originalSetTheme(theme, false); // Don't save to localStorage
+                    // Save to cookie instead
+                    if (save) {
+                        this.setCookie('selectedTheme', theme);
+                    }
+                };
+
+                // Override applySavedTheme to use cookies
+                window.themeManager.applySavedTheme = () => {
+                    const savedTheme = this.getCookie('selectedTheme') || 'default';
+                    window.themeManager.setTheme(savedTheme, false);
+                };
+            } else {
+                // If no existing theme manager, set up our own listeners
+                this.setupFallbackThemeListeners();
+            }
+        };
+
+        // Try immediately, then wait for DOM ready, then try again with delay
+        overrideWhenReady();
+        
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', () => {
+                setTimeout(overrideWhenReady, 100);
+            });
+        } else {
+            setTimeout(overrideWhenReady, 100);
+        }
+    }
+
+    /**
+     * Fallback theme listeners if no existing theme manager
+     */
+    setupFallbackThemeListeners() {
         const setupListeners = () => {
             // Theme buttons in modal
             const themeButtons = document.querySelectorAll('.theme-option');
@@ -268,6 +316,11 @@ class CookieManager {
                     const theme = e.currentTarget.dataset.theme;
                     if (theme) {
                         this.setTheme(theme);
+                        // Close modal if it exists
+                        const modal = document.getElementById('theme-modal');
+                        if (modal) {
+                            modal.style.display = 'none';
+                        }
                     }
                 });
             });
@@ -276,9 +329,16 @@ class CookieManager {
             const themeToggle = document.getElementById('theme-toggle');
             if (themeToggle) {
                 themeToggle.addEventListener('click', () => {
-                    const currentTheme = this.getCookie('selectedTheme') || 'default';
-                    const newTheme = currentTheme === 'default' ? 'dark' : 'default';
-                    this.setTheme(newTheme);
+                    // Check if it should open modal or toggle theme
+                    const modal = document.getElementById('theme-modal');
+                    if (modal) {
+                        modal.style.display = 'flex';
+                    } else {
+                        // Fallback to simple toggle
+                        const currentTheme = this.getCookie('selectedTheme') || 'default';
+                        const newTheme = currentTheme === 'default' ? 'dark' : 'default';
+                        this.setTheme(newTheme);
+                    }
                 });
             }
         };
