@@ -445,10 +445,16 @@
             setupEventListeners();
             loadSavedTheme();
             startLiveClock();
+            
+            // Hide loading screen after 1.5 seconds maximum
+            setTimeout(() => {
+                hideLoadingScreen();
+            }, 1500);
+            
             loadFlightData().then(() => {
-                hideLoadingScreen();
+                // Data loaded successfully
             }).catch(() => {
-                hideLoadingScreen();
+                // Error handled in loadFlightData
             });
             startAutoRefresh();
         }
@@ -590,7 +596,7 @@
             noResultsElement.style.display = 'none';
 
             try {
-                // Fetch real aviation data from multiple sources
+                // Fetch real aviation data with faster timeout
                 const realData = await fetchRealAviationData();
                 if (realData && realData.length > 0) {
                     allFlights = realData;
@@ -614,34 +620,28 @@
         async function fetchRealAviationData() {
             const flights = [];
             
-            try {
-                // Try AviationStack API first
-                const aviationStackData = await fetchAviationStackData();
-                if (aviationStackData && aviationStackData.length > 0) {
-                    flights.push(...aviationStackData);
-                }
-            } catch (error) {
-                console.warn('AviationStack API failed:', error);
-            }
+            // Use Promise.race to get the fastest response
+            const promises = [
+                fetchAviationStackData().catch(() => []),
+                fetchOpenSkyData().catch(() => [])
+            ];
             
             try {
-                // Try FlightLabs API as backup
-                const flightLabsData = await fetchFlightLabsData();
-                if (flightLabsData && flightLabsData.length > 0) {
-                    flights.push(...flightLabsData);
+                // Wait for the fastest API response (max 3 seconds)
+                const results = await Promise.race([
+                    Promise.allSettled(promises),
+                    new Promise((_, reject) => setTimeout(() => reject(new Error('Timeout')), 3000))
+                ]);
+                
+                if (results && results.length > 0) {
+                    results.forEach(result => {
+                        if (result.status === 'fulfilled' && result.value && result.value.length > 0) {
+                            flights.push(...result.value);
+                        }
+                    });
                 }
             } catch (error) {
-                console.warn('FlightLabs API failed:', error);
-            }
-            
-            try {
-                // Try OpenSky Network API as another backup
-                const openSkyData = await fetchOpenSkyData();
-                if (openSkyData && openSkyData.length > 0) {
-                    flights.push(...openSkyData);
-                }
-            } catch (error) {
-                console.warn('OpenSky API failed:', error);
+                console.warn('All aviation APIs failed or timed out:', error);
             }
             
             // Remove duplicates and return unique flights
@@ -651,9 +651,9 @@
         async function fetchAviationStackData() {
             try {
                 const controller = new AbortController();
-                const timeoutId = setTimeout(() => controller.abort(), 10000);
+                const timeoutId = setTimeout(() => controller.abort(), 2000); // Reduced to 2 seconds
                 
-                const response = await fetch(`${AVIATION_API_URL}&limit=100`, {
+                const response = await fetch(`${AVIATION_API_URL}&limit=50`, { // Reduced limit for faster loading
                     signal: controller.signal
                 });
                 clearTimeout(timeoutId);
@@ -675,34 +675,12 @@
             }
         }
         
-        async function fetchFlightLabsData() {
-            try {
-                // FlightLabs API key would be needed here
-                const FLIGHTLABS_API_KEY = 'your-flightlabs-api-key';
-                const controller = new AbortController();
-                const timeoutId = setTimeout(() => controller.abort(), 10000);
-                
-                const response = await fetch(`https://app.goflightlabs.com/flights?access_key=${FLIGHTLABS_API_KEY}&limit=100`, {
-                    signal: controller.signal
-                });
-                clearTimeout(timeoutId);
-                
-                if (!response.ok) {
-                    throw new Error(`FlightLabs API error: ${response.status}`);
-                }
-                
-                const data = await response.json();
-                return data.data || [];
-            } catch (error) {
-                console.error('FlightLabs API error:', error);
-                return [];
-            }
-        }
+
         
         async function fetchOpenSkyData() {
             try {
                 const controller = new AbortController();
-                const timeoutId = setTimeout(() => controller.abort(), 10000);
+                const timeoutId = setTimeout(() => controller.abort(), 2000); // Reduced to 2 seconds
                 
                 // OpenSky Network API (free tier, no API key required)
                 const response = await fetch('https://opensky-network.org/api/states/all?lamin=35&lamax=70&lomin=-20&lomax=40', {
@@ -716,8 +694,8 @@
                 
                 const data = await response.json();
                 
-                // Convert OpenSky format to our format
-                return data.states ? data.states.map(state => ({
+                // Convert OpenSky format to our format (limit to first 50 for speed)
+                return data.states ? data.states.slice(0, 50).map(state => ({
                     flight: { 
                         number: state[1] || 'Unknown', 
                         iata: state[1] || 'Unknown' 

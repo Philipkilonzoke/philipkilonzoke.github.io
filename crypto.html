@@ -1104,6 +1104,7 @@
             
             async init() {
                 try {
+                    // Load crypto data with faster timeout
                     await this.loadCryptoData();
                     this.setupEventListeners();
                     this.startAutoRefresh();
@@ -1119,7 +1120,7 @@
                 try {
                     const symbols = this.coins.join(',');
                     const controller = new AbortController();
-                    const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
+                    const timeoutId = setTimeout(() => controller.abort(), 3000); // Reduced to 3 seconds for faster loading
                     
                     const response = await fetch(`${this.baseUrl}?access_key=${this.apiKey}&symbols=${symbols}`, {
                         signal: controller.signal
@@ -2029,7 +2030,7 @@
             // Initialize crypto market
             window.cryptoMarket = new CryptoMarket();
             
-            // Fallback: Hide loading screen after 3 seconds maximum
+            // Hide loading screen after 1.5 seconds maximum (faster like food category)
             setTimeout(() => {
                 const loadingScreen = document.getElementById('loading-screen');
                 if (loadingScreen && loadingScreen.style.display !== 'none') {
@@ -2038,7 +2039,7 @@
                         loadingScreen.style.display = 'none';
                     }, 300);
                 }
-            }, 3000);
+            }, 1500);
         });
     </script>
 </body>
