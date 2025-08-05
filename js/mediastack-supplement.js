@@ -9,7 +9,7 @@ class MediastackSupplement {
         this.apiKey = 'ea4397f277b123655ad1929cd58d41a5';
         this.baseUrl = 'https://api.mediastack.com/v1/news';
         this.cache = new Map();
-        this.cacheTimeout = 10 * 60 * 1000; // 10 minutes cache
+        this.cacheTimeout = 3 * 60 * 1000; // 3 minutes cache for more recent articles
     }
 
     /**
@@ -110,6 +110,9 @@ class MediastackSupplement {
      * Format Mediastack articles to match the expected structure
      */
     formatMediastackArticles(articles, category) {
+        const now = new Date();
+        const oneDayAgo = new Date(now.getTime() - (24 * 60 * 60 * 1000)); // 24 hours ago
+        
         return articles.map(article => ({
             title: article.title || 'No title available',
             description: article.description || article.snippet || 'No description available',
@@ -118,11 +121,25 @@ class MediastackSupplement {
             publishedAt: article.published_at || new Date().toISOString(),
             source: article.source || 'Mediastack',
             category: category
-        })).filter(article => 
-            article.title && 
-            article.url && 
-            article.title !== 'No title available'
-        );
+        })).filter(article => {
+            // Filter out articles without required fields
+            if (!article.title || !article.url || article.title === 'No title available') {
+                return false;
+            }
+            
+            // Filter out articles older than 24 hours
+            try {
+                const articleDate = new Date(article.publishedAt);
+                if (articleDate < oneDayAgo) {
+                    return false;
+                }
+            } catch (error) {
+                console.warn('Invalid date format for article:', article.title);
+                return false;
+            }
+            
+            return true;
+        });
     }
 
     /**

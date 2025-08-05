@@ -58,6 +58,18 @@ class NewsAPI {
     }
 
     /**
+     * Clear cache for a specific category or all cache
+     */
+    clearCache(category = null) {
+        if (category) {
+            const keys = Array.from(this.cache.keys()).filter(key => key.startsWith(category));
+            keys.forEach(key => this.cache.delete(key));
+        } else {
+            this.cache.clear();
+        }
+    }
+
+    /**
      * Fetch news for a specific category from all APIs
      */
     async fetchNews(category, limit = 20) {
@@ -222,10 +234,13 @@ class NewsAPI {
     async fetchEnhancedKenyaNews(limit = 100) {
         const cacheKey = `kenya_enhanced_${limit}`;
         
+        // Use shorter cache timeout for Kenya to ensure more recent articles
+        const kenyaCacheTimeout = 2 * 60 * 1000; // 2 minutes for Kenya
+        
         // Check cache first
         if (this.cache.has(cacheKey)) {
             const cached = this.cache.get(cacheKey);
-            if (Date.now() - cached.timestamp < this.cacheTimeout) {
+            if (Date.now() - cached.timestamp < kenyaCacheTimeout) {
                 return cached.data;
             }
         }
@@ -1128,7 +1143,21 @@ class NewsAPI {
             'kibera', 'mathare', 'eastleigh', 'westlands', 'karen', 'runda', 'kilifi'
         ];
 
+        const now = new Date();
+        const oneDayAgo = new Date(now.getTime() - (24 * 60 * 60 * 1000)); // 24 hours ago
+
         return articles.filter(article => {
+            // Filter out articles older than 24 hours
+            try {
+                const articleDate = new Date(article.publishedAt);
+                if (articleDate < oneDayAgo) {
+                    return false;
+                }
+            } catch (error) {
+                console.warn('Invalid date format for Kenya article:', article.title);
+                return false;
+            }
+
             const textToCheck = `${article.title} ${article.description}`.toLowerCase();
             return kenyaKeywords.some(keyword => textToCheck.includes(keyword)) ||
                    article.source.toLowerCase().includes('kenya') ||
@@ -1153,7 +1182,21 @@ class NewsAPI {
             'battery', 'renewable energy', 'solar', 'biotech', 'medtech', 'drone', 'satellite'
         ];
 
+        const now = new Date();
+        const oneDayAgo = new Date(now.getTime() - (24 * 60 * 60 * 1000)); // 24 hours ago
+
         return articles.filter(article => {
+            // Filter out articles older than 24 hours
+            try {
+                const articleDate = new Date(article.publishedAt);
+                if (articleDate < oneDayAgo) {
+                    return false;
+                }
+            } catch (error) {
+                console.warn('Invalid date format for Technology article:', article.title);
+                return false;
+            }
+
             // Exclude known sample/static/demo articles by URL
             const staticDomains = [
                 'digitaltrends.com',

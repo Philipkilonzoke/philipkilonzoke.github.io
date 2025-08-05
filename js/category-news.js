@@ -140,6 +140,11 @@ class CategoryNews {
         try {
             console.log(`Loading ${this.category} news...`);
             
+            // Clear cache for Kenya category to ensure fresh articles
+            if (this.category === 'kenya') {
+                this.newsAPI.clearCache('kenya');
+            }
+            
             // Load news for all categories using the standard API
             const articles = await this.newsAPI.fetchNews(this.category, 100);
             
@@ -148,6 +153,10 @@ class CategoryNews {
             if ((this.category === 'kenya' || this.category === 'sports') && window.MediastackSupplement) {
                 try {
                     const mediastackSupplement = new window.MediastackSupplement();
+                    // Clear cache to ensure fresh articles for Kenya category
+                    if (this.category === 'kenya') {
+                        mediastackSupplement.clearCache('kenya');
+                    }
                     supplementalArticles = await mediastackSupplement.getSupplementalArticles(this.category, 50);
                     console.log(`Mediastack supplement: Added ${supplementalArticles.length} additional ${this.category} articles`);
                 } catch (error) {
