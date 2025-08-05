@@ -1424,6 +1424,33 @@ class NewsAPI {
         ];
 
         return articles.filter(article => {
+            // Exclude known sample/static/demo articles by URL
+            const staticDomains = [
+                'digitaltrends.com',
+                'arstechnica.com/cpu-dynamic-core-reconfiguration-technology',
+                'arstechnica.com/cybersecurity-machine-learning-attack-prediction',
+                'wired.com/self-healing-electronics-space-applications',
+                'wired.com/fusion-energy-breakthrough-net-gain',
+                'cnet.com/smart-contact-lenses-display-clinical-testing',
+                'cnet.com/autonomous-drone-network-emergency-response',
+                'gadgets360.com/foldable-smartphone-ultra-thin-durability',
+                'gadgets360.com/next-generation-wifi-gigabit-speeds-mobile',
+                'mashable.com/ai-personalized-vr-education-experiences',
+                'mashable.com/robotic-surgery-systems-precision-beyond-human',
+                'engadget.com/revolutionary-battery-1000-mile-electric-vehicle',
+                'engadget.com/3d-printing-living-tissue-medical-transplants',
+                'zdnet.com/enterprise-cloud-ai-automation-platforms',
+                'zdnet.com/blockchain-infrastructure-millions-transactions-per-second',
+                'bbc.com/news/technology/satellite-internet-global-connectivity',
+                'techradar.com/gaming-photorealistic-graphics-real-time',
+                'anandtech.com/advanced-memory-10x-faster-data-access',
+                'gizmodo.com/smart-glass-windows-interactive-displays',
+                'venturebeat.com',
+            ];
+            const url = (article.url || '').toLowerCase();
+            if (staticDomains.some(domain => url.includes(domain))) {
+                return false;
+            }
             const textToCheck = `${article.title} ${article.description}`.toLowerCase();
             return techKeywords.some(keyword => textToCheck.includes(keyword)) ||
                    article.source.toLowerCase().includes('tech') ||
