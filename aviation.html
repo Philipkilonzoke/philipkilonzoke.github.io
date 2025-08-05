@@ -747,17 +747,7 @@
             const loadingElement = document.getElementById('flight-loading');
             loadingElement.style.display = 'none';
             
-            // Add demo notice
-            const container = document.getElementById('flights-container');
-            const demoNotice = document.createElement('div');
-            demoNotice.className = 'demo-notice';
-            demoNotice.innerHTML = `
-                <div class="demo-notice-content">
-                    <i class="fas fa-info-circle"></i>
-                    <span>Demo Mode: Showing sample flight data. Live API integration available - requires backend implementation for CORS handling.</span>
-                </div>
-            `;
-            container.parentNode.insertBefore(demoNotice, container);
+            // Removed demo notice insertion
         }
 
         function displayFlights() {
