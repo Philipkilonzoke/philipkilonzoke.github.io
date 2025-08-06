@@ -1049,8 +1049,10 @@
         <div class="footer-glow"></div>
     </footer>
 
-    <script src="js/themes.js" defer></script>
-    <script src="js/main.js" defer></script>
+    <script src="js/news-api.js"></script>
+    <script src="js/cookie-manager.js"></script>
+    <script src="js/themes.js"></script>
+    <script src="js/category-news.js"></script>
     <script>
         // Crypto Market Data Manager
         class CryptoMarket {
@@ -2027,19 +2029,22 @@
         
         // Initialize crypto market when DOM is loaded
         document.addEventListener('DOMContentLoaded', function() {
+            // Initialize standard category news functionality for proper loading screen handling
+            window.categoryNews = new CategoryNews('crypto');
+            
             // Initialize crypto market
             window.cryptoMarket = new CryptoMarket();
             
-            // Hide loading screen after 1.5 seconds maximum (faster like food category)
+            // Ensure loading screen is hidden after maximum 2 seconds
             setTimeout(() => {
                 const loadingScreen = document.getElementById('loading-screen');
-                if (loadingScreen && loadingScreen.style.display !== 'none') {
+                if (loadingScreen && !loadingScreen.classList.contains('hidden')) {
                     loadingScreen.classList.add('hidden');
                     setTimeout(() => {
                         loadingScreen.style.display = 'none';
                     }, 300);
                 }
-            }, 1500);
+            }, 2000);
         });
     </script>
 </body>
