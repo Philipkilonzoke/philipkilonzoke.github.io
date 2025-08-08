@@ -9,8 +9,10 @@ const urlsToCache = [
 
 
   '/css/weather.css',
+  '/css/settings.css',
   '/js/sidebar-navigation.js',
   '/js/push-notifications.js',
+  '/js/settings.js',
   '/script.js',
   '/news-data.js',
   '/news-sources.js',
