@@ -1,99 +1,122 @@
 # Brightlens News
 
-A modern, responsive news aggregation website that provides real-time news from multiple sources with a focus on Kenyan and international news.
+A modern, fast, and responsive news and media hub focused on Kenyan and global coverage. It aggregates real-time articles from multiple APIs, adds special category experiences (Weather, Live TV, Food & Recipes), and ships as a PWA with offline support and push notifications.
 
-## Features
+## Highlights
 
-- **Multi-Source News Aggregation**: Integrates with GNews, NewsData, NewsAPI, MediaStack, and CurrentsAPI
-- **Enhanced Sports Coverage**: Comprehensive sports news from ESPN, TheSportsDB, Sports News API, and RapidSports
-- **Real-time Updates**: Latest news from multiple reliable sources
-- **Kenyan News Focus**: Dedicated section for Kenyan news from local sources
-- **Category-based Navigation**: Latest, Kenya, World, Entertainment, Technology, Business, Sports, Health
-- **Weather Integration**: Real-time weather information
-- **Live TV Streaming**: Access to Kenyan live TV channels
-- **Theme System**: 12 color themes for personalization
-- **Responsive Design**: Mobile-first approach with adaptive layouts
-- **Progressive Web App**: PWA capabilities with offline functionality
+- **Multi-source aggregation**: GNews, NewsData.io, NewsAPI.org, MediaStack, CurrentsAPI (via `js/news-api.js`)
+- **Kenya-first**: Enhanced Kenya category and local sources handling
+- **Rich categories**: Latest, Kenya, World, Entertainment, Technology, Business, Sports, Health, Lifestyle, Food, Crypto, Astronomy, Aviation, Weather, Live TV
+- **Live TV**: Curated Kenyan channels with working YouTube/Twitch embeds (`live-tv.html`, `js/live-tv.js`)
+- **Weather**: Dedicated weather experience (`weather.html`)
+- **Recipes**: Food & Recipes page backed by Spoonacular with robust image fallbacks (`food.html`)
+- **Performance**: Lazy-loaded images, intersection observers, caching via Service Worker
+- **PWA**: Installable app with offline support (`manifest.json`, `service-worker.js`)
+- **Push notifications**: OneSignal integration (`js/push-notifications.js`)
+- **Themes**: Multiple color themes (`css/themes.css`)
 
-## Pages
-
-- **Home (index.html)**: Landing page with navigation
-- **Latest News (latest.html)**: Latest news from all sources
-- **Kenya News (kenya.html)**: Kenyan news and local updates
-- **World News (world.html)**: International news coverage
-- **Entertainment (entertainment.html)**: Entertainment and celebrity news
-- **Technology (technology.html)**: Tech news and innovations
-- **Business (business.html)**: Business and financial news
-- **Sports (sports.html)**: Enhanced sports coverage with multiple sources
-- **Health (health.html)**: Health and medical news
-- **Weather (weather.html)**: Weather information and forecasts
-- **Live TV (live-tv.html)**: Kenyan live TV streaming
-
-## File Structure
+## Project Structure
 
 ```
 /
-├── index.html              # Main news page
-├── weather.html           # Weather page
-├── live-tv.html          # Live TV page
-├── manifest.json         # PWA manifest
-├── package.json          # Dependencies
-├── css/
-│   ├── styles.css        # Main styles
-│   ├── themes.css        # Theme definitions
-│   ├── weather.css       # Weather page styles
-│   └── live-tv.css       # Live TV styles
+├── index.html                # Homepage
+├── latest.html               # Breaking
+├── kenya.html                # Kenya
+├── world.html                # World
+├── entertainment.html        # Entertainment
+├── technology.html           # Technology
+├── business.html             # Business
+├── sports.html               # Sports
+├── health.html               # Health
+├── lifestyle.html            # Lifestyle
+├── food.html                 # Food & Recipes
+├── crypto.html               # Crypto
+├── astronomy.html            # Astronomy
+├── aviation.html             # Aviation
+├── weather.html              # Weather
+├── live-tv.html              # Live TV
+├── manifest.json             # PWA manifest
+├── service-worker.js         # Offline caching
 ├── js/
-│   ├── main.js           # Main application logic
-│   ├── news-api.js       # News API integration
-│   ├── themes.js         # Theme management
-│   ├── weather.js        # Weather functionality
-│   ├── live-tv.js        # Live TV functionality
-│   └── extended-articles.js # Fallback content
+│   ├── main.js              # Homepage app logic
+│   ├── news-api.js          # Aggregation + API adapters
+│   ├── category-news.js     # Category page renderer
+│   ├── live-tv.js           # Live TV interactions
+│   ├── weather.js           # Weather logic (used by weather.html)
+│   ├── sidebar-navigation.js# Sidebar component
+│   ├── push-notifications.js# OneSignal init
+│   └── ...
+├── css/
+│   ├── styles.css           # Base styles
+│   ├── themes.css           # Theme variables
+│   ├── live-tv.css          # Live TV styles
+│   └── weather.css          # Weather styles
 └── assets/
-    └── default.svg       # Default image placeholder
+    └── default.svg
 ```
+
+## Setup & Development
+
+This site is static and designed for GitHub Pages. No build step is required.
+
+- Clone the repo and open any `.html` file in a browser (or use a simple static server).
+- To test PWA/service worker locally, serve over HTTP(S) using a static server, e.g.:
+
+```
+npx serve .
+```
+
+- Some APIs require keys. `js/news-api.js` contains key placeholders and uses graceful fallbacks when a source fails.
+- Push notifications require a valid OneSignal `appId` (already configured in `js/push-notifications.js`).
+
+## Data Sources (APIs)
+
+Implemented adapters in `js/news-api.js`:
+- GNews
+- NewsData.io
+- NewsAPI.org
+- MediaStack
+- CurrentsAPI
+
+Category-specific logic for Kenya, Technology, Health, Lifestyle, and Sports optimizes relevance and eliminates duplicates. When APIs fail, the site still renders gracefully to avoid blank pages.
+
+## Food & Recipes
+
+- The `food.html` page integrates with Spoonacular for recipes.
+- Images use lazy-loading and a multi-candidate fallback strategy to avoid broken images from size-specific URLs. If all attempts fail, a clean placeholder is displayed.
+- Preconnect to `https://img.spoonacular.com` is configured to speed up first-paint.
+
+## Sidebar & Navigation
+
+- The sidebar is generated by `js/sidebar-navigation.js`.
+- Only existing categories are listed. Removed: Music and Movies & Series, to prevent 404s.
+
+## PWA & Caching
+
+- `service-worker.js` caches key assets and pages for offline usage.
+- Cache version is `brightlens-news-v2` to purge old entries (including removed routes and unused CSS).
+- `manifest.json` configures install experience and icons.
+
+## Notifications
+
+- OneSignal is initialized in `js/push-notifications.js`. To use a different OneSignal app, update `appId`.
 
 ## Deployment
 
-This website is ready for deployment on GitHub Pages. Simply push to your repository and enable GitHub Pages in the repository settings.
+This repository is configured for GitHub Pages hosting.
+- Commit your changes to `main` and ensure Pages is enabled in repo settings.
+- Service Worker updates may require a hard refresh on client devices to activate the new version.
 
-## Technologies Used
+## Recent Improvements
 
-- Vanilla JavaScript (ES6+)
-- CSS3 with Custom Properties
-- HTML5 with Semantic Markup
-- Font Awesome Icons
-- Google Fonts (Inter)
-- Progressive Web App Features
-
-## API Integration
-
-The website integrates with multiple news APIs:
-
-### General News APIs:
-- GNews API
-- NewsData.io API
-- NewsAPI.org
-- MediaStack API
-- CurrentsAPI
-
-### Enhanced Sports APIs:
-- ESPN API (NFL, NBA, MLB, NHL, College Sports, Soccer)
-- TheSportsDB API
-- Sports News API
-- RapidSports API
-
-## Browser Support
-
-- Modern browsers (Chrome, Firefox, Safari, Edge)
-- Mobile browsers (iOS Safari, Chrome Mobile)
-- Progressive Web App support
-
-## Author
-
-Philip Kilonzo
+- Fixed recipe images failing to load by adding lazy-load fallbacks and CDN preconnect
+- Removed dead categories (Music, Movies & Series) from sidebar and service worker pre-cache
+- Bumped service worker cache to v2 to evict stale assets
 
 ## License
 
 All rights reserved © 2025 Brightlens News
+
+## Author
+
+Philip Kilonzo
