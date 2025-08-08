@@ -105,21 +105,13 @@
 
         <section class="settings-section" id="settings-language">
           <h4>Language</h4>
-          <select id="language-select" style="width:100%; padding:0.5rem; border:1px solid var(--border-color); border-radius:0.5rem; background:#fff;">
-            <option value="en">English</option>
-            <option value="zh">Chinese</option>
-            <option value="ja">Japanese</option>
-            <option value="hi">Hindi</option>
-            <option value="fr">French</option>
-          </select>
-          <div style="margin-top:0.5rem; font-size:0.85rem; color:var(--text-muted);">Experimental: basic UI text changes only.</div>
+          <select id="language-select" style="width:100%; padding:0.5rem; border:1px solid var(--border-color); border-radius:0.5rem; background:#fff;"></select>
         </section>
 
         <section class="settings-section" id="settings-privacy">
           <h4>Privacy</h4>
           <div style="display:grid; gap:0.5rem;">
             <label class="toggle"><input type="checkbox" id="cookies-toggle" /> Allow Cookies</label>
-            <label style="display:flex; align-items:center; gap:0.5rem;"><input type="checkbox" id="tos-check" /> I agree to Terms of Service</label>
           </div>
         </section>
 
@@ -236,6 +228,22 @@
     const el = document.getElementById('notifications-status');
     if (el) el.textContent = text;
   }
+  function bindOneSignalSubscriptionObserver() {
+    if (!window.OneSignalDeferred) return;
+    window.OneSignalDeferred.push(function(OneSignal) {
+      try {
+        OneSignal.User.PushSubscription.addEventListener('change', async () => {
+          const toggle = document.getElementById('notifications-toggle');
+          if (!toggle) return;
+          const optedIn = await OneSignal.User.PushSubscription.optedIn;
+          toggle.checked = !!optedIn;
+          setNotifStatus(optedIn ? 'Notifications enabled' : 'Notifications disabled');
+        });
+      } catch (e) {
+        /* ignore */
+      }
+    });
+  }
   function initNotifications() {
     const toggle = document.getElementById('notifications-toggle');
     if (!toggle) return;
@@ -253,6 +261,7 @@
           const optedIn = await OneSignal.User.PushSubscription.optedIn;
           toggle.checked = !!optedIn;
           setNotifStatus(optedIn ? 'Notifications enabled' : 'Notifications disabled');
+          bindOneSignalSubscriptionObserver();
         } catch (e) {
           setNotifStatus('Unable to determine notification status');
         }
@@ -281,47 +290,161 @@
     });
   }
 
-  // === Language (basic demo implementation) ===
-  const TRANSLATIONS = {
-    en: { explore: 'Explore Now', breaking: 'Breaking News' },
-    zh: { explore: '立即探索', breaking: '突发新闻' },
-    ja: { explore: '今すぐ探索', breaking: '速報' },
-    hi: { explore: 'खोजें', breaking: 'ताज़ा खबर' },
-    fr: { explore: 'Explorer', breaking: 'Dernières nouvelles' },
-  };
-  function applyLanguage(lang) {
-    localStorage.setItem('bl-language', lang);
-    // Minimal visible updates without full i18n system
-    const explore = document.querySelector('.explore-btn');
-    if (explore && TRANSLATIONS[lang]?.explore) explore.childNodes[1].nodeValue = ' ' + TRANSLATIONS[lang].explore;
-    const breakingBadge = document.querySelector('.breaking-badge');
-    if (breakingBadge && TRANSLATIONS[lang]?.breaking) breakingBadge.lastChild.nodeValue = ' ' + TRANSLATIONS[lang].breaking;
-  }
-  function initLanguage() {
+  // === Language (50+ via Google Translate widget control) ===
+  const SUPPORTED_LANGUAGES = [
+    { code: 'af', name: 'Afrikaans' }, { code: 'sq', name: 'Albanian' },
+    { code: 'am', name: 'Amharic' }, { code: 'ar', name: 'Arabic' },
+    { code: 'hy', name: 'Armenian' }, { code: 'az', name: 'Azerbaijani' },
+    { code: 'eu', name: 'Basque' }, { code: 'be', name: 'Belarusian' },
+    { code: 'bn', name: 'Bengali' }, { code: 'bs', name: 'Bosnian' },
+    { code: 'bg', name: 'Bulgarian' }, { code: 'ca', name: 'Catalan' },
+    { code: 'ceb', name: 'Cebuano' }, { code: 'zh-CN', name: 'Chinese (Simplified)' },
+    { code: 'zh-TW', name: 'Chinese (Traditional)' }, { code: 'co', name: 'Corsican' },
+    { code: 'hr', name: 'Croatian' }, { code: 'cs', name: 'Czech' },
+    { code: 'da', name: 'Danish' }, { code: 'nl', name: 'Dutch' },
+    { code: 'en', name: 'English' }, { code: 'eo', name: 'Esperanto' },
+    { code: 'et', name: 'Estonian' }, { code: 'fi', name: 'Finnish' },
+    { code: 'fr', name: 'French' }, { code: 'fy', name: 'Frisian' },
+    { code: 'gl', name: 'Galician' }, { code: 'ka', name: 'Georgian' },
+    { code: 'de', name: 'German' }, { code: 'el', name: 'Greek' },
+    { code: 'gu', name: 'Gujarati' }, { code: 'ht', name: 'Haitian Creole' },
+    { code: 'ha', name: 'Hausa' }, { code: 'haw', name: 'Hawaiian' },
+    { code: 'he', name: 'Hebrew' }, { code: 'hi', name: 'Hindi' },
+    { code: 'hmn', name: 'Hmong' }, { code: 'hu', name: 'Hungarian' },
+    { code: 'is', name: 'Icelandic' }, { code: 'ig', name: 'Igbo' },
+    { code: 'id', name: 'Indonesian' }, { code: 'ga', name: 'Irish' },
+    { code: 'it', name: 'Italian' }, { code: 'ja', name: 'Japanese' },
+    { code: 'jw', name: 'Javanese' }, { code: 'kn', name: 'Kannada' },
+    { code: 'kk', name: 'Kazakh' }, { code: 'km', name: 'Khmer' },
+    { code: 'rw', name: 'Kinyarwanda' }, { code: 'ko', name: 'Korean' },
+    { code: 'ku', name: 'Kurdish' }, { code: 'ky', name: 'Kyrgyz' },
+    { code: 'lo', name: 'Lao' }, { code: 'la', name: 'Latin' },
+    { code: 'lv', name: 'Latvian' }, { code: 'lt', name: 'Lithuanian' },
+    { code: 'lb', name: 'Luxembourgish' }, { code: 'mk', name: 'Macedonian' },
+    { code: 'mg', name: 'Malagasy' }, { code: 'ms', name: 'Malay' },
+    { code: 'ml', name: 'Malayalam' }, { code: 'mt', name: 'Maltese' },
+    { code: 'mi', name: 'Maori' }, { code: 'mr', name: 'Marathi' },
+    { code: 'mn', name: 'Mongolian' }, { code: 'my', name: 'Myanmar (Burmese)' },
+    { code: 'ne', name: 'Nepali' }, { code: 'no', name: 'Norwegian' },
+    { code: 'ny', name: 'Nyanja (Chichewa)' }, { code: 'or', name: 'Odia (Oriya)' },
+    { code: 'ps', name: 'Pashto' }, { code: 'fa', name: 'Persian' },
+    { code: 'pl', name: 'Polish' }, { code: 'pt', name: 'Portuguese' },
+    { code: 'pa', name: 'Punjabi' }, { code: 'ro', name: 'Romanian' },
+    { code: 'ru', name: 'Russian' }, { code: 'sm', name: 'Samoan' },
+    { code: 'gd', name: 'Scots Gaelic' }, { code: 'sr', name: 'Serbian' },
+    { code: 'st', name: 'Sesotho' }, { code: 'sn', name: 'Shona' },
+    { code: 'sd', name: 'Sindhi' }, { code: 'si', name: 'Sinhala' },
+    { code: 'sk', name: 'Slovak' }, { code: 'sl', name: 'Slovenian' },
+    { code: 'so', name: 'Somali' }, { code: 'es', name: 'Spanish' },
+    { code: 'su', name: 'Sundanese' }, { code: 'sw', name: 'Swahili' },
+    { code: 'sv', name: 'Swedish' }, { code: 'tl', name: 'Tagalog (Filipino)' },
+    { code: 'tg', name: 'Tajik' }, { code: 'ta', name: 'Tamil' },
+    { code: 'tt', name: 'Tatar' }, { code: 'te', name: 'Telugu' },
+    { code: 'th', name: 'Thai' }, { code: 'tr', name: 'Turkish' },
+    { code: 'tk', name: 'Turkmen' }, { code: 'uk', name: 'Ukrainian' },
+    { code: 'ur', name: 'Urdu' }, { code: 'ug', name: 'Uyghur' },
+    { code: 'uz', name: 'Uzbek' }, { code: 'vi', name: 'Vietnamese' },
+    { code: 'cy', name: 'Welsh' }, { code: 'xh', name: 'Xhosa' },
+    { code: 'yi', name: 'Yiddish' }, { code: 'yo', name: 'Yoruba' },
+    { code: 'zu', name: 'Zulu' }
+  ];
+
+  function populateLanguages() {
     const select = document.getElementById('language-select');
     if (!select) return;
+    select.innerHTML = '';
+    SUPPORTED_LANGUAGES.forEach(l => {
+      const opt = document.createElement('option');
+      opt.value = l.code;
+      opt.textContent = l.name;
+      select.appendChild(opt);
+    });
+  }
+
+  function ensureGoogleTranslate() {
+    if (window.__bl_gtranslate_initialized) return;
+    window.__bl_gtranslate_initialized = true;
+
+    // Hidden container for Google Translate element
+    if (!document.getElementById('google_translate_element')) {
+      const div = document.createElement('div');
+      div.id = 'google_translate_element';
+      div.style.display = 'none';
+      document.body.appendChild(div);
+    }
+
+    window.googleTranslateElementInit = function () {
+      // eslint-disable-next-line no-undef
+      new google.translate.TranslateElement({
+        pageLanguage: 'en',
+        autoDisplay: false,
+        includedLanguages: SUPPORTED_LANGUAGES.map(l => l.code).join(',')
+      }, 'google_translate_element');
+    };
+
+    const script = document.createElement('script');
+    script.src = 'https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit';
+    document.head.appendChild(script);
+  }
+
+  function setGoogleTranslateCookie(key, value) {
+    document.cookie = key + '=' + value + '; path=/; expires=' + new Date(Date.now() + 365*24*60*60*1000).toUTCString();
+  }
+
+  function applyLanguage(langCode) {
+    // Save selection
+    localStorage.setItem('bl-language', langCode);
+    document.documentElement.setAttribute('lang', langCode);
+
+    // Use Google Translate site-wide
+    ensureGoogleTranslate();
+    // Set both auto and en source to improve reliability
+    setGoogleTranslateCookie('googtrans', `/auto/${langCode}`);
+    setGoogleTranslateCookie('googtrans', `/en/${langCode}`);
+
+    // Soft reload to let Google Translate re-render fully
+    setTimeout(() => {
+      try {
+        if (typeof google !== 'undefined' && google.translate) {
+          // Trigger re-translate without full reload if possible
+          const frame = document.querySelector('iframe.goog-te-menu-frame');
+          if (!frame) {
+            location.reload();
+          }
+        } else {
+          location.reload();
+        }
+      } catch (_) {
+        location.reload();
+      }
+    }, 200);
+  }
+
+  function initLanguage() {
+    populateLanguages();
+    const select = document.getElementById('language-select');
+    if (!select) return;
+
     const saved = localStorage.getItem('bl-language') || 'en';
     select.value = saved;
-    applyLanguage(saved);
+    // Apply immediately for consistency across pages
+    if (saved && saved !== 'en') {
+      ensureGoogleTranslate();
+      setGoogleTranslateCookie('googtrans', `/en/${saved}`);
+      document.documentElement.setAttribute('lang', saved);
+    }
+
     select.addEventListener('change', () => applyLanguage(select.value));
   }
 
-  // === Privacy (dummy toggles) ===
+  // === Privacy (cookies toggle only) ===
   function initPrivacy() {
     const cookiesToggle = document.getElementById('cookies-toggle');
-    const tosCheck = document.getElementById('tos-check');
     const cookies = localStorage.getItem('bl-cookies-allowed');
-    const tos = localStorage.getItem('bl-tos-agreed');
     if (cookiesToggle) {
       cookiesToggle.checked = cookies === 'true';
       cookiesToggle.addEventListener('change', () => {
         localStorage.setItem('bl-cookies-allowed', cookiesToggle.checked ? 'true' : 'false');
-      });
-    }
-    if (tosCheck) {
-      tosCheck.checked = tos === 'true';
-      tosCheck.addEventListener('change', () => {
-        localStorage.setItem('bl-tos-agreed', tosCheck.checked ? 'true' : 'false');
       });
     }
   }
