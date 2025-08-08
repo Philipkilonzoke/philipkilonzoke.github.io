@@ -65,7 +65,8 @@
     <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
     <noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"></noscript>
     <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+            <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="preconnect" href="https://img.spoonacular.com" crossorigin>
     <link rel="preload" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" as="style" onload="this.onload=null;this.rel='stylesheet'">
     <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"></noscript>
     
@@ -663,6 +664,66 @@
             sortBy.addEventListener('change', applyFilters);
         }
         
+        // Build ordered list of possible image URLs for a recipe
+        function getRecipeImageCandidates(recipe) {
+            const candidates = [];
+            const knownSizes = ['636x393', '556x370', '480x360', '312x231'];
+
+            // Use provided image first if absolute URL
+            if (recipe.image && /^https?:\/\//.test(recipe.image)) {
+                candidates.push(recipe.image);
+            }
+
+            // Try constructing from id and imageType
+            const recipeId = recipe.id;
+            const imageTypeFromProp = recipe.imageType && typeof recipe.imageType === 'string'
+                ? recipe.imageType.replace(/[^a-zA-Z0-9]/g, '')
+                : '';
+
+            if (recipeId && imageTypeFromProp) {
+                knownSizes.forEach(size => {
+                    candidates.push(`https://img.spoonacular.com/recipes/${recipeId}-${size}.${imageTypeFromProp}`);
+                });
+            } else if (recipe.image) {
+                // Try to extract id and type from existing URL if possible
+                const match = recipe.image.match(/recipes\/(\d+)-(\d+x\d+)\.(\w+)/);
+                if (match) {
+                    const id = match[1];
+                    const ext = match[3];
+                    knownSizes.forEach(size => {
+                        candidates.push(`https://img.spoonacular.com/recipes/${id}-${size}.${ext}`);
+                    });
+                }
+            }
+
+            // De-duplicate while preserving order
+            return Array.from(new Set(candidates));
+        }
+
+        // Error handler to advance through fallbacks or replace with placeholder
+        function handleRecipeImgError(event) {
+            const img = event.target;
+            const encoded = img.getAttribute('data-fallbacks') || '';
+            if (!encoded) {
+                const placeholder = document.createElement('div');
+                placeholder.className = 'recipe-image-placeholder';
+                placeholder.textContent = '🍽️';
+                img.replaceWith(placeholder);
+                return;
+            }
+            const fallbacks = decodeURIComponent(encoded).split('|').filter(Boolean);
+            if (fallbacks.length === 0) {
+                const placeholder = document.createElement('div');
+                placeholder.className = 'recipe-image-placeholder';
+                placeholder.textContent = '🍽️';
+                img.replaceWith(placeholder);
+                return;
+            }
+            const nextUrl = fallbacks.shift();
+            img.setAttribute('data-fallbacks', encodeURIComponent(fallbacks.join('|')));
+            img.src = nextUrl;
+        }
+
         async function loadRandomRecipes() {
             showLoading();
             updateSectionTitle('Featured Recipes');
@@ -769,11 +830,16 @@
             if (recipe.vegan) dietTags.push('Vegan');
             if (recipe.glutenFree) dietTags.push('Gluten Free');
             if (recipe.dairyFree) dietTags.push('Dairy Free');
+
+            const imageCandidates = getRecipeImageCandidates(recipe);
+            const hasImage = imageCandidates.length > 0;
+            const firstSrc = hasImage ? imageCandidates[0] : '';
+            const fallbackList = hasImage ? encodeURIComponent(imageCandidates.slice(1).join('|')) : '';
             
             return `
                 <div class="recipe-card" onclick="openRecipe('${recipe.sourceUrl || recipe.spoonacularSourceUrl}')">
-                    ${recipe.image 
-                        ? `<img data-src="${recipe.image.replace('556x370', '1200x800').replace('312x231', '1200x800').replace('636x393', '1200x800')}" alt="${recipe.title}" class="recipe-image" loading="lazy">`
+                    ${hasImage
+                        ? `<img data-src="${firstSrc}" data-fallbacks="${fallbackList}" alt="${recipe.title}" class="recipe-image" loading="lazy" onerror="handleRecipeImgError(event)">`
                         : `<div class="recipe-image-placeholder">🍽️</div>`
                     }
                     <div class="recipe-content">
