@@ -4,12 +4,12 @@ A modern, fast, and responsive news and media hub focused on Kenyan and global c
 
 ## Highlights
 
-- **Multi-source aggregation**: GNews, NewsData.io, NewsAPI.org, MediaStack, CurrentsAPI (via `js/news-api.js`)
+
 - **Kenya-first**: Enhanced Kenya category and local sources handling
 - **Rich categories**: Latest, Kenya, World, Entertainment, Technology, Business, Sports, Health, Lifestyle, Food, Crypto, Astronomy, Aviation, Weather, Live TV
-- **Live TV**: Curated Kenyan channels with working YouTube/Twitch embeds (`live-tv.html`, `js/live-tv.js`)
+- **Live TV**: Curated channels with working YouTube/Twitch embeds (`live-tv.html`, `js/live-tv.js`)
 - **Weather**: Dedicated weather experience (`weather.html`)
-- **Recipes**: Food & Recipes page backed by Spoonacular with robust image fallbacks (`food.html`)
+- **Recipes**: Food & Recipes page  (`food.html`)
 - **Performance**: Lazy-loaded images, intersection observers, caching via Service Worker
 - **PWA**: Installable app with offline support (`manifest.json`, `service-worker.js`)
 - **Push notifications**: OneSignal integration (`js/push-notifications.js`)
