@@ -81,22 +81,10 @@ class SidebarNavigation {
                 id: 'lifestyle'
             },
             { 
-                href: 'music.html', 
-                icon: 'fas fa-music', 
-                text: 'Music',
-                id: 'music'
-            },
-            { 
                 href: 'food.html', 
                 icon: 'fas fa-utensils', 
                 text: 'Food & Recipes',
                 id: 'food'
-            },
-            { 
-                href: 'movies-series.html', 
-                icon: 'fas fa-video', 
-                text: 'Movies & Series',
-                id: 'movies-series'
             },
             { 
                 href: 'crypto.html', 
