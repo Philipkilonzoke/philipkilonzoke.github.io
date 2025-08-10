@@ -21,15 +21,20 @@
     .category-header{display:flex;align-items:end;justify-content:space-between;gap:1rem;margin:1rem 0}
     .searchbar{display:flex;gap:.75rem;align-items:center}
     .searchbar input{border:1px solid var(--border);border-radius:10px;padding:.75rem 1rem;min-width:260px}
+    .filters{display:flex;gap:.5rem;align-items:center}
+    .filter-btn{border:1px solid var(--border);background:#fff;border-radius:10px;padding:.5rem .8rem;cursor:pointer}
     .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:1rem}
     .channel-card{border:1px solid var(--border);border-radius:14px;background:var(--surface)}
     .channel-card-header{display:flex;gap:.75rem;padding:1rem}
     .channel-logo{width:56px;height:56px;object-fit:contain;background:#fff;border-radius:8px;border:1px solid var(--border)}
     .channel-meta h3{margin:0 0 .25rem;font-size:1.05rem}
     .channel-meta p{margin:0;color:#475569;font-size:.9rem}
-    .channel-card-actions{padding:0 1rem 1rem}
+    .channel-card-actions{padding:0 1rem 1rem;display:flex;gap:.5rem;align-items:center}
     .watch-btn{background:var(--primary-color);border:0;color:#fff;border-radius:10px;padding:.6rem 1rem;cursor:pointer}
+    .fav-btn{border:1px solid var(--border);background:#fff;border-radius:10px;padding:.55rem .8rem;cursor:pointer}
+    .fav-btn.active{border-color:#f59e0b;color:#b45309;background:#fff7ed}
     .load-more{margin:1rem auto;display:none}
+    .continue{display:none;margin:0 0 1rem}
 
     /* Overlay */
     .overlay{position:fixed;inset:0;background:rgba(0,0,0,.9);display:none;align-items:center;justify-content:center;z-index:1000}
@@ -58,6 +63,7 @@
   <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
   <script src="/js/push-notifications.js" defer></script>
   <script src="/js/sidebar-navigation.js" defer></script>
+  <script src="/js/themes.js" defer></script>
   <script>
     if ('serviceWorker' in navigator) {
       addEventListener('load', () => navigator.serviceWorker.register('/service-worker.js'))
@@ -114,10 +120,17 @@
           <h2>Live TV</h2>
           <div class="category-meta">Watch trusted news channels live</div>
         </div>
-        <div class="searchbar">
-          <i class="fas fa-search"></i>
-          <input id="channel-search" placeholder="Search channels..." />
+        <div class="filters">
+          <div class="searchbar">
+            <i class="fas fa-search"></i>
+            <input id="channel-search" placeholder="Search channels..." />
+          </div>
+          <button id="favorites-toggle" class="filter-btn" title="Show Favorites"><i class="fas fa-star"></i> Favorites</button>
         </div>
+      </div>
+
+      <div class="continue">
+        <button id="continue-watching" class="watch-btn"><i class="fas fa-play"></i> Continue watching</button>
       </div>
 
       <div id="channels-grid" class="grid"></div>
@@ -149,6 +162,7 @@
           <span id="player-title">Loading...</span>
         </div>
         <div class="player-actions">
+          <button id="share-link" class="icon-btn" title="Copy link"><i class="fas fa-link"></i></button>
           <button id="back-to-list" class="icon-btn" title="Back"><i class="fas fa-arrow-left"></i></button>
           <button id="player-close" class="icon-btn" title="Close"><i class="fas fa-times"></i></button>
         </div>

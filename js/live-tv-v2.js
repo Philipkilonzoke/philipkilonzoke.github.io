@@ -89,7 +89,11 @@
     const end = state.page * state.pageSize;
     const list = state.filtered.slice(start, end);
 
-    grid.innerHTML = list.map(ch => `
+    const favorites = getFavorites();
+
+    grid.innerHTML = list.map(ch => {
+      const isFav = favorites.includes(ch.channelId);
+      return `
       <div class="channel-card">
         <div class="channel-card-header">
           <img class="channel-logo" src="${ch.logo}" alt="${ch.name} logo" loading="lazy" referrerpolicy="no-referrer" />
@@ -100,9 +104,13 @@
         </div>
         <div class="channel-card-actions">
           <button class="watch-btn" data-channel-id="${ch.channelId}" data-name="${ch.name}">Watch Live</button>
+          <button class="fav-btn ${isFav ? 'active' : ''}" data-channel-id="${ch.channelId}" title="Toggle favorite">
+            <i class="fas fa-star"></i>
+          </button>
         </div>
       </div>
-    `).join('');
+    `;
+    }).join('');
 
     const loadMore = $('#load-more');
     if (loadMore) {
@@ -110,6 +118,98 @@
     }
 
     bindWatchButtons();
+    bindFavoriteButtons();
+  }
+
+  function favKey() { return 'bl_favorites'; }
+  function getFavorites() {
+    try { return JSON.parse(localStorage.getItem(favKey())||'[]'); } catch { return []; }
+  }
+  function setFavorites(arr) {
+    try { localStorage.setItem(favKey(), JSON.stringify(arr)); } catch {}
+  }
+  function toggleFavorite(channelId) {
+    const favs = getFavorites();
+    const idx = favs.indexOf(channelId);
+    if (idx >= 0) { favs.splice(idx,1); } else { favs.push(channelId); }
+    setFavorites(favs);
+  }
+  function bindFavoriteButtons() {
+    document.querySelectorAll('.fav-btn').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const channelId = btn.getAttribute('data-channel-id');
+        toggleFavorite(channelId);
+        renderGrid();
+      });
+    });
+  }
+
+  function bindFavoritesFilter() {
+    const toggle = document.getElementById('favorites-toggle');
+    if (!toggle) return;
+    let showingFavs = false;
+    toggle.addEventListener('click', () => {
+      showingFavs = !showingFavs;
+      toggle.classList.toggle('active', showingFavs);
+      state.page = 1;
+      if (showingFavs) {
+        const favIds = new Set(getFavorites());
+        state.filtered = channels.filter(ch => favIds.has(ch.channelId));
+      } else {
+        state.filtered = channels;
+      }
+      renderGrid();
+    });
+  }
+
+  function setContinueWatching(channelId, name) {
+    try { localStorage.setItem('bl_continue', JSON.stringify({ channelId, name })); } catch {}
+  }
+  function getContinueWatching() {
+    try { return JSON.parse(localStorage.getItem('bl_continue')||'null'); } catch { return null; }
+  }
+  function initContinueWatching() {
+    const cw = getContinueWatching();
+    const btn = document.getElementById('continue-watching');
+    const box = document.querySelector('.continue');
+    if (!btn || !box) return;
+    if (cw && cw.channelId) {
+      btn.innerHTML = `<i class="fas fa-play"></i> Continue watching ${escapeHtml(cw.name || '')}`;
+      box.style.display = 'block';
+      btn.onclick = async () => {
+        openPlayerOverlay();
+        setOverlayTitle(cw.name || 'Live');
+        setOverlayLoading(true);
+        const info = await fetchLiveInfo(cw.channelId);
+        if (info.status === 'live' && info.videoId) {
+          mountYouTubePlayer(info.videoId);
+          setOverlayLoading(false);
+          setOverlayMeta(info);
+        } else if (info.status === 'offline' && info.latest && info.latest.videoId) {
+          showOfflineMessage();
+          showLatestVideo(info.latest);
+          setOverlayLoading(false);
+        } else {
+          showErrorMessage(info.error || 'Unable to load stream.');
+          setOverlayLoading(false);
+        }
+      };
+    } else {
+      box.style.display = 'none';
+    }
+  }
+
+  function bindShareButton() {
+    const shareBtn = document.getElementById('share-link');
+    if (!shareBtn) return;
+    shareBtn.addEventListener('click', async () => {
+      try {
+        await navigator.clipboard.writeText(location.href);
+        shareBtn.innerHTML = '<i class="fas fa-check"></i>';
+        setTimeout(() => shareBtn.innerHTML = '<i class="fas fa-link"></i>', 1500);
+      } catch {}
+    });
   }
 
   function bindWatchButtons() {
@@ -117,6 +217,7 @@
       btn.addEventListener('click', async (e) => {
         const channelId = e.currentTarget.getAttribute('data-channel-id');
         const name = e.currentTarget.getAttribute('data-name');
+        setContinueWatching(channelId, name);
         openPlayerOverlay();
         setOverlayTitle(name);
         setOverlayLoading(true);
@@ -243,6 +344,9 @@
     bindSearch();
     bindLoadMore();
     bindOverlayControls();
+    bindFavoritesFilter();
+    bindShareButton();
+    initContinueWatching();
     renderGrid();
   });
 })();
