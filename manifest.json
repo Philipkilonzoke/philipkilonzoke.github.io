@@ -4,23 +4,17 @@
   "description": "A modern world news platform with the latest headlines and categories.",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#ffffff",
+  "background_color": "#1e1e1e",
   "theme_color": "#1e1e1e",
   "orientation": "portrait",
   "scope": "/",
   "icons": [
-    {
-      "src": "assets/icon-192.svg",
-      "sizes": "192x192",
-      "type": "image/svg+xml",
-      "purpose": "any maskable"
-    },
-    {
-      "src": "assets/icon-512.svg",
-      "sizes": "512x512",
-      "type": "image/svg+xml",
-      "purpose": "any maskable"
-    }
+    { "src": "/assets/icon-192.svg", "sizes": "192x192", "type": "image/svg+xml" },
+    { "src": "/assets/icon-512.svg", "sizes": "512x512", "type": "image/svg+xml" }
+  ],
+  "shortcuts": [
+    { "name": "Technology", "url": "/technology" },
+    { "name": "Live TV", "url": "/live-tv-v2" }
   ],
   "categories": ["news", "productivity"],
   "lang": "en-US",

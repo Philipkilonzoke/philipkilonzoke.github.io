@@ -120,3 +120,48 @@ All rights reserved © 2025 Brightlens News
 ## Author
 
 Philip Kilonzo
+
+## Live TV v2
+
+A new Live TV experience has been added as `live-tv-v2.html` using a secure backend API for YouTube live lookups.
+
+- Frontend: `live-tv-v2.html`, `js/live-tv-v2.js`
+- Backend: `server/index.js`, `server/package.json`
+
+### Local usage
+
+1. Set YouTube Data API v3 key as environment variable:
+   - `export YT_API_KEY=YOUR_API_KEY`
+2. Install and run the backend:
+   - `cd server && npm install && npm run start`
+3. Serve the static site (e.g., with any static server) and ensure `window.BRIGHTLENS_API_BASE_URL='/api'` is proxied to the backend, or open directly if on the same origin.
+
+### Replit deployment
+
+- Create a new Repl for the backend, import `server/` folder.
+- Set secret `YT_API_KEY` in Replit Secrets.
+- Run `npm install` and `npm start`.
+- Note the backend URL, e.g., `https://your-repl-name.your-username.repl.co`.
+- In the frontend hosting (this repo on GitHub Pages or similar), set `window.BRIGHTLENS_API_BASE_URL` before loading `js/live-tv-v2.js` or host the backend under the same domain using a reverse proxy.
+
+### Frontend API configuration example
+
+Include before `js/live-tv-v2.js` on `live-tv-v2.html` if backend is on a different host:
+
+```html
+<script>window.BRIGHTLENS_API_BASE_URL = 'https://your-backend.example.com/api';</script>
+```
+
+### API
+
+GET `/api/live?channelId=UC...`
+
+Response when live:
+```json
+{ "status":"live", "videoId":"VIDEO_ID", "title":"...", "publishedAt":"..." }
+```
+
+Response when offline:
+```json
+{ "status":"offline", "latest": { "videoId":"...", "title":"...", "publishedAt":"...", "thumbnail":"..." } }
+```
