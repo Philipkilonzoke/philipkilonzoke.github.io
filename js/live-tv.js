@@ -121,11 +121,26 @@ import { channels } from '/assets/js/live-channels.js';
 		);
 	}
 
-	function renderGrid(){
+	function prefetchImage(src){
+		return new Promise((resolve)=>{
+			if(!src){ resolve(); return; }
+			const img = new Image();
+			img.loading = 'eager';
+			img.decoding = 'async';
+			img.referrerPolicy = 'no-referrer';
+			img.onload = ()=> resolve();
+			img.onerror = ()=> resolve();
+			img.src = src;
+		});
+	}
+
+	async function renderGrid(){
 		const grid = document.getElementById('channel-grid');
 		if(!grid) return;
 		const filtered = applyFilters(channels);
 		grid.innerHTML = '';
+		// Prefetch first 12 icons for fast rendering
+		await Promise.all(filtered.slice(0,12).map(c=>prefetchImage(c.icon)));
 		filtered.forEach(c => {
 			const card = document.createElement('div');
 			card.className = 'channel-card';
@@ -134,10 +149,18 @@ import { channels } from '/assets/js/live-channels.js';
 				<div class="channel-name">${c.name}</div>
 				<button class="watch-btn" aria-label="Watch ${c.name}" data-id="${c.id}"><i class="fas fa-play"></i> Watch</button>
 			`;
-			const watch = card.querySelector('.watch-btn');
-			watch.addEventListener('click', (e) => { e.preventDefault(); openChannel(c.id); });
+			card.querySelector('.watch-btn').addEventListener('click', (e) => { e.preventDefault(); openChannel(c.id); });
 			grid.appendChild(card);
 		});
+	}
+
+	function setPlayerStatus(text){
+		const el = document.getElementById('player-status');
+		if(el) el.textContent = text || '';
+	}
+	function setPlayerLoading(isLoading){
+		const el = document.getElementById('player-loading');
+		if(el) el.hidden = !isLoading;
 	}
 
 	function bindGridEvents(){
@@ -186,11 +209,28 @@ import { channels } from '/assets/js/live-channels.js';
 		const iframeEl = document.getElementById('live-player');
 		const box = document.getElementById('player-box');
 		if (iframeEl && titleEl && box) {
-			// Force immediate reveal, then assign src (prevents layout shift)
 			box.classList.remove('player-hidden');
 			document.body.classList.add('player-active');
+			setPlayerStatus('');
+			setPlayerLoading(true);
 			titleEl.textContent = channel.name;
-			// Write src last for faster visual feedback
+			// Attach load/error handlers
+			const onLoad = ()=>{ setPlayerLoading(false); setPlayerStatus(''); cleanup(); };
+			const onError = ()=>{ setPlayerLoading(false); setPlayerStatus('Channel failed to load. Please try another.'); cleanup(); };
+			const cleanup = ()=>{
+				iframeEl.removeEventListener('load', onLoad);
+				iframeEl.removeEventListener('error', onError);
+			};
+			iframeEl.addEventListener('load', onLoad, { once:true });
+			iframeEl.addEventListener('error', onError, { once:true });
+			// Timeout fallback (provider blocking)
+			const timeoutId = setTimeout(()=>{
+				if(elStillLoading()){
+					setPlayerLoading(false);
+					setPlayerStatus('This channel may block embeds. Please try a different one.');
+				}
+			}, 6000);
+			function elStillLoading(){ return !iframeEl.contentWindow || !iframeEl.contentDocument; }
 			iframeEl.src = channel.embed + (channel.embed.includes('?') ? '&' : '?') + 'autoplay=1&rel=0&mute=1';
 		} else {
 			mountPlayerIframe(channel);
