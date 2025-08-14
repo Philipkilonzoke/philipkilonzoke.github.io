@@ -199,37 +199,63 @@ import { channels } from '/assets/js/live-channels.js';
 
 	function bindControls(){
 		const search = $('#live-search');
-		let t; search.addEventListener('input',()=>{ clearTimeout(t); t=setTimeout(()=>{ state.search=search.value; renderGrid(); },250); });
-		$all('[role="tab"]').forEach(btn=>{
-			btn.addEventListener('click',()=>{
-				$all('[role="tab"]').forEach(b=>b.setAttribute('aria-selected','false'));
-				btn.setAttribute('aria-selected','true');
-				state.filter = btn.dataset.cat;
-				renderGrid();
+		if (search) {
+			let t; 
+			search.addEventListener('input',()=>{ 
+				clearTimeout(t); 
+				t=setTimeout(()=>{ state.search=search.value; renderGrid(); },250); 
 			});
-		});
+		}
+		const tabs = $all('[role="tab"]');
+		if (tabs.length) {
+			tabs.forEach(btn=>{
+				btn.addEventListener('click',()=>{
+					$all('[role="tab"]').forEach(b=>b.setAttribute('aria-selected','false'));
+					btn.setAttribute('aria-selected','true');
+					state.filter = btn.dataset.cat;
+					renderGrid();
+				});
+			});
+		}
 		const favToggle = $('#favorites-toggle');
-		let favMode=false;
-		favToggle.addEventListener('click',()=>{
-			favMode=!favMode; favToggle.classList.toggle('active', favMode);
-			if(favMode){
-				const favIds = new Set(state.favorites);
-				const favList = channels.filter(c=>favIds.has(c.id));
-				$('#channels-grid').innerHTML = favList.map(channelCard).join('');
-				bindGridEvents();
-			}else{
-				renderGrid();
-			}
-		});
+		if (favToggle) {
+			let favMode=false;
+			favToggle.addEventListener('click',()=>{
+				favMode=!favMode; favToggle.classList.toggle('active', favMode);
+				if(favMode){
+					const favIds = new Set(state.favorites);
+					const favList = channels.filter(c=>favIds.has(c.id));
+					const grid = document.getElementById('channel-grid');
+					if (grid) {
+						grid.innerHTML = '';
+						favList.forEach(c => {
+							const card = document.createElement('div');
+							card.className = 'channel-card';
+							card.innerHTML = `
+								<img class="channel-icon" src="${c.icon || ''}" alt="${c.name}" width="64" height="64" loading="lazy" decoding="async" referrerpolicy="no-referrer" onerror="this.onerror=null;this.src='/assets/icon-192.svg'" />
+								<div class="channel-name">${c.name}</div>
+								<button class="watch-btn" aria-label="Watch ${c.name}" data-id="${c.id}"><i class="fas fa-play"></i> Watch</button>
+							`;
+							card.querySelector('.watch-btn').addEventListener('click', (e)=>{ e.preventDefault(); openChannel(c.id); });
+							grid.appendChild(card);
+						});
+					}
+				}else{
+					renderGrid();
+				}
+			});
+		}
 		const close = $('#player-close');
-		close.addEventListener('click',()=>{
-			const shell = $('#player-shell');
-			$('#player-container').innerHTML='';
-			shell.style.display='none';
-			state.activeId=null;
-			$('#sticky-player').setAttribute('aria-hidden','true');
-		});
-		document.addEventListener('keydown',e=>{ if(e.key==='Escape' && state.activeId){ $('#player-close').click(); } });
+		if (close) {
+			close.addEventListener('click',()=>{
+				const shell = $('#player-shell');
+				$('#player-container').innerHTML='';
+				shell.style.display='none';
+				state.activeId=null;
+				$('#sticky-player').setAttribute('aria-hidden','true');
+			});
+		}
+		document.addEventListener('keydown',e=>{ if(e.key==='Escape' && state.activeId){ if (close) close.click(); } });
 	}
 
 	function bindPlayerClose(){
