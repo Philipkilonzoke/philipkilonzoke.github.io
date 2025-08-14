@@ -350,54 +350,7 @@
                 </button>
             </div>
             <div class="theme-grid">
-                <button class="theme-option" data-theme="default">
-                    <div class="theme-preview theme-preview-default"></div>
-                    <span>Default</span>
-                </button>
-                <button class="theme-option" data-theme="dark">
-                    <div class="theme-preview theme-preview-dark"></div>
-                    <span>Dark</span>
-                </button>
-                <button class="theme-option" data-theme="blue">
-                    <div class="theme-preview theme-preview-blue"></div>
-                    <span>Ocean Blue</span>
-                </button>
-                <button class="theme-option" data-theme="green">
-                    <div class="theme-preview theme-preview-green"></div>
-                    <span>Forest Green</span>
-                </button>
-                <button class="theme-option" data-theme="purple">
-                    <div class="theme-preview theme-preview-purple"></div>
-                    <span>Royal Purple</span>
-                </button>
-                <button class="theme-option" data-theme="orange">
-                    <div class="theme-preview theme-preview-orange"></div>
-                    <span>Sunset Orange</span>
-                </button>
-                <button class="theme-option" data-theme="red">
-                    <div class="theme-preview theme-preview-red"></div>
-                    <span>Cherry Red</span>
-                </button>
-                <button class="theme-option" data-theme="teal">
-                    <div class="theme-preview theme-preview-teal"></div>
-                    <span>Teal</span>
-                </button>
-                <button class="theme-option" data-theme="pink">
-                    <div class="theme-preview theme-preview-pink"></div>
-                    <span>Pink</span>
-                </button>
-                <button class="theme-option" data-theme="indigo">
-                    <div class="theme-preview theme-preview-indigo"></div>
-                    <span>Indigo</span>
-                </button>
-                <button class="theme-option" data-theme="yellow">
-                    <div class="theme-preview theme-preview-yellow"></div>
-                    <span>Golden Yellow</span>
-                </button>
-                <button class="theme-option" data-theme="cyan">
-                    <div class="theme-preview theme-preview-cyan"></div>
-                    <span>Cyan</span>
-                </button>
+                <!-- Dynamically populated by js/themes.js -->
             </div>
         </div>
     </div>
@@ -528,6 +481,9 @@
         }
 
         function setupThemeSelector() {
+            if (window.themeManager) {
+                return;
+            }
             const themeToggle = document.getElementById('theme-toggle');
             const themeModal = document.getElementById('theme-modal');
             const themeModalClose = document.querySelector('.theme-modal-close');
