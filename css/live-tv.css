@@ -459,3 +459,5 @@ select:focus {
 .channel-card .watch-btn:hover{filter:brightness(1.05)}
 .player-loading{display:flex;align-items:center;gap:.5rem;padding:.5rem 1rem;color:var(--theme-text, var(--text-color))}
 .player-status{padding:.25rem 1rem;color:var(--theme-text, var(--text-color))}
+.live-pill{color:#ef4444;font-weight:700}
+.cards-grid .channel-card{gap:.25rem}
