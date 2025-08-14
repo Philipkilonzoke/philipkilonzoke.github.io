@@ -180,6 +180,18 @@
                                 <option value="delayed">Delayed</option>
                             </select>
                         </div>
+                        <div class="sort-container">
+                            <select id="sort-order" class="status-filter" title="Sort by">
+                                <option value="dep-asc">Dep Time ↑</option>
+                                <option value="dep-desc">Dep Time ↓</option>
+                                <option value="arr-asc">Arr Time ↑</option>
+                                <option value="arr-desc">Arr Time ↓</option>
+                                <option value="airline">Airline A→Z</option>
+                            </select>
+                        </div>
+                        <div class="tz-container">
+                            <button id="tz-toggle" class="refresh-btn" title="Toggle UTC/Local">UTC</button>
+                        </div>
                         <div class="refresh-container">
                             <button id="refresh-btn" class="refresh-btn" title="Refresh flight data">
                                 <i class="fas fa-sync-alt"></i>
@@ -366,6 +378,11 @@
         let countdownInterval;
         let clockInterval;
         let refreshCountdown = 60;
+        let useLocalTime = false;
+        const favKey = 'bl_fav_flights';
+        const getFavs = ()=>{ try{return new Set(JSON.parse(localStorage.getItem(favKey)||'[]'));}catch{return new Set();} };
+        const setFavs = (s)=>{ try{localStorage.setItem(favKey, JSON.stringify([...s]));}catch{} };
+        let favorites = getFavs();
 
         // API Configuration
         const AVIATION_API_KEY = '826b3184165e11d389a2a31d089021a4';
@@ -487,6 +504,18 @@
             // Status filter
             const statusFilter = document.getElementById('status-filter');
             statusFilter.addEventListener('change', handleFilter);
+
+            // Sort order
+            const sortOrder = document.getElementById('sort-order');
+            sortOrder.addEventListener('change', handleSort);
+
+            // TZ toggle
+            const tzToggle = document.getElementById('tz-toggle');
+            tzToggle.addEventListener('click', ()=>{
+                useLocalTime = !useLocalTime;
+                tzToggle.textContent = useLocalTime ? 'Local' : 'UTC';
+                displayFlights();
+            });
 
             // Refresh button
             const refreshBtn = document.getElementById('refresh-btn');
@@ -755,7 +784,24 @@
             container.style.display = 'grid';
             noResultsElement.style.display = 'none';
 
+            // Apply sort before render
+            applySort();
             container.innerHTML = filteredFlights.map(flight => createFlightCard(flight)).join('');
+
+            // Bind favorites
+            container.querySelectorAll('.fav-btn').forEach(btn=>{
+                btn.addEventListener('click', ()=>{
+                    const id = btn.dataset.id;
+                    if (favorites.has(id)) favorites.delete(id); else favorites.add(id);
+                    setFavs(favorites);
+                    displayFlights();
+                });
+            });
+        }
+
+        function timeFormat(ts){
+            if (!ts) return 'N/A';
+            return useLocalTime ? dayjs(ts).format('HH:mm') : dayjs(ts).utc().format('HH:mm');
         }
 
         function createFlightCard(flight) {
@@ -763,25 +809,24 @@
             const arrival = flight.arrival || {};
             const airline = flight.airline || {};
             const aircraft = flight.aircraft || {};
-            
-            // Format times
-            const scheduledDeparture = departure.scheduled ? dayjs(departure.scheduled).format('HH:mm') : 'N/A';
-            const scheduledArrival = arrival.scheduled ? dayjs(arrival.scheduled).format('HH:mm') : 'N/A';
-            const estimatedDeparture = departure.estimated ? dayjs(departure.estimated).format('HH:mm') : null;
-            const estimatedArrival = arrival.estimated ? dayjs(arrival.estimated).format('HH:mm') : null;
-            
-            // Determine if delayed
+
+            const id = `${flight.flight?.iata||flight.flight?.number||''}-${departure.iata||''}-${arrival.iata||''}`;
+
+            const scheduledDeparture = timeFormat(departure.scheduled);
+            const scheduledArrival = timeFormat(arrival.scheduled);
+            const estimatedDeparture = departure.estimated ? timeFormat(departure.estimated) : null;
+            const estimatedArrival = arrival.estimated ? timeFormat(arrival.estimated) : null;
+
             const isDepartureDelayed = estimatedDeparture && estimatedDeparture !== scheduledDeparture;
             const isArrivalDelayed = estimatedArrival && estimatedArrival !== scheduledArrival;
-            
-            // Status styling
+
             const statusClass = getStatusClass(flight.flight_status);
             const statusIcon = getStatusIcon(flight.flight_status);
-            
-            // Get airline color and first letter for logo
+
             const airlineColor = AIRLINE_COLORS[airline.name] || 'var(--primary-color)';
             const airlineInitial = airline.name ? airline.name.charAt(0).toUpperCase() : 'A';
-            
+            const isFav = favorites.has(id);
+
             return `
                 <div class="news-card flight-card">
                     <div class="flight-header">
@@ -799,7 +844,14 @@
                             <span>${flight.flight_status || 'unknown'}</span>
                         </div>
                     </div>
-                    
+                    <div style="display:flex;justify-content:space-between;align-items:center;margin:-.5rem 0 .5rem 0">
+                        <button class="fav-btn" data-id="${id}" title="Favorite" style="border:1px solid var(--border-color);background:var(--surface-color);border-radius:8px;padding:.25rem .5rem;color:${isFav?'#f59e0b':'inherit'}">
+                            <i class="fas fa-star"></i>
+                        </button>
+                        <button class="copy-btn" onclick="navigator.clipboard.writeText('${flight.flight?.number||''} ${departure.iata||''}-${arrival.iata||''}')" title="Copy" style="border:1px solid var(--border-color);background:var(--surface-color);border-radius:8px;padding:.25rem .5rem">
+                            <i class="fas fa-copy"></i>
+                        </button>
+                    </div>
                     <div class="flight-route">
                         <div class="airport departure-airport">
                             <div class="airport-code">${departure.iata || 'N/A'}</div>
@@ -810,11 +862,9 @@
                                 ${estimatedDeparture ? `<div class="estimated-time">Est: ${estimatedDeparture}</div>` : ''}
                             </div>
                         </div>
-                        
                         <div class="route-line">
                             <i class="fas fa-arrow-right"></i>
                         </div>
-                        
                         <div class="airport arrival-airport">
                             <div class="airport-code">${arrival.iata || 'N/A'}</div>
                             <div class="airport-name">${arrival.airport || 'Unknown Airport'}</div>
@@ -825,18 +875,16 @@
                             </div>
                         </div>
                     </div>
-                    
                     ${aircraft.registration || aircraft.iata ? `
                     <div class="aircraft-info">
                         <i class="fas fa-plane-departure"></i>
                         <span>Aircraft: ${aircraft.registration || aircraft.iata || 'N/A'}</span>
                     </div>
                     ` : ''}
-                    
                     <div class="flight-meta">
                         <span class="flight-date">
                             <i class="fas fa-calendar"></i>
-                            ${departure.scheduled ? dayjs(departure.scheduled).format('MMM DD, YYYY') : 'N/A'}
+                            ${departure.scheduled ? (useLocalTime ? dayjs(departure.scheduled).format('MMM DD, YYYY') : dayjs(departure.scheduled).utc().format('MMM DD, YYYY')) : 'N/A'}
                         </span>
                         <span class="flight-duration">
                             <i class="fas fa-clock"></i>
@@ -1001,6 +1049,27 @@
                 clearTimeout(timeout);
                 timeout = setTimeout(later, wait);
             };
+        }
+
+        function handleSort(){
+            applySort();
+            displayFlights();
+        }
+        function applySort(){
+            const order = document.getElementById('sort-order').value;
+            const byTime = (key, asc)=> (a,b)=>{
+                const ta = new Date(a[key]?.scheduled||0).getTime();
+                const tb = new Date(b[key]?.scheduled||0).getTime();
+                return asc ? ta - tb : tb - ta;
+            };
+            if (order==='dep-asc') filteredFlights.sort(byTime('departure', true));
+            else if (order==='dep-desc') filteredFlights.sort(byTime('departure', false));
+            else if (order==='arr-asc') filteredFlights.sort(byTime('arrival', true));
+            else if (order==='arr-desc') filteredFlights.sort(byTime('arrival', false));
+            else if (order==='airline') filteredFlights.sort((a,b)=> (a.airline?.name||'').localeCompare(b.airline?.name||''));
+            // Favorites first
+            const favSet = favorites;
+            filteredFlights.sort((a,b)=> (favSet.has(`${a.flight?.iata||a.flight?.number||''}-${a.departure?.iata||''}-${a.arrival?.iata||''}`)?-1:0) - (favSet.has(`${b.flight?.iata||b.flight?.number||''}-${b.departure?.iata||''}-${b.arrival?.iata||''}`)?-1:0));
         }
 
         // Cleanup intervals when page unloads
