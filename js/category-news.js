@@ -140,10 +140,8 @@ class CategoryNews {
         try {
             console.log(`Loading ${this.category} news...`);
             
-            // Load news for all categories using the standard API
             const articles = await this.newsAPI.fetchNews(this.category, 100);
             
-            // Supplement with Mediastack API for Kenya and Sports categories
             let supplementalArticles = [];
             if ((this.category === 'kenya' || this.category === 'sports') && window.MediastackSupplement) {
                 try {
@@ -155,21 +153,33 @@ class CategoryNews {
                 }
             }
             
-            // Combine articles and remove duplicates
             const allArticles = [...(articles || []), ...supplementalArticles];
             const uniqueArticles = this.removeDuplicates(allArticles);
             
-            // Sort by published date (most recent first)
+            // Sort newest first
             uniqueArticles.sort((a, b) => new Date(b.publishedAt) - new Date(a.publishedAt));
+
+            // For Kenya, strictly filter out items older than 48 hours
+            const finalArticles = (this.category === 'kenya') 
+                ? uniqueArticles.filter(a => {
+                    const t = new Date(a.publishedAt).getTime();
+                    if (!t || Number.isNaN(t)) return false;
+                    const cutoff = Date.now() - (48 * 60 * 60 * 1000);
+                    return t >= cutoff;
+                  })
+                : uniqueArticles;
             
-            if (uniqueArticles && uniqueArticles.length > 0) {
-                this.allArticles = uniqueArticles;
+            if (finalArticles && finalArticles.length > 0) {
+                this.allArticles = finalArticles;
                 this.renderNews();
                 this.updateArticleCount();
                 this.updateLastUpdated();
                 this.showNewsGrid();
             } else {
-                this.showNewsError('No articles found for this category. Please try again later.');
+                const msg = this.category === 'kenya' 
+                  ? 'No Kenya articles from the last 48 hours. Please check back shortly.' 
+                  : 'No articles found for this category. Please try again later.';
+                this.showNewsError(msg);
             }
         } catch (error) {
             console.error('Error loading news:', error);
