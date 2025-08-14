@@ -62,6 +62,12 @@
     .chart-title{font-weight:600}
 
     .error{display:none;border:1px solid #fecaca;background:#fef2f2;color:#991b1b;border-radius:10px;padding:.6rem .8rem;margin-top:1rem}
+
+    /* Page splash screen (consistent with other categories) */
+    .loading-screen{position:fixed;top:0;left:0;width:100%;height:100%;background:var(--primary-color);display:flex;align-items:center;justify-content:center;z-index:9999;transition:opacity 0.3s}
+    .loading-screen.hidden{opacity:0;visibility:hidden}
+    .loading-container{text-align:center;color:white}
+    .loading-spinner{width:60px;height:60px;border:4px solid rgba(255,255,255,0.3);border-top:4px solid white;border-radius:50%;animation:spin 1s linear infinite;margin:0 auto 1rem}
   </style>
 
   <link rel="preload" href="css/styles.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
@@ -88,6 +94,15 @@
   <script src="https://cdn.jsdelivr.net/npm/chart.js" defer></script>
 </head>
 <body>
+  <!-- Loading Screen -->
+  <div id="loading-screen" class="loading-screen">
+    <div class="loading-container">
+      <div class="loading-spinner"></div>
+      <h2>Brightlens News</h2>
+      <p>Loading crypto market...</p>
+    </div>
+  </div>
+
   <header class="header">
     <div class="container">
       <div class="header-content">
