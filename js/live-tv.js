@@ -161,6 +161,8 @@ import { channels } from '/assets/js/live-channels.js';
 		iframe.style.height = '100%';
 		iframe.style.border = '0';
 		iframe.loading = 'eager';
+		let loaded = false;
+		iframe.addEventListener('load',()=>{ loaded = true; });
 		if(channel.type === 'youtube'){
 			iframe.src = channel.embed + (channel.embed.includes('?') ? '&' : '?') + 'autoplay=1&rel=0';
 			iframe.allow = 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share';
@@ -170,6 +172,11 @@ import { channels } from '/assets/js/live-channels.js';
 			iframe.src = channel.embed;
 			iframe.referrerPolicy = 'no-referrer';
 			iframe.setAttribute('sandbox','allow-same-origin allow-scripts allow-forms allow-popups');
+			setTimeout(()=>{
+				if(!loaded){
+					container.innerHTML = `<div style="color:#fff;display:flex;align-items:center;justify-content:center;height:100%;flex-direction:column;gap:.5rem;text-align:center;padding:1rem">This channel cannot be embedded by the provider.<br><a href="${channel.embed}" target="_blank" rel="noopener noreferrer" style="color:#fff;text-decoration:underline">Open channel directly</a></div>`;
+				}
+			}, 4500);
 		}
 		container.appendChild(iframe);
 		state.activeId = channel.id;
