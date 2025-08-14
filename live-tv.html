@@ -22,20 +22,14 @@
     <link rel="preload" href="css/styles.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
     <link rel="preload" href="css/themes.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
     <link rel="preload" href="/css/settings.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
-    <link rel="preload" href="/css/live-tv.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <link rel="preload" href="/css/live-tv.css?v=1" as="style" onload="this.onload=null;this.rel='stylesheet'">
     <noscript><link rel="stylesheet" href="css/styles.css"><link rel="stylesheet" href="css/themes.css"><link rel="stylesheet" href="/css/settings.css"><link rel="stylesheet" href="/css/live-tv.css"></noscript>
 
     <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
     <script src="js/push-notifications.js" defer></script>
     <script src="js/sidebar-navigation.js" defer></script>
     
-    <script>
-      if ('serviceWorker' in navigator) {
-        window.addEventListener('load', () => {
-          navigator.serviceWorker.register('/service-worker.js');
-        });
-      }
-    </script>
+    <!-- Service worker intentionally not registered on Live TV to avoid caching issues during updates -->
     <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
     <noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"></noscript>
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -114,6 +108,6 @@
         </div>
     </footer>
 
-    <script type="module" src="/js/live-tv.js"></script>
+    <script type="module" src="/js/live-tv.js?v=1"></script>
 </body>
 </html>
