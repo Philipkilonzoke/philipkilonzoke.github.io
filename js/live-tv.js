@@ -1,5 +1,5 @@
 /* Live TV (scoped) - uses assets/js/live-channels.js data and builds UI with existing global styles/themes */
-import { channels } from '/assets/js/live-channels.js';
+import { channels } from '/assets/js/live-channels.js?v=2';
 
 (function(){
 	const state = {
@@ -142,7 +142,13 @@ import { channels } from '/assets/js/live-channels.js';
 	async function renderGrid(){
 		const grid = document.getElementById('channel-grid');
 		if(!grid) return;
-		let filtered = applyFilters(channels);
+		let source = Array.isArray(channels) ? channels : [];
+		if (source.length === 0) {
+			// Retry once after a brief delay in case the data script is cached or slow
+			await new Promise(r=>setTimeout(r, 200));
+			source = Array.isArray(channels) ? channels : [];
+		}
+		let filtered = applyFilters(source);
 		filtered = sortWithFavoritesFirst(filtered);
 		grid.innerHTML = '';
 		await Promise.all(filtered.slice(0,12).map(c=>prefetchImage(c.icon)));
