@@ -1144,6 +1144,7 @@
     height: 40px;
     border-radius: 8px;
     border: 1px solid var(--border-color);
+    margin: 0 auto 0.5rem;
 }
 
 .theme-preview-default { background: linear-gradient(45deg, #2563eb, #3b82f6); }
