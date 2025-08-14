@@ -78,6 +78,11 @@
         <div class="container">
             <div id="player-box" class="player-sticky-top player-sticky-bottom player-hidden">
                 <div id="player-title" style="font-size:1.1rem;padding:.5rem 1rem;color:var(--theme-text, var(--text-color))">Select a channel</div>
+                <div id="player-loading" class="player-loading" hidden>
+                    <div class="spinner"></div>
+                    <span>Loading stream…</span>
+                </div>
+                <div id="player-status" class="player-status" aria-live="polite"></div>
                 <iframe id="live-player" aria-label="Live stream player" tabindex="0" allowfullscreen></iframe>
                 <button class="close-btn" aria-label="Close player" title="Close" style="position:absolute;top:.5rem;right:.5rem;font-size:1.5rem;color:var(--theme-text, var(--text-color));background:transparent;border:none;cursor:pointer">&times;</button>
             </div>
