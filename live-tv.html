@@ -35,6 +35,13 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="preload" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <link rel="preconnect" href="https://www.youtube.com">
+    <link rel="preconnect" href="https://i.ytimg.com">
+    <link rel="preconnect" href="https://pluto.tv">
+    <link rel="preconnect" href="https://tubitv.com">
+    <link rel="preconnect" href="https://watch.plex.tv">
+    <link rel="preconnect" href="https://www.redbull.com">
+    <link rel="preconnect" href="https://fubosportsnetwork.com">
     <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"></noscript>
 </head>
 <body data-theme="dark">
@@ -77,7 +84,11 @@
     <main class="main">
         <div class="container">
             <div id="player-box" class="player-sticky-top player-sticky-bottom player-hidden">
-                <div id="player-title" style="font-size:1.1rem;padding:.5rem 1rem;color:var(--theme-text, var(--text-color))">Select a channel</div>
+                <div id="player-title" style="font-size:1.1rem;padding:.5rem 1rem;color:var(--theme-text, var(--text-color));display:flex;align-items:center;gap:.5rem">
+                    <span class="live-pill" aria-hidden="true">● LIVE</span>
+                    <img id="player-icon" alt="" width="20" height="20" style="object-fit:contain" />
+                    <span id="player-name">Select a channel</span>
+                </div>
                 <div id="player-loading" class="player-loading" hidden>
                     <div class="spinner"></div>
                     <span>Loading stream…</span>
@@ -87,6 +98,16 @@
                 <button class="close-btn" aria-label="Close player" title="Close" style="position:absolute;top:.5rem;right:.5rem;font-size:1.5rem;color:var(--theme-text, var(--text-color));background:transparent;border:none;cursor:pointer">&times;</button>
             </div>
 
+            <div class="filters" role="toolbar" aria-label="Live TV Controls" style="display:flex;gap:.5rem;align-items:center;justify-content:flex-start;margin:.5rem 0 1rem">
+                <div class="tabs" role="tablist" aria-label="Categories" style="display:flex;flex-wrap:wrap;gap:.5rem">
+                    <button role="tab" aria-selected="true" class="filter-btn" data-cat="All">All</button>
+                    <button role="tab" aria-selected="false" class="filter-btn" data-cat="News">News</button>
+                    <button role="tab" aria-selected="false" class="filter-btn" data-cat="Sports">Sports</button>
+                    <button role="tab" aria-selected="false" class="filter-btn" data-cat="Entertainment">Entertainment</button>
+                    <button role="tab" aria-selected="false" class="filter-btn" data-cat="Science">Science</button>
+                </div>
+                <button id="favorites-toggle" class="filter-btn" title="Show Favorites"><i class="fas fa-star"></i> Favorites</button>
+            </div>
             <section id="channel-grid" class="cards-grid" aria-live="polite"></section>
         </div>
     </main>

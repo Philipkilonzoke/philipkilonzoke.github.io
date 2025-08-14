@@ -121,6 +121,11 @@ import { channels } from '/assets/js/live-channels.js';
 		);
 	}
 
+	function sortWithFavoritesFirst(list){
+		const favs = state.favorites;
+		return list.slice().sort((a,b)=> (favs.has(a.id)?-1:0) - (favs.has(b.id)?-1:0));
+	}
+
 	function prefetchImage(src){
 		return new Promise((resolve)=>{
 			if(!src){ resolve(); return; }
@@ -137,17 +142,17 @@ import { channels } from '/assets/js/live-channels.js';
 	async function renderGrid(){
 		const grid = document.getElementById('channel-grid');
 		if(!grid) return;
-		const filtered = applyFilters(channels);
+		let filtered = applyFilters(channels);
+		filtered = sortWithFavoritesFirst(filtered);
 		grid.innerHTML = '';
-		// Prefetch first 12 icons for fast rendering
 		await Promise.all(filtered.slice(0,12).map(c=>prefetchImage(c.icon)));
 		filtered.forEach(c => {
 			const card = document.createElement('div');
 			card.className = 'channel-card';
 			card.innerHTML = `
-				<img class="channel-icon" src="${c.icon || ''}" alt="${c.name}" width="64" height="64" loading="lazy" decoding="async" referrerpolicy="no-referrer" onerror="this.onerror=null;this.src='/assets/icon-192.svg'" />
-				<div class="channel-name">${c.name}</div>
-				<button class="watch-btn" aria-label="Watch ${c.name}" data-id="${c.id}"><i class="fas fa-play"></i> Watch</button>
+				<img class=\"channel-icon\" src=\"${c.icon || ''}\" alt=\"${c.name}\" width=\"64\" height=\"64\" loading=\"lazy\" decoding=\"async\" referrerpolicy=\"no-referrer\" onerror=\"this.onerror=null;this.src='/assets/icon-192.svg'\" />
+				<div class=\"channel-name\">${c.name}</div>
+				<button class=\"watch-btn\" aria-label=\"Watch ${c.name}\" data-id=\"${c.id}\"><i class=\"fas fa-play\"></i> Watch</button>
 			`;
 			card.querySelector('.watch-btn').addEventListener('click', (e) => { e.preventDefault(); openChannel(c.id); });
 			grid.appendChild(card);
@@ -202,20 +207,26 @@ import { channels } from '/assets/js/live-channels.js';
 		$('#sticky-player').setAttribute('aria-hidden','false');
 	}
 
+	function setPlayerMeta(channel){
+		const nameEl = document.getElementById('player-name');
+		const iconEl = document.getElementById('player-icon');
+		if (nameEl) nameEl.textContent = channel.name;
+		if (iconEl) { iconEl.src = channel.icon || '/assets/icon-192.svg'; iconEl.onerror = ()=>{ iconEl.src='/assets/icon-192.svg'; } }
+	}
+
 	function openChannel(id){
 		const channel = channels.find(c=>c.id===id);
 		if(!channel) return;
-		const titleEl = document.getElementById('player-title');
+		location.hash = channel.id;
 		const iframeEl = document.getElementById('live-player');
 		const box = document.getElementById('player-box');
-		if (iframeEl && titleEl && box) {
+		if (iframeEl && box) {
 			box.classList.remove('player-hidden');
 			document.body.classList.add('player-active');
 			setPlayerStatus('');
 			setPlayerLoading(true);
-			titleEl.textContent = channel.name;
-			// Attach load/error handlers
-			const onLoad = ()=>{ setPlayerLoading(false); setPlayerStatus(''); cleanup(); };
+			setPlayerMeta(channel);
+			const onLoad = ()=>{ setPlayerLoading(false); setPlayerStatus(''); cleanup(); saveLastWatched(channel.id); };
 			const onError = ()=>{ setPlayerLoading(false); setPlayerStatus('Channel failed to load. Please try another.'); cleanup(); };
 			const cleanup = ()=>{
 				iframeEl.removeEventListener('load', onLoad);
@@ -223,18 +234,20 @@ import { channels } from '/assets/js/live-channels.js';
 			};
 			iframeEl.addEventListener('load', onLoad, { once:true });
 			iframeEl.addEventListener('error', onError, { once:true });
-			// Timeout fallback (provider blocking)
-			const timeoutId = setTimeout(()=>{
-				if(elStillLoading()){
-					setPlayerLoading(false);
-					setPlayerStatus('This channel may block embeds. Please try a different one.');
-				}
-			}, 6000);
-			function elStillLoading(){ return !iframeEl.contentWindow || !iframeEl.contentDocument; }
+			setTimeout(()=>{ if(!iframeEl.contentWindow){ setPlayerLoading(false); setPlayerStatus('This channel may block embeds. Please try a different one.'); }}, 6000);
 			iframeEl.src = channel.embed + (channel.embed.includes('?') ? '&' : '?') + 'autoplay=1&rel=0&mute=1';
 		} else {
 			mountPlayerIframe(channel);
 		}
+	}
+
+	function saveLastWatched(id){ try{ localStorage.setItem('bl_last_channel', id); }catch{} }
+	function getLastWatched(){ try{ return localStorage.getItem('bl_last_channel') || ''; }catch{ return ''; }}
+
+	function handleDeepLink(){
+		const idFromHash = location.hash.replace('#','');
+		const target = channels.find(c=>c.id===idFromHash) || channels.find(c=>c.id===getLastWatched());
+		if (target){ openChannel(target.id); }
 	}
 
 	function bindControls(){
@@ -321,5 +334,6 @@ import { channels } from '/assets/js/live-channels.js';
 		bindControls();
 		renderGrid();
 		bindPlayerClose();
+		handleDeepLink();
 	});
 })();
