@@ -222,7 +222,7 @@
         datasets: [{
           label: `${state.selected} ${range}`,
           data: series,
-          borderColor: '#2563eb',
+          borderColor: 'var(--primary-color)'.replace('var(--primary-color)', getComputedStyle(document.body).getPropertyValue('--primary-color').trim() || '#2563eb'),
           backgroundColor: 'rgba(37,99,235,0.2)',
           tension: 0.3,
           pointRadius: 0,
@@ -278,7 +278,17 @@
     setTimeout(() => { screen.style.display = 'none'; }, 300);
   }
 
+  function applySavedThemeEarly(){
+    try {
+      if (window.themeManager?.getCurrentTheme) {
+        const t = localStorage.getItem('brightlens-theme') || localStorage.getItem('selectedTheme') || 'default';
+        if (t && t !== 'default') document.body.setAttribute('data-theme', t);
+      }
+    } catch (_) {}
+  }
+
   document.addEventListener('DOMContentLoaded', async () => {
+    applySavedThemeEarly();
     bindControls();
     // Start initial data load and show in-page loading indicator
     await refreshData(true);
