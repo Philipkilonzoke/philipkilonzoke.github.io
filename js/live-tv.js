@@ -127,15 +127,16 @@ import { channels } from '/assets/js/live-channels.js';
 		const filtered = applyFilters(channels);
 		grid.innerHTML = '';
 		filtered.forEach(c => {
-			const btn = document.createElement('button');
-			btn.className = 'channel-btn';
-			btn.setAttribute('aria-label', `Play ${c.name} live`);
-			btn.dataset.id = c.id;
-			btn.dataset.embed = c.embed;
-			btn.dataset.name = c.name;
-			btn.innerHTML = `<img src="${c.icon || ''}" alt="${c.name}" width="64" height="64" loading="lazy" decoding="async" referrerpolicy="no-referrer" /><span class="live-dot"></span><span class="channel-name">${c.name}</span>`;
-			btn.addEventListener('click', ()=> openChannel(c.id));
-			grid.appendChild(btn);
+			const card = document.createElement('div');
+			card.className = 'channel-card';
+			card.innerHTML = `
+				<img class="channel-icon" src="${c.icon || ''}" alt="${c.name}" width="64" height="64" loading="lazy" decoding="async" referrerpolicy="no-referrer" />
+				<div class="channel-name">${c.name}</div>
+				<button class="watch-btn" aria-label="Watch ${c.name}" data-id="${c.id}"><i class="fas fa-play"></i> Watch</button>
+			`;
+			const watch = card.querySelector('.watch-btn');
+			watch.addEventListener('click', (e) => { e.preventDefault(); openChannel(c.id); });
+			grid.appendChild(card);
 		});
 	}
 
