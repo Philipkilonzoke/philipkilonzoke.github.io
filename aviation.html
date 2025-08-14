@@ -384,6 +384,33 @@
             'United Airlines': '#0E2452'
         };
 
+        // Airline IATA code to name fallback map
+        const AIRLINE_IATA_MAP = {
+            'KQ': 'Kenya Airways',
+            'BA': 'British Airways',
+            'EK': 'Emirates',
+            'LH': 'Lufthansa',
+            'AF': 'Air France',
+            'QR': 'Qatar Airways',
+            'AA': 'American Airlines',
+            'DL': 'Delta Air Lines',
+            'UA': 'United Airlines',
+            'KL': 'KLM',
+            'TK': 'Turkish Airlines',
+            'ET': 'Ethiopian Airlines',
+            'SW': 'Swiss',
+            'QF': 'Qantas',
+            'IB': 'Iberia',
+            'SN': 'Brussels Airlines',
+            'EY': 'Etihad Airways'
+        };
+
+        function inferAirlineFromFlightNumber(flightNum) {
+            if (!flightNum) return '';
+            const code = String(flightNum).trim().toUpperCase().match(/^[A-Z]{2}/);
+            return code ? (AIRLINE_IATA_MAP[code[0]] || '') : '';
+        }
+
         // Initialize Day.js plugins
         dayjs.extend(dayjs_plugin_relativeTime);
         dayjs.extend(dayjs_plugin_utc);
@@ -607,9 +634,9 @@
         async function fetchAviationStackData() {
             try {
                 const controller = new AbortController();
-                const timeoutId = setTimeout(() => controller.abort(), 2000); // Reduced to 2 seconds
+                const timeoutId = setTimeout(() => controller.abort(), 2500);
                 
-                const response = await fetch(`${AVIATION_API_URL}&limit=50`, { // Reduced limit for faster loading
+                const response = await fetch(`${AVIATION_API_URL}&limit=100&flight_status=active`, {
                     signal: controller.signal
                 });
                 clearTimeout(timeoutId);
@@ -653,22 +680,22 @@
                 // Convert OpenSky format to our format (limit to first 50 for speed)
                 return data.states ? data.states.slice(0, 50).map(state => ({
                     flight: { 
-                        number: state[1] || 'Unknown', 
-                        iata: state[1] || 'Unknown' 
+                        number: state[1] || 'N/A', 
+                        iata: state[1] || 'N/A' 
                     },
-                    airline: { name: 'Unknown' },
+                    airline: { name: inferAirlineFromFlightNumber(state[1]) || 'Unknown' },
                     flight_status: 'active',
                     departure: {
-                        iata: 'Unknown',
+                        iata: 'N/A',
                         airport: 'Unknown',
                         scheduled: new Date().toISOString()
                     },
                     arrival: {
-                        iata: 'Unknown',
+                        iata: 'N/A',
                         airport: 'Unknown',
                         scheduled: new Date(Date.now() + 2 * 3600000).toISOString()
                     },
-                    aircraft: { registration: state[0] || 'Unknown' }
+                    aircraft: { registration: state[0] || 'N/A' }
                 })) : [];
             } catch (error) {
                 console.error('OpenSky API error:', error);
