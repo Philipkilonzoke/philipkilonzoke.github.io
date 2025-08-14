@@ -447,3 +447,8 @@ select:focus {
 .channel-btn img{width:64px;height:64px;object-fit:contain}
 .live-dot{display:block;width:8px;height:8px;margin:4px auto;border-radius:50%;background:#ff0000;animation:pulse 1.5s infinite}
 .channel-btn:focus{outline:2px solid var(--primary-color);outline-offset:2px}
+.player-sticky-top,.player-sticky-bottom{position:sticky;width:100%;background:var(--theme-bg, var(--surface-color));border-bottom:1px solid var(--theme-border, var(--border-color));z-index:999}
+.player-sticky-bottom{bottom:0;border-top:1px solid var(--theme-border, var(--border-color))}
+.player-hidden{display:none}
+#live-player{width:100%;aspect-ratio:16/9;border:0;max-height:506px}
+#player-title{font-size:1.1rem;padding:.5rem 1rem;color:var(--theme-text, var(--text-color))}
