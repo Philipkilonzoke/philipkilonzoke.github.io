@@ -97,9 +97,10 @@ import { channels } from '/assets/js/live-channels.js';
 		const isFav = state.favorites.has(c.id);
 		return `
 			<article class="channel-card" data-id="${c.id}" tabindex="0" aria-label="${c.name}">
-				<div class="channel-thumb" style="position:relative;border-radius:var(--radius-md);overflow:hidden">
-					<img src="${c.thumb}" alt="${c.name} thumbnail" loading="lazy" referrerpolicy="no-referrer" style="width:100%;aspect-ratio:16/9;object-fit:cover" />
-					<span class="live-pulse" aria-hidden="true" style="position:absolute;left:.5rem;top:.5rem;background:#ef4444;color:#fff;border-radius:999px;padding:.15rem .5rem;font-size:.75rem;font-weight:700">LIVE</span>
+				<div class=\"channel-thumb\" style=\"position:relative;border-radius:var(--radius-md);overflow:hidden\">
+					<img src=\"${c.thumb}\" alt=\"${c.name} thumbnail\" loading=\"lazy\" referrerpolicy=\"no-referrer\" style=\"width:100%;aspect-ratio:16/9;object-fit:cover\" />
+					<span class=\"live-pulse\" aria-hidden=\"true\" style=\"position:absolute;left:.5rem;top:.5rem;background:#ef4444;color:#fff;border-radius:999px;padding:.15rem .5rem;font-size:.75rem;font-weight:700\">LIVE</span>
+					<img src=\"${c.icon || ''}\" alt=\"${c.name} logo\" loading=\"lazy\" referrerpolicy=\"no-referrer\" style=\"position:absolute;right:.5rem;bottom:.5rem;width:48px;height:48px;object-fit:contain;background:rgba(0,0,0,.3);backdrop-filter:blur(2px);border-radius:8px;padding:.25rem\" />
 				</div>
 				<header style="display:flex;align-items:center;justify-content:space-between;margin-top:.5rem">
 					<h3 style="font-size:1rem">${c.name}</h3>
@@ -164,7 +165,7 @@ import { channels } from '/assets/js/live-channels.js';
 		let loaded = false;
 		iframe.addEventListener('load',()=>{ loaded = true; });
 		if(channel.type === 'youtube'){
-			iframe.src = channel.embed + (channel.embed.includes('?') ? '&' : '?') + 'autoplay=1&rel=0';
+			iframe.src = channel.embed + (channel.embed.includes('?') ? '&' : '?') + 'autoplay=1&rel=0&mute=1';
 			iframe.allow = 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share';
 			iframe.referrerPolicy = 'strict-origin-when-cross-origin';
 			iframe.setAttribute('sandbox','allow-same-origin allow-scripts allow-presentation');
