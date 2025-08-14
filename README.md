@@ -1,167 +1,161 @@
 # Brightlens News.
 
-A modern, fast, and responsive news and media hub focused on Kenyan and global coverage. It aggregates real-time articles from multiple APIs, adds special category experiences (Weather, Live TV, Food & Recipes), and ships as a PWA with offline support and push notifications.
+A fast, modern, mobile‑first news and media hub focused on Kenya and global coverage. It aggregates real‑time articles from multiple APIs, includes category‑specific experiences (Live TV, Aviation, Weather, Food & Recipes), supports 12+ themes, and ships as a PWA.
 
-## Highlights
+## Live site
 
+- GitHub Pages: https://philipkilonzoke.github.io/
 
-- **Kenya-first**: Enhanced Kenya category and local sources handling
-- **Rich categories**: Latest, Kenya, World, Entertainment, Technology, Business, Sports, Health, Lifestyle, Food, Crypto, Astronomy, Aviation, Weather, Live TV
-- **Live TV**: Curated channels with working YouTube/Twitch embeds (`live-tv.html`, `js/live-tv.js`)
-- **Weather**: Dedicated weather experience (`weather.html`)
-- **Recipes**: Food & Recipes page  (`food.html`)
-- **Performance**: Lazy-loaded images, intersection observers, caching via Service Worker
-- **PWA**: Installable app with offline support (`manifest.json`, `service-worker.js`)
-- **Push notifications**: OneSignal integration (`js/push-notifications.js`)
-- **Themes**: Multiple color _themes (`css/themes.css`)
+## Key features
 
-## Project Structure
+- News aggregation with duplicate removal, relevance filters, and newest‑first sorting
+- Categories: Latest, Kenya, World, Entertainment, Technology, Business, Sports, Health, Lifestyle, Food, Crypto, Astronomy, Aviation, Weather, Live TV
+- 12+ color themes with instant theme modal (`css/themes.css`, `js/themes.js`)
+- PWA: offline caching, install experience (`manifest.json`, `service-worker.js`)
+- OneSignal push notifications (`js/push-notifications.js`)
+- Accessibility: keyboard navigation, focus states, aria‑labels, and ESC to close overlays
+- Performance: lazy loading, preconnects, intersection observers, and careful caching
 
-```
-/
-├── index.html                # Homepage
-├── latest.html               # Breaking
-├── kenya.html                # Kenya
-├── world.html                # World
-├── entertainment.html        # Entertainment
-├── technology.html           # Technology
-├── business.html             # Business
-├── sports.html               # Sports
-├── health.html               # Health
-├── lifestyle.html            # Lifestyle
-├── food.html                 # Food & Recipes
-├── crypto.html               # Crypto
-├── astronomy.html            # Astronomy
-├── aviation.html             # Aviation
-├── weather.html              # Weather
-├── live-tv.html              # Live TV
-├── manifest.json             # PWA manifest
-├── service-worker.js         # Offline caching
-├── js/
-│   ├── main.js              # Homepage app logic
-│   ├── news-api.js          # Aggregation + API adapters
-│   ├── category-news.js     # Category page renderer
-│   ├── live-tv.js           # Live TV interactions
-│   ├── weather.js           # Weather logic (used by weather.html)
-│   ├── sidebar-navigation.js# Sidebar component
-│   ├── push-notifications.js# OneSignal init
-│   └── ...
-├── css/
-│   ├── styles.css           # Base styles
-│   ├── themes.css           # Theme variables
-│   ├── live-tv.css          # Live TV styles
-│   └── weather.css          # Weather styles
-└── assets/
-    └── default.svg
-```
-
-## Setup & Development
-
-This site is static and designed for GitHub Pages. No build step is required.
-
-- Clone the repo and open any `.html` file in a browser (or use a simple static server).
-- To test PWA/service worker locally, serve over HTTP(S) using a static server, e.g.:
+## Repository structure
 
 ```
-npx serve .
+/                      # Static site root (GitHub Pages)
+├─ index.html          # Homepage
+├─ latest.html         # Breaking news
+├─ kenya.html          # Kenya category (enhanced relevance and freshness)
+├─ world.html
+├─ entertainment.html
+├─ technology.html
+├─ business.html
+├─ sports.html
+├─ health.html
+├─ lifestyle.html
+├─ food.html           # Food & Recipes
+├─ crypto.html
+├─ astronomy.html
+├─ aviation.html       # Aviation hub + live flight tracker
+├─ weather.html        # Weather experience
+├─ live-tv.html        # Live TV hub (sticky inline player)
+├─ manifest.json       # PWA manifest
+├─ service-worker.js   # Caching (Pages + optional offline)
+├─ js/
+│  ├─ main.js                  # Homepage logic
+│  ├─ news-api.js              # Aggregation + adapters + enhanced categories
+│  ├─ category-news.js         # Shared category renderer
+│  ├─ live-tv.js               # Live TV logic (grid, sticky player, filters)
+│  ├─ sidebar-navigation.js    # Sidebar & mobile toggle
+│  ├─ settings.js, themes.js   # Theme modal + persistence
+│  ├─ push-notifications.js    # OneSignal integration
+│  └─ ... (weather.js, etc.)
+├─ css/
+│  ├─ styles.css               # Base styles + grid, header, cards
+│  ├─ themes.css               # 12+ theme variables
+│  ├─ live-tv.css              # Live TV specific styles
+│  └─ weather.css              # Weather styles
+└─ assets/
+   ├─ js/live-channels.js      # Live TV channel data (30 channels)
+   ├─ media/hero.mp4           # Hero video for Live TV (small loop)
+   ├─ icon-192.svg, icon-512.svg
+   └─ default.svg
 ```
 
-- Some APIs require keys. `js/news-api.js` contains key placeholders and uses graceful fallbacks when a source fails.
-- Push notifications require a valid OneSignal `appId` (already configured in `js/push-notifications.js`).
+## Local development
 
-## Data Sources (APIs)
+This is a static site (no build step). Open any `.html` file directly or run a static server to test PWA features.
 
-Implemented adapters in `js/news-api.js`:
+- Quick start:
+  - Open `index.html` in your browser, or
+  - `npx serve .` (or use any static server) and visit `http://localhost:3000` (port may vary)
+
+- PWA/Service Worker:
+  - Service worker requires HTTPS or `localhost`. For debugging, you can hard‑refresh or unregister the SW via DevTools (Application → Service workers → Unregister).
+  - Live TV page intentionally does not re‑register the SW to avoid caching confusion during updates.
+
+- API keys:
+  - News APIs are configured in `js/news-api.js`. Keys are embedded for a demo experience; replace with your own API keys where needed.
+  - OneSignal is initialized in `js/push-notifications.js` (update `appId` if you use a different project).
+
+## Data sources (News)
+
+Adapters in `js/news-api.js`:
 - GNews
 - NewsData.io
 - NewsAPI.org
-- MediaStack
+- Mediastack
 - CurrentsAPI
 
-Category-specific logic for Kenya, Technology, Health, Lifestyle, and Sports optimizes relevance and eliminates duplicates. When APIs fail, the site still renders gracefully to avoid blank pages.
+Enhancements:
+- Sports: specialized multi‑source strategy to increase volume and recency
+- Kenya: enhanced Kenya‑relevant filters (keywords + domain heuristics), duplicates removed, newest‑first; page further filters to last 48 hours for freshness
+- Technology/Health: boosted relevance and timeliness with dedicated adapters
 
-## Food & Recipes
+## Category specifics
 
-- The `food.html` page integrates with Spoonacular for recipes.
-- Images use lazy-loading and a multi-candidate fallback strategy to avoid broken images from size-specific URLs. If all attempts fail, a clean placeholder is displayed.
-- Preconnect to `https://img.spoonacular.com` is configured to speed up first-paint.
+### Kenya
+- Enhanced multi‑source fetching with expanded Kenya‑relevance detection (keywords + Kenyan domains + known sources)
+- Deduped, newest‑first sorting; page filters to last 48h to keep content fresh
 
-## Sidebar & Navigation
+### Live TV (`live-tv.html`)
+- 30 curated channels in `assets/js/live-channels.js` (YouTube + FAST: Pluto, Tubi, Plex, Red Bull, Fubo)
+- Grid of channel cards with icons and Watch button
+- Sticky inline player (top on desktop, bottom on mobile), ESC/× closes
+- Filters (All/News/Sports/Entertainment/Science), search, and favorites (localStorage)
+- Autoplay for YouTube; sandbox for FAST providers; graceful message if a provider blocks embeds
+- Dark mode by default; fully themeable via the global theme system
 
-- The sidebar is generated by `js/sidebar-navigation.js`.
-- Only existing categories are listed. Removed: Music and Movies & Series, to prevent 404s.
+To add or edit channels:
+- Update `assets/js/live-channels.js` (id, name, icon, embed, category)
 
-## PWA & Caching
+### Aviation (`aviation.html`)
+- Live flight tracker using AviationStack + OpenSky (fastest source wins)
+- Airline names inferred from flight numbers if missing; fewer “Unknown” labels
+- Sorting (departure/arrival time, airline), UTC/Local time toggle, favorites (pin), copy info
+- Auto refresh with countdown, search and status filter
 
-- `service-worker.js` caches key assets and pages for offline usage.
-- Cache version is `brightlens-news-v2` to purge old entries (including removed routes and unused CSS).
-- `manifest.json` configures install experience and icons.
+### Weather
+- Dedicated `weather.html` with a richer layout and styling
 
-## Notifications
+### Food & Recipes
+- Pulls recipes with lazy image loading and resilient fallbacks
 
-- OneSignal is initialized in `js/push-notifications.js`. To use a different OneSignal app, update `appId`.
+## Theming
+
+- Themes are defined in `css/themes.css` and applied via `js/themes.js`
+- Open the theme modal from the header palette icon
+- Selected theme persists in localStorage and is applied across pages
+
+## Accessibility
+
+- Keyboard support for overlays (ESC to close), Enter/Space to activate, and consistent focus states
+- Aria labels and live regions for player status updates
+
+## Caching & service worker
+
+- `service-worker.js` caches core pages and assets. Cache name bump forces eviction of stale content when updated.
+- For debugging caching issues: hard refresh (Ctrl/Cmd+Shift+R) or temporarily unregister the service worker in DevTools.
 
 ## Deployment
 
-This repository is configured for GitHub Pages hosting.
-- Commit your changes to `main` and ensure Pages is enabled in repo settings.
-- Service Worker updates may require a hard refresh on client devices to activate the new version.
+- The repo is configured for GitHub Pages
+- Commit to `main`; Pages will serve `main` branch content
+- SW updates may require a hard refresh for clients
 
-## Recent Improvements
+## Troubleshooting
 
-- Fixed recipe images failing to load by adding lazy-load fallbacks and CDN preconnect
-- Removed dead categories (Music, Movies & Series) from sidebar and service worker pre-cache
-- Bumped service worker cache to v2 to evict stale assets
+- “Live TV shows old layout or empty grid” → Hard refresh and/or unregister SW. Ensure `assets/js/live-channels.js` is loading; the page retries once if not ready.
+- “Kenya shows few items” → APIs may be rate‑limited. The page filters to last 48h by design; volume increases automatically as sources publish new items.
+- “Aviation shows Unknown airline” → With OpenSky, some records lack names; we infer by IATA code when possible, otherwise show a neutral label.
+
+## Contributing
+
+- Fork and open a PR on `main`
+- Keep pages static and CDN‑friendly (no build step)
+- Match code style: clear names, early returns, minimal nesting, and accessible UIs
+
+## Security
+
+- Never commit private API keys to the repo. If you rotate keys, update `js/news-api.js` and re‑deploy.
 
 ## License
 
 All rights reserved © 2025 Brightlens News
-
-## Author
-
-Philip Kilonzo
-
-## Live TV v2
-
-A new Live TV experience has been added as `live-tv-v2.html` using a secure backend API for YouTube live lookups.
-
-- Frontend: `live-tv-v2.html`, `js/live-tv-v2.js`
-- Backend: `server/index.js`, `server/package.json`
-
-### Local usage
-
-1. Set YouTube Data API v3 key as environment variable:
-   - `export YT_API_KEY=YOUR_API_KEY`
-2. Install and run the backend:
-   - `cd server && npm install && npm run start`
-3. Serve the static site (e.g., with any static server) and ensure `window.BRIGHTLENS_API_BASE_URL='/api'` is proxied to the backend, or open directly if on the same origin.
-
-### Replit deployment
-
-- Create a new Repl for the backend, import `server/` folder.
-- Set secret `YT_API_KEY` in Replit Secrets.
-- Run `npm install` and `npm start`.
-- Note the backend URL, e.g., `https://your-repl-name.your-username.repl.co`.
-- In the frontend hosting (this repo on GitHub Pages or similar), set `window.BRIGHTLENS_API_BASE_URL` before loading `js/live-tv-v2.js` or host the backend under the same domain using a reverse proxy.
-
-### Frontend API configuration example
-
-Include before `js/live-tv-v2.js` on `live-tv-v2.html` if backend is on a different host:
-
-```html
-<script>window.BRIGHTLENS_API_BASE_URL = 'https://your-backend.example.com/api';</script>
-```
-
-### API
-
-GET `/api/live?channelId=UC...`
-
-Response when live:
-```json
-{ "status":"live", "videoId":"VIDEO_ID", "title":"...", "publishedAt":"..." }
-```
-
-Response when offline:
-```json
-{ "status":"offline", "latest": { "videoId":"...", "title":"...", "publishedAt":"...", "thumbnail":"..." } }
-```
