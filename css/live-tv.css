@@ -441,3 +441,9 @@ select:focus {
         color: black;
     }
 }
+.cards-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:1rem}
+.channel-btn{display:flex;flex-direction:column;align-items:center;border:none;background:transparent;cursor:pointer;transition:transform .2s;padding:.5rem;border-radius:12px}
+.channel-btn:hover{transform:scale(1.05)}
+.channel-btn img{width:64px;height:64px;object-fit:contain}
+.live-dot{display:block;width:8px;height:8px;margin:4px auto;border-radius:50%;background:#ff0000;animation:pulse 1.5s infinite}
+.channel-btn:focus{outline:2px solid var(--primary-color);outline-offset:2px}
