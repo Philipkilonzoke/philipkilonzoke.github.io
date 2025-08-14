@@ -61,7 +61,7 @@ import { channels } from '/assets/js/live-channels.js';
 	function buildGrid(){
 		const wrap = document.createElement('div');
 		wrap.className = 'container';
-		wrap.innerHTML = `<div id="channels-grid" class="news-grid" aria-live="polite"></div>`;
+		wrap.innerHTML = `<section id="channel-grid" class="cards-grid" aria-live="polite"></section>`;
 		return wrap;
 	}
 
@@ -122,31 +122,24 @@ import { channels } from '/assets/js/live-channels.js';
 	}
 
 	function renderGrid(){
-		const grid = $('#channels-grid');
+		const grid = document.getElementById('channel-grid');
 		if(!grid) return;
 		const filtered = applyFilters(channels);
-		grid.innerHTML = filtered.map(channelCard).join('');
-		bindGridEvents();
+		grid.innerHTML = '';
+		filtered.forEach(c => {
+			const btn = document.createElement('button');
+			btn.className = 'channel-btn';
+			btn.setAttribute('aria-label', `Play ${c.name} live`);
+			btn.dataset.id = c.id;
+			btn.dataset.embed = c.embed;
+			btn.innerHTML = `<img src="${c.icon || ''}" alt="${c.name}" /><span class="live-dot"></span><span class="channel-name">${c.name}</span>`;
+			btn.addEventListener('click', ()=> openChannel(c.id));
+			grid.appendChild(btn);
+		});
 	}
 
 	function bindGridEvents(){
-		$all('.watch-btn').forEach(btn=>{
-			btn.addEventListener('click',()=>openChannel(btn.dataset.id));
-		});
-		$all('.channel-card').forEach(card=>{
-			card.addEventListener('keydown',e=>{
-				if(e.key==='Enter' || e.key===' '){ e.preventDefault(); const id = card.dataset.id; openChannel(id); }
-			});
-		});
-		$all('.fav-btn').forEach(btn=>{
-			btn.addEventListener('click',e=>{
-				e.stopPropagation();
-				const id = btn.dataset.id;
-				if(state.favorites.has(id)) state.favorites.delete(id); else state.favorites.add(id);
-				saveFavorites();
-				renderGrid();
-			});
-		});
+		// No-op: events are attached per button during render
 	}
 
 	function mountPlayerIframe(channel){
@@ -187,7 +180,15 @@ import { channels } from '/assets/js/live-channels.js';
 	function openChannel(id){
 		const channel = channels.find(c=>c.id===id);
 		if(!channel) return;
-		mountPlayerIframe(channel);
+		const titleEl = document.getElementById('player-title');
+		const iframeEl = document.getElementById('player');
+		if (iframeEl && titleEl) {
+			// direct swap if the static player exists
+			iframeEl.src = channel.embed + (channel.embed.includes('?') ? '&' : '?') + 'autoplay=1&rel=0&mute=1';
+			titleEl.textContent = channel.name;
+		} else {
+			mountPlayerIframe(channel);
+		}
 	}
 
 	function bindControls(){

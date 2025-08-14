@@ -22,7 +22,8 @@
     <link rel="preload" href="css/styles.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
     <link rel="preload" href="css/themes.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
     <link rel="preload" href="/css/settings.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
-    <noscript><link rel="stylesheet" href="css/styles.css"><link rel="stylesheet" href="css/themes.css"><link rel="stylesheet" href="/css/settings.css"></noscript>
+    <link rel="preload" href="/css/live-tv.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <noscript><link rel="stylesheet" href="css/styles.css"><link rel="stylesheet" href="css/themes.css"><link rel="stylesheet" href="/css/settings.css"><link rel="stylesheet" href="/css/live-tv.css"></noscript>
 
     <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
     <script src="js/push-notifications.js" defer></script>
@@ -79,7 +80,28 @@
         </div>
     </header>
 
-    <main class="main"></main>
+    <main class="main">
+        <div class="container">
+            <div class="player-desktop" style="position:sticky;top:0;z-index:90">
+                <div style="background:#000;border-radius:12px;overflow:hidden">
+                    <div style="padding:.5rem 1rem;color:#fff;display:flex;justify-content:space-between;align-items:center;background:linear-gradient(180deg,rgba(0,0,0,.65),transparent)">
+                        <div><span class="badge" style="color:#ef4444">● LIVE</span> <span id="player-title">Select a channel</span></div>
+                    </div>
+                    <div style="width:100%;aspect-ratio:16/9;background:#000">
+                        <iframe id="player" allowfullscreen style="width:100%;height:100%;border:0"></iframe>
+                    </div>
+                </div>
+            </div>
+
+            <section id="channel-grid" class="cards-grid" aria-live="polite"></section>
+
+            <div class="player-mobile" style="display:none;position:fixed;left:0;right:0;bottom:0;z-index:95">
+                <div style="background:#000">
+                    <iframe id="player-mobile" allowfullscreen style="width:100%;height:36vh;border:0"></iframe>
+                </div>
+            </div>
+        </div>
+    </main>
 
     <footer class="footer">
         <div class="footer-wave">
