@@ -82,24 +82,13 @@
 
     <main class="main">
         <div class="container">
-            <div class="player-desktop" style="position:sticky;top:0;z-index:90">
-                <div style="background:#000;border-radius:12px;overflow:hidden">
-                    <div style="padding:.5rem 1rem;color:#fff;display:flex;justify-content:space-between;align-items:center;background:linear-gradient(180deg,rgba(0,0,0,.65),transparent)">
-                        <div><span class="badge" style="color:#ef4444">● LIVE</span> <span id="player-title">Select a channel</span></div>
-                    </div>
-                    <div style="width:100%;aspect-ratio:16/9;background:#000">
-                        <iframe id="player" allowfullscreen style="width:100%;height:100%;border:0"></iframe>
-                    </div>
-                </div>
+            <div id="player-box" class="player-sticky-top player-sticky-bottom player-hidden">
+                <div id="player-title" style="font-size:1.1rem;padding:.5rem 1rem;color:var(--theme-text, var(--text-color))">Select a channel</div>
+                <iframe id="live-player" aria-label="Live stream player" tabindex="0" allowfullscreen></iframe>
+                <button class="close-btn" aria-label="Close player" title="Close" style="position:absolute;top:.5rem;right:.5rem;font-size:1.5rem;color:var(--theme-text, var(--text-color));background:transparent;border:none;cursor:pointer">&times;</button>
             </div>
 
             <section id="channel-grid" class="cards-grid" aria-live="polite"></section>
-
-            <div class="player-mobile" style="display:none;position:fixed;left:0;right:0;bottom:0;z-index:95">
-                <div style="background:#000">
-                    <iframe id="player-mobile" allowfullscreen style="width:100%;height:36vh;border:0"></iframe>
-                </div>
-            </div>
         </div>
     </main>
 
