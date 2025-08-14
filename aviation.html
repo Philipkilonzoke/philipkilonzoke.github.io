@@ -422,10 +422,20 @@
             'EY': 'Etihad Airways'
         };
 
-        function inferAirlineFromFlightNumber(flightNum) {
-            if (!flightNum) return '';
-            const code = String(flightNum).trim().toUpperCase().match(/^[A-Z]{2}/);
-            return code ? (AIRLINE_IATA_MAP[code[0]] || '') : '';
+        const AIRLINE_ICAO_MAP = {
+            'KQA':'Kenya Airways','BAW':'British Airways','AFR':'Air France','DLH':'Lufthansa','QTR':'Qatar Airways',
+            'AAL':'American Airlines','DAL':'Delta Air Lines','UAL':'United Airlines','KLM':'KLM','THY':'Turkish Airlines',
+            'ETD':'Etihad Airways','SWR':'Swiss','QFA':'Qantas','IBE':'Iberia','BEL':'Brussels Airlines','ETH':'Ethiopian Airlines'
+        };
+
+        function inferAirlineFromCodes(flight){
+            const num = (flight?.flight?.number || flight?.flight?.iata || '').trim().toUpperCase();
+            if (!num) return '';
+            const iata2 = num.slice(0,2);
+            const icao3 = num.slice(0,3);
+            if (AIRLINE_ICAO_MAP[icao3]) return AIRLINE_ICAO_MAP[icao3];
+            if (AIRLINE_IATA_MAP[iata2]) return AIRLINE_IATA_MAP[iata2];
+            return '';
         }
 
         // Initialize Day.js plugins
@@ -707,12 +717,12 @@
                 const data = await response.json();
                 
                 // Convert OpenSky format to our format (limit to first 50 for speed)
-                return data.states ? data.states.slice(0, 50).map(state => ({
+                                    return data.states ? data.states.slice(0, 50).map(state => ({
                     flight: { 
                         number: state[1] || 'N/A', 
                         iata: state[1] || 'N/A' 
                     },
-                    airline: { name: inferAirlineFromFlightNumber(state[1]) || 'Unknown' },
+                    airline: { name: inferAirlineFromCodes({ flight: { number: state[1], iata: state[1] } }) || 'Unknown' },
                     flight_status: 'active',
                     departure: {
                         iata: 'N/A',
@@ -835,7 +845,7 @@
                                 <span class="airline-initial">${airlineInitial}</span>
                             </div>
                             <div class="airline-details">
-                                <h3 class="airline-name">${airline.name || 'Unknown Airline'}</h3>
+                                <h3 class="airline-name">${airline.name || inferAirlineFromCodes(flight) || 'Unknown Airline'}</h3>
                                 <div class="flight-number">${flight.flight?.number || flight.flight?.iata || 'N/A'}</div>
                             </div>
                         </div>
