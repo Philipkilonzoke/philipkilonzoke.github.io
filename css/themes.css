@@ -130,6 +130,61 @@
     --border-color: #fca5a5;
 }
 
+/* Midnight Neon (Dark) */
+[data-theme="midnight-neon"] {
+    --primary-color: #00FFC6;
+    --secondary-color: #FF2079;
+    --background-color: #0D0D0D;
+    --surface-color: #141414;
+    --text-color: #FFFFFF;
+    --text-muted: #cbd5e1;
+    --border-color: #262626;
+}
+
+/* Sunset Horizon (Dark Warm) */
+[data-theme="sunset-horizon"] {
+    --primary-color: #FF6B6B;
+    --secondary-color: #F7B801;
+    --background-color: #2D132C;
+    --surface-color: #3b193c;
+    --text-color: #FFFFFF;
+    --text-muted: #e5e7eb;
+    --border-color: #4b1f4a;
+}
+
+/* Arctic Light (Light) */
+[data-theme="arctic-light"] {
+    --primary-color: #00B4D8;
+    --secondary-color: #0077B6;
+    --background-color: #F4F9F9;
+    --surface-color: #eaf3f3;
+    --text-color: #222222;
+    --text-muted: #4b5563;
+    --border-color: #d7e6e6;
+}
+
+/* Cyber Purple (Dark) */
+[data-theme="cyber-purple"] {
+    --primary-color: #FF3366;
+    --secondary-color: #6C63FF;
+    --background-color: #1A1B41;
+    --surface-color: #232454;
+    --text-color: #FFFFFF;
+    --text-muted: #c7cbe6;
+    --border-color: #2a2b5a;
+}
+
+/* Forest Glow (Dark) */
+[data-theme="forest-glow"] {
+    --primary-color: #06D6A0;
+    --secondary-color: #FFD166;
+    --background-color: #0B3D2E;
+    --surface-color: #0f4a39;
+    --text-color: #FFFFFF;
+    --text-muted: #d1fae5;
+    --border-color: #145445;
+}
+
 /* Theme transitions */
 * {
     transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
@@ -178,6 +233,26 @@
 
 [data-theme="crimson"] .loading-screen {
     background: linear-gradient(135deg, #dc2626, #b91c1c);
+}
+
+[data-theme="midnight-neon"] .loading-screen {
+    background: linear-gradient(135deg, #00FFC6, #FF2079);
+}
+
+[data-theme="sunset-horizon"] .loading-screen {
+    background: linear-gradient(135deg, #FF6B6B, #F7B801);
+}
+
+[data-theme="arctic-light"] .loading-screen {
+    background: linear-gradient(135deg, #00B4D8, #0077B6);
+}
+
+[data-theme="cyber-purple"] .loading-screen {
+    background: linear-gradient(135deg, #6C63FF, #FF3366);
+}
+
+[data-theme="forest-glow"] .loading-screen {
+    background: linear-gradient(135deg, #06D6A0, #0B3D2E);
 }
 
 /* Dark theme specific adjustments */

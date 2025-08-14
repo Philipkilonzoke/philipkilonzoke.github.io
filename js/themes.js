@@ -18,7 +18,12 @@ class ThemeManager {
             { id: 'indigo', name: 'Indigo', description: 'Deep indigo blue theme' },
             { id: 'amber', name: 'Amber', description: 'Golden amber theme' },
             { id: 'teal', name: 'Teal', description: 'Refreshing teal theme' },
-            { id: 'crimson', name: 'Crimson', description: 'Bold crimson red theme' }
+            { id: 'crimson', name: 'Crimson', description: 'Bold crimson red theme' },
+            { id: 'midnight-neon', name: 'Midnight Neon', description: 'Dark theme with glowing neon accents' },
+            { id: 'sunset-horizon', name: 'Sunset Horizon', description: 'Warm and inviting gradient theme' },
+            { id: 'arctic-light', name: 'Arctic Light', description: 'Clean and fresh light theme' },
+            { id: 'cyber-purple', name: 'Cyber Purple', description: 'Futuristic tech vibe with bold colors' },
+            { id: 'forest-glow', name: 'Forest Glow', description: 'Nature-inspired modern dark theme' }
         ];
         
         this.init();

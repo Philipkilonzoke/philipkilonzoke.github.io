@@ -790,6 +790,26 @@ body {
     background: linear-gradient(45deg, #dc2626 50%, #b91c1c 50%);
 }
 
+.theme-preview-midnight-neon {
+    background: linear-gradient(45deg, #0D0D0D 50%, #00FFC6 50%);
+}
+
+.theme-preview-sunset-horizon {
+    background: linear-gradient(45deg, #2D132C 50%, #FF6B6B 50%);
+}
+
+.theme-preview-arctic-light {
+    background: linear-gradient(45deg, #F4F9F9 50%, #00B4D8 50%);
+}
+
+.theme-preview-cyber-purple {
+    background: linear-gradient(45deg, #1A1B41 50%, #6C63FF 50%);
+}
+
+.theme-preview-forest-glow {
+    background: linear-gradient(45deg, #0B3D2E 50%, #06D6A0 50%);
+}
+
 .theme-info {
     margin-top: 0.5rem;
 }
