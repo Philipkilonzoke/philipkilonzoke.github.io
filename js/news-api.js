@@ -233,12 +233,12 @@ class NewsAPI {
         try {
             // Fetch from multiple sources including Kenya-specific APIs and RSS feeds
             const promises = [
-                // Original API sources with Kenya focus
-                this.fetchFromGNews('kenya', Math.floor(limit * 0.2)),
-                this.fetchFromNewsData('kenya', Math.floor(limit * 0.2)),
-                this.fetchFromNewsAPI('kenya', Math.floor(limit * 0.2)),
-                this.fetchFromMediastack('kenya', Math.floor(limit * 0.2)),
-                this.fetchFromCurrentsAPI('kenya', Math.floor(limit * 0.2)),
+                // Original API sources with Kenya focus (increase overall volume)
+                this.fetchFromGNews('kenya', Math.floor(limit * 0.4)),
+                this.fetchFromNewsData('kenya', Math.floor(limit * 0.4)),
+                this.fetchFromNewsAPI('kenya', Math.floor(limit * 0.4)),
+                this.fetchFromMediastack('kenya', Math.floor(limit * 0.4)),
+                this.fetchFromCurrentsAPI('kenya', Math.floor(limit * 0.4)),
                 
                 // Kenya-specific RSS feeds and APIs
                 this.fetchFromNationAfrica(),
@@ -1128,11 +1128,25 @@ class NewsAPI {
             'kibera', 'mathare', 'eastleigh', 'westlands', 'karen', 'runda', 'kilifi'
         ];
 
+        const isKenyanDomain = (url) => {
+            try {
+                const u = new URL(url);
+                const host = u.hostname.replace(/^www\./, '').toLowerCase();
+                if (host.endsWith('.co.ke') || host.endsWith('.ke')) return true;
+                // Match against known Kenyan sources list
+                return this.kenyanSources.some(src => host.includes(src));
+            } catch { return false; }
+        };
+
         return articles.filter(article => {
-            const textToCheck = `${article.title} ${article.description}`.toLowerCase();
+            const title = (article.title || '').toLowerCase();
+            const desc = (article.description || '').toLowerCase();
+            const src = (article.source || '').toLowerCase();
+            const textToCheck = `${title} ${desc}`;
             return kenyaKeywords.some(keyword => textToCheck.includes(keyword)) ||
-                   article.source.toLowerCase().includes('kenya') ||
-                   article.category === 'kenya';
+                   src.includes('kenya') ||
+                   article.category === 'kenya' ||
+                   isKenyanDomain(article.url);
         });
     }
 
