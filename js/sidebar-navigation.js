@@ -113,10 +113,10 @@ class SidebarNavigation {
                 id: 'weather'
             },
             { 
-                href: 'live-tv-v2.html', 
+                href: 'live-tv.html', 
                 icon: 'fas fa-tv', 
                 text: 'Live TV',
-                id: 'live-tv-v2'
+                id: 'live-tv'
             }
         ];
     }

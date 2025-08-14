@@ -1,4 +1,4 @@
-const CACHE_NAME = 'brightlens-news-v2';
+const CACHE_NAME = 'brightlens-news-v3';
 const urlsToCache = [
   '/',
   '/index.html',
