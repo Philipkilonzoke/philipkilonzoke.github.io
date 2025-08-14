@@ -13,7 +13,7 @@ A modern, fast, and responsive news and media hub focused on Kenyan and global c
 - **Performance**: Lazy-loaded images, intersection observers, caching via Service Worker
 - **PWA**: Installable app with offline support (`manifest.json`, `service-worker.js`)
 - **Push notifications**: OneSignal integration (`js/push-notifications.js`)
-- **Themes**: Multiple color themes (`css/themes.css`)
+- **Themes**: Multiple color _themes (`css/themes.css`)
 
 ## Project Structure
 
