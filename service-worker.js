@@ -6,13 +6,13 @@ const urlsToCache = [
   '/css/themes.css',
   '/css/style.css',
   '/css/live-tv.css',
-
-
   '/css/weather.css',
   '/css/settings.css',
   '/js/sidebar-navigation.js',
   '/js/push-notifications.js',
   '/js/settings.js',
+  '/js/live-tv.js',
+  '/assets/js/live-channels.js',
   '/script.js',
   '/news-data.js',
   '/news-sources.js',
@@ -25,9 +25,7 @@ const urlsToCache = [
   '/sports.html',
   '/health.html',
   '/lifestyle.html',
-
   '/food.html',
-
   '/crypto.html',
   '/astronomy.html',
   '/aviation.html',
