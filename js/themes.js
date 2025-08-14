@@ -42,8 +42,8 @@ class ThemeManager {
     }
 
     applySavedTheme() {
-        // Get saved theme from localStorage
-        const savedTheme = localStorage.getItem('brightlens-theme') || 'default';
+        // Get saved theme from localStorage (support legacy key too)
+        const savedTheme = localStorage.getItem('brightlens-theme') || localStorage.getItem('selectedTheme') || 'default';
         this.setTheme(savedTheme, false);
     }
 
@@ -136,9 +136,10 @@ class ThemeManager {
         
         this.currentTheme = themeId;
         
-        // Save to localStorage
+        // Save to localStorage (write both keys for compatibility)
         if (save) {
             localStorage.setItem('brightlens-theme', themeId);
+            localStorage.setItem('selectedTheme', themeId);
         }
         
         // Update UI

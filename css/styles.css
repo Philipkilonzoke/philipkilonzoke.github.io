@@ -168,10 +168,10 @@ body {
     left: -320px;
     width: 320px;
     height: 100vh;
-    background: rgba(248, 250, 252, 0.95);
+    background: var(--surface-color);
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
-    border-right: 1px solid rgba(226, 232, 240, 0.8);
+    border-right: 1px solid var(--border-color);
     transition: left 0.2s ease;
     z-index: 200;
     overflow-y: auto;
@@ -191,7 +191,7 @@ body {
     left: 0;
     width: 100%;
     height: 100%;
-    background: rgba(15, 23, 42, 0.4);
+    background: rgba(0, 0, 0, 0.35);
     backdrop-filter: blur(4px);
     z-index: 150;
     opacity: 0;
@@ -216,8 +216,8 @@ body {
     align-items: center;
     justify-content: space-between;
     padding: 1.5rem 1.5rem 1rem;
-    border-bottom: 1px solid rgba(226, 232, 240, 0.6);
-    background: rgba(255, 255, 255, 0.5);
+    border-bottom: 1px solid var(--border-color);
+    background: var(--surface-color);
     backdrop-filter: blur(10px);
     position: sticky;
     top: 0;
@@ -299,7 +299,7 @@ body {
 
 .sidebar-divider {
     height: 1px;
-    background: linear-gradient(90deg, transparent, rgba(226, 232, 240, 0.6), transparent);
+    background: linear-gradient(90deg, transparent, var(--border-color), transparent);
     margin: 1rem 1.5rem;
     position: relative;
 }
