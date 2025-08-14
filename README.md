@@ -1,4 +1,4 @@
-# Brightlens News
+# Brightlens News.
 
 A modern, fast, and responsive news and media hub focused on Kenyan and global coverage. It aggregates real-time articles from multiple APIs, adds special category experiences (Weather, Live TV, Food & Recipes), and ships as a PWA with offline support and push notifications.
 
