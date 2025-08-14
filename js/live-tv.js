@@ -130,7 +130,7 @@ import { channels } from '/assets/js/live-channels.js';
 			const card = document.createElement('div');
 			card.className = 'channel-card';
 			card.innerHTML = `
-				<img class="channel-icon" src="${c.icon || ''}" alt="${c.name}" width="64" height="64" loading="lazy" decoding="async" referrerpolicy="no-referrer" />
+				<img class="channel-icon" src="${c.icon || ''}" alt="${c.name}" width="64" height="64" loading="lazy" decoding="async" referrerpolicy="no-referrer" onerror="this.onerror=null;this.src='/assets/icon-192.svg'" />
 				<div class="channel-name">${c.name}</div>
 				<button class="watch-btn" aria-label="Watch ${c.name}" data-id="${c.id}"><i class="fas fa-play"></i> Watch</button>
 			`;
@@ -186,10 +186,12 @@ import { channels } from '/assets/js/live-channels.js';
 		const iframeEl = document.getElementById('live-player');
 		const box = document.getElementById('player-box');
 		if (iframeEl && titleEl && box) {
-			iframeEl.src = channel.embed + (channel.embed.includes('?') ? '&' : '?') + 'autoplay=1&rel=0&mute=1';
-			titleEl.textContent = channel.name;
+			// Force immediate reveal, then assign src (prevents layout shift)
 			box.classList.remove('player-hidden');
 			document.body.classList.add('player-active');
+			titleEl.textContent = channel.name;
+			// Write src last for faster visual feedback
+			iframeEl.src = channel.embed + (channel.embed.includes('?') ? '&' : '?') + 'autoplay=1&rel=0&mute=1';
 		} else {
 			mountPlayerIframe(channel);
 		}
@@ -249,12 +251,7 @@ import { channels } from '/assets/js/live-channels.js';
 	}
 
 	document.addEventListener('DOMContentLoaded',()=>{
-		const main = document.createDocumentFragment();
-		main.appendChild(buildHero());
-		main.appendChild(buildControls());
-		main.appendChild(buildStickyPlayer());
-		main.appendChild(buildGrid());
-		document.querySelector('main')?.appendChild(main);
+		// Use existing markup only: player-box and channel-grid are in live-tv.html
 		bindControls();
 		renderGrid();
 		bindPlayerClose();
