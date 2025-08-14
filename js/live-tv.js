@@ -132,7 +132,8 @@ import { channels } from '/assets/js/live-channels.js';
 			btn.setAttribute('aria-label', `Play ${c.name} live`);
 			btn.dataset.id = c.id;
 			btn.dataset.embed = c.embed;
-			btn.innerHTML = `<img src="${c.icon || ''}" alt="${c.name}" /><span class="live-dot"></span><span class="channel-name">${c.name}</span>`;
+			btn.dataset.name = c.name;
+			btn.innerHTML = `<img src="${c.icon || ''}" alt="${c.name}" width="64" height="64" loading="lazy" decoding="async" referrerpolicy="no-referrer" /><span class="live-dot"></span><span class="channel-name">${c.name}</span>`;
 			btn.addEventListener('click', ()=> openChannel(c.id));
 			grid.appendChild(btn);
 		});
@@ -181,11 +182,13 @@ import { channels } from '/assets/js/live-channels.js';
 		const channel = channels.find(c=>c.id===id);
 		if(!channel) return;
 		const titleEl = document.getElementById('player-title');
-		const iframeEl = document.getElementById('player');
-		if (iframeEl && titleEl) {
-			// direct swap if the static player exists
+		const iframeEl = document.getElementById('live-player');
+		const box = document.getElementById('player-box');
+		if (iframeEl && titleEl && box) {
 			iframeEl.src = channel.embed + (channel.embed.includes('?') ? '&' : '?') + 'autoplay=1&rel=0&mute=1';
 			titleEl.textContent = channel.name;
+			box.classList.remove('player-hidden');
+			document.body.classList.add('player-active');
 		} else {
 			mountPlayerIframe(channel);
 		}
@@ -226,6 +229,24 @@ import { channels } from '/assets/js/live-channels.js';
 		document.addEventListener('keydown',e=>{ if(e.key==='Escape' && state.activeId){ $('#player-close').click(); } });
 	}
 
+	function bindPlayerClose(){
+		const closeBtn = document.querySelector('.close-btn');
+		const box = document.getElementById('player-box');
+		const iframeEl = document.getElementById('live-player');
+		if (closeBtn && box && iframeEl){
+			closeBtn.addEventListener('click', ()=>{
+				iframeEl.src = '';
+				box.classList.add('player-hidden');
+				document.body.classList.remove('player-active');
+			});
+			document.addEventListener('keydown', (e)=>{
+				if(e.key==='Escape'){
+					closeBtn.click();
+				}
+			});
+		}
+	}
+
 	document.addEventListener('DOMContentLoaded',()=>{
 		const main = document.createDocumentFragment();
 		main.appendChild(buildHero());
@@ -235,5 +256,6 @@ import { channels } from '/assets/js/live-channels.js';
 		document.querySelector('main')?.appendChild(main);
 		bindControls();
 		renderGrid();
+		bindPlayerClose();
 	});
 })();
