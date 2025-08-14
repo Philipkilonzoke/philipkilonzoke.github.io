@@ -271,9 +271,19 @@
     setInterval(() => refreshData(false), REFRESH_MS);
   }
 
+  function hideSplashScreen(){
+    const screen = document.getElementById('loading-screen');
+    if (!screen) return;
+    screen.classList.add('hidden');
+    setTimeout(() => { screen.style.display = 'none'; }, 300);
+  }
+
   document.addEventListener('DOMContentLoaded', async () => {
     bindControls();
+    // Start initial data load and show in-page loading indicator
     await refreshData(true);
+    // Hide page splash once content is ready (match behavior on other categories)
+    setTimeout(hideSplashScreen, 200);
     startAutoRefresh();
   });
 })();
