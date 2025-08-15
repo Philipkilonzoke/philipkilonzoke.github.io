@@ -340,10 +340,9 @@
             font-size: 1.3rem;
             line-height: 1.7;
             margin-bottom: 1.25rem;
-            display: -webkit-box;
-            -webkit-line-clamp: 4;
-            -webkit-box-orient: vertical;
-            overflow: hidden;
+            /* Removed line-clamp to allow full description display */
+            word-wrap: break-word;
+            overflow-wrap: break-word;
         }
         
         .recipe-meta {
