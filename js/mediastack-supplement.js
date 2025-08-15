@@ -106,6 +106,41 @@ class MediastackSupplement {
         }
     }
 
+    async fetchCategory(category, params = {}, limit = 50) {
+        const key = Object.entries(params).sort().map(([k,v])=>`${k}:${v}`).join('&');
+        const cacheKey = `${category}_${key}_${limit}`;
+        if (this.cache.has(cacheKey)) {
+            const cached = this.cache.get(cacheKey);
+            if (Date.now() - cached.timestamp < this.cacheTimeout) {
+                return cached.data;
+            }
+        }
+
+        try {
+            const maxLimit = Math.min(limit, 100);
+            const url = new URL(this.baseUrl);
+            url.searchParams.set('access_key', this.apiKey);
+            url.searchParams.set('languages', 'en');
+            url.searchParams.set('limit', String(maxLimit));
+            url.searchParams.set('sort', 'published_desc');
+            for (const [k, v] of Object.entries(params)) {
+                url.searchParams.set(k, v);
+            }
+
+            const response = await fetch(url.href);
+            if (!response.ok) throw new Error(`Mediastack API error: ${response.status}`);
+            const data = await response.json();
+            if (data.error) throw new Error(`Mediastack API error: ${data.error.message}`);
+
+            const articles = this.formatMediastackArticles(data.data || [], category);
+            this.cache.set(cacheKey, { data: articles, timestamp: Date.now() });
+            return articles;
+        } catch (e) {
+            console.warn('Mediastack generic fetch failed:', e.message);
+            return [];
+        }
+    }
+
     /**
      * Format Mediastack articles to match the expected structure
      */
@@ -118,22 +153,34 @@ class MediastackSupplement {
             publishedAt: article.published_at || new Date().toISOString(),
             source: article.source || 'Mediastack',
             category: category
-        })).filter(article => 
-            article.title && 
-            article.url && 
-            article.title !== 'No title available'
-        );
+        })).filter(a => a.title && a.url && a.title !== 'No title available');
     }
 
     /**
      * Get supplemental articles for a specific category
      */
     async getSupplementalArticles(category, limit = 50) {
-        switch(category.toLowerCase()) {
+        switch ((category || '').toLowerCase()) {
             case 'kenya':
                 return await this.fetchKenyaNews(limit);
             case 'sports':
                 return await this.fetchSportsNews(limit);
+            case 'technology':
+                return await this.fetchCategory('technology', { categories: 'technology' }, limit);
+            case 'health':
+                return await this.fetchCategory('health', { categories: 'health' }, limit);
+            case 'entertainment':
+                return await this.fetchCategory('entertainment', { categories: 'entertainment' }, limit);
+            case 'business':
+                return await this.fetchCategory('business', { categories: 'business' }, limit);
+            case 'world':
+                // world: no categories filter to broaden
+                return await this.fetchCategory('world', {}, limit);
+            case 'latest':
+                return await this.fetchCategory('latest', {}, limit);
+            case 'lifestyle':
+                // Map lifestyle to health/entertainment mix (prefer health)
+                return await this.fetchCategory('lifestyle', { categories: 'health' }, limit);
             default:
                 return [];
         }

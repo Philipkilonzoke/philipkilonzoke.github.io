@@ -536,7 +536,7 @@ class NewsAPI {
      */
     async fetchFromGNews(category, limit) {
         try {
-            let url = `https://gnews.io/api/v4/top-headlines?token=${this.apiKeys.gnews}&lang=en&max=${Math.min(limit, 10)}`;
+            let url = `https://gnews.io/api/v4/top-headlines?token=${this.apiKeys.gnews}&lang=en&max=${Math.min(limit, 100)}`;
             
             if (category === 'kenya') {
                 url += '&country=ke&q=(Kenya OR Nairobi OR Mombasa OR Kisumu OR "East Africa" OR "Kenyan government" OR "President Ruto")';
@@ -568,7 +568,7 @@ class NewsAPI {
      */
     async fetchFromNewsData(category, limit) {
         try {
-            let url = `https://newsdata.io/api/1/news?apikey=${this.apiKeys.newsdata}&language=en&size=${Math.min(limit, 10)}`;
+            let url = `https://newsdata.io/api/1/news?apikey=${this.apiKeys.newsdata}&language=en&size=${Math.min(limit, 50)}`;
             
             if (category === 'kenya') {
                 url += '&country=ke&q=Kenya OR Nairobi OR Mombasa OR Kisumu OR "East Africa"';
@@ -594,14 +594,14 @@ class NewsAPI {
      */
     async fetchFromNewsAPI(category, limit) {
         try {
-            let url = `https://newsapi.org/v2/top-headlines?apiKey=${this.apiKeys.newsapi}&pageSize=${Math.min(limit, 20)}`;
+            let url = `https://newsapi.org/v2/top-headlines?apiKey=${this.apiKeys.newsapi}&pageSize=${Math.min(limit, 100)}`;
             
             if (category === 'kenya') {
                 url += '&country=ke';
             } else if (category === 'latest') {
                 url += '&country=us'; // Use US for general latest news
             } else if (category === 'world') {
-                url = `https://newsapi.org/v2/everything?apiKey=${this.apiKeys.newsapi}&q=international&sortBy=publishedAt&pageSize=${Math.min(limit, 20)}`;
+                url = `https://newsapi.org/v2/everything?apiKey=${this.apiKeys.newsapi}&q=international&sortBy=publishedAt&pageSize=${Math.min(limit, 100)}`;
             } else {
                 url += `&category=${this.mapCategoryForNewsAPI(category)}`;
             }
@@ -622,7 +622,7 @@ class NewsAPI {
      */
     async fetchFromMediastack(category, limit) {
         try {
-            let url = `https://api.mediastack.com/v1/news?access_key=${this.apiKeys.mediastack}&languages=en&limit=${Math.min(limit, 25)}`;
+            let url = `https://api.mediastack.com/v1/news?access_key=${this.apiKeys.mediastack}&languages=en&limit=${Math.min(limit, 100)}`;
             
             if (category === 'kenya') {
                 url += '&countries=ke';
@@ -648,7 +648,7 @@ class NewsAPI {
      */
     async fetchFromCurrentsAPI(category, limit) {
         try {
-            let url = `https://api.currentsapi.services/v1/latest-news?apiKey=${this.apiKeys.currentsapi}&language=en&page_size=${Math.min(limit, 20)}`;
+            let url = `https://api.currentsapi.services/v1/latest-news?apiKey=${this.apiKeys.currentsapi}&language=en&page_size=${Math.min(limit, 100)}`;
             
             if (category === 'kenya') {
                 url += '&country=ke';
