@@ -526,10 +526,9 @@ body {
     line-height: 1.4;
     margin-bottom: 0.75rem;
     color: var(--text-color);
-    display: -webkit-box;
-    -webkit-line-clamp: 2;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
+    /* Removed line-clamp to allow full title display */
+    word-wrap: break-word;
+    overflow-wrap: break-word;
 }
 
 .news-description {
@@ -537,10 +536,9 @@ body {
     font-size: 1.125rem;
     line-height: 1.6;
     margin-bottom: 1rem;
-    display: -webkit-box;
-    -webkit-line-clamp: 4;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
+    /* Removed line-clamp to allow full description display */
+    word-wrap: break-word;
+    overflow-wrap: break-word;
     opacity: 0.9;
     font-weight: 400;
 }
