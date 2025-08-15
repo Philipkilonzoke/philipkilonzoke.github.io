@@ -22,43 +22,7 @@
     font-size: 0.625rem;
 }
 
-/* ===== AI SEARCH SUGGESTIONS ===== */
-.ai-suggestions {
-    margin-top: 1rem;
-    padding-top: 1rem;
-    border-top: 1px solid var(--border-color);
-}
 
-.suggestion-header {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    margin-bottom: 0.75rem;
-    color: var(--primary-color);
-    font-weight: 600;
-    font-size: 0.875rem;
-}
-
-.suggestion-header i {
-    font-size: 1rem;
-}
-
-.ai-suggestion {
-    background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
-    color: white;
-    border: none;
-    transition: all 0.3s ease;
-}
-
-.ai-suggestion:hover {
-    background: linear-gradient(135deg, var(--primary-dark), var(--primary-color));
-    transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-}
-
-.ai-suggestion i {
-    color: #ffd700;
-}
 
 /* ===== TOAST NOTIFICATIONS ===== */
 .toast {
@@ -165,8 +129,7 @@
 /* ===== PRINT STYLES ===== */
 @media print {
     .reading-time-badge,
-    .toast,
-    .ai-suggestions {
+    .toast {
         display: none !important;
     }
 }

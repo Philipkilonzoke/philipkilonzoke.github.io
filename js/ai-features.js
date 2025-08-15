@@ -5,13 +5,11 @@
 
 class AIFeatures {
     constructor() {
-        this.searchHistory = this.loadSearchHistory();
         this.init();
     }
 
     init() {
         this.setupReadingTime();
-        this.setupSmartSearch();
     }
 
     // ===== READING TIME ESTIMATION =====
@@ -51,65 +49,7 @@ class AIFeatures {
         cardHeader.appendChild(badge);
     }
 
-    // ===== SMART SEARCH SUGGESTIONS =====
-    setupSmartSearch() {
-        const searchInput = document.getElementById('quick-search-input');
-        if (!searchInput) return;
 
-        // Enhanced search suggestions based on user behavior
-        const enhancedSuggestions = this.generateSmartSuggestions();
-        this.updateSearchSuggestions(enhancedSuggestions);
-    }
-
-    generateSmartSuggestions() {
-        const baseSuggestions = [
-            'Breaking News', 'Technology News', 'Sports Updates', 'Weather Forecast',
-            'Food Recipes', 'Business News', 'Entertainment News', 'Health News'
-        ];
-
-        // Add personalized suggestions based on user history
-        const personalizedSuggestions = this.getPersonalizedSuggestions();
-        
-        return [...baseSuggestions, ...personalizedSuggestions];
-    }
-
-    getPersonalizedSuggestions() {
-        const suggestions = [];
-        
-        // Based on search history
-        if (this.searchHistory.length > 0) {
-            const recentSearches = this.searchHistory.slice(-3);
-            suggestions.push(...recentSearches);
-        }
-
-        return suggestions.slice(0, 3); // Limit to 3 personalized suggestions
-    }
-
-    updateSearchSuggestions(suggestions) {
-        const suggestionsContainer = document.querySelector('.search-suggestions');
-        if (!suggestionsContainer) return;
-
-        // Check if AI suggestions already exist
-        if (suggestionsContainer.querySelector('.ai-suggestions')) return;
-
-        // Add AI-powered suggestions
-        const aiSuggestions = document.createElement('div');
-        aiSuggestions.className = 'ai-suggestions';
-        aiSuggestions.innerHTML = `
-            <div class="suggestion-header">
-                <i class="fas fa-brain"></i>
-                <span>AI Suggestions</span>
-            </div>
-            ${suggestions.map(suggestion => `
-                <div class="suggestion-item ai-suggestion" data-query="${suggestion.toLowerCase()}">
-                    <i class="fas fa-lightbulb"></i>
-                    <span>${suggestion}</span>
-                </div>
-            `).join('')}
-        `;
-
-        suggestionsContainer.appendChild(aiSuggestions);
-    }
 
     // ===== UTILITY FUNCTIONS =====
     showFeedback(message, type = 'info') {
@@ -132,32 +72,7 @@ class AIFeatures {
         }, 3000);
     }
 
-    // ===== STORAGE FUNCTIONS =====
-    loadSearchHistory() {
-        try {
-            return JSON.parse(localStorage.getItem('ai_search_history')) || [];
-        } catch {
-            return [];
-        }
-    }
 
-    saveSearchHistory(query) {
-        try {
-            const history = this.loadSearchHistory();
-            if (!history.includes(query)) {
-                history.push(query);
-                
-                // Keep only last 10 searches
-                if (history.length > 10) {
-                    history.splice(0, history.length - 10);
-                }
-                
-                localStorage.setItem('ai_search_history', JSON.stringify(history));
-            }
-        } catch (error) {
-            console.error('Error saving search history:', error);
-        }
-    }
 }
 
 // Initialize AI Features when DOM is loaded
@@ -170,16 +85,3 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 });
 
-// Track search queries
-document.addEventListener('submit', (e) => {
-    try {
-        if (e.target.id === 'quick-search-form' && window.aiFeatures) {
-            const query = e.target.querySelector('input').value.trim();
-            if (query) {
-                window.aiFeatures.saveSearchHistory(query);
-            }
-        }
-    } catch (error) {
-        console.error('Error tracking search query:', error);
-    }
-});
