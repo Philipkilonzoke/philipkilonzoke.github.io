@@ -1,0 +1,231 @@
+/* Image Enhancement CSS - Food & Recipes Category */
+
+/* ===== ENHANCEMENT OVERLAY ===== */
+.enhancement-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.7);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 0.875rem;
+    font-weight: 500;
+    z-index: 10;
+    border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+}
+
+.enhancement-spinner {
+    width: 2rem;
+    height: 2rem;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-top: 2px solid white;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin-bottom: 0.5rem;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* ===== ENHANCEMENT BADGE ===== */
+.enhancement-badge {
+    position: absolute;
+    top: 0.75rem;
+    left: 0.75rem;
+    background: linear-gradient(135deg, #10b981, #059669);
+    color: white;
+    padding: 0.25rem 0.5rem;
+    border-radius: 0.375rem;
+    font-size: 0.75rem;
+    font-weight: 500;
+    backdrop-filter: blur(4px);
+    z-index: 10;
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
+}
+
+.enhancement-badge i {
+    font-size: 0.625rem;
+    color: #ffd700;
+}
+
+/* ===== ENHANCED IMAGE STYLES ===== */
+.recipe-image.enhancing {
+    filter: blur(1px);
+    transition: filter 0.3s ease;
+}
+
+.recipe-image.enhanced {
+    filter: none;
+    transition: all 0.3s ease;
+    transform: scale(1);
+}
+
+.recipe-image.enhanced:hover {
+    transform: scale(1.02);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+}
+
+/* ===== ENHANCEMENT ANIMATIONS ===== */
+@keyframes enhanceFadeIn {
+    from {
+        opacity: 0;
+        transform: scale(0.95);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+.recipe-image.enhanced {
+    animation: enhanceFadeIn 0.5s ease-out;
+}
+
+/* ===== RESPONSIVE DESIGN ===== */
+@media (max-width: 768px) {
+    .enhancement-badge {
+        top: 0.5rem;
+        left: 0.5rem;
+        font-size: 0.625rem;
+        padding: 0.125rem 0.375rem;
+    }
+    
+    .enhancement-overlay {
+        font-size: 0.75rem;
+    }
+    
+    .enhancement-spinner {
+        width: 1.5rem;
+        height: 1.5rem;
+        margin-bottom: 0.375rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .enhancement-badge {
+        font-size: 0.5rem;
+        padding: 0.125rem 0.25rem;
+    }
+    
+    .enhancement-badge i {
+        font-size: 0.5rem;
+    }
+}
+
+/* ===== DARK MODE SUPPORT ===== */
+@media (prefers-color-scheme: dark) {
+    .enhancement-overlay {
+        background: rgba(0, 0, 0, 0.8);
+    }
+    
+    .enhancement-badge {
+        background: linear-gradient(135deg, #059669, #047857);
+    }
+}
+
+/* ===== ACCESSIBILITY ===== */
+.enhancement-badge:focus,
+.enhancement-overlay:focus {
+    outline: 2px solid var(--primary-color);
+    outline-offset: 2px;
+}
+
+/* ===== PERFORMANCE OPTIMIZATIONS ===== */
+.recipe-image.enhancing,
+.recipe-image.enhanced {
+    will-change: filter, transform;
+}
+
+.enhancement-overlay {
+    will-change: opacity;
+}
+
+/* ===== PRINT STYLES ===== */
+@media print {
+    .enhancement-overlay,
+    .enhancement-badge {
+        display: none !important;
+    }
+}
+
+/* ===== ENHANCEMENT QUALITY INDICATORS ===== */
+.recipe-card:hover .enhancement-badge {
+    transform: scale(1.05);
+    transition: transform 0.2s ease;
+}
+
+/* ===== LOADING STATES ===== */
+.recipe-image.enhancing {
+    position: relative;
+}
+
+.recipe-image.enhancing::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+    animation: shimmer 1.5s infinite;
+    z-index: 1;
+}
+
+@keyframes shimmer {
+    0% { transform: translateX(-100%); }
+    100% { transform: translateX(100%); }
+}
+
+/* ===== ENHANCEMENT SUCCESS ANIMATION ===== */
+@keyframes enhanceSuccess {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+    100% { transform: scale(1); }
+}
+
+.enhancement-badge {
+    animation: enhanceSuccess 0.6s ease-out;
+}
+
+/* ===== FALLBACK STYLES ===== */
+.recipe-image:not(.enhanced):not(.enhancing) {
+    /* Original image styles remain unchanged */
+}
+
+/* ===== ENHANCEMENT PROGRESS ===== */
+.enhancement-progress {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: rgba(255, 255, 255, 0.3);
+    border-radius: 0 0 var(--radius-lg) var(--radius-lg);
+    overflow: hidden;
+}
+
+.enhancement-progress::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    width: 0%;
+    background: linear-gradient(90deg, #10b981, #059669);
+    animation: progressFill 2s ease-out;
+}
+
+@keyframes progressFill {
+    0% { width: 0%; }
+    100% { width: 100%; }
+}
