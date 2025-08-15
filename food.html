@@ -66,9 +66,10 @@
     <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
     <noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"></noscript>
     <link rel="preconnect" href="https://fonts.googleapis.com">
-            <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-        <link rel="preconnect" href="https://img.spoonacular.com" crossorigin>
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preconnect" href="https://img.spoonacular.com" crossorigin>
     <link rel="dns-prefetch" href="https://img.spoonacular.com">
+    <link rel="preload" as="image" href="https://img.spoonacular.com/recipes/1-1200x800.webp">
     <link rel="preload" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" as="style" onload="this.onload=null;this.rel='stylesheet'">
     <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"></noscript>
     
@@ -266,21 +267,27 @@
             width: 100%;
             height: 240px;
             object-fit: cover;
-            transition: all 0.2s ease;
+            object-position: center;
+            transition: all 0.3s ease;
             background: linear-gradient(45deg, #f1f5f9, #e2e8f0);
             opacity: 0;
-            filter: blur(1px);
-            will-change: opacity, filter;
+            filter: blur(2px);
+            will-change: opacity, filter, transform;
+            image-rendering: -webkit-optimize-contrast;
+            image-rendering: crisp-edges;
+            backface-visibility: hidden;
+            transform: translateZ(0);
         }
         
         .recipe-image.loading {
-            opacity: 0.3;
-            filter: blur(1px);
+            opacity: 0.4;
+            filter: blur(2px);
         }
         
         .recipe-image.loaded {
             opacity: 1;
             filter: blur(0);
+            transform: scale(1);
         }
         
         .recipe-card:hover .recipe-image {
@@ -863,28 +870,35 @@
             setupQuickFilters();
         }
         
-        // Build ordered list of possible image URLs for a recipe with high-quality options
+        // Build ordered list of possible image URLs for a recipe with ultra-high-quality options
         function getRecipeImageCandidates(recipe) {
             const candidates = [];
             
-            // High-quality image sizes for modern displays (including retina)
-            const highQualitySizes = [
-                '1200x800',  // Large desktop
-                '1000x667',  // Desktop
-                '800x533',   // Tablet
+            // Ultra-high-quality image sizes optimized for modern displays (including 4K and retina)
+            const ultraHighQualitySizes = [
+                '2000x1333', // 4K displays
+                '1600x1067', // Large retina displays
+                '1200x800',  // Standard retina displays
+                '1000x667',  // Desktop displays
+                '800x533',   // Tablet displays
                 '636x393',   // Original large
                 '556x370',   // Original medium
                 '480x360',   // Mobile
                 '312x231'    // Fallback
             ];
             
-            // Generate responsive srcset for better quality
+            // Generate responsive srcset for optimal quality
             function generateSrcSet(baseUrl, sizes) {
                 return sizes.map(size => `${baseUrl.replace(/-\d+x\d+/, `-${size}`)} ${size.split('x')[0]}w`).join(', ');
             }
 
-            // Use provided image first if absolute URL
+            // Use provided image first if absolute URL (but try to enhance it)
             if (recipe.image && /^https?:\/\//.test(recipe.image)) {
+                // Try to enhance the provided image URL
+                const enhancedUrl = enhanceImageUrl(recipe.image);
+                if (enhancedUrl) {
+                    candidates.push(enhancedUrl);
+                }
                 candidates.push(recipe.image);
             }
 
@@ -896,11 +910,11 @@
 
             if (recipeId && imageTypeFromProp) {
                 // Try WebP first for better quality and smaller size
-                highQualitySizes.forEach(size => {
+                ultraHighQualitySizes.forEach(size => {
                     candidates.push(`https://img.spoonacular.com/recipes/${recipeId}-${size}.webp`);
                 });
                 // Fallback to original format
-                highQualitySizes.forEach(size => {
+                ultraHighQualitySizes.forEach(size => {
                     candidates.push(`https://img.spoonacular.com/recipes/${recipeId}-${size}.${imageTypeFromProp}`);
                 });
             } else if (recipe.image) {
@@ -910,11 +924,11 @@
                     const id = match[1];
                     const ext = match[3];
                     // Try WebP first
-                    highQualitySizes.forEach(size => {
+                    ultraHighQualitySizes.forEach(size => {
                         candidates.push(`https://img.spoonacular.com/recipes/${id}-${size}.webp`);
                     });
                     // Fallback to original format
-                    highQualitySizes.forEach(size => {
+                    ultraHighQualitySizes.forEach(size => {
                         candidates.push(`https://img.spoonacular.com/recipes/${id}-${size}.${ext}`);
                     });
                 }
@@ -922,6 +936,48 @@
 
             // De-duplicate while preserving order
             return Array.from(new Set(candidates));
+        }
+        
+        // Function to enhance image URLs for better quality
+        function enhanceImageUrl(url) {
+            // If it's already a Spoonacular URL, try to get a larger version
+            const match = url.match(/recipes\/(\d+)-(\d+x\d+)\.(\w+)/);
+            if (match) {
+                const id = match[1];
+                const currentSize = match[2];
+                const ext = match[3];
+                
+                // Try to get a larger size if current is small
+                const sizes = ['2000x1333', '1600x1067', '1200x800', '1000x667'];
+                for (const size of sizes) {
+                    if (size !== currentSize) {
+                        return `https://img.spoonacular.com/recipes/${id}-${size}.webp`;
+                    }
+                }
+            }
+            return null;
+        }
+        
+        // Function to generate srcset for responsive images
+        function generateImageSrcset(imageCandidates) {
+            // Filter and sort candidates by size (width)
+            const sizedCandidates = imageCandidates
+                .filter(url => {
+                    const match = url.match(/-(\d+x\d+)\./);
+                    return match;
+                })
+                .map(url => {
+                    const match = url.match(/-(\d+x\d+)\./);
+                    const size = match[1];
+                    const width = parseInt(size.split('x')[0]);
+                    return { url, width };
+                })
+                .sort((a, b) => a.width - b.width);
+            
+            // Generate srcset string
+            return sizedCandidates
+                .map(candidate => `${candidate.url} ${candidate.width}w`)
+                .join(', ');
         }
 
         // Error handler to advance through fallbacks or replace with placeholder
@@ -1027,49 +1083,81 @@
             
             grid.innerHTML = recipes.map(recipe => createRecipeCard(recipe)).join('');
             
-            // Ultra-fast lazy loading with priority optimization
+            // Ultra-fast lazy loading with priority optimization and quality enhancement
             const images = grid.querySelectorAll('img[data-src]');
             const imageObserver = new IntersectionObserver((entries, observer) => {
                 entries.forEach(entry => {
                     if (entry.isIntersecting) {
                         const img = entry.target;
                         
-                        // Immediate loading for better perceived performance
+                        // Load the highest quality image available
                         img.src = img.dataset.src;
                         img.classList.add('loading');
+                        
+                        // Preload the next best quality image for smooth transitions
+                        const fallbacks = img.dataset.fallbacks ? decodeURIComponent(img.dataset.fallbacks).split('|').filter(Boolean) : [];
+                        if (fallbacks.length > 0) {
+                            const preloadImg = new Image();
+                            preloadImg.src = fallbacks[0];
+                        }
                         
                         img.onload = () => {
                             img.classList.remove('loading');
                             img.classList.add('loaded');
                             img.removeAttribute('data-src');
+                            img.removeAttribute('data-fallbacks');
                             observer.unobserve(img);
                         };
                         
                         img.onerror = () => {
-                            handleRecipeImgError({ target: img });
+                            // Try fallback images if main image fails
+                            const fallbacks = img.dataset.fallbacks ? decodeURIComponent(img.dataset.fallbacks).split('|').filter(Boolean) : [];
+                            if (fallbacks.length > 0) {
+                                const nextUrl = fallbacks.shift();
+                                img.dataset.fallbacks = encodeURIComponent(fallbacks.join('|'));
+                                img.src = nextUrl;
+                            } else {
+                                handleRecipeImgError({ target: img });
+                            }
                         };
                     }
                 });
             }, {
-                rootMargin: '100px 0px', // Start loading 100px before image comes into view
+                rootMargin: '150px 0px', // Start loading 150px before image comes into view
                 threshold: 0.01 // Load as soon as 1% is visible
             });
             
-            // Prioritize first 6 images for immediate loading
+            // Prioritize first 8 images for immediate loading (increased from 6)
             images.forEach((img, index) => {
-                if (index < 6) {
-                    // Load first 6 images immediately for better perceived performance
+                if (index < 8) {
+                    // Load first 8 images immediately for better perceived performance
                     img.src = img.dataset.src;
                     img.classList.add('loading');
+                    
+                    // Preload fallback for immediate images too
+                    const fallbacks = img.dataset.fallbacks ? decodeURIComponent(img.dataset.fallbacks).split('|').filter(Boolean) : [];
+                    if (fallbacks.length > 0) {
+                        const preloadImg = new Image();
+                        preloadImg.src = fallbacks[0];
+                    }
                     
                     img.onload = () => {
                         img.classList.remove('loading');
                         img.classList.add('loaded');
                         img.removeAttribute('data-src');
+                        img.removeAttribute('data-fallbacks');
                     };
                     
                     img.onerror = () => {
-                        handleRecipeImgError({ target: img });
+                        // Try fallback images if main image fails
+                        const fallbacks = img.dataset.fallbacks ? decodeURIComponent(img.dataset.fallbacks).split('|').filter(Boolean) : [];
+                        if (fallbacks.length > 0) {
+                            const nextUrl = fallbacks.shift();
+                            img.dataset.fallbacks = encodeURIComponent(fallbacks.join('|'));
+                            img.src = nextUrl;
+                        } else {
+                            handleRecipeImgError({ target: img });
+                        }
                     };
                 } else {
                     // Lazy load the rest
@@ -1106,10 +1194,13 @@
             const firstSrc = hasImage ? imageCandidates[0] : '';
             const fallbackList = hasImage ? encodeURIComponent(imageCandidates.slice(1).join('|')) : '';
             
+            // Generate srcset for responsive images
+            const srcset = hasImage ? generateImageSrcset(imageCandidates) : '';
+            
             return `
                 <div class="recipe-card" onclick="openRecipe('${recipe.sourceUrl || recipe.spoonacularSourceUrl}')">
                     ${hasImage
-                        ? `<img data-src="${firstSrc}" data-fallbacks="${fallbackList}" alt="${recipe.title}" class="recipe-image" loading="lazy" onerror="handleRecipeImgError(event)" decoding="async">`
+                        ? `<img data-src="${firstSrc}" data-fallbacks="${fallbackList}" srcset="${srcset}" sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw" alt="${recipe.title}" class="recipe-image" loading="lazy" onerror="handleRecipeImgError(event)" decoding="async">`
                         : `<div class="recipe-image-placeholder">🍽️</div>`
                     }
                     <div class="recipe-content">
