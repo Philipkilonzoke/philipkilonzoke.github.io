@@ -68,6 +68,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
             <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
         <link rel="preconnect" href="https://img.spoonacular.com" crossorigin>
+    <link rel="dns-prefetch" href="https://img.spoonacular.com">
     <link rel="preload" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" as="style" onload="this.onload=null;this.rel='stylesheet'">
     <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"></noscript>
     
@@ -187,10 +188,16 @@
             width: 100%;
             height: 240px;
             object-fit: cover;
-            transition: all 0.3s ease;
+            transition: all 0.2s ease;
             background: linear-gradient(45deg, #f1f5f9, #e2e8f0);
             opacity: 0;
-            filter: blur(2px);
+            filter: blur(1px);
+            will-change: opacity, filter;
+        }
+        
+        .recipe-image.loading {
+            opacity: 0.3;
+            filter: blur(1px);
         }
         
         .recipe-image.loaded {
@@ -211,6 +218,21 @@
             justify-content: center;
             font-size: 3rem;
             color: #64748b;
+            position: relative;
+        }
+        
+        .recipe-image-placeholder::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 40px;
+            height: 40px;
+            border: 3px solid #e2e8f0;
+            border-top: 3px solid var(--primary-color);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
         }
         
         .recipe-content {
@@ -838,34 +860,55 @@
             
             grid.innerHTML = recipes.map(recipe => createRecipeCard(recipe)).join('');
             
-            // Enhanced lazy loading for images with quality optimization
+            // Ultra-fast lazy loading with priority optimization
             const images = grid.querySelectorAll('img[data-src]');
             const imageObserver = new IntersectionObserver((entries, observer) => {
                 entries.forEach(entry => {
                     if (entry.isIntersecting) {
                         const img = entry.target;
                         
-                        // Preload the image for better performance
-                        const preloadImg = new Image();
-                        preloadImg.onload = () => {
-                            img.src = preloadImg.src;
+                        // Immediate loading for better perceived performance
+                        img.src = img.dataset.src;
+                        img.classList.add('loading');
+                        
+                        img.onload = () => {
+                            img.classList.remove('loading');
                             img.classList.add('loaded');
                             img.removeAttribute('data-src');
                             observer.unobserve(img);
                         };
-                        preloadImg.onerror = () => {
-                            // If preload fails, try the fallback
+                        
+                        img.onerror = () => {
                             handleRecipeImgError({ target: img });
                         };
-                        preloadImg.src = img.dataset.src;
                     }
                 });
             }, {
-                rootMargin: '50px 0px', // Start loading 50px before image comes into view
-                threshold: 0.1
+                rootMargin: '100px 0px', // Start loading 100px before image comes into view
+                threshold: 0.01 // Load as soon as 1% is visible
             });
             
-            images.forEach(img => imageObserver.observe(img));
+            // Prioritize first 6 images for immediate loading
+            images.forEach((img, index) => {
+                if (index < 6) {
+                    // Load first 6 images immediately for better perceived performance
+                    img.src = img.dataset.src;
+                    img.classList.add('loading');
+                    
+                    img.onload = () => {
+                        img.classList.remove('loading');
+                        img.classList.add('loaded');
+                        img.removeAttribute('data-src');
+                    };
+                    
+                    img.onerror = () => {
+                        handleRecipeImgError({ target: img });
+                    };
+                } else {
+                    // Lazy load the rest
+                    imageObserver.observe(img);
+                }
+            });
         }
         
         function createRecipeCard(recipe) {
