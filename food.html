@@ -1342,7 +1342,7 @@
             return `
                 <div class="recipe-card" onclick="openRecipe('${recipe.sourceUrl || recipe.spoonacularSourceUrl}')">
                     ${hasImage
-                        ? `<img data-src="${firstSrc}" data-fallbacks="${fallbackList}" srcset="${srcset}" sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw" alt="${recipe.title}" class="recipe-image" loading="lazy" onerror="handleRecipeImgError(event)" decoding="async">`
+                        ? `<img data-src="${firstSrc}" data-fallbacks="${fallbackList}" srcset="${srcset}" sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw" alt="${recipe.title}" class="recipe-image" loading="lazy" onerror="handleRecipeImgError(event)" decoding="async" onload="handleRecipeImgLoad(event)">`
                         : `<div class="recipe-image-placeholder">🍽️</div>`
                     }
                     
@@ -1393,11 +1393,7 @@
                             </div>
                         ` : ''}
                         
-                        <!-- Recipe Stats -->
-                        <div class="recipe-stats">
-                            ${recipe.aggregateLikes ? `<div class="stat-item"><i class="fas fa-thumbs-up"></i> ${recipe.aggregateLikes} likes</div>` : ''}
-                            ${recipe.pricePerServing ? `<div class="stat-item"><i class="fas fa-dollar-sign"></i> $${(recipe.pricePerServing / 100).toFixed(2)}</div>` : ''}
-                        </div>
+
                         
                         <div class="recipe-actions">
                             <button class="view-recipe-btn" onclick="event.stopPropagation(); openRecipe('${recipe.sourceUrl || recipe.spoonacularSourceUrl}')">
