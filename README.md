@@ -1,6 +1,6 @@
 # Brightlens News.
 
-A fast, modern, mobile‑first news and media hub focused on Kenya and global coverage. It aggregates real‑time articles from multiple sources, includes category‑specific experiences (Live TV, Aviation, Weather, Food & Recipes), supports 12+ themes, and ships as a PWA.
+A fast, modern, mobile‑first news and media hub focused on Kenya and global coverage. It aggregates real‑time articles from multiple sources, includes category‑specific experiences (Live TV, Aviation, Weather, Food & Recipes), supports 12+ themes, and ships as a PWA..
 
 ## Live site
 
