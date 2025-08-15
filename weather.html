@@ -364,6 +364,60 @@
                                 </div>
                             </div>
                         </div>
+
+                        <!-- Weather Alerts Section -->
+                        <div id="weather-alerts" class="weather-alerts" style="display: none;">
+                            <div class="alert-header">
+                                <i class="fas fa-exclamation-triangle"></i>
+                                <span>Weather Alerts</span>
+                            </div>
+                            <div id="alerts-container" class="alerts-container">
+                                <!-- Alerts will be populated here -->
+                            </div>
+                        </div>
+
+                        <!-- Air Quality Section -->
+                        <div id="air-quality-section" class="air-quality-section" style="display: none;">
+                            <div class="aqi-header">
+                                <i class="fas fa-leaf"></i>
+                                <span>Air Quality</span>
+                            </div>
+                            <div class="aqi-content">
+                                <div class="aqi-value" id="aqi-value">--</div>
+                                <div class="aqi-label" id="aqi-label">Loading...</div>
+                                <div class="aqi-description" id="aqi-description">Air quality information</div>
+                            </div>
+                        </div>
+
+                        <!-- Weather Recommendations -->
+                        <div id="weather-recommendations" class="weather-recommendations" style="display: none;">
+                            <div class="recommendations-header">
+                                <i class="fas fa-lightbulb"></i>
+                                <span>Today's Recommendations</span>
+                            </div>
+                            <div class="recommendations-content">
+                                <div class="recommendation-item" id="clothing-recommendation">
+                                    <i class="fas fa-tshirt"></i>
+                                    <span>Loading recommendations...</span>
+                                </div>
+                                <div class="recommendation-item" id="activity-recommendation">
+                                    <i class="fas fa-running"></i>
+                                    <span>Loading recommendations...</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Weather Actions -->
+                        <div class="weather-actions">
+                            <button id="favorite-btn" class="action-btn" title="Add to Favorites">
+                                <i class="fas fa-heart"></i>
+                                <span>Favorite</span>
+                            </button>
+                            <button id="share-btn" class="action-btn" title="Share Weather">
+                                <i class="fas fa-share-alt"></i>
+                                <span>Share</span>
+                            </button>
+                        </div>
                     </div>
                 </section>
 
