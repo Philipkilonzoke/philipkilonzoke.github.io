@@ -190,6 +190,22 @@
             padding: 1rem 0;
             scrollbar-width: none;
             -ms-overflow-style: none;
+            min-height: 200px; /* Ensure space for loading spinner */
+        }
+        
+        .ticker-loading {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 3rem 0;
+            color: var(--text-muted);
+        }
+        
+        .ticker-loading p {
+            margin-top: 1rem;
+            font-size: 1rem;
+            font-weight: 500;
         }
         
         .news-ticker::-webkit-scrollbar {
@@ -199,7 +215,7 @@
         .ticker-content {
             display: flex;
             gap: 2rem;
-            animation: scroll-left 90s linear infinite;
+            animation: scroll-left 180s linear infinite; /* Slower speed */
             padding: 0 1rem;
             will-change: transform;
             cursor: grab;
@@ -232,7 +248,7 @@
             border-radius: var(--radius-lg);
             min-width: 380px;
             max-width: 380px;
-            height: 420px; /* Fixed height for consistent layout */
+            height: 450px; /* Increased height for better layout */
             border: 1px solid var(--border-color);
             box-shadow: var(--shadow-sm);
             transition: all 0.3s ease;
@@ -719,7 +735,7 @@
             .ticker-item {
                 min-width: 320px;
                 max-width: 320px;
-                height: 400px;
+                height: 420px;
             }
             
             .ticker-image,
@@ -790,7 +806,7 @@
             .ticker-item {
                 min-width: 300px;
                 max-width: 300px;
-                height: 380px;
+                height: 400px;
             }
             
             .ticker-image,
@@ -947,21 +963,15 @@
                     </div>
                 </div>
                 <div class="news-ticker">
-                    <div class="ticker-content" id="news-ticker">
+                    <!-- Loading Spinner -->
+                    <div id="ticker-loading" class="ticker-loading">
+                        <div class="loading-spinner-small"></div>
+                        <p>Loading breaking news...</p>
+                    </div>
+                    
+                    <!-- Ticker Content -->
+                    <div class="ticker-content" id="news-ticker" style="display: none;">
                         <!-- Breaking news items will be populated here -->
-                        <div class="ticker-item">
-                            <div class="ticker-image-placeholder">
-                                <i class="fas fa-newspaper"></i>
-                            </div>
-                            <div class="ticker-text">
-                                <h3 class="ticker-title">Loading Breaking News...</h3>
-                                <p class="ticker-description">Please wait while we fetch the latest news articles from our trusted sources around the world.</p>
-                                <div class="ticker-meta">
-                                    <span class="ticker-source">Brightlens News</span>
-                                    <span class="ticker-date">Now</span>
-                                </div>
-                            </div>
-                        </div>
                     </div>
                 </div>
             </div>
@@ -1518,11 +1528,20 @@
             
             // Initialize Real-Time Breaking News Ticker
             initializeRealTimeTicker() {
+                // Show loading spinner immediately
+                const tickerLoading = document.getElementById('ticker-loading');
+                const tickerContent = document.getElementById('news-ticker');
+                
+                if (tickerLoading) tickerLoading.style.display = 'flex';
+                if (tickerContent) tickerContent.style.display = 'none';
+                
                 // Initialize the same CategoryNews class used on Breaking News page
                 newsInstance = new CategoryNews('latest');
                 
-                // Load initial breaking news
-                this.loadBreakingNewsForTicker();
+                // Load initial breaking news with a small delay to ensure proper initialization
+                setTimeout(() => {
+                    this.loadBreakingNewsForTicker();
+                }, 500);
                 
                 // Set up refresh interval (every 5 minutes)
                 tickerRefreshInterval = setInterval(() => {
@@ -1543,9 +1562,13 @@
                     );
                     
                     const ticker = document.getElementById('news-ticker');
+                    const tickerLoading = document.getElementById('ticker-loading');
                     if (!ticker) return;
                     
                     if (validArticles.length > 0) {
+                        // Hide loading spinner and show content
+                        if (tickerLoading) tickerLoading.style.display = 'none';
+                        ticker.style.display = 'flex';
                         // Create ticker items using the exact same article structure as Breaking News page
                         const tickerItems = validArticles.map(article => {
                             // Use the exact same formatDate method as Breaking News page
@@ -1576,27 +1599,30 @@
                             const sourceName = article.source?.name || 'Brightlens News';
                             
                             return `
-                                <div class="ticker-item">
-                                    <div class="ticker-content" onclick="window.open('${article.url}', '_blank')">
-                                        ${hasValidImage ? 
-                                            `<img src="${article.urlToImage}" alt="${article.title}" class="ticker-image" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">` : ''
-                                        }
-                                        ${hasValidImage ? 
-                                            `<div class="ticker-image-placeholder" style="display: none;">
-                                                <i class="fas fa-newspaper"></i>
-                                            </div>` :
-                                            `<div class="ticker-image-placeholder">
-                                                <i class="fas fa-newspaper"></i>
-                                            </div>`
-                                        }
-                                        <div class="ticker-text">
-                                            <h3 class="ticker-title">${truncatedTitle}</h3>
-                                            <p class="ticker-description">${truncatedDescription}</p>
-                                            <div class="ticker-meta">
-                                                <span class="ticker-date">${formattedDate}</span>
-                                            </div>
+                                <div class="ticker-item" onclick="window.open('${article.url}', '_blank')">
+                                    <!-- Image at top -->
+                                    ${hasValidImage ? 
+                                        `<img src="${article.urlToImage}" alt="${article.title}" class="ticker-image" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">` : ''
+                                    }
+                                    ${hasValidImage ? 
+                                        `<div class="ticker-image-placeholder" style="display: none;">
+                                            <i class="fas fa-newspaper"></i>
+                                        </div>` :
+                                        `<div class="ticker-image-placeholder">
+                                            <i class="fas fa-newspaper"></i>
+                                        </div>`
+                                    }
+                                    
+                                    <!-- Content in middle -->
+                                    <div class="ticker-text">
+                                        <h3 class="ticker-title">${truncatedTitle}</h3>
+                                        <p class="ticker-description">${truncatedDescription}</p>
+                                        <div class="ticker-meta">
+                                            <span class="ticker-date">${formattedDate}</span>
                                         </div>
                                     </div>
+                                    
+                                    <!-- Share buttons at bottom -->
                                     <div class="ticker-share-buttons">
                                         <button class="ticker-share-btn" onclick="event.stopPropagation(); shareArticle('${encodeURIComponent(article.title)}', '${encodeURIComponent(article.url)}', 'facebook')" title="Share on Facebook">
                                             <i class="fab fa-facebook-f"></i>
@@ -1620,19 +1646,34 @@
                         
                         console.log(`✓ Homepage ticker loaded with ${validArticles.length} real-time breaking news articles`);
                     } else {
-                        // Fallback content if no articles loaded
+                        // Show fallback content if no articles loaded
+                        if (tickerLoading) tickerLoading.style.display = 'none';
+                        ticker.style.display = 'flex';
                         ticker.innerHTML = `
                             <div class="ticker-item">
                                 <div class="ticker-image-placeholder">
                                     <i class="fas fa-newspaper"></i>
                                 </div>
                                 <div class="ticker-text">
-                                    <h3 class="ticker-title">Loading Breaking News...</h3>
-                                    <p class="ticker-description">Please wait while we fetch the latest news articles from our trusted sources around the world.</p>
+                                    <h3 class="ticker-title">Welcome to Brightlens News</h3>
+                                    <p class="ticker-description">Your trusted source for breaking news and comprehensive coverage from multiple reliable sources worldwide.</p>
                                     <div class="ticker-meta">
-                                        <span class="ticker-source">Brightlens News</span>
                                         <span class="ticker-date">Now</span>
                                     </div>
+                                </div>
+                                <div class="ticker-share-buttons">
+                                    <button class="ticker-share-btn" title="Share on Facebook">
+                                        <i class="fab fa-facebook-f"></i>
+                                    </button>
+                                    <button class="ticker-share-btn" title="Share on Twitter">
+                                        <i class="fab fa-twitter"></i>
+                                    </button>
+                                    <button class="ticker-share-btn" title="Share on WhatsApp">
+                                        <i class="fab fa-whatsapp"></i>
+                                    </button>
+                                    <button class="ticker-share-btn" title="Copy Link">
+                                        <i class="fas fa-link"></i>
+                                    </button>
                                 </div>
                             </div>
                         `;
@@ -1641,18 +1682,36 @@
                     console.error('Error loading breaking news for ticker:', error);
                     // Show fallback content on error
                     const ticker = document.getElementById('news-ticker');
+                    const tickerLoading = document.getElementById('ticker-loading');
+                    
+                    if (tickerLoading) tickerLoading.style.display = 'none';
+                    ticker.style.display = 'flex';
+                    
                     ticker.innerHTML = `
                         <div class="ticker-item">
                             <div class="ticker-image-placeholder">
                                 <i class="fas fa-exclamation-triangle"></i>
                             </div>
                             <div class="ticker-text">
-                                <h3 class="ticker-title">Loading Breaking News...</h3>
-                                <p class="ticker-description">Please wait while we fetch the latest news articles from our trusted sources around the world.</p>
+                                <h3 class="ticker-title">Breaking News</h3>
+                                <p class="ticker-description">Stay tuned for the latest breaking news and updates from our trusted sources worldwide.</p>
                                 <div class="ticker-meta">
-                                    <span class="ticker-source">Brightlens News</span>
                                     <span class="ticker-date">Now</span>
                                 </div>
+                            </div>
+                            <div class="ticker-share-buttons">
+                                <button class="ticker-share-btn" title="Share on Facebook">
+                                    <i class="fab fa-facebook-f"></i>
+                                </button>
+                                <button class="ticker-share-btn" title="Share on Twitter">
+                                    <i class="fab fa-twitter"></i>
+                                </button>
+                                <button class="ticker-share-btn" title="Share on WhatsApp">
+                                    <i class="fab fa-whatsapp"></i>
+                                </button>
+                                <button class="ticker-share-btn" title="Copy Link">
+                                    <i class="fas fa-link"></i>
+                                </button>
                             </div>
                         </div>
                     `;
