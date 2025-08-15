@@ -470,6 +470,76 @@
             animation: spin 1s linear infinite;
         }
         
+        /* Ticker Share Buttons */
+        .ticker-item {
+            position: relative;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .ticker-content {
+            cursor: pointer;
+            flex: 1;
+        }
+        
+        .ticker-share-buttons {
+            display: flex;
+            gap: 0.5rem;
+            padding: 0.75rem;
+            background: rgba(255, 255, 255, 0.95);
+            border-top: 1px solid rgba(255, 255, 255, 0.2);
+            justify-content: center;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        
+        .ticker-item:hover .ticker-share-buttons {
+            opacity: 1;
+        }
+        
+        .ticker-share-btn {
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-size: 0.875rem;
+        }
+        
+        .ticker-share-btn:hover {
+            background: #1d4ed8;
+            transform: scale(1.1);
+        }
+        
+        /* Toast Animations */
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+        
+        @keyframes slideOut {
+            from {
+                transform: translateX(0);
+                opacity: 1;
+            }
+            to {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+        }
+        
         /* Quick Stats Section */
         .quick-stats-section {
             padding: 3rem 0;
@@ -678,6 +748,17 @@
             
             .autocomplete-suggestions {
                 max-height: 150px;
+            }
+            
+            .ticker-share-buttons {
+                padding: 0.5rem;
+                gap: 0.25rem;
+            }
+            
+            .ticker-share-btn {
+                width: 28px;
+                height: 28px;
+                font-size: 0.75rem;
             }
         }
         
@@ -1453,7 +1534,7 @@
                     
                     if (validArticles.length > 0) {
                         // Create ticker items using the exact same article structure as Breaking News page
-                        const tickerItems = validArticles.slice(0, 8).map(article => {
+                        const tickerItems = validArticles.map(article => {
                             // Use the exact same formatDate method as Breaking News page
                             const date = new Date(article.publishedAt);
                             const formattedDate = date.toLocaleDateString('en-US', {
@@ -1479,28 +1560,43 @@
                                 : article.title;
                             
                             // Use the exact same source name as Breaking News page
-                            const sourceName = article.source?.name || 'Unknown Source';
+                            const sourceName = article.source?.name || 'Brightlens News';
                             
                             return `
-                                <div class="ticker-item" onclick="window.open('${article.url}', '_blank')">
-                                    ${hasValidImage ? 
-                                        `<img src="${article.urlToImage}" alt="${article.title}" class="ticker-image" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">` : ''
-                                    }
-                                    ${hasValidImage ? 
-                                        `<div class="ticker-image-placeholder" style="display: none;">
-                                            <i class="fas fa-newspaper"></i>
-                                        </div>` :
-                                        `<div class="ticker-image-placeholder">
-                                            <i class="fas fa-newspaper"></i>
-                                        </div>`
-                                    }
-                                    <div class="ticker-text">
-                                        <h3 class="ticker-title">${truncatedTitle}</h3>
-                                        <p class="ticker-description">${truncatedDescription}</p>
-                                        <div class="ticker-meta">
-                                            <span class="ticker-source">${sourceName}</span>
-                                            <span class="ticker-date">${formattedDate}</span>
+                                <div class="ticker-item">
+                                    <div class="ticker-content" onclick="window.open('${article.url}', '_blank')">
+                                        ${hasValidImage ? 
+                                            `<img src="${article.urlToImage}" alt="${article.title}" class="ticker-image" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">` : ''
+                                        }
+                                        ${hasValidImage ? 
+                                            `<div class="ticker-image-placeholder" style="display: none;">
+                                                <i class="fas fa-newspaper"></i>
+                                            </div>` :
+                                            `<div class="ticker-image-placeholder">
+                                                <i class="fas fa-newspaper"></i>
+                                            </div>`
+                                        }
+                                        <div class="ticker-text">
+                                            <h3 class="ticker-title">${truncatedTitle}</h3>
+                                            <p class="ticker-description">${truncatedDescription}</p>
+                                            <div class="ticker-meta">
+                                                <span class="ticker-date">${formattedDate}</span>
+                                            </div>
                                         </div>
+                                    </div>
+                                    <div class="ticker-share-buttons">
+                                        <button class="ticker-share-btn" onclick="event.stopPropagation(); shareArticle('${encodeURIComponent(article.title)}', '${encodeURIComponent(article.url)}', 'facebook')" title="Share on Facebook">
+                                            <i class="fab fa-facebook-f"></i>
+                                        </button>
+                                        <button class="ticker-share-btn" onclick="event.stopPropagation(); shareArticle('${encodeURIComponent(article.title)}', '${encodeURIComponent(article.url)}', 'twitter')" title="Share on Twitter">
+                                            <i class="fab fa-twitter"></i>
+                                        </button>
+                                        <button class="ticker-share-btn" onclick="event.stopPropagation(); shareArticle('${encodeURIComponent(article.title)}', '${encodeURIComponent(article.url)}', 'whatsapp')" title="Share on WhatsApp">
+                                            <i class="fab fa-whatsapp"></i>
+                                        </button>
+                                        <button class="ticker-share-btn" onclick="event.stopPropagation(); shareArticle('${encodeURIComponent(article.title)}', '${encodeURIComponent(article.url)}', 'copy')" title="Copy Link">
+                                            <i class="fas fa-link"></i>
+                                        </button>
                                     </div>
                                 </div>
                             `;
@@ -1821,6 +1917,100 @@
             
             // Sidebar functionality is now handled by sidebar-navigation.js
         });
+        
+        // Share article function (same as breaking news page)
+        function shareArticle(title, url, platform) {
+            const decodedTitle = decodeURIComponent(title);
+            const decodedUrl = decodeURIComponent(url);
+            
+            let shareUrl = '';
+            let shareText = '';
+            
+            switch (platform) {
+                case 'facebook':
+                    shareUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(decodedUrl)}`;
+                    break;
+                case 'twitter':
+                    shareText = `${decodedTitle} - Read more on Brightlens News`;
+                    shareUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(decodedUrl)}`;
+                    break;
+                case 'whatsapp':
+                    shareText = `${decodedTitle} - ${decodedUrl}`;
+                    shareUrl = `https://wa.me/?text=${encodeURIComponent(shareText)}`;
+                    break;
+                case 'copy':
+                    // Copy to clipboard
+                    const fullText = `${decodedTitle}\n${decodedUrl}`;
+                    if (navigator.clipboard && window.isSecureContext) {
+                        navigator.clipboard.writeText(fullText).then(() => {
+                            showToast('Link copied to clipboard!');
+                        }).catch(() => {
+                            fallbackCopyTextToClipboard(fullText);
+                        });
+                    } else {
+                        fallbackCopyTextToClipboard(fullText);
+                    }
+                    return;
+                default:
+                    return;
+            }
+            
+            if (shareUrl) {
+                window.open(shareUrl, '_blank', 'width=600,height=400');
+            }
+        }
+        
+        // Fallback copy function
+        function fallbackCopyTextToClipboard(text) {
+            const textArea = document.createElement('textarea');
+            textArea.value = text;
+            textArea.style.position = 'fixed';
+            textArea.style.left = '-999999px';
+            textArea.style.top = '-999999px';
+            document.body.appendChild(textArea);
+            textArea.focus();
+            textArea.select();
+            
+            try {
+                document.execCommand('copy');
+                showToast('Link copied to clipboard!');
+            } catch (err) {
+                console.error('Copy failed:', err);
+                showToast('Copy failed - please copy manually', 'error');
+            }
+            
+            document.body.removeChild(textArea);
+        }
+        
+        // Simple toast notification
+        function showToast(message, type = 'success') {
+            const toast = document.createElement('div');
+            toast.className = `toast-notification ${type}`;
+            toast.textContent = message;
+            toast.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                background: ${type === 'error' ? '#ef4444' : '#10b981'};
+                color: white;
+                padding: 12px 20px;
+                border-radius: 8px;
+                z-index: 10000;
+                font-size: 14px;
+                font-weight: 500;
+                box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+                animation: slideIn 0.3s ease;
+            `;
+            
+            document.body.appendChild(toast);
+            
+            setTimeout(() => {
+                toast.style.animation = 'slideOut 0.3s ease';
+                setTimeout(() => {
+                    document.body.removeChild(toast);
+                }, 300);
+            }, 3000);
+        }
     </script>
 </body>
 </html>
