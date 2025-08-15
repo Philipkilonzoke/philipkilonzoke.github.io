@@ -268,11 +268,11 @@
             height: 240px;
             object-fit: cover;
             object-position: center;
-            transition: all 0.3s ease;
+            transition: opacity 0.3s ease, filter 0.3s ease;
             background: linear-gradient(45deg, #f1f5f9, #e2e8f0);
             opacity: 0;
-            filter: blur(2px);
-            will-change: opacity, filter, transform;
+            filter: blur(1px);
+            will-change: opacity, filter;
             image-rendering: -webkit-optimize-contrast;
             image-rendering: crisp-edges;
             backface-visibility: hidden;
@@ -280,14 +280,13 @@
         }
         
         .recipe-image.loading {
-            opacity: 0.4;
-            filter: blur(2px);
+            opacity: 0.6;
+            filter: blur(1px);
         }
         
         .recipe-image.loaded {
             opacity: 1;
             filter: blur(0);
-            transform: scale(1);
         }
         
         .recipe-card:hover .recipe-image {
@@ -452,27 +451,7 @@
             margin-bottom: 1rem;
         }
         
-        /* Recipe Stats */
-        .recipe-stats {
-            display: flex;
-            gap: 1rem;
-            margin-bottom: 1rem;
-            padding: 0.75rem;
-            background: var(--surface-color);
-            border-radius: 0.75rem;
-        }
-        
-        .recipe-stats .stat-item {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            font-size: 0.875rem;
-            color: #64748b;
-        }
-        
-        .recipe-stats .stat-item i {
-            color: var(--primary-color);
-        }
+
         
         /* Copy Link Button */
         .copy-link-btn {
@@ -579,10 +558,7 @@
                 padding: 0.2rem 0.5rem;
             }
             
-            .recipe-stats {
-                flex-direction: column;
-                gap: 0.5rem;
-            }
+
             
             .recipe-actions {
                 flex-direction: column;
@@ -1130,6 +1106,15 @@
             img.src = nextUrl;
         }
 
+        // Success handler for image loading
+        function handleRecipeImgLoad(event) {
+            const img = event.target;
+            img.classList.remove('loading');
+            img.classList.add('loaded');
+            img.removeAttribute('data-src');
+            img.removeAttribute('data-fallbacks');
+        }
+
         async function loadRandomRecipes() {
             showLoading();
             updateSectionTitle('Featured Recipes');
@@ -1209,82 +1194,45 @@
             
             grid.innerHTML = recipes.map(recipe => createRecipeCard(recipe)).join('');
             
-            // Ultra-fast lazy loading with priority optimization and quality enhancement
+            // Optimized lazy loading with better performance
             const images = grid.querySelectorAll('img[data-src]');
             const imageObserver = new IntersectionObserver((entries, observer) => {
                 entries.forEach(entry => {
                     if (entry.isIntersecting) {
                         const img = entry.target;
                         
-                        // Load the highest quality image available
+                        // Load the image immediately
                         img.src = img.dataset.src;
                         img.classList.add('loading');
                         
-                        // Preload the next best quality image for smooth transitions
+                        // Preload fallback images for better UX
                         const fallbacks = img.dataset.fallbacks ? decodeURIComponent(img.dataset.fallbacks).split('|').filter(Boolean) : [];
                         if (fallbacks.length > 0) {
                             const preloadImg = new Image();
                             preloadImg.src = fallbacks[0];
                         }
                         
-                        img.onload = () => {
-                            img.classList.remove('loading');
-                            img.classList.add('loaded');
-                            img.removeAttribute('data-src');
-                            img.removeAttribute('data-fallbacks');
-                            observer.unobserve(img);
-                        };
-                        
-                        img.onerror = () => {
-                            // Try fallback images if main image fails
-                            const fallbacks = img.dataset.fallbacks ? decodeURIComponent(img.dataset.fallbacks).split('|').filter(Boolean) : [];
-                            if (fallbacks.length > 0) {
-                                const nextUrl = fallbacks.shift();
-                                img.dataset.fallbacks = encodeURIComponent(fallbacks.join('|'));
-                                img.src = nextUrl;
-                            } else {
-                                handleRecipeImgError({ target: img });
-                            }
-                        };
+                        observer.unobserve(img);
                     }
                 });
             }, {
-                rootMargin: '150px 0px', // Start loading 150px before image comes into view
+                rootMargin: '200px 0px', // Start loading 200px before image comes into view
                 threshold: 0.01 // Load as soon as 1% is visible
             });
             
-            // Prioritize first 8 images for immediate loading (increased from 6)
+            // Load first 6 images immediately for better perceived performance
             images.forEach((img, index) => {
-                if (index < 8) {
-                    // Load first 8 images immediately for better perceived performance
+                if (index < 6) {
+                    // Load first 6 images immediately
                     img.src = img.dataset.src;
                     img.classList.add('loading');
                     
-                    // Preload fallback for immediate images too
+                    // Preload fallback for immediate images
                     const fallbacks = img.dataset.fallbacks ? decodeURIComponent(img.dataset.fallbacks).split('|').filter(Boolean) : [];
                     if (fallbacks.length > 0) {
                         const preloadImg = new Image();
                         preloadImg.src = fallbacks[0];
                     }
-                    
-                    img.onload = () => {
-                        img.classList.remove('loading');
-                        img.classList.add('loaded');
-                        img.removeAttribute('data-src');
-                        img.removeAttribute('data-fallbacks');
-                    };
-                    
-                    img.onerror = () => {
-                        // Try fallback images if main image fails
-                        const fallbacks = img.dataset.fallbacks ? decodeURIComponent(img.dataset.fallbacks).split('|').filter(Boolean) : [];
-                        if (fallbacks.length > 0) {
-                            const nextUrl = fallbacks.shift();
-                            img.dataset.fallbacks = encodeURIComponent(fallbacks.join('|'));
-                            img.src = nextUrl;
-                        } else {
-                            handleRecipeImgError({ target: img });
-                        }
-                    };
                 } else {
                     // Lazy load the rest
                     imageObserver.observe(img);
