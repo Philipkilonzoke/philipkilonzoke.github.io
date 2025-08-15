@@ -162,41 +162,7 @@
             100% { transform: scale(1); }
         }
         
-        /* Quick Filter Buttons */
-        .cuisine-filters, .time-filters, .meal-filters {
-            display: flex;
-            gap: 0.5rem;
-            flex-wrap: wrap;
-            margin: 1rem 0;
-            justify-content: center;
-        }
-        
-        .cuisine-btn, .time-btn, .meal-btn {
-            padding: 0.5rem 1rem;
-            border: 2px solid var(--border-color);
-            border-radius: 25px;
-            background: var(--background-color);
-            color: var(--text-color);
-            font-size: 0.875rem;
-            font-weight: 500;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-        
-        .cuisine-btn:hover, .time-btn:hover, .meal-btn:hover {
-            border-color: var(--primary-color);
-            background: rgba(37, 99, 235, 0.1);
-            transform: translateY(-1px);
-        }
-        
-        .cuisine-btn.active, .time-btn.active, .meal-btn.active {
-            background: var(--primary-color);
-            color: white;
-            border-color: var(--primary-color);
-        }
+
         
         .filters-container {
             display: flex;
@@ -222,14 +188,6 @@
         
         /* Responsive Design */
         @media (max-width: 768px) {
-            .cuisine-filters, .time-filters, .meal-filters {
-                gap: 0.25rem;
-            }
-            
-            .cuisine-btn, .time-btn, .meal-btn {
-                padding: 0.375rem 0.75rem;
-                font-size: 0.75rem;
-            }
             
             .recipes-grid {
                 grid-template-columns: 1fr;
@@ -268,25 +226,7 @@
             height: 240px;
             object-fit: cover;
             object-position: center;
-            transition: opacity 0.3s ease, filter 0.3s ease;
             background: linear-gradient(45deg, #f1f5f9, #e2e8f0);
-            opacity: 0;
-            filter: blur(1px);
-            will-change: opacity, filter;
-            image-rendering: -webkit-optimize-contrast;
-            image-rendering: crisp-edges;
-            backface-visibility: hidden;
-            transform: translateZ(0);
-        }
-        
-        .recipe-image.loading {
-            opacity: 0.6;
-            filter: blur(1px);
-        }
-        
-        .recipe-image.loaded {
-            opacity: 1;
-            filter: blur(0);
         }
         
         .recipe-card:hover .recipe-image {
@@ -340,9 +280,33 @@
             font-size: 1.3rem;
             line-height: 1.7;
             margin-bottom: 1.25rem;
-            /* Removed line-clamp to allow full description display */
+            display: -webkit-box;
+            -webkit-line-clamp: 4;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
             word-wrap: break-word;
             overflow-wrap: break-word;
+        }
+        
+        .recipe-summary.expanded {
+            -webkit-line-clamp: unset;
+            overflow: visible;
+        }
+        
+        .read-more-btn {
+            color: var(--primary-color);
+            background: none;
+            border: none;
+            font-size: 0.875rem;
+            font-weight: 500;
+            cursor: pointer;
+            padding: 0;
+            margin-top: 0.5rem;
+            text-decoration: underline;
+        }
+        
+        .read-more-btn:hover {
+            color: #1d4ed8;
         }
         
         .recipe-meta {
@@ -642,65 +606,7 @@
                     </button>
                 </div>
                 
-                <!-- Quick Cuisine Filters -->
-                <div class="cuisine-filters">
-                    <button class="cuisine-btn active" data-cuisine="">
-                        <i class="fas fa-globe"></i> All
-                    </button>
-                    <button class="cuisine-btn" data-cuisine="italian">
-                        <i class="fas fa-pizza-slice"></i> Italian
-                    </button>
-                    <button class="cuisine-btn" data-cuisine="mexican">
-                        <i class="fas fa-pepper-hot"></i> Mexican
-                    </button>
-                    <button class="cuisine-btn" data-cuisine="asian">
-                        <i class="fas fa-dragon"></i> Asian
-                    </button>
-                    <button class="cuisine-btn" data-cuisine="mediterranean">
-                        <i class="fas fa-fish"></i> Mediterranean
-                    </button>
-                    <button class="cuisine-btn" data-cuisine="american">
-                        <i class="fas fa-hamburger"></i> American
-                    </button>
-                    <button class="cuisine-btn" data-cuisine="indian">
-                        <i class="fas fa-pepper-hot"></i> Indian
-                    </button>
-                </div>
 
-                <!-- Quick Time Filters -->
-                <div class="time-filters">
-                    <button class="time-btn active" data-time="">
-                        <i class="fas fa-clock"></i> Any Time
-                    </button>
-                    <button class="time-btn" data-time="15">
-                        <i class="fas fa-bolt"></i> 15 min
-                    </button>
-                    <button class="time-btn" data-time="30">
-                        <i class="fas fa-stopwatch"></i> 30 min
-                    </button>
-                    <button class="time-btn" data-time="60">
-                        <i class="fas fa-hourglass-half"></i> 60+ min
-                    </button>
-                </div>
-
-                <!-- Meal Type Filters -->
-                <div class="meal-filters">
-                    <button class="meal-btn active" data-meal="">
-                        <i class="fas fa-utensils"></i> All Meals
-                    </button>
-                    <button class="meal-btn" data-meal="breakfast">
-                        <i class="fas fa-sun"></i> Breakfast
-                    </button>
-                    <button class="meal-btn" data-meal="lunch">
-                        <i class="fas fa-cloud-sun"></i> Lunch
-                    </button>
-                    <button class="meal-btn" data-meal="dinner">
-                        <i class="fas fa-moon"></i> Dinner
-                    </button>
-                    <button class="meal-btn" data-meal="dessert">
-                        <i class="fas fa-ice-cream"></i> Desserts
-                    </button>
-                </div>
 
                 <div class="filters-container">
                     <select id="diet-filter" class="filter-select">
@@ -928,10 +834,7 @@
             const dietFilter = document.getElementById('diet-filter');
             const sortBy = document.getElementById('sort-by');
             
-            // Quick filter variables
-            let currentCuisine = '';
-            let currentTime = '';
-            let currentMeal = '';
+
             
             // Search functionality with debounce
             searchInput.addEventListener('input', function() {
@@ -967,151 +870,35 @@
             dietFilter.addEventListener('change', applyFilters);
             sortBy.addEventListener('change', applyFilters);
             
-            // Quick filter event listeners
-            setupQuickFilters();
+
         }
         
-        // Build ordered list of possible image URLs for a recipe with ultra-high-quality options
-        function getRecipeImageCandidates(recipe) {
-            const candidates = [];
-            
-            // Ultra-high-quality image sizes optimized for modern displays (including 4K and retina)
-            const ultraHighQualitySizes = [
-                '2000x1333', // 4K displays
-                '1600x1067', // Large retina displays
-                '1200x800',  // Standard retina displays
-                '1000x667',  // Desktop displays
-                '800x533',   // Tablet displays
-                '636x393',   // Original large
-                '556x370',   // Original medium
-                '480x360',   // Mobile
-                '312x231'    // Fallback
-            ];
-            
-            // Generate responsive srcset for optimal quality
-            function generateSrcSet(baseUrl, sizes) {
-                return sizes.map(size => `${baseUrl.replace(/-\d+x\d+/, `-${size}`)} ${size.split('x')[0]}w`).join(', ');
-            }
-
-            // Use provided image first if absolute URL (but try to enhance it)
+        // Simple image URL generation for recipes
+        function getRecipeImageUrl(recipe) {
             if (recipe.image && /^https?:\/\//.test(recipe.image)) {
-                // Try to enhance the provided image URL
-                const enhancedUrl = enhanceImageUrl(recipe.image);
-                if (enhancedUrl) {
-                    candidates.push(enhancedUrl);
-                }
-                candidates.push(recipe.image);
+                return recipe.image;
             }
-
-            // Try constructing from id and imageType
-            const recipeId = recipe.id;
-            const imageTypeFromProp = recipe.imageType && typeof recipe.imageType === 'string'
-                ? recipe.imageType.replace(/[^a-zA-Z0-9]/g, '')
-                : '';
-
-            if (recipeId && imageTypeFromProp) {
-                // Try WebP first for better quality and smaller size
-                ultraHighQualitySizes.forEach(size => {
-                    candidates.push(`https://img.spoonacular.com/recipes/${recipeId}-${size}.webp`);
-                });
-                // Fallback to original format
-                ultraHighQualitySizes.forEach(size => {
-                    candidates.push(`https://img.spoonacular.com/recipes/${recipeId}-${size}.${imageTypeFromProp}`);
-                });
-            } else if (recipe.image) {
-                // Try to extract id and type from existing URL if possible
-                const match = recipe.image.match(/recipes\/(\d+)-(\d+x\d+)\.(\w+)/);
-                if (match) {
-                    const id = match[1];
-                    const ext = match[3];
-                    // Try WebP first
-                    ultraHighQualitySizes.forEach(size => {
-                        candidates.push(`https://img.spoonacular.com/recipes/${id}-${size}.webp`);
-                    });
-                    // Fallback to original format
-                    ultraHighQualitySizes.forEach(size => {
-                        candidates.push(`https://img.spoonacular.com/recipes/${id}-${size}.${ext}`);
-                    });
-                }
+            
+            if (recipe.id) {
+                return `https://img.spoonacular.com/recipes/${recipe.id}-556x370.jpg`;
             }
-
-            // De-duplicate while preserving order
-            return Array.from(new Set(candidates));
-        }
-        
-        // Function to enhance image URLs for better quality
-        function enhanceImageUrl(url) {
-            // If it's already a Spoonacular URL, try to get a larger version
-            const match = url.match(/recipes\/(\d+)-(\d+x\d+)\.(\w+)/);
-            if (match) {
-                const id = match[1];
-                const currentSize = match[2];
-                const ext = match[3];
-                
-                // Try to get a larger size if current is small
-                const sizes = ['2000x1333', '1600x1067', '1200x800', '1000x667'];
-                for (const size of sizes) {
-                    if (size !== currentSize) {
-                        return `https://img.spoonacular.com/recipes/${id}-${size}.webp`;
-                    }
-                }
-            }
+            
             return null;
         }
-        
-        // Function to generate srcset for responsive images
-        function generateImageSrcset(imageCandidates) {
-            // Filter and sort candidates by size (width)
-            const sizedCandidates = imageCandidates
-                .filter(url => {
-                    const match = url.match(/-(\d+x\d+)\./);
-                    return match;
-                })
-                .map(url => {
-                    const match = url.match(/-(\d+x\d+)\./);
-                    const size = match[1];
-                    const width = parseInt(size.split('x')[0]);
-                    return { url, width };
-                })
-                .sort((a, b) => a.width - b.width);
+
+        // Toggle read more functionality
+        function toggleReadMore(summaryId, event) {
+            event.stopPropagation();
+            const summaryElement = document.getElementById(`summary-${summaryId}`);
+            const button = event.target;
             
-            // Generate srcset string
-            return sizedCandidates
-                .map(candidate => `${candidate.url} ${candidate.width}w`)
-                .join(', ');
-        }
-
-        // Error handler to advance through fallbacks or replace with placeholder
-        function handleRecipeImgError(event) {
-            const img = event.target;
-            const encoded = img.getAttribute('data-fallbacks') || '';
-            if (!encoded) {
-                const placeholder = document.createElement('div');
-                placeholder.className = 'recipe-image-placeholder';
-                placeholder.textContent = '🍽️';
-                img.replaceWith(placeholder);
-                return;
+            if (summaryElement.classList.contains('expanded')) {
+                summaryElement.classList.remove('expanded');
+                button.textContent = 'Read More';
+            } else {
+                summaryElement.classList.add('expanded');
+                button.textContent = 'Read Less';
             }
-            const fallbacks = decodeURIComponent(encoded).split('|').filter(Boolean);
-            if (fallbacks.length === 0) {
-                const placeholder = document.createElement('div');
-                placeholder.className = 'recipe-image-placeholder';
-                placeholder.textContent = '🍽️';
-                img.replaceWith(placeholder);
-                return;
-            }
-            const nextUrl = fallbacks.shift();
-            img.setAttribute('data-fallbacks', encodeURIComponent(fallbacks.join('|')));
-            img.src = nextUrl;
-        }
-
-        // Success handler for image loading
-        function handleRecipeImgLoad(event) {
-            const img = event.target;
-            img.classList.remove('loading');
-            img.classList.add('loaded');
-            img.removeAttribute('data-src');
-            img.removeAttribute('data-fallbacks');
         }
 
         async function loadRandomRecipes() {
@@ -1192,51 +979,6 @@
             }
             
             grid.innerHTML = recipes.map(recipe => createRecipeCard(recipe)).join('');
-            
-            // Optimized lazy loading with better performance
-            const images = grid.querySelectorAll('img[data-src]');
-            const imageObserver = new IntersectionObserver((entries, observer) => {
-                entries.forEach(entry => {
-                    if (entry.isIntersecting) {
-                        const img = entry.target;
-                        
-                        // Load the image immediately
-                        img.src = img.dataset.src;
-                        img.classList.add('loading');
-                        
-                        // Preload fallback images for better UX
-                        const fallbacks = img.dataset.fallbacks ? decodeURIComponent(img.dataset.fallbacks).split('|').filter(Boolean) : [];
-                        if (fallbacks.length > 0) {
-                            const preloadImg = new Image();
-                            preloadImg.src = fallbacks[0];
-                        }
-                        
-                        observer.unobserve(img);
-                    }
-                });
-            }, {
-                rootMargin: '200px 0px', // Start loading 200px before image comes into view
-                threshold: 0.01 // Load as soon as 1% is visible
-            });
-            
-            // Load first 6 images immediately for better perceived performance
-            images.forEach((img, index) => {
-                if (index < 6) {
-                    // Load first 6 images immediately
-                    img.src = img.dataset.src;
-                    img.classList.add('loading');
-                    
-                    // Preload fallback for immediate images
-                    const fallbacks = img.dataset.fallbacks ? decodeURIComponent(img.dataset.fallbacks).split('|').filter(Boolean) : [];
-                    if (fallbacks.length > 0) {
-                        const preloadImg = new Image();
-                        preloadImg.src = fallbacks[0];
-                    }
-                } else {
-                    // Lazy load the rest
-                    imageObserver.observe(img);
-                }
-            });
         }
         
         function createRecipeCard(recipe) {
@@ -1278,20 +1020,15 @@
             if (recipe.glutenFree) dietTags.push('Gluten Free');
             if (recipe.dairyFree) dietTags.push('Dairy Free');
 
-            const imageCandidates = getRecipeImageCandidates(recipe);
-            const hasImage = imageCandidates.length > 0;
-            const firstSrc = hasImage ? imageCandidates[0] : '';
-            const fallbackList = hasImage ? encodeURIComponent(imageCandidates.slice(1).join('|')) : '';
-            
-            // Generate srcset for responsive images
-            const srcset = hasImage ? generateImageSrcset(imageCandidates) : '';
+            const imageUrl = getRecipeImageUrl(recipe);
+            const defaultImage = 'https://via.placeholder.com/400x240/f1f5f9/64748b?text=Recipe+Image';
             
             return `
                 <div class="recipe-card" onclick="openRecipe('${recipe.sourceUrl || recipe.spoonacularSourceUrl}')">
-                    ${hasImage
-                        ? `<img data-src="${firstSrc}" data-fallbacks="${fallbackList}" srcset="${srcset}" sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw" alt="${recipe.title}" class="recipe-image" loading="lazy" onerror="handleRecipeImgError(event)" decoding="async" onload="handleRecipeImgLoad(event)">`
-                        : `<div class="recipe-image-placeholder">🍽️</div>`
-                    }
+                    <img src="${imageUrl || defaultImage}" 
+                         alt="${recipe.title}" 
+                         class="recipe-image"
+                         onerror="this.src='${defaultImage}'">
                     
                     <!-- Recipe Badges -->
                     <div class="recipe-badges">
@@ -1303,7 +1040,10 @@
                     
                     <div class="recipe-content">
                         <h3 class="recipe-title">${recipe.title}</h3>
-                        <p class="recipe-summary">${summary}</p>
+                        <div class="recipe-summary-container">
+                            <p class="recipe-summary" id="summary-${recipe.id || Math.random().toString(36).substr(2, 9)}">${summary}</p>
+                            ${summary.length > 200 ? `<button class="read-more-btn" onclick="toggleReadMore('${recipe.id || Math.random().toString(36).substr(2, 9)}', event)">Read More</button>` : ''}
+                        </div>
                         
                         <!-- Reading Time Badge -->
                         <div class="reading-time-badge">
@@ -1409,47 +1149,7 @@
             document.getElementById('recipe-count').textContent = `${count} recipes found`;
         }
         
-        // Quick filter functionality
-        function setupQuickFilters() {
-            // Cuisine filters
-            document.querySelectorAll('.cuisine-btn').forEach(btn => {
-                btn.addEventListener('click', function() {
-                    document.querySelectorAll('.cuisine-btn').forEach(b => b.classList.remove('active'));
-                    this.classList.add('active');
-                    currentCuisine = this.dataset.cuisine;
-                    applyQuickFilters();
-                });
-            });
-            
-            // Time filters
-            document.querySelectorAll('.time-btn').forEach(btn => {
-                btn.addEventListener('click', function() {
-                    document.querySelectorAll('.time-btn').forEach(b => b.classList.remove('active'));
-                    this.classList.add('active');
-                    currentTime = this.dataset.time;
-                    applyQuickFilters();
-                });
-            });
-            
-            // Meal filters
-            document.querySelectorAll('.meal-btn').forEach(btn => {
-                btn.addEventListener('click', function() {
-                    document.querySelectorAll('.meal-btn').forEach(b => b.classList.remove('active'));
-                    this.classList.add('active');
-                    currentMeal = this.dataset.meal;
-                    applyQuickFilters();
-                });
-            });
-        }
-        
-        function applyQuickFilters() {
-            const searchQuery = document.getElementById('recipe-search').value.trim();
-            if (searchQuery) {
-                searchRecipesWithFilters(searchQuery);
-            } else {
-                loadRandomRecipesWithFilters();
-            }
-        }
+
         
         async function searchRecipesWithFilters(query) {
             showLoading();
