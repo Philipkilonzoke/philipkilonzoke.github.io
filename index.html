@@ -204,6 +204,7 @@
             will-change: transform;
             cursor: grab;
             user-select: none;
+            width: max-content; /* Ensure proper horizontal scrolling */
         }
         
         .ticker-content:active {
@@ -229,8 +230,9 @@
             flex-direction: column;
             background: var(--background-color);
             border-radius: var(--radius-lg);
-            min-width: 350px;
-            max-width: 350px;
+            min-width: 380px;
+            max-width: 380px;
+            height: 420px; /* Fixed height for consistent layout */
             border: 1px solid var(--border-color);
             box-shadow: var(--shadow-sm);
             transition: all 0.3s ease;
@@ -269,6 +271,7 @@
             flex: 1;
             display: flex;
             flex-direction: column;
+            min-height: 0; /* Allow flex shrinking */
         }
         
         .ticker-title {
@@ -289,11 +292,12 @@
             line-height: 1.5;
             margin-bottom: 1rem;
             display: -webkit-box;
-            -webkit-line-clamp: 3;
+            -webkit-line-clamp: 4;
             -webkit-box-orient: vertical;
             overflow: hidden;
             opacity: 0.8;
             flex: 1;
+            min-height: 0; /* Allow flex shrinking */
         }
         
         .ticker-meta {
@@ -486,16 +490,15 @@
             display: flex;
             gap: 0.5rem;
             padding: 0.75rem;
-            background: rgba(255, 255, 255, 0.95);
-            border-top: 1px solid rgba(255, 255, 255, 0.2);
+            background: var(--surface-color);
+            border-top: 1px solid var(--border-color);
             justify-content: center;
-            opacity: 0;
+            opacity: 1; /* Always visible */
             transition: opacity 0.3s ease;
+            flex-shrink: 0; /* Prevent shrinking */
         }
         
-        .ticker-item:hover .ticker-share-buttons {
-            opacity: 1;
-        }
+
         
         .ticker-share-btn {
             background: var(--primary-color);
@@ -714,8 +717,9 @@
             }
             
             .ticker-item {
-                min-width: 300px;
-                max-width: 300px;
+                min-width: 320px;
+                max-width: 320px;
+                height: 400px;
             }
             
             .ticker-image,
@@ -733,7 +737,15 @@
             
             .ticker-description {
                 font-size: 0.8rem;
-                -webkit-line-clamp: 2;
+                -webkit-line-clamp: 3;
+            }
+            
+            .ticker-text {
+                padding: 1rem;
+            }
+            
+            .ticker-title {
+                font-size: 1rem;
             }
             
             .search-suggestions {
@@ -776,8 +788,9 @@
             }
             
             .ticker-item {
-                min-width: 280px;
-                max-width: 280px;
+                min-width: 300px;
+                max-width: 300px;
+                height: 380px;
             }
             
             .ticker-image,
