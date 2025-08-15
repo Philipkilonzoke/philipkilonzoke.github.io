@@ -392,12 +392,67 @@
     will-change: transform;
 }
 
+/* ===== NO RECOMMENDATIONS MESSAGE ===== */
+.no-recommendations {
+    grid-column: 1 / -1;
+    text-align: center;
+    padding: 3rem;
+}
+
+.no-recommendations-content {
+    max-width: 400px;
+    margin: 0 auto;
+}
+
+.no-recommendations-content i {
+    font-size: 3rem;
+    color: var(--primary-color);
+    margin-bottom: 1rem;
+    opacity: 0.7;
+}
+
+.no-recommendations-content h3 {
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    color: var(--text-color);
+}
+
+.no-recommendations-content p {
+    color: var(--text-muted);
+    margin-bottom: 1.5rem;
+    font-size: 1rem;
+}
+
+.no-recommendations .explore-btn {
+    background: var(--primary-color);
+    color: white;
+    border: none;
+    padding: 0.75rem 1.5rem;
+    border-radius: var(--radius-md);
+    font-size: 0.875rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    text-decoration: none;
+}
+
+.no-recommendations .explore-btn:hover {
+    background: var(--primary-dark);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
 /* ===== PRINT STYLES ===== */
 @media print {
     .reading-time-badge,
     .content-filter-btn,
     .toast,
-    .ai-suggestions {
+    .ai-suggestions,
+    .no-recommendations {
         display: none !important;
     }
     

@@ -23,6 +23,9 @@ class AIFeatures {
         // Calculate reading time for articles
         const articles = document.querySelectorAll('.article-card, .recipe-card, .ticker-item');
         articles.forEach(article => {
+            // Check if reading time badge already exists
+            if (article.querySelector('.reading-time-badge')) return;
+            
             const textContent = this.extractTextContent(article);
             const readingTime = this.calculateReadingTime(textContent);
             this.addReadingTimeBadge(article, readingTime);
@@ -128,6 +131,9 @@ class AIFeatures {
         const mainContent = document.querySelector('main');
         if (!mainContent) return;
 
+        // Check if recommendations section already exists
+        if (document.querySelector('.recommendations-section')) return;
+
         const recommendationsSection = document.createElement('section');
         recommendationsSection.className = 'recommendations-section';
         recommendationsSection.innerHTML = `
@@ -186,26 +192,49 @@ class AIFeatures {
     }
 
     async fetchRecommendedArticles(categories) {
+        // Since we don't have an API, we'll use existing articles from the page
         const articles = [];
         
-        for (const category of categories) {
-            try {
-                const response = await fetch(`/api/news?category=${category}&limit=2`);
-                const data = await response.json();
-                if (data.articles) {
-                    articles.push(...data.articles.slice(0, 2));
+        // Get existing articles from the page
+        const existingArticles = document.querySelectorAll('.article-card, .recipe-card, .ticker-item');
+        
+        if (existingArticles.length > 0) {
+            // Convert existing articles to recommendation format
+            existingArticles.forEach((article, index) => {
+                if (index < 6) { // Limit to 6 recommendations
+                    const title = article.querySelector('.article-title, .recipe-title, .ticker-title')?.textContent || '';
+                    const description = article.querySelector('.article-description, .recipe-summary, .ticker-description')?.textContent || '';
+                    const image = article.querySelector('.article-image, .recipe-image, .ticker-image')?.src || '';
+                    const url = article.getAttribute('onclick')?.match(/window\.open\('([^']+)'/)?.[1] || '#';
+                    
+                    articles.push({
+                        title,
+                        description,
+                        urlToImage: image,
+                        url,
+                        source: { name: 'Brightlens News' },
+                        publishedAt: new Date().toISOString()
+                    });
                 }
-            } catch (error) {
-                console.error(`Error fetching ${category} articles:`, error);
-            }
+            });
+        }
+        
+        // If no articles found, show a friendly message
+        if (articles.length === 0) {
+            this.showNoRecommendationsMessage();
         }
 
-        return articles.slice(0, 6); // Limit to 6 recommendations
+        return articles;
     }
 
     displayRecommendations(articles) {
         const grid = document.getElementById('recommendations-grid');
-        if (!grid || articles.length === 0) return;
+        if (!grid) return;
+
+        if (articles.length === 0) {
+            this.showNoRecommendationsMessage();
+            return;
+        }
 
         grid.innerHTML = articles.map(article => `
             <div class="recommendation-card" onclick="window.open('${article.url}', '_blank')">
@@ -229,6 +258,25 @@ class AIFeatures {
         `).join('');
     }
 
+    showNoRecommendationsMessage() {
+        const grid = document.getElementById('recommendations-grid');
+        if (!grid) return;
+
+        grid.innerHTML = `
+            <div class="no-recommendations">
+                <div class="no-recommendations-content">
+                    <i class="fas fa-star"></i>
+                    <h3>Start Exploring!</h3>
+                    <p>Read some articles to get personalized recommendations</p>
+                    <button onclick="window.scrollTo({top: 0, behavior: 'smooth'})" class="explore-btn">
+                        <i class="fas fa-arrow-up"></i>
+                        Explore Articles
+                    </button>
+                </div>
+            </div>
+        `;
+    }
+
     // ===== SMART CONTENT FILTERING =====
     setupContentFiltering() {
         // Add "Show more/less like this" buttons to article cards
@@ -239,6 +287,9 @@ class AIFeatures {
         const articles = document.querySelectorAll('.article-card, .recipe-card');
         
         articles.forEach(article => {
+            // Check if filter button already exists
+            if (article.querySelector('.content-filter-btn')) return;
+            
             const filterButton = document.createElement('button');
             filterButton.className = 'content-filter-btn';
             filterButton.innerHTML = '<i class="fas fa-thumbs-up"></i> Show more like this';
@@ -400,24 +451,37 @@ class AIFeatures {
 
 // Initialize AI Features when DOM is loaded
 document.addEventListener('DOMContentLoaded', () => {
-    window.aiFeatures = new AIFeatures();
+    try {
+        window.aiFeatures = new AIFeatures();
+    } catch (error) {
+        console.error('AI Features initialization failed:', error);
+        // Graceful degradation - features won't work but site continues to function
+    }
 });
 
 // Track user interactions for better recommendations
 document.addEventListener('click', (e) => {
-    const articleCard = e.target.closest('.article-card, .recipe-card, .ticker-item');
-    if (articleCard && window.aiFeatures) {
-        const articleData = window.aiFeatures.extractArticleData(articleCard);
-        window.aiFeatures.saveReadingHistory(articleData);
+    try {
+        const articleCard = e.target.closest('.article-card, .recipe-card, .ticker-item');
+        if (articleCard && window.aiFeatures) {
+            const articleData = window.aiFeatures.extractArticleData(articleCard);
+            window.aiFeatures.saveReadingHistory(articleData);
+        }
+    } catch (error) {
+        console.error('Error tracking user interaction:', error);
     }
 });
 
 // Track search queries
 document.addEventListener('submit', (e) => {
-    if (e.target.id === 'quick-search-form' && window.aiFeatures) {
-        const query = e.target.querySelector('input').value.trim();
-        if (query) {
-            window.aiFeatures.saveSearchHistory(query);
+    try {
+        if (e.target.id === 'quick-search-form' && window.aiFeatures) {
+            const query = e.target.querySelector('input').value.trim();
+            if (query) {
+                window.aiFeatures.saveSearchHistory(query);
+            }
         }
+    } catch (error) {
+        console.error('Error tracking search query:', error);
     }
 });
