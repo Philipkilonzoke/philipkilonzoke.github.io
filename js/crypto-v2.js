@@ -18,7 +18,64 @@
     { symbol: 'LTC', name: 'Litecoin', icon: '💡' },
     { symbol: 'UNI', name: 'Uniswap', icon: '🦄' },
     { symbol: 'XLM', name: 'Stellar', icon: '✨' },
-    { symbol: 'TON', name: 'Toncoin', icon: '🪙' }
+    { symbol: 'TON', name: 'Toncoin', icon: '🪙' },
+    { symbol: 'AVAX', name: 'Avalanche', icon: '❄️' },
+    { symbol: 'SHIB', name: 'Shiba Inu', icon: '🐕' },
+    { symbol: 'ATOM', name: 'Cosmos', icon: '⚛️' },
+    { symbol: 'NEAR', name: 'NEAR Protocol', icon: '🌐' },
+    { symbol: 'FTM', name: 'Fantom', icon: '👻' },
+    { symbol: 'ALGO', name: 'Algorand', icon: '🔷' },
+    { symbol: 'VET', name: 'VeChain', icon: '🔗' },
+    { symbol: 'FIL', name: 'Filecoin', icon: '📁' },
+    { symbol: 'ICP', name: 'Internet Computer', icon: '🌐' },
+    { symbol: 'APT', name: 'Aptos', icon: '🟢' },
+    { symbol: 'ARB', name: 'Arbitrum', icon: '🔵' },
+    { symbol: 'OP', name: 'Optimism', icon: '🟠' },
+    { symbol: 'MKR', name: 'Maker', icon: '🏛️' },
+    { symbol: 'AAVE', name: 'Aave', icon: '📈' },
+    { symbol: 'SNX', name: 'Synthetix', icon: '📊' },
+    { symbol: 'COMP', name: 'Compound', icon: '🏦' },
+    { symbol: 'YFI', name: 'yearn.finance', icon: '🎯' },
+    { symbol: 'CRV', name: 'Curve DAO', icon: '🔄' },
+    { symbol: 'BAL', name: 'Balancer', icon: '⚖️' },
+    { symbol: 'SUSHI', name: 'SushiSwap', icon: '🍣' },
+    { symbol: '1INCH', name: '1inch', icon: '🔗' },
+    { symbol: 'ZRX', name: '0x Protocol', icon: '🔄' },
+    { symbol: 'BAT', name: 'Basic Attention Token', icon: '🦁' },
+    { symbol: 'ZEC', name: 'Zcash', icon: '🛡️' },
+    { symbol: 'DASH', name: 'Dash', icon: '💎' },
+    { symbol: 'XMR', name: 'Monero', icon: '🔒' },
+    { symbol: 'EOS', name: 'EOS', icon: '⚡' },
+    { symbol: 'XTZ', name: 'Tezos', icon: '🍞' },
+    { symbol: 'NEO', name: 'Neo', icon: '🐉' },
+    { symbol: 'WAVES', name: 'Waves', icon: '🌊' },
+    { symbol: 'IOTA', name: 'IOTA', icon: '📡' },
+    { symbol: 'NANO', name: 'Nano', icon: '⚡' },
+    { symbol: 'HBAR', name: 'Hedera', icon: '🌿' },
+    { symbol: 'THETA', name: 'Theta Network', icon: '🎬' },
+    { symbol: 'CAKE', name: 'PancakeSwap', icon: '🥞' },
+    { symbol: 'CHZ', name: 'Chiliz', icon: '⚽' },
+    { symbol: 'HOT', name: 'Holo', icon: '🔥' },
+    { symbol: 'ENJ', name: 'Enjin Coin', icon: '🎮' },
+    { symbol: 'MANA', name: 'Decentraland', icon: '🏗️' },
+    { symbol: 'SAND', name: 'The Sandbox', icon: '🏖️' },
+    { symbol: 'AXS', name: 'Axie Infinity', icon: '🎮' },
+    { symbol: 'GALA', name: 'Gala', icon: '🎭' },
+    { symbol: 'ROBLOX', name: 'Roblox', icon: '🎮' },
+    { symbol: 'RUNE', name: 'THORChain', icon: '⚡' },
+    { symbol: 'KSM', name: 'Kusama', icon: '🟡' },
+    { symbol: 'GRT', name: 'The Graph', icon: '📊' },
+    { symbol: 'OCEAN', name: 'Ocean Protocol', icon: '🌊' },
+    { symbol: 'BAND', name: 'Band Protocol', icon: '🎵' },
+    { symbol: 'ANKR', name: 'Ankr', icon: '🔗' },
+    { symbol: 'STORJ', name: 'Storj', icon: '☁️' },
+    { symbol: 'SKL', name: 'Skale', icon: '⚡' },
+    { symbol: 'COTI', name: 'COTI', icon: '💳' },
+    { symbol: 'CELO', name: 'Celo', icon: '📱' },
+    { symbol: 'HIVE', name: 'Hive', icon: '🐝' },
+    { symbol: 'STEEM', name: 'Steem', icon: '📝' },
+    { symbol: 'HBD', name: 'Hive Dollar', icon: '💵' },
+    { symbol: 'SBD', name: 'Steem Dollar', icon: '💵' }
   ];
 
   const state = {
@@ -28,6 +85,10 @@
     selected: null, // symbol
     chart: null,
     lastLive: null,
+    favorites: [], // user's favorite coins
+    portfolio: {}, // user's portfolio holdings
+    priceAlerts: {}, // user's price alerts
+    viewMode: 'grid', // grid or list view
   };
 
   function $(sel){ return document.querySelector(sel); }
@@ -79,6 +140,7 @@
         state.prices[c.symbol] = { price, change24h: changePct };
       });
       render();
+      checkPriceAlerts(); // Check for triggered alerts
     } catch (e) {
       showError('Unable to fetch crypto data.');
     } finally {
@@ -97,6 +159,191 @@
     if (!el) return;
     el.style.display = 'block';
     el.querySelector('.error-message').textContent = msg;
+  }
+
+  // Safe client-side features
+  function loadUserData() {
+    try {
+      state.favorites = JSON.parse(localStorage.getItem('crypto-favorites') || '[]');
+      state.portfolio = JSON.parse(localStorage.getItem('crypto-portfolio') || '{}');
+      state.priceAlerts = JSON.parse(localStorage.getItem('crypto-alerts') || '{}');
+      state.viewMode = localStorage.getItem('crypto-view-mode') || 'grid';
+    } catch (e) {
+      console.error('Error loading user data:', e);
+    }
+  }
+
+  function saveUserData() {
+    try {
+      localStorage.setItem('crypto-favorites', JSON.stringify(state.favorites));
+      localStorage.setItem('crypto-portfolio', JSON.stringify(state.portfolio));
+      localStorage.setItem('crypto-alerts', JSON.stringify(state.priceAlerts));
+      localStorage.setItem('crypto-view-mode', state.viewMode);
+    } catch (e) {
+      console.error('Error saving user data:', e);
+    }
+  }
+
+  function toggleFavorite(symbol) {
+    const index = state.favorites.indexOf(symbol);
+    if (index > -1) {
+      state.favorites.splice(index, 1);
+    } else {
+      state.favorites.push(symbol);
+    }
+    saveUserData();
+    render();
+  }
+
+  function isFavorite(symbol) {
+    return state.favorites.includes(symbol);
+  }
+
+  function addToPortfolio(symbol, amount) {
+    if (!state.portfolio[symbol]) {
+      state.portfolio[symbol] = 0;
+    }
+    state.portfolio[symbol] += parseFloat(amount) || 0;
+    saveUserData();
+    render();
+  }
+
+  function getPortfolioValue() {
+    let total = 0;
+    for (const [symbol, amount] of Object.entries(state.portfolio)) {
+      const price = state.prices[symbol]?.price || 0;
+      total += amount * price;
+    }
+    return total;
+  }
+
+  function setPriceAlert(symbol, targetPrice, type = 'above') {
+    if (!state.priceAlerts[symbol]) {
+      state.priceAlerts[symbol] = [];
+    }
+    state.priceAlerts[symbol].push({
+      id: Date.now(),
+      targetPrice: parseFloat(targetPrice),
+      type: type,
+      active: true
+    });
+    saveUserData();
+    showToast(`Alert set for ${symbol} at $${targetPrice}`);
+  }
+
+  function checkPriceAlerts() {
+    for (const [symbol, alerts] of Object.entries(state.priceAlerts)) {
+      const currentPrice = state.prices[symbol]?.price || 0;
+      alerts.forEach(alert => {
+        if (!alert.active) return;
+        
+        let triggered = false;
+        if (alert.type === 'above' && currentPrice >= alert.targetPrice) {
+          triggered = true;
+        } else if (alert.type === 'below' && currentPrice <= alert.targetPrice) {
+          triggered = true;
+        }
+        
+        if (triggered) {
+          alert.active = false;
+          showToast(`${symbol} reached $${alert.targetPrice}!`, 'alert');
+        }
+      });
+    }
+    saveUserData();
+  }
+
+  function showToast(message, type = 'success') {
+    // Remove existing toast
+    const existingToast = document.querySelector('.crypto-toast');
+    if (existingToast) {
+      existingToast.remove();
+    }
+    
+    // Create toast
+    const toast = document.createElement('div');
+    toast.className = `crypto-toast ${type}`;
+    toast.innerHTML = `
+      <i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-triangle'}"></i>
+      <span>${message}</span>
+    `;
+    
+    // Add styles
+    toast.style.cssText = `
+      position: fixed;
+      top: 2rem;
+      right: 2rem;
+      background: ${type === 'success' ? '#10b981' : '#f59e0b'};
+      color: white;
+      padding: 1rem 1.5rem;
+      border-radius: 0.5rem;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+      z-index: 10000;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-weight: 500;
+      animation: slideIn 0.3s ease;
+      max-width: 300px;
+    `;
+    
+    // Add animation styles if not already present
+    if (!document.querySelector('#crypto-toast-styles')) {
+      const style = document.createElement('style');
+      style.id = 'crypto-toast-styles';
+      style.textContent = `
+        @keyframes slideIn {
+          from { transform: translateX(100%); opacity: 0; }
+          to { transform: translateX(0); opacity: 1; }
+        }
+        @keyframes slideOut {
+          from { transform: translateX(0); opacity: 1; }
+          to { transform: translateX(100%); opacity: 0; }
+        }
+      `;
+      document.head.appendChild(style);
+    }
+    
+    document.body.appendChild(toast);
+    
+    // Remove after 3 seconds
+    setTimeout(() => {
+      toast.style.animation = 'slideOut 0.3s ease';
+      setTimeout(() => toast.remove(), 300);
+    }, 3000);
+  }
+
+  function copyToClipboard(text) {
+    if (navigator.clipboard && window.isSecureContext) {
+      navigator.clipboard.writeText(text).then(() => {
+        showToast('Copied to clipboard!');
+      }).catch(() => {
+        fallbackCopyTextToClipboard(text);
+      });
+    } else {
+      fallbackCopyTextToClipboard(text);
+    }
+  }
+
+  function fallbackCopyTextToClipboard(text) {
+    const textArea = document.createElement('textarea');
+    textArea.value = text;
+    textArea.style.position = 'fixed';
+    textArea.style.left = '-999999px';
+    textArea.style.top = '-999999px';
+    document.body.appendChild(textArea);
+    textArea.focus();
+    textArea.select();
+    
+    try {
+      document.execCommand('copy');
+      showToast('Copied to clipboard!');
+    } catch (err) {
+      console.error('Copy failed:', err);
+      showToast('Copy failed - please copy manually', 'error');
+    }
+    
+    document.body.removeChild(textArea);
   }
 
   function fmtPrice(v){
@@ -142,10 +389,38 @@
   function renderStats(){
     const liveCount = COINS.length;
     const totalMkt = getFilteredSorted().reduce((sum,c)=> sum + (c.price||0), 0);
+    const portfolioValue = getPortfolioValue();
+    const favoritesCount = state.favorites.length;
+    
     const liveEl = $('#stat-count');
     const mktEl = $('#stat-sum');
     if (liveEl) liveEl.textContent = String(liveCount);
     if (mktEl) mktEl.textContent = `$${Math.round(totalMkt).toLocaleString()}`;
+    
+    // Update or create portfolio stats
+    let portfolioEl = $('#stat-portfolio');
+    if (!portfolioEl) {
+      const statsContainer = $('.stats');
+      if (statsContainer) {
+        statsContainer.innerHTML += `
+          <div class="stat">
+            <span>Portfolio: <strong id="stat-portfolio">$${portfolioValue.toFixed(2)}</strong></span>
+          </div>
+          <div class="stat">
+            <span>Favorites: <strong id="stat-favorites">${favoritesCount}</strong></span>
+          </div>
+        `;
+        portfolioEl = $('#stat-portfolio');
+      }
+    } else {
+      portfolioEl.textContent = `$${portfolioValue.toFixed(2)}`;
+    }
+    
+    // Update favorites count
+    const favoritesEl = $('#stat-favorites');
+    if (favoritesEl) {
+      favoritesEl.textContent = String(favoritesCount);
+    }
   }
 
   function renderCards(){
@@ -156,6 +431,10 @@
       const pct = c.change24h;
       const signClass = pct == null ? '' : (pct >= 0 ? 'pos' : 'neg');
       const grad = cardGradient(pct);
+      const isFav = isFavorite(c.symbol);
+      const portfolioAmount = state.portfolio[c.symbol] || 0;
+      const portfolioValue = portfolioAmount * (c.price || 0);
+      
       return `
       <div class="coin-card ${grad}" data-symbol="${c.symbol}">
         <div class="coin-top">
@@ -163,22 +442,72 @@
           <div class="coin-meta">
             <div class="coin-name">${c.name}</div>
             <div class="coin-symbol">${c.symbol}</div>
+            ${portfolioAmount > 0 ? `<div class="portfolio-info">You own: ${portfolioAmount.toFixed(4)} ($${portfolioValue.toFixed(2)})</div>` : ''}
           </div>
-          <button class="coin-chart-btn" data-symbol="${c.symbol}"><i class="fas fa-chart-line"></i></button>
+          <div class="coin-actions">
+            <button class="coin-favorite-btn ${isFav ? 'favorited' : ''}" data-symbol="${c.symbol}" title="${isFav ? 'Remove from favorites' : 'Add to favorites'}">
+              <i class="fas fa-heart"></i>
+            </button>
+            <button class="coin-chart-btn" data-symbol="${c.symbol}" title="View chart">
+              <i class="fas fa-chart-line"></i>
+            </button>
+            <button class="coin-more-btn" data-symbol="${c.symbol}" title="More actions">
+              <i class="fas fa-ellipsis-v"></i>
+            </button>
+          </div>
         </div>
         <div class="coin-bottom">
           <div class="coin-price">${fmtPrice(c.price)}</div>
           <div class="coin-change ${signClass}">${fmtPct(pct)}</div>
         </div>
+        <div class="coin-actions-menu" id="menu-${c.symbol}" style="display: none;">
+          <button class="action-btn" onclick="addToPortfolio('${c.symbol}', prompt('Enter amount of ${c.symbol} to add:'))">
+            <i class="fas fa-plus"></i> Add to Portfolio
+          </button>
+          <button class="action-btn" onclick="setPriceAlert('${c.symbol}', prompt('Enter target price for ${c.symbol}:'))">
+            <i class="fas fa-bell"></i> Set Price Alert
+          </button>
+          <button class="action-btn" onclick="copyToClipboard('${c.symbol}: ${fmtPrice(c.price)}')">
+            <i class="fas fa-copy"></i> Copy Price
+          </button>
+          <button class="action-btn" onclick="copyToClipboard('${c.symbol} price: ${fmtPrice(c.price)} - Check it out on Brightlens News!')">
+            <i class="fas fa-share"></i> Share
+          </button>
+        </div>
       </div>`;
     }).join('');
 
-    // Bind card clicks to open chart
-    $all('.coin-card, .coin-chart-btn').forEach(el => {
-      el.addEventListener('click', (e) => {
-        const symbol = el.getAttribute('data-symbol') || el.closest('.coin-card')?.getAttribute('data-symbol');
-        if (symbol) openChart(symbol);
+    // Bind card interactions
+    $all('.coin-card').forEach(el => {
+      const symbol = el.getAttribute('data-symbol');
+      
+      // Chart button
+      el.querySelector('.coin-chart-btn')?.addEventListener('click', (e) => {
+        e.stopPropagation();
+        openChart(symbol);
       });
+      
+      // Favorite button
+      el.querySelector('.coin-favorite-btn')?.addEventListener('click', (e) => {
+        e.stopPropagation();
+        toggleFavorite(symbol);
+      });
+      
+      // More actions button
+      el.querySelector('.coin-more-btn')?.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const menu = el.querySelector('.coin-actions-menu');
+        const allMenus = $all('.coin-actions-menu');
+        allMenus.forEach(m => m.style.display = 'none');
+        menu.style.display = menu.style.display === 'none' ? 'block' : 'none';
+      });
+    });
+    
+    // Close menus when clicking outside
+    document.addEventListener('click', (e) => {
+      if (!e.target.closest('.coin-actions-menu') && !e.target.closest('.coin-more-btn')) {
+        $all('.coin-actions-menu').forEach(menu => menu.style.display = 'none');
+      }
     });
   }
 
@@ -289,6 +618,7 @@
 
   document.addEventListener('DOMContentLoaded', async () => {
     applySavedThemeEarly();
+    loadUserData(); // Load user preferences and data
     bindControls();
     // Start initial data load and show in-page loading indicator
     await refreshData(true);
