@@ -1738,7 +1738,10 @@ class WeatherDashboard {
      * Share current weather information
      */
     shareWeather() {
-        if (!this.weatherData || !this.currentLocation) return;
+        if (!this.weatherData || !this.currentLocation) {
+            this.showToast('No weather data available to share', 'error');
+            return;
+        }
 
         const current = this.weatherData.current;
         const temp = this.currentUnit === 'celsius' ? current.temperature_2m : this.celsiusToFahrenheit(current.temperature_2m);
@@ -1748,19 +1751,123 @@ class WeatherDashboard {
         const shareText = `🌤️ Weather in ${this.currentLocation.city}, ${this.currentLocation.country}: ${temp}${unit}, ${weatherInfo.description}. Check it out on Brightlens News!`;
         const shareUrl = window.location.href;
 
-        if (navigator.share) {
+        if (navigator.share && navigator.canShare) {
             navigator.share({
                 title: 'Current Weather',
                 text: shareText,
                 url: shareUrl
+            }).catch(error => {
+                console.log('Share failed:', error);
+                this.copyToClipboard(shareText, shareUrl);
             });
         } else {
             // Fallback: copy to clipboard
-            const fullText = `${shareText}\n${shareUrl}`;
-            navigator.clipboard.writeText(fullText).then(() => {
-                alert('Weather information copied to clipboard!');
-            });
+            this.copyToClipboard(shareText, shareUrl);
         }
+    }
+    
+    /**
+     * Copy weather info to clipboard with better feedback
+     */
+    copyToClipboard(shareText, shareUrl) {
+        const fullText = `${shareText}\n${shareUrl}`;
+        
+        if (navigator.clipboard && window.isSecureContext) {
+            navigator.clipboard.writeText(fullText).then(() => {
+                this.showToast('Weather information copied to clipboard!', 'success');
+            }).catch(() => {
+                this.fallbackCopyTextToClipboard(fullText);
+            });
+        } else {
+            this.fallbackCopyTextToClipboard(fullText);
+        }
+    }
+    
+    /**
+     * Fallback copy method for older browsers
+     */
+    fallbackCopyTextToClipboard(text) {
+        const textArea = document.createElement('textarea');
+        textArea.value = text;
+        textArea.style.position = 'fixed';
+        textArea.style.left = '-999999px';
+        textArea.style.top = '-999999px';
+        document.body.appendChild(textArea);
+        textArea.focus();
+        textArea.select();
+        
+        try {
+            document.execCommand('copy');
+            this.showToast('Weather information copied to clipboard!', 'success');
+        } catch (err) {
+            console.error('Fallback copy failed:', err);
+            this.showToast('Failed to copy weather information', 'error');
+        }
+        
+        document.body.removeChild(textArea);
+    }
+    
+    /**
+     * Show toast notification
+     */
+    showToast(message, type = 'success') {
+        // Remove existing toast
+        const existingToast = document.querySelector('.weather-toast');
+        if (existingToast) {
+            existingToast.remove();
+        }
+        
+        // Create new toast
+        const toast = document.createElement('div');
+        toast.className = `weather-toast ${type}`;
+        toast.innerHTML = `
+            <i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-circle'}"></i>
+            <span>${message}</span>
+        `;
+        
+        // Add styles
+        toast.style.cssText = `
+            position: fixed;
+            top: 2rem;
+            right: 2rem;
+            background: ${type === 'success' ? '#10b981' : '#ef4444'};
+            color: white;
+            padding: 1rem 1.5rem;
+            border-radius: 0.5rem;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            z-index: 10000;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-weight: 500;
+            animation: slideIn 0.3s ease;
+            max-width: 300px;
+        `;
+        
+        // Add animation styles if not already present
+        if (!document.querySelector('#weather-toast-styles')) {
+            const style = document.createElement('style');
+            style.id = 'weather-toast-styles';
+            style.textContent = `
+                @keyframes slideIn {
+                    from { transform: translateX(100%); opacity: 0; }
+                    to { transform: translateX(0); opacity: 1; }
+                }
+                @keyframes slideOut {
+                    from { transform: translateX(0); opacity: 1; }
+                    to { transform: translateX(100%); opacity: 0; }
+                }
+            `;
+            document.head.appendChild(style);
+        }
+        
+        document.body.appendChild(toast);
+        
+        // Remove after 3 seconds
+        setTimeout(() => {
+            toast.style.animation = 'slideOut 0.3s ease';
+            setTimeout(() => toast.remove(), 300);
+        }, 3000);
     }
 }
 
