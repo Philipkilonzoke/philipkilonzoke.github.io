@@ -220,6 +220,10 @@ class WeatherDashboard {
             });
         }
 
+        // Setup new features
+        this.setupFavorites();
+        this.setupSharing();
+
         // Suggestion clicks
         document.addEventListener('click', (e) => {
             if (e.target.classList.contains('suggestion-item')) {
@@ -703,6 +707,35 @@ class WeatherDashboard {
                 console.log('Temperature chart rendered');
             } catch (error) {
                 console.error('Error rendering temperature chart:', error);
+            }
+            
+            // New features
+            try {
+                this.checkWeatherAlerts();
+                console.log('Weather alerts checked');
+            } catch (error) {
+                console.error('Error checking weather alerts:', error);
+            }
+            
+            try {
+                this.fetchAirQuality();
+                console.log('Air quality fetched');
+            } catch (error) {
+                console.error('Error fetching air quality:', error);
+            }
+            
+            try {
+                this.generateRecommendations();
+                console.log('Recommendations generated');
+            } catch (error) {
+                console.error('Error generating recommendations:', error);
+            }
+            
+            try {
+                this.checkFavoriteStatus();
+                console.log('Favorite status checked');
+            } catch (error) {
+                console.error('Error checking favorite status:', error);
             }
             
             console.log('Weather data rendered successfully');
@@ -1434,6 +1467,300 @@ class WeatherDashboard {
             95: '⛈️', 96: '⛈️', 99: '⛈️'
         };
         return emojiMap[weatherCode] || '🌤️';
+    }
+
+    /**
+     * Check for weather alerts and display them
+     */
+    checkWeatherAlerts() {
+        if (!this.weatherData) return;
+
+        const alerts = [];
+        const current = this.weatherData.current;
+        const hourly = this.weatherData.hourly;
+
+        // Check for severe weather conditions
+        if (current.weather_code >= 95) {
+            alerts.push('⚠️ Thunderstorm warning - Stay indoors');
+        }
+        
+        if (current.weather_code >= 80 && current.weather_code <= 82) {
+            alerts.push('🌧️ Heavy rain expected - Bring umbrella');
+        }
+        
+        if (current.weather_code >= 71 && current.weather_code <= 77) {
+            alerts.push('❄️ Snow expected - Drive carefully');
+        }
+
+        // Check for extreme temperatures
+        const temp = this.currentUnit === 'celsius' ? current.temperature_2m : this.celsiusToFahrenheit(current.temperature_2m);
+        if (temp > 35) {
+            alerts.push('🌡️ High temperature warning - Stay hydrated');
+        } else if (temp < 0) {
+            alerts.push('❄️ Freezing temperatures - Bundle up');
+        }
+
+        // Check for high UV index
+        if (current.uv_index >= 8) {
+            alerts.push('☀️ High UV index - Use sunscreen');
+        }
+
+        // Check next few hours for rain
+        const nextHours = hourly.time.slice(0, 6); // Next 6 hours
+        const nextRain = hourly.precipitation_probability.slice(0, 6);
+        const highRainHours = nextRain.filter(prob => prob > 70);
+        
+        if (highRainHours.length > 0) {
+            alerts.push('🌧️ Rain likely in the next few hours');
+        }
+
+        this.displayAlerts(alerts);
+    }
+
+    /**
+     * Display weather alerts
+     */
+    displayAlerts(alerts) {
+        const alertsSection = document.getElementById('weather-alerts');
+        const alertsContainer = document.getElementById('alerts-container');
+        
+        if (alerts.length === 0) {
+            alertsSection.style.display = 'none';
+            return;
+        }
+
+        alertsContainer.innerHTML = alerts.map(alert => 
+            `<div class="alert-item">${alert}</div>`
+        ).join('');
+        
+        alertsSection.style.display = 'block';
+    }
+
+    /**
+     * Fetch and display air quality data
+     */
+    async fetchAirQuality() {
+        if (!this.currentLocation) return;
+
+        try {
+            const url = `${this.airQualityAPI}?latitude=${this.currentLocation.lat}&longitude=${this.currentLocation.lon}&hourly=pm10,pm2_5,carbon_monoxide,nitrogen_dioxide,european_aqi`;
+            const response = await fetch(url);
+            const data = await response.json();
+
+            if (data.hourly && data.hourly.european_aqi) {
+                const currentAQI = data.hourly.european_aqi[0];
+                this.displayAirQuality(currentAQI);
+            }
+        } catch (error) {
+            console.log('Air quality data not available');
+        }
+    }
+
+    /**
+     * Display air quality information
+     */
+    displayAirQuality(aqi) {
+        const aqiSection = document.getElementById('air-quality-section');
+        const aqiValue = document.getElementById('aqi-value');
+        const aqiLabel = document.getElementById('aqi-label');
+        const aqiDescription = document.getElementById('aqi-description');
+
+        if (!aqi || aqi === null) {
+            aqiSection.style.display = 'none';
+            return;
+        }
+
+        aqiValue.textContent = aqi;
+        aqiLabel.textContent = this.getAQIDescription(aqi);
+        
+        const descriptions = {
+            'Good': 'Air quality is satisfactory, and air pollution poses little or no risk.',
+            'Fair': 'Air quality is acceptable. However, there may be a risk for some people.',
+            'Moderate': 'Some members of the general public may experience health effects.',
+            'Poor': 'Some members of the general public may experience more serious health effects.',
+            'Very Poor': 'Health alert: The risk of health effects is increased for everyone.',
+            'Extremely Poor': 'Health warning of emergency conditions.'
+        };
+
+        aqiDescription.textContent = descriptions[aqiLabel.textContent] || 'Air quality information';
+        aqiSection.style.display = 'block';
+    }
+
+    /**
+     * Generate weather-based recommendations
+     */
+    generateRecommendations() {
+        if (!this.weatherData) return;
+
+        const current = this.weatherData.current;
+        const temp = this.currentUnit === 'celsius' ? current.temperature_2m : this.celsiusToFahrenheit(current.temperature_2m);
+        const weatherCode = current.weather_code;
+        const humidity = current.relative_humidity_2m;
+
+        // Clothing recommendations
+        let clothingRec = 'Light clothing recommended';
+        if (temp < 10) {
+            clothingRec = 'Wear warm clothes, jacket, and hat';
+        } else if (temp < 20) {
+            clothingRec = 'Light jacket or sweater recommended';
+        } else if (temp > 30) {
+            clothingRec = 'Light, breathable clothing';
+        }
+
+        if (weatherCode >= 61 || weatherCode <= 82) {
+            clothingRec += ' - Bring umbrella or raincoat';
+        }
+
+        // Activity recommendations
+        let activityRec = 'Good weather for outdoor activities';
+        if (weatherCode >= 95) {
+            activityRec = 'Stay indoors - thunderstorm warning';
+        } else if (weatherCode >= 80) {
+            activityRec = 'Indoor activities recommended - rain expected';
+        } else if (weatherCode >= 71) {
+            activityRec = 'Winter activities or stay warm indoors';
+        } else if (temp > 35) {
+            activityRec = 'Stay in shade, avoid strenuous outdoor activities';
+        } else if (temp < 0) {
+            activityRec = 'Bundle up for outdoor activities';
+        }
+
+        this.displayRecommendations(clothingRec, activityRec);
+    }
+
+    /**
+     * Display weather recommendations
+     */
+    displayRecommendations(clothing, activity) {
+        const recommendationsSection = document.getElementById('weather-recommendations');
+        const clothingRec = document.getElementById('clothing-recommendation');
+        const activityRec = document.getElementById('activity-recommendation');
+
+        clothingRec.innerHTML = `<i class="fas fa-tshirt"></i><span>${clothing}</span>`;
+        activityRec.innerHTML = `<i class="fas fa-running"></i><span>${activity}</span>`;
+        
+        recommendationsSection.style.display = 'block';
+    }
+
+    /**
+     * Setup favorite locations functionality
+     */
+    setupFavorites() {
+        const favoriteBtn = document.getElementById('favorite-btn');
+        if (favoriteBtn) {
+            favoriteBtn.addEventListener('click', () => {
+                this.toggleFavorite();
+            });
+        }
+    }
+
+    /**
+     * Toggle favorite status for current location
+     */
+    toggleFavorite() {
+        if (!this.currentLocation) return;
+
+        const favoriteBtn = document.getElementById('favorite-btn');
+        const favorites = this.getFavorites();
+        const locationKey = `${this.currentLocation.city},${this.currentLocation.country}`;
+        
+        const isFavorite = favorites.some(fav => 
+            `${fav.city},${fav.country}` === locationKey
+        );
+
+        if (isFavorite) {
+            // Remove from favorites
+            const newFavorites = favorites.filter(fav => 
+                `${fav.city},${fav.country}` !== locationKey
+            );
+            localStorage.setItem('weatherFavorites', JSON.stringify(newFavorites));
+            favoriteBtn.classList.remove('favorited');
+            favoriteBtn.innerHTML = '<i class="fas fa-heart"></i><span>Favorite</span>';
+        } else {
+            // Add to favorites
+            favorites.push({
+                city: this.currentLocation.city,
+                country: this.currentLocation.country,
+                lat: this.currentLocation.lat,
+                lon: this.currentLocation.lon
+            });
+            localStorage.setItem('weatherFavorites', JSON.stringify(favorites));
+            favoriteBtn.classList.add('favorited');
+            favoriteBtn.innerHTML = '<i class="fas fa-heart"></i><span>Favorited</span>';
+        }
+    }
+
+    /**
+     * Get favorite locations from localStorage
+     */
+    getFavorites() {
+        const favorites = localStorage.getItem('weatherFavorites');
+        return favorites ? JSON.parse(favorites) : [];
+    }
+
+    /**
+     * Check if current location is favorited
+     */
+    checkFavoriteStatus() {
+        if (!this.currentLocation) return;
+
+        const favorites = this.getFavorites();
+        const locationKey = `${this.currentLocation.city},${this.currentLocation.country}`;
+        const isFavorite = favorites.some(fav => 
+            `${fav.city},${fav.country}` === locationKey
+        );
+
+        const favoriteBtn = document.getElementById('favorite-btn');
+        if (favoriteBtn) {
+            if (isFavorite) {
+                favoriteBtn.classList.add('favorited');
+                favoriteBtn.innerHTML = '<i class="fas fa-heart"></i><span>Favorited</span>';
+            } else {
+                favoriteBtn.classList.remove('favorited');
+                favoriteBtn.innerHTML = '<i class="fas fa-heart"></i><span>Favorite</span>';
+            }
+        }
+    }
+
+    /**
+     * Setup weather sharing functionality
+     */
+    setupSharing() {
+        const shareBtn = document.getElementById('share-btn');
+        if (shareBtn) {
+            shareBtn.addEventListener('click', () => {
+                this.shareWeather();
+            });
+        }
+    }
+
+    /**
+     * Share current weather information
+     */
+    shareWeather() {
+        if (!this.weatherData || !this.currentLocation) return;
+
+        const current = this.weatherData.current;
+        const temp = this.currentUnit === 'celsius' ? current.temperature_2m : this.celsiusToFahrenheit(current.temperature_2m);
+        const unit = this.currentUnit === 'celsius' ? '°C' : '°F';
+        const weatherInfo = this.weatherCodes[current.weather_code];
+        
+        const shareText = `🌤️ Weather in ${this.currentLocation.city}, ${this.currentLocation.country}: ${temp}${unit}, ${weatherInfo.description}. Check it out on Brightlens News!`;
+        const shareUrl = window.location.href;
+
+        if (navigator.share) {
+            navigator.share({
+                title: 'Current Weather',
+                text: shareText,
+                url: shareUrl
+            });
+        } else {
+            // Fallback: copy to clipboard
+            const fullText = `${shareText}\n${shareUrl}`;
+            navigator.clipboard.writeText(fullText).then(() => {
+                alert('Weather information copied to clipboard!');
+            });
+        }
     }
 }
 
