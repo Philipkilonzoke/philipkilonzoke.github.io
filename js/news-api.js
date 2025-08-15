@@ -536,7 +536,7 @@ class NewsAPI {
      */
     async fetchFromGNews(category, limit) {
         try {
-            let url = `https://gnews.io/api/v4/top-headlines?token=${this.apiKeys.gnews}&lang=en&max=${Math.min(limit, 100)}`;
+            let url = `https://gnews.io/api/v4/top-headlines?token=${this.apiKeys.gnews}&lang=en&max=${Math.min(limit, 10)}`;
             
             if (category === 'kenya') {
                 url += '&country=ke&q=(Kenya OR Nairobi OR Mombasa OR Kisumu OR "East Africa" OR "Kenyan government" OR "President Ruto")';
