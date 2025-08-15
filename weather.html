@@ -139,6 +139,10 @@
                 <!-- Weather Header Controls -->
                 <div class="weather-header">
                     <div class="header-controls">
+                        <button id="location-btn" class="control-btn location-control-btn" title="Use Current Location">
+                            <i class="fas fa-location-arrow"></i>
+                            <span>My Location</span>
+                        </button>
                         <button id="unit-toggle" class="control-btn" title="Toggle Temperature Unit">
                             <span id="unit-display">°C</span>
                         </button>
@@ -157,9 +161,6 @@
                                 <input type="text" id="city-input" class="search-input" placeholder="Search for a city or location..." autocomplete="off">
                                 <button id="search-btn" class="search-btn" title="Search">
                                     <i class="fas fa-search"></i>
-                                </button>
-                                <button id="location-btn" class="location-btn" title="Use Current Location">
-                                    <i class="fas fa-location-arrow"></i>
                                 </button>
                             </div>
                             <div id="search-suggestions" class="search-suggestions"></div>

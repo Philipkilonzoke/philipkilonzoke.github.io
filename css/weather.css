@@ -206,6 +206,8 @@
 .header-controls {
     display: flex;
     gap: 1rem;
+    justify-content: flex-end;
+    align-items: center;
 }
 
 .control-btn {
@@ -217,12 +219,29 @@
     cursor: pointer;
     transition: var(--weather-transition);
     font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
 }
 
 .control-btn:hover {
     background: var(--primary-color);
     color: white;
     transform: translateY(-2px);
+}
+
+.location-control-btn {
+    background: var(--primary-color);
+    color: white;
+    border-color: var(--primary-color);
+    font-weight: 500;
+    padding: 0.75rem 1.25rem;
+}
+
+.location-control-btn:hover {
+    background: #1d4ed8;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2);
 }
 
 /* Search Section */
@@ -265,7 +284,7 @@
     box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
 }
 
-.search-btn, .location-btn {
+.search-btn {
     margin-left: 0.5rem;
     padding: 1rem;
     border: none;
@@ -276,8 +295,8 @@
     transition: var(--weather-transition);
 }
 
-.search-btn:hover, .location-btn:hover {
-    background: var(--primary-color);
+.search-btn:hover {
+    background: #1d4ed8;
     transform: translateY(-2px);
 }
 
@@ -742,6 +761,19 @@
 
 /* Responsive Design for New Features */
 @media (max-width: 768px) {
+    .header-controls {
+        flex-direction: column;
+        gap: 0.75rem;
+        align-items: stretch;
+    }
+    
+    .location-control-btn {
+        order: -1;
+        justify-content: center;
+        padding: 1rem;
+        font-size: 1rem;
+    }
+    
     .weather-alerts,
     .air-quality-section,
     .weather-recommendations {
