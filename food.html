@@ -1257,19 +1257,22 @@
             updateSectionTitle(`Search Results for "${query}"`);
             
             try {
-                let url = `${BASE_URL}/recipes/complexSearch?query=${encodeURIComponent(query)}&number=12&addRecipeInformation=true&apiKey=${API_KEY}`;
+                // Build search query with filters
+                let searchQuery = query;
                 
-                // Add cuisine filter
+                // Add cuisine to search query if specified
                 if (currentCuisine) {
-                    url += `&cuisine=${currentCuisine}`;
+                    searchQuery += ` ${currentCuisine}`;
                 }
                 
-                // Add max ready time filter
-                if (currentTime) {
-                    url += `&maxReadyTime=${currentTime}`;
+                // Add meal type to search query if specified
+                if (currentMeal) {
+                    searchQuery += ` ${currentMeal}`;
                 }
                 
-                // Add diet filter
+                let url = `${BASE_URL}/recipes/complexSearch?query=${encodeURIComponent(searchQuery)}&number=20&addRecipeInformation=true&apiKey=${API_KEY}`;
+                
+                // Add diet filter (this is supported by the API)
                 const dietParam = document.getElementById('diet-filter').value;
                 if (dietParam) {
                     url += `&diet=${dietParam}`;
@@ -1287,10 +1290,20 @@
                 const data = await response.json();
                 let recipes = data.results || [];
                 
-                // Filter by meal type if specified
+                // Client-side filtering for time (API doesn't support maxReadyTime properly)
+                if (currentTime) {
+                    recipes = recipes.filter(recipe => 
+                        recipe.readyInMinutes && recipe.readyInMinutes <= parseInt(currentTime)
+                    );
+                }
+                
+                // Additional client-side filtering for meal type
                 if (currentMeal) {
                     recipes = filterByMealType(recipes, currentMeal);
                 }
+                
+                // Limit to 12 recipes
+                recipes = recipes.slice(0, 12);
                 
                 if (recipes.length === 0) {
                     showNoResults();
@@ -1311,17 +1324,8 @@
             updateSectionTitle('Featured Recipes');
             
             try {
-                let url = `${BASE_URL}/recipes/random?number=20&apiKey=${API_KEY}`;
-                
-                // Add cuisine filter
-                if (currentCuisine) {
-                    url += `&cuisine=${currentCuisine}`;
-                }
-                
-                // Add tags for meal type
-                if (currentMeal) {
-                    url += `&tags=${currentMeal}`;
-                }
+                // For random recipes, we need to fetch more and filter client-side
+                let url = `${BASE_URL}/recipes/random?number=50&apiKey=${API_KEY}`;
                 
                 const response = await fetch(url);
                 if (!response.ok) throw new Error('Failed to fetch recipes');
@@ -1329,11 +1333,36 @@
                 const data = await response.json();
                 let recipes = data.recipes || [];
                 
-                // Filter by cooking time if specified
+                // Client-side filtering for cuisine
+                if (currentCuisine) {
+                    recipes = recipes.filter(recipe => {
+                        const title = recipe.title.toLowerCase();
+                        const summary = (recipe.summary || '').toLowerCase();
+                        const text = title + ' ' + summary;
+                        
+                        const cuisineKeywords = {
+                            'italian': ['italian', 'pasta', 'pizza', 'risotto', 'bruschetta', 'tiramisu'],
+                            'mexican': ['mexican', 'taco', 'burrito', 'enchilada', 'guacamole', 'salsa'],
+                            'asian': ['asian', 'chinese', 'japanese', 'thai', 'vietnamese', 'korean', 'sushi', 'curry'],
+                            'mediterranean': ['mediterranean', 'greek', 'spanish', 'olive', 'hummus', 'falafel'],
+                            'american': ['american', 'burger', 'hot dog', 'bbq', 'apple pie', 'chicken wings'],
+                            'indian': ['indian', 'curry', 'naan', 'tandoori', 'biryani', 'dal']
+                        };
+                        
+                        return cuisineKeywords[currentCuisine]?.some(keyword => text.includes(keyword)) || false;
+                    });
+                }
+                
+                // Client-side filtering for cooking time
                 if (currentTime) {
                     recipes = recipes.filter(recipe => 
                         recipe.readyInMinutes && recipe.readyInMinutes <= parseInt(currentTime)
                     );
+                }
+                
+                // Client-side filtering for meal type
+                if (currentMeal) {
+                    recipes = filterByMealType(recipes, currentMeal);
                 }
                 
                 // Limit to 12 recipes
@@ -1355,10 +1384,10 @@
         
         function filterByMealType(recipes, mealType) {
             const mealKeywords = {
-                'breakfast': ['breakfast', 'morning', 'eggs', 'pancake', 'waffle', 'oatmeal'],
-                'lunch': ['lunch', 'sandwich', 'salad', 'soup'],
-                'dinner': ['dinner', 'main course', 'entree', 'roast', 'grill'],
-                'dessert': ['dessert', 'cake', 'cookie', 'ice cream', 'sweet', 'chocolate']
+                'breakfast': ['breakfast', 'morning', 'eggs', 'pancake', 'waffle', 'oatmeal', 'cereal', 'toast', 'bacon', 'sausage', 'french toast', 'omelette'],
+                'lunch': ['lunch', 'sandwich', 'salad', 'soup', 'wrap', 'panini', 'quiche', 'pasta salad'],
+                'dinner': ['dinner', 'main course', 'entree', 'roast', 'grill', 'steak', 'chicken breast', 'fish', 'pasta', 'rice dish', 'casserole'],
+                'dessert': ['dessert', 'cake', 'cookie', 'ice cream', 'sweet', 'chocolate', 'pie', 'pudding', 'cheesecake', 'brownie', 'muffin', 'cupcake']
             };
             
             if (!mealKeywords[mealType]) return recipes;
