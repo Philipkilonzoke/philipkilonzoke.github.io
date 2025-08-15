@@ -146,6 +146,57 @@
             transform: translateY(-1px);
         }
         
+        .surprise-btn {
+            background: linear-gradient(45deg, #ff6b35, #f7941d);
+            animation: pulse 2s infinite;
+        }
+        
+        .surprise-btn:hover {
+            background: linear-gradient(45deg, #e55a2b, #e8851a);
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+        
+        /* Quick Filter Buttons */
+        .cuisine-filters, .time-filters, .meal-filters {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+            margin: 1rem 0;
+            justify-content: center;
+        }
+        
+        .cuisine-btn, .time-btn, .meal-btn {
+            padding: 0.5rem 1rem;
+            border: 2px solid var(--border-color);
+            border-radius: 25px;
+            background: var(--background-color);
+            color: var(--text-color);
+            font-size: 0.875rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .cuisine-btn:hover, .time-btn:hover, .meal-btn:hover {
+            border-color: var(--primary-color);
+            background: rgba(37, 99, 235, 0.1);
+            transform: translateY(-1px);
+        }
+        
+        .cuisine-btn.active, .time-btn.active, .meal-btn.active {
+            background: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+        }
+        
         .filters-container {
             display: flex;
             gap: 1rem;
@@ -297,6 +348,22 @@
             font-weight: 500;
         }
         
+        .difficulty-badge {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            color: white;
+            padding: 0.25rem 0.75rem;
+            border-radius: 15px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+            z-index: 10;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+        
         .recipe-actions {
             display: flex;
             gap: 0.75rem;
@@ -435,8 +502,71 @@
                     <button id="random-btn" class="filter-btn">
                         <i class="fas fa-random"></i> Random
                     </button>
+                    <button id="surprise-btn" class="filter-btn surprise-btn">
+                        <i class="fas fa-dice"></i> Surprise Me!
+                    </button>
                 </div>
                 
+                <!-- Quick Cuisine Filters -->
+                <div class="cuisine-filters">
+                    <button class="cuisine-btn active" data-cuisine="">
+                        <i class="fas fa-globe"></i> All
+                    </button>
+                    <button class="cuisine-btn" data-cuisine="italian">
+                        <i class="fas fa-pizza-slice"></i> Italian
+                    </button>
+                    <button class="cuisine-btn" data-cuisine="mexican">
+                        <i class="fas fa-pepper-hot"></i> Mexican
+                    </button>
+                    <button class="cuisine-btn" data-cuisine="asian">
+                        <i class="fas fa-dragon"></i> Asian
+                    </button>
+                    <button class="cuisine-btn" data-cuisine="mediterranean">
+                        <i class="fas fa-fish"></i> Mediterranean
+                    </button>
+                    <button class="cuisine-btn" data-cuisine="american">
+                        <i class="fas fa-hamburger"></i> American
+                    </button>
+                    <button class="cuisine-btn" data-cuisine="indian">
+                        <i class="fas fa-pepper-hot"></i> Indian
+                    </button>
+                </div>
+
+                <!-- Quick Time Filters -->
+                <div class="time-filters">
+                    <button class="time-btn active" data-time="">
+                        <i class="fas fa-clock"></i> Any Time
+                    </button>
+                    <button class="time-btn" data-time="15">
+                        <i class="fas fa-bolt"></i> 15 min
+                    </button>
+                    <button class="time-btn" data-time="30">
+                        <i class="fas fa-stopwatch"></i> 30 min
+                    </button>
+                    <button class="time-btn" data-time="60">
+                        <i class="fas fa-hourglass-half"></i> 60+ min
+                    </button>
+                </div>
+
+                <!-- Meal Type Filters -->
+                <div class="meal-filters">
+                    <button class="meal-btn active" data-meal="">
+                        <i class="fas fa-utensils"></i> All Meals
+                    </button>
+                    <button class="meal-btn" data-meal="breakfast">
+                        <i class="fas fa-sun"></i> Breakfast
+                    </button>
+                    <button class="meal-btn" data-meal="lunch">
+                        <i class="fas fa-cloud-sun"></i> Lunch
+                    </button>
+                    <button class="meal-btn" data-meal="dinner">
+                        <i class="fas fa-moon"></i> Dinner
+                    </button>
+                    <button class="meal-btn" data-meal="dessert">
+                        <i class="fas fa-ice-cream"></i> Desserts
+                    </button>
+                </div>
+
                 <div class="filters-container">
                     <select id="diet-filter" class="filter-select">
                         <option value="">All Diets</option>
@@ -659,8 +789,14 @@
             const searchInput = document.getElementById('recipe-search');
             const searchBtn = document.getElementById('search-btn');
             const randomBtn = document.getElementById('random-btn');
+            const surpriseBtn = document.getElementById('surprise-btn');
             const dietFilter = document.getElementById('diet-filter');
             const sortBy = document.getElementById('sort-by');
+            
+            // Quick filter variables
+            let currentCuisine = '';
+            let currentTime = '';
+            let currentMeal = '';
             
             // Search functionality with debounce
             searchInput.addEventListener('input', function() {
@@ -691,9 +827,13 @@
             });
             
             randomBtn.addEventListener('click', loadRandomRecipes);
+            surpriseBtn.addEventListener('click', loadSurpriseRecipe);
             
             dietFilter.addEventListener('change', applyFilters);
             sortBy.addEventListener('change', applyFilters);
+            
+            // Quick filter event listeners
+            setupQuickFilters();
         }
         
         // Build ordered list of possible image URLs for a recipe with high-quality options
@@ -917,6 +1057,17 @@
             const healthScore = recipe.healthScore || 'N/A';
             const calories = recipe.nutrition?.nutrients?.find(n => n.name === 'Calories')?.amount || 'N/A';
             
+            // Determine difficulty level based on cooking time and complexity
+            let difficulty = 'Easy';
+            let difficultyColor = '#10b981';
+            if (readyTime > 45) {
+                difficulty = 'Hard';
+                difficultyColor = '#ef4444';
+            } else if (readyTime > 25) {
+                difficulty = 'Medium';
+                difficultyColor = '#f59e0b';
+            }
+            
             const dietTags = [];
             if (recipe.vegetarian) dietTags.push('Vegetarian');
             if (recipe.vegan) dietTags.push('Vegan');
@@ -955,6 +1106,11 @@
                                 <i class="fas fa-users meta-icon"></i>
                                 <span>${recipe.servings || 'N/A'} servings</span>
                             </div>
+                        </div>
+                        
+                        <!-- Difficulty Badge -->
+                        <div class="difficulty-badge" style="background: ${difficultyColor}">
+                            <i class="fas fa-star"></i> ${difficulty}
                         </div>
                         
                         ${dietTags.length > 0 ? `
