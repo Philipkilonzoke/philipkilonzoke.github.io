@@ -191,6 +191,7 @@
             scrollbar-width: none;
             -ms-overflow-style: none;
             min-height: 200px; /* Ensure space for loading spinner */
+            transform: translateZ(0); /* Hardware acceleration */
         }
         
         .ticker-loading {
@@ -214,13 +215,14 @@
         
         .ticker-content {
             display: flex;
-            gap: 2rem;
-            animation: scroll-left 180s linear infinite; /* Slower speed */
+            gap: 1.5rem;
+            animation: scroll-left 120s linear infinite; /* Smooth, moderate speed */
             padding: 0 1rem;
             will-change: transform;
             cursor: grab;
             user-select: none;
             width: max-content; /* Ensure proper horizontal scrolling */
+            transform: translateZ(0); /* Hardware acceleration */
         }
         
         .ticker-content:active {
@@ -236,8 +238,8 @@
         }
         
         @keyframes scroll-left {
-            0% { transform: translateX(0%); }
-            100% { transform: translateX(-50%); }
+            0% { transform: translateX(0%) translateZ(0); }
+            100% { transform: translateX(-50%) translateZ(0); }
         }
         
         .ticker-item {
@@ -246,14 +248,15 @@
             flex-direction: column;
             background: var(--background-color);
             border-radius: var(--radius-lg);
-            min-width: 380px;
-            max-width: 380px;
-            height: 450px; /* Increased height for better layout */
+            min-width: 350px;
+            max-width: 350px;
+            height: 420px; /* Optimized height for smooth scrolling */
             border: 1px solid var(--border-color);
             box-shadow: var(--shadow-sm);
             transition: all 0.3s ease;
             cursor: pointer;
             overflow: hidden;
+            transform: translateZ(0); /* Hardware acceleration */
         }
         
         .ticker-item:hover {
@@ -264,14 +267,18 @@
         
         .ticker-image {
             width: 100%;
-            height: 200px;
+            height: 180px;
             object-fit: cover;
+            object-position: center;
             border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+            transition: transform 0.3s ease;
+            transform: translateZ(0); /* Hardware acceleration */
+            backface-visibility: hidden; /* Prevent flickering */
         }
         
         .ticker-image-placeholder {
             width: 100%;
-            height: 200px;
+            height: 180px;
             background: var(--surface-color);
             border-radius: var(--radius-lg) var(--radius-lg) 0 0;
             display: flex;
@@ -735,7 +742,7 @@
             .ticker-item {
                 min-width: 320px;
                 max-width: 320px;
-                height: 420px;
+                height: 400px;
             }
             
             .ticker-image,
@@ -806,7 +813,7 @@
             .ticker-item {
                 min-width: 300px;
                 max-width: 300px;
-                height: 400px;
+                height: 380px;
             }
             
             .ticker-image,
@@ -1538,10 +1545,10 @@
                 // Initialize the same CategoryNews class used on Breaking News page
                 newsInstance = new CategoryNews('latest');
                 
-                // Load initial breaking news with a small delay to ensure proper initialization
+                // Load initial breaking news immediately for faster loading
                 setTimeout(() => {
                     this.loadBreakingNewsForTicker();
-                }, 500);
+                }, 100);
                 
                 // Set up refresh interval (every 5 minutes)
                 tickerRefreshInterval = setInterval(() => {
@@ -1602,7 +1609,7 @@
                                 <div class="ticker-item" onclick="window.open('${article.url}', '_blank')">
                                     <!-- Image at top -->
                                     ${hasValidImage ? 
-                                        `<img src="${article.urlToImage}" alt="${article.title}" class="ticker-image" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">` : ''
+                                        `<img src="${article.urlToImage}" alt="${article.title}" class="ticker-image" loading="eager" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">` : ''
                                     }
                                     ${hasValidImage ? 
                                         `<div class="ticker-image-placeholder" style="display: none;">
