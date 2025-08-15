@@ -384,6 +384,41 @@
             flex-wrap: wrap;
         }
         
+        .autocomplete-suggestions {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: white;
+            border: 1px solid var(--border-color);
+            border-top: none;
+            border-radius: 0 0 8px 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+            max-height: 200px;
+            overflow-y: auto;
+            display: none;
+        }
+        
+        .autocomplete-item {
+            padding: 0.75rem 1rem;
+            cursor: pointer;
+            border-bottom: 1px solid var(--border-color);
+            transition: background-color 0.2s ease;
+        }
+        
+        .autocomplete-item:last-child {
+            border-bottom: none;
+        }
+        
+        .autocomplete-item:hover {
+            background-color: var(--surface-color);
+        }
+        
+        .search-box {
+            position: relative;
+        }
+        
         .suggestion-item {
             display: flex;
             align-items: center;
@@ -621,6 +656,20 @@
                 font-size: 0.8rem;
                 -webkit-line-clamp: 2;
             }
+            
+            .search-suggestions {
+                grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+                gap: 0.75rem;
+            }
+            
+            .suggestion-item {
+                padding: 0.375rem 0.75rem;
+                font-size: 0.8rem;
+            }
+            
+            .autocomplete-suggestions {
+                max-height: 150px;
+            }
         }
         
         @media (max-width: 480px) {
@@ -737,21 +786,37 @@
                         </button>
                     </div>
                     <div class="search-suggestions" id="search-suggestions">
-                        <div class="suggestion-item" data-query="technology">
+                        <div class="suggestion-item" data-category="technology" data-query="technology news">
                             <i class="fas fa-microchip"></i>
                             <span>Technology News</span>
                         </div>
-                        <div class="suggestion-item" data-query="breaking">
+                        <div class="suggestion-item" data-category="latest" data-query="breaking news">
                             <i class="fas fa-bolt"></i>
                             <span>Breaking News</span>
                         </div>
-                        <div class="suggestion-item" data-query="sports">
+                        <div class="suggestion-item" data-category="sports" data-query="sports updates">
                             <i class="fas fa-futbol"></i>
                             <span>Sports Updates</span>
                         </div>
-                        <div class="suggestion-item" data-query="weather">
+                        <div class="suggestion-item" data-category="weather" data-query="weather forecast">
                             <i class="fas fa-cloud-sun"></i>
                             <span>Weather Forecast</span>
+                        </div>
+                        <div class="suggestion-item" data-category="food" data-query="food recipes">
+                            <i class="fas fa-utensils"></i>
+                            <span>Food & Recipes</span>
+                        </div>
+                        <div class="suggestion-item" data-category="business" data-query="business news">
+                            <i class="fas fa-chart-line"></i>
+                            <span>Business News</span>
+                        </div>
+                        <div class="suggestion-item" data-category="entertainment" data-query="entertainment news">
+                            <i class="fas fa-film"></i>
+                            <span>Entertainment</span>
+                        </div>
+                        <div class="suggestion-item" data-category="health" data-query="health news">
+                            <i class="fas fa-heartbeat"></i>
+                            <span>Health News</span>
                         </div>
                     </div>
                 </div>
@@ -1205,15 +1270,122 @@
                             this.performSearch();
                         }
                     });
+                    
+                    // Add autocomplete functionality
+                    searchInput.addEventListener('input', (e) => {
+                        this.showAutocomplete(e.target.value);
+                    });
+                    
+                    // Hide autocomplete when clicking outside
+                    document.addEventListener('click', (e) => {
+                        if (!e.target.closest('.search-box')) {
+                            this.hideAutocomplete();
+                        }
+                    });
+                }
+            }
+            
+            // Autocomplete functionality
+            showAutocomplete(query) {
+                if (!query.trim()) {
+                    this.hideAutocomplete();
+                    return;
+                }
+                
+                const suggestions = this.getAutocompleteSuggestions(query);
+                this.displayAutocompleteSuggestions(suggestions);
+            }
+            
+            getAutocompleteSuggestions(query) {
+                const lowerQuery = query.toLowerCase();
+                const allSuggestions = [
+                    'Technology News', 'Breaking News', 'Sports Updates', 'Weather Forecast',
+                    'Food & Recipes', 'Business News', 'Entertainment', 'Health News',
+                    'Kenya News', 'World News', 'Lifestyle', 'Crypto News',
+                    'AI News', 'Football News', 'Climate News', 'Cooking Recipes',
+                    'Stock Market', 'Hollywood News', 'Medical News', 'Latest Updates'
+                ];
+                
+                return allSuggestions.filter(suggestion => 
+                    suggestion.toLowerCase().includes(lowerQuery)
+                ).slice(0, 6);
+            }
+            
+            displayAutocompleteSuggestions(suggestions) {
+                const autocompleteContainer = document.getElementById('autocomplete-suggestions');
+                if (!autocompleteContainer) {
+                    // Create autocomplete container if it doesn't exist
+                    const searchBox = document.querySelector('.search-box');
+                    const autocomplete = document.createElement('div');
+                    autocomplete.id = 'autocomplete-suggestions';
+                    autocomplete.className = 'autocomplete-suggestions';
+                    searchBox.appendChild(autocomplete);
+                }
+                
+                const container = document.getElementById('autocomplete-suggestions');
+                container.innerHTML = '';
+                
+                suggestions.forEach(suggestion => {
+                    const item = document.createElement('div');
+                    item.className = 'autocomplete-item';
+                    item.textContent = suggestion;
+                    item.addEventListener('click', () => {
+                        document.getElementById('quick-search-input').value = suggestion;
+                        this.hideAutocomplete();
+                        this.performSearch();
+                    });
+                    container.appendChild(item);
+                });
+                
+                container.style.display = suggestions.length > 0 ? 'block' : 'none';
+            }
+            
+            hideAutocomplete() {
+                const autocompleteContainer = document.getElementById('autocomplete-suggestions');
+                if (autocompleteContainer) {
+                    autocompleteContainer.style.display = 'none';
                 }
             }
             
             performSearch() {
                 const query = document.getElementById('quick-search-input').value.trim();
                 if (query) {
-                    // Simple redirect to latest page with search query
-                    window.location.href = `/latest?search=${encodeURIComponent(query)}`;
+                    // Smart category detection
+                    const category = this.detectCategory(query);
+                    if (category) {
+                        // Navigate to specific category
+                        window.location.href = `/${category}`;
+                    } else {
+                        // Fallback to latest page with search query
+                        window.location.href = `/latest?search=${encodeURIComponent(query)}`;
+                    }
                 }
+            }
+            
+            // Smart category detection based on search query
+            detectCategory(query) {
+                const lowerQuery = query.toLowerCase();
+                
+                // Category mapping
+                const categoryMap = {
+                    'technology': ['tech', 'technology', 'ai', 'artificial intelligence', 'software', 'hardware', 'gadgets', 'apps', 'digital'],
+                    'sports': ['sports', 'football', 'soccer', 'basketball', 'tennis', 'cricket', 'olympics', 'athletics', 'fitness'],
+                    'weather': ['weather', 'climate', 'forecast', 'temperature', 'rain', 'sunny', 'storm', 'meteorology'],
+                    'food': ['food', 'recipe', 'cooking', 'cuisine', 'restaurant', 'chef', 'ingredients', 'kitchen', 'diet'],
+                    'business': ['business', 'economy', 'finance', 'market', 'stock', 'investment', 'trade', 'commerce'],
+                    'entertainment': ['entertainment', 'movie', 'music', 'celebrity', 'hollywood', 'film', 'tv', 'show'],
+                    'health': ['health', 'medical', 'medicine', 'doctor', 'hospital', 'wellness', 'fitness', 'disease'],
+                    'latest': ['breaking', 'news', 'latest', 'recent', 'update', 'headlines']
+                };
+                
+                // Check if query matches any category
+                for (const [category, keywords] of Object.entries(categoryMap)) {
+                    if (keywords.some(keyword => lowerQuery.includes(keyword))) {
+                        return category;
+                    }
+                }
+                
+                return null;
             }
             
             // Search Suggestions - Safe Click Handlers
@@ -1221,9 +1393,16 @@
                 const suggestions = document.querySelectorAll('.suggestion-item');
                 suggestions.forEach(suggestion => {
                     suggestion.addEventListener('click', () => {
+                        const category = suggestion.getAttribute('data-category');
                         const query = suggestion.getAttribute('data-query');
                         document.getElementById('quick-search-input').value = query;
-                        this.performSearch();
+                        
+                        // Navigate directly to category
+                        if (category) {
+                            window.location.href = `/${category}`;
+                        } else {
+                            this.performSearch();
+                        }
                     });
                 });
             }
