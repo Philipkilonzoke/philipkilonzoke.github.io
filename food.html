@@ -187,7 +187,15 @@
             width: 100%;
             height: 240px;
             object-fit: cover;
-            transition: transform 0.3s ease;
+            transition: all 0.3s ease;
+            background: linear-gradient(45deg, #f1f5f9, #e2e8f0);
+            opacity: 0;
+            filter: blur(2px);
+        }
+        
+        .recipe-image.loaded {
+            opacity: 1;
+            filter: blur(0);
         }
         
         .recipe-card:hover .recipe-image {
@@ -666,10 +674,25 @@
             sortBy.addEventListener('change', applyFilters);
         }
         
-        // Build ordered list of possible image URLs for a recipe
+        // Build ordered list of possible image URLs for a recipe with high-quality options
         function getRecipeImageCandidates(recipe) {
             const candidates = [];
-            const knownSizes = ['636x393', '556x370', '480x360', '312x231'];
+            
+            // High-quality image sizes for modern displays (including retina)
+            const highQualitySizes = [
+                '1200x800',  // Large desktop
+                '1000x667',  // Desktop
+                '800x533',   // Tablet
+                '636x393',   // Original large
+                '556x370',   // Original medium
+                '480x360',   // Mobile
+                '312x231'    // Fallback
+            ];
+            
+            // Generate responsive srcset for better quality
+            function generateSrcSet(baseUrl, sizes) {
+                return sizes.map(size => `${baseUrl.replace(/-\d+x\d+/, `-${size}`)} ${size.split('x')[0]}w`).join(', ');
+            }
 
             // Use provided image first if absolute URL
             if (recipe.image && /^https?:\/\//.test(recipe.image)) {
@@ -683,7 +706,12 @@
                 : '';
 
             if (recipeId && imageTypeFromProp) {
-                knownSizes.forEach(size => {
+                // Try WebP first for better quality and smaller size
+                highQualitySizes.forEach(size => {
+                    candidates.push(`https://img.spoonacular.com/recipes/${recipeId}-${size}.webp`);
+                });
+                // Fallback to original format
+                highQualitySizes.forEach(size => {
                     candidates.push(`https://img.spoonacular.com/recipes/${recipeId}-${size}.${imageTypeFromProp}`);
                 });
             } else if (recipe.image) {
@@ -692,7 +720,12 @@
                 if (match) {
                     const id = match[1];
                     const ext = match[3];
-                    knownSizes.forEach(size => {
+                    // Try WebP first
+                    highQualitySizes.forEach(size => {
+                        candidates.push(`https://img.spoonacular.com/recipes/${id}-${size}.webp`);
+                    });
+                    // Fallback to original format
+                    highQualitySizes.forEach(size => {
                         candidates.push(`https://img.spoonacular.com/recipes/${id}-${size}.${ext}`);
                     });
                 }
@@ -805,17 +838,31 @@
             
             grid.innerHTML = recipes.map(recipe => createRecipeCard(recipe)).join('');
             
-            // Add lazy loading for images
+            // Enhanced lazy loading for images with quality optimization
             const images = grid.querySelectorAll('img[data-src]');
             const imageObserver = new IntersectionObserver((entries, observer) => {
                 entries.forEach(entry => {
                     if (entry.isIntersecting) {
                         const img = entry.target;
-                        img.src = img.dataset.src;
-                        img.removeAttribute('data-src');
-                        observer.unobserve(img);
+                        
+                        // Preload the image for better performance
+                        const preloadImg = new Image();
+                        preloadImg.onload = () => {
+                            img.src = preloadImg.src;
+                            img.classList.add('loaded');
+                            img.removeAttribute('data-src');
+                            observer.unobserve(img);
+                        };
+                        preloadImg.onerror = () => {
+                            // If preload fails, try the fallback
+                            handleRecipeImgError({ target: img });
+                        };
+                        preloadImg.src = img.dataset.src;
                     }
                 });
+            }, {
+                rootMargin: '50px 0px', // Start loading 50px before image comes into view
+                threshold: 0.1
             });
             
             images.forEach(img => imageObserver.observe(img));
@@ -841,7 +888,7 @@
             return `
                 <div class="recipe-card" onclick="openRecipe('${recipe.sourceUrl || recipe.spoonacularSourceUrl}')">
                     ${hasImage
-                        ? `<img data-src="${firstSrc}" data-fallbacks="${fallbackList}" alt="${recipe.title}" class="recipe-image" loading="lazy" onerror="handleRecipeImgError(event)">`
+                        ? `<img data-src="${firstSrc}" data-fallbacks="${fallbackList}" alt="${recipe.title}" class="recipe-image" loading="lazy" onerror="handleRecipeImgError(event)" decoding="async">`
                         : `<div class="recipe-image-placeholder">🍽️</div>`
                     }
                     <div class="recipe-content">
