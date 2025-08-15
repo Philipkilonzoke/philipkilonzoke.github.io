@@ -398,6 +398,108 @@
             box-shadow: 0 2px 4px rgba(0,0,0,0.2);
         }
         
+        /* Recipe Badges */
+        .recipe-badges {
+            position: absolute;
+            top: 1rem;
+            left: 1rem;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            z-index: 10;
+        }
+        
+        .recipe-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.25rem;
+            padding: 0.25rem 0.75rem;
+            border-radius: 1rem;
+            color: white;
+            font-size: 0.75rem;
+            font-weight: 600;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+        }
+        
+        .recipe-badge.popular {
+            background: linear-gradient(135deg, #ff6b35, #f7941d);
+        }
+        
+        .recipe-badge.quick {
+            background: linear-gradient(135deg, #10b981, #059669);
+        }
+        
+        .recipe-badge.healthy {
+            background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+        }
+        
+        .recipe-badge.rating {
+            background: linear-gradient(135deg, #f59e0b, #d97706);
+        }
+        
+        /* Reading Time Badge */
+        .reading-time-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.25rem 0.75rem;
+            background: rgba(37, 99, 235, 0.1);
+            color: var(--primary-color);
+            border-radius: 1rem;
+            font-size: 0.875rem;
+            font-weight: 500;
+            margin-bottom: 1rem;
+        }
+        
+        /* Recipe Stats */
+        .recipe-stats {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1rem;
+            padding: 0.75rem;
+            background: var(--surface-color);
+            border-radius: 0.75rem;
+        }
+        
+        .recipe-stats .stat-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.875rem;
+            color: #64748b;
+        }
+        
+        .recipe-stats .stat-item i {
+            color: var(--primary-color);
+        }
+        
+        /* Copy Link Button */
+        .copy-link-btn {
+            background: var(--surface-color);
+            color: #64748b;
+            border: 1px solid var(--border-color);
+            padding: 0.5rem;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .copy-link-btn:hover {
+            background: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+        }
+        
+        .copy-link-btn.copied {
+            background: #10b981;
+            color: white;
+            border-color: #10b981;
+        }
+        
         .recipe-actions {
             display: flex;
             gap: 0.75rem;
@@ -464,6 +566,30 @@
             
             .recipe-meta {
                 grid-template-columns: 1fr;
+            }
+            
+            .recipe-badges {
+                top: 0.5rem;
+                left: 0.5rem;
+                gap: 0.25rem;
+            }
+            
+            .recipe-badge {
+                font-size: 0.7rem;
+                padding: 0.2rem 0.5rem;
+            }
+            
+            .recipe-stats {
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+            
+            .recipe-actions {
+                flex-direction: column;
+            }
+            
+            .copy-link-btn {
+                padding: 0.75rem;
             }
         }
     </style>
@@ -1167,10 +1293,26 @@
         }
         
         function createRecipeCard(recipe) {
-            const summary = stripHtml(recipe.summary || '').substring(0, 150) + '...';
+            // Remove truncation - show full description
+            const summary = stripHtml(recipe.summary || '');
             const readyTime = recipe.readyInMinutes || 'N/A';
             const healthScore = recipe.healthScore || 'N/A';
             const calories = recipe.nutrition?.nutrients?.find(n => n.name === 'Calories')?.amount || 'N/A';
+            
+            // Calculate reading time for the recipe
+            const readingTime = Math.max(1, Math.ceil((summary.length + recipe.title.length) / 200));
+            
+            // Get recipe rating if available
+            const rating = recipe.spoonacularScore || recipe.aggregateLikes ? Math.round((recipe.spoonacularScore || recipe.aggregateLikes) / 20) : null;
+            
+            // Check if recipe is popular (high likes)
+            const isPopular = recipe.aggregateLikes && recipe.aggregateLikes > 100;
+            
+            // Check if recipe is quick (under 20 minutes)
+            const isQuick = readyTime && readyTime <= 20;
+            
+            // Check if recipe is healthy (high health score)
+            const isHealthy = healthScore && healthScore >= 80;
             
             // Determine difficulty level based on cooking time and complexity
             let difficulty = 'Easy';
@@ -1203,9 +1345,23 @@
                         ? `<img data-src="${firstSrc}" data-fallbacks="${fallbackList}" srcset="${srcset}" sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw" alt="${recipe.title}" class="recipe-image" loading="lazy" onerror="handleRecipeImgError(event)" decoding="async">`
                         : `<div class="recipe-image-placeholder">🍽️</div>`
                     }
+                    
+                    <!-- Recipe Badges -->
+                    <div class="recipe-badges">
+                        ${isPopular ? '<span class="recipe-badge popular"><i class="fas fa-fire"></i> Popular</span>' : ''}
+                        ${isQuick ? '<span class="recipe-badge quick"><i class="fas fa-bolt"></i> Quick</span>' : ''}
+                        ${isHealthy ? '<span class="recipe-badge healthy"><i class="fas fa-heart"></i> Healthy</span>' : ''}
+                        ${rating ? `<span class="recipe-badge rating"><i class="fas fa-star"></i> ${rating}/5</span>` : ''}
+                    </div>
+                    
                     <div class="recipe-content">
                         <h3 class="recipe-title">${recipe.title}</h3>
                         <p class="recipe-summary">${summary}</p>
+                        
+                        <!-- Reading Time Badge -->
+                        <div class="reading-time-badge">
+                            <i class="fas fa-book-open"></i> ${readingTime} min read
+                        </div>
                         
                         <div class="recipe-meta">
                             <div class="meta-item">
@@ -1237,9 +1393,18 @@
                             </div>
                         ` : ''}
                         
+                        <!-- Recipe Stats -->
+                        <div class="recipe-stats">
+                            ${recipe.aggregateLikes ? `<div class="stat-item"><i class="fas fa-thumbs-up"></i> ${recipe.aggregateLikes} likes</div>` : ''}
+                            ${recipe.pricePerServing ? `<div class="stat-item"><i class="fas fa-dollar-sign"></i> $${(recipe.pricePerServing / 100).toFixed(2)}</div>` : ''}
+                        </div>
+                        
                         <div class="recipe-actions">
                             <button class="view-recipe-btn" onclick="event.stopPropagation(); openRecipe('${recipe.sourceUrl || recipe.spoonacularSourceUrl}')">
                                 <i class="fas fa-external-link-alt"></i> View Recipe
+                            </button>
+                            <button class="copy-link-btn" onclick="event.stopPropagation(); copyRecipeLink('${recipe.sourceUrl || recipe.spoonacularSourceUrl}', this)" title="Copy Recipe Link">
+                                <i class="fas fa-link"></i>
                             </button>
                         </div>
                     </div>
@@ -1516,6 +1681,83 @@
             } finally {
                 hideLoading();
             }
+        }
+        
+        // Function to copy recipe link to clipboard
+        async function copyRecipeLink(url, button) {
+            try {
+                await navigator.clipboard.writeText(url);
+                
+                // Visual feedback
+                const originalText = button.innerHTML;
+                button.innerHTML = '<i class="fas fa-check"></i>';
+                button.classList.add('copied');
+                
+                // Reset after 2 seconds
+                setTimeout(() => {
+                    button.innerHTML = originalText;
+                    button.classList.remove('copied');
+                }, 2000);
+                
+                // Show toast notification
+                showToast('Recipe link copied to clipboard!');
+            } catch (error) {
+                console.error('Failed to copy link:', error);
+                showToast('Failed to copy link', 'error');
+            }
+        }
+        
+        // Simple toast notification function
+        function showToast(message, type = 'success') {
+            // Remove existing toast
+            const existingToast = document.querySelector('.toast-notification');
+            if (existingToast) {
+                existingToast.remove();
+            }
+            
+            // Create new toast
+            const toast = document.createElement('div');
+            toast.className = `toast-notification ${type}`;
+            toast.innerHTML = `
+                <i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-circle'}"></i>
+                <span>${message}</span>
+            `;
+            
+            // Add styles
+            toast.style.cssText = `
+                position: fixed;
+                top: 2rem;
+                right: 2rem;
+                background: ${type === 'success' ? '#10b981' : '#ef4444'};
+                color: white;
+                padding: 1rem 1.5rem;
+                border-radius: 0.5rem;
+                box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+                z-index: 10000;
+                display: flex;
+                align-items: center;
+                gap: 0.5rem;
+                font-weight: 500;
+                animation: slideIn 0.3s ease;
+            `;
+            
+            // Add animation styles
+            const style = document.createElement('style');
+            style.textContent = `
+                @keyframes slideIn {
+                    from { transform: translateX(100%); opacity: 0; }
+                    to { transform: translateX(0); opacity: 1; }
+                }
+            `;
+            document.head.appendChild(style);
+            
+            document.body.appendChild(toast);
+            
+            // Remove after 3 seconds
+            setTimeout(() => {
+                toast.style.animation = 'slideOut 0.3s ease';
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
         }
     </script>
 
