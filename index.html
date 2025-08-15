@@ -314,6 +314,165 @@
             font-weight: 400;
         }
         
+        /* Quick Search Section */
+        .quick-search-section {
+            padding: 3rem 0;
+            background: var(--surface-color);
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        .search-container {
+            max-width: 600px;
+            margin: 0 auto;
+            text-align: center;
+        }
+        
+        .search-header h2 {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            color: var(--text-color);
+        }
+        
+        .search-header p {
+            color: var(--text-muted);
+            margin-bottom: 2rem;
+        }
+        
+        .search-box {
+            display: flex;
+            background: var(--background-color);
+            border: 2px solid var(--border-color);
+            border-radius: 50px;
+            overflow: hidden;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+        }
+        
+        .search-box:focus-within {
+            border-color: var(--primary-color);
+            box-shadow: 0 4px 20px rgba(37, 99, 235, 0.2);
+        }
+        
+        #quick-search-input {
+            flex: 1;
+            padding: 1rem 1.5rem;
+            border: none;
+            outline: none;
+            font-size: 1rem;
+            background: transparent;
+        }
+        
+        #quick-search-btn {
+            padding: 1rem 1.5rem;
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+        
+        #quick-search-btn:hover {
+            background: #1d4ed8;
+        }
+        
+        .search-suggestions {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        
+        .suggestion-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            background: var(--background-color);
+            border: 1px solid var(--border-color);
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.875rem;
+        }
+        
+        .suggestion-item:hover {
+            background: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+            transform: translateY(-2px);
+        }
+        
+        /* Breaking News Controls */
+        .breaking-controls {
+            display: flex;
+            gap: 0.5rem;
+        }
+        
+        .ticker-control-btn {
+            background: rgba(255,255,255,0.1);
+            color: white;
+            border: 1px solid rgba(255,255,255,0.2);
+            padding: 0.5rem;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+        
+        .ticker-control-btn:hover {
+            background: rgba(255,255,255,0.2);
+            transform: scale(1.05);
+        }
+        
+        /* Quick Stats Section */
+        .quick-stats-section {
+            padding: 3rem 0;
+            background: var(--background-color);
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 2rem;
+        }
+        
+        .stat-card {
+            background: var(--surface-color);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            padding: 2rem;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-md);
+            border-color: var(--primary-color);
+        }
+        
+        .stat-icon {
+            font-size: 2.5rem;
+            color: var(--primary-color);
+            margin-bottom: 1rem;
+        }
+        
+        .stat-number {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--text-color);
+            margin-bottom: 0.5rem;
+        }
+        
+        .stat-label {
+            color: var(--text-muted);
+            font-size: 0.875rem;
+            font-weight: 500;
+        }
+        
         /* Category Grid */
         .categories-section {
             padding: 4rem 0;
@@ -563,6 +722,42 @@
             </div>
         </section>
 
+        <!-- Quick Search Section -->
+        <section class="quick-search-section">
+            <div class="container">
+                <div class="search-container">
+                    <div class="search-header">
+                        <h2><i class="fas fa-search"></i> Quick News Search</h2>
+                        <p>Search across all categories for the latest stories</p>
+                    </div>
+                    <div class="search-box">
+                        <input type="text" id="quick-search-input" placeholder="Search for news, topics, or keywords...">
+                        <button id="quick-search-btn">
+                            <i class="fas fa-search"></i>
+                        </button>
+                    </div>
+                    <div class="search-suggestions" id="search-suggestions">
+                        <div class="suggestion-item" data-query="technology">
+                            <i class="fas fa-microchip"></i>
+                            <span>Technology News</span>
+                        </div>
+                        <div class="suggestion-item" data-query="breaking">
+                            <i class="fas fa-bolt"></i>
+                            <span>Breaking News</span>
+                        </div>
+                        <div class="suggestion-item" data-query="sports">
+                            <i class="fas fa-futbol"></i>
+                            <span>Sports Updates</span>
+                        </div>
+                        <div class="suggestion-item" data-query="weather">
+                            <i class="fas fa-cloud-sun"></i>
+                            <span>Weather Forecast</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
         <!-- Breaking News Ticker -->
         <section class="breaking-news-section">
             <div class="container">
@@ -570,6 +765,14 @@
                     <div class="breaking-badge">
                         <i class="fas fa-bolt"></i>
                         Breaking News
+                    </div>
+                    <div class="breaking-controls">
+                        <button id="pause-ticker" class="ticker-control-btn" title="Pause Ticker">
+                            <i class="fas fa-pause"></i>
+                        </button>
+                        <button id="share-breaking" class="ticker-control-btn" title="Share Breaking News">
+                            <i class="fas fa-share-alt"></i>
+                        </button>
                     </div>
                 </div>
                 <div class="news-ticker">
@@ -587,6 +790,50 @@
                                     <span class="ticker-date">Now</span>
                                 </div>
                             </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Quick Stats Section -->
+        <section class="quick-stats-section">
+            <div class="container">
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-newspaper"></i>
+                        </div>
+                        <div class="stat-content">
+                            <div class="stat-number" id="total-articles">∞</div>
+                            <div class="stat-label">Articles Today</div>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-globe"></i>
+                        </div>
+                        <div class="stat-content">
+                            <div class="stat-number" id="active-sources">17+</div>
+                            <div class="stat-label">News Sources</div>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-users"></i>
+                        </div>
+                        <div class="stat-content">
+                            <div class="stat-number" id="live-visitors">1.2K</div>
+                            <div class="stat-label">Live Visitors</div>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-clock"></i>
+                        </div>
+                        <div class="stat-content">
+                            <div class="stat-number" id="update-time">24/7</div>
+                            <div class="stat-label">Real-time Updates</div>
                         </div>
                     </div>
                 </div>
