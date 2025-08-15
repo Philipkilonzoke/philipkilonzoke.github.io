@@ -219,6 +219,33 @@
             padding: 2rem 0;
         }
         
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .cuisine-filters, .time-filters, .meal-filters {
+                gap: 0.25rem;
+            }
+            
+            .cuisine-btn, .time-btn, .meal-btn {
+                padding: 0.375rem 0.75rem;
+                font-size: 0.75rem;
+            }
+            
+            .recipes-grid {
+                grid-template-columns: 1fr;
+                gap: 1.5rem;
+            }
+            
+            .search-container {
+                flex-direction: column;
+                gap: 0.75rem;
+            }
+            
+            .search-input {
+                min-width: auto;
+                width: 100%;
+            }
+        }
+        
         .recipe-card {
             background: var(--surface-color);
             border: 1px solid var(--border-color);
@@ -1181,6 +1208,194 @@
         
         function updateRecipeCount(count) {
             document.getElementById('recipe-count').textContent = `${count} recipes found`;
+        }
+        
+        // Quick filter functionality
+        function setupQuickFilters() {
+            // Cuisine filters
+            document.querySelectorAll('.cuisine-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    document.querySelectorAll('.cuisine-btn').forEach(b => b.classList.remove('active'));
+                    this.classList.add('active');
+                    currentCuisine = this.dataset.cuisine;
+                    applyQuickFilters();
+                });
+            });
+            
+            // Time filters
+            document.querySelectorAll('.time-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    document.querySelectorAll('.time-btn').forEach(b => b.classList.remove('active'));
+                    this.classList.add('active');
+                    currentTime = this.dataset.time;
+                    applyQuickFilters();
+                });
+            });
+            
+            // Meal filters
+            document.querySelectorAll('.meal-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    document.querySelectorAll('.meal-btn').forEach(b => b.classList.remove('active'));
+                    this.classList.add('active');
+                    currentMeal = this.dataset.meal;
+                    applyQuickFilters();
+                });
+            });
+        }
+        
+        function applyQuickFilters() {
+            const searchQuery = document.getElementById('recipe-search').value.trim();
+            if (searchQuery) {
+                searchRecipesWithFilters(searchQuery);
+            } else {
+                loadRandomRecipesWithFilters();
+            }
+        }
+        
+        async function searchRecipesWithFilters(query) {
+            showLoading();
+            updateSectionTitle(`Search Results for "${query}"`);
+            
+            try {
+                let url = `${BASE_URL}/recipes/complexSearch?query=${encodeURIComponent(query)}&number=12&addRecipeInformation=true&apiKey=${API_KEY}`;
+                
+                // Add cuisine filter
+                if (currentCuisine) {
+                    url += `&cuisine=${currentCuisine}`;
+                }
+                
+                // Add max ready time filter
+                if (currentTime) {
+                    url += `&maxReadyTime=${currentTime}`;
+                }
+                
+                // Add diet filter
+                const dietParam = document.getElementById('diet-filter').value;
+                if (dietParam) {
+                    url += `&diet=${dietParam}`;
+                }
+                
+                // Add sort parameter
+                const sortParam = document.getElementById('sort-by').value;
+                if (sortParam && sortParam !== 'popularity') {
+                    url += `&sort=${sortParam}`;
+                }
+                
+                const response = await fetch(url);
+                if (!response.ok) throw new Error('Failed to search recipes');
+                
+                const data = await response.json();
+                let recipes = data.results || [];
+                
+                // Filter by meal type if specified
+                if (currentMeal) {
+                    recipes = filterByMealType(recipes, currentMeal);
+                }
+                
+                if (recipes.length === 0) {
+                    showNoResults();
+                } else {
+                    displayRecipes(recipes);
+                    updateRecipeCount(recipes.length);
+                }
+            } catch (error) {
+                console.error('Error searching recipes:', error);
+                showError();
+            } finally {
+                hideLoading();
+            }
+        }
+        
+        async function loadRandomRecipesWithFilters() {
+            showLoading();
+            updateSectionTitle('Featured Recipes');
+            
+            try {
+                let url = `${BASE_URL}/recipes/random?number=20&apiKey=${API_KEY}`;
+                
+                // Add cuisine filter
+                if (currentCuisine) {
+                    url += `&cuisine=${currentCuisine}`;
+                }
+                
+                // Add tags for meal type
+                if (currentMeal) {
+                    url += `&tags=${currentMeal}`;
+                }
+                
+                const response = await fetch(url);
+                if (!response.ok) throw new Error('Failed to fetch recipes');
+                
+                const data = await response.json();
+                let recipes = data.recipes || [];
+                
+                // Filter by cooking time if specified
+                if (currentTime) {
+                    recipes = recipes.filter(recipe => 
+                        recipe.readyInMinutes && recipe.readyInMinutes <= parseInt(currentTime)
+                    );
+                }
+                
+                // Limit to 12 recipes
+                recipes = recipes.slice(0, 12);
+                
+                if (recipes.length === 0) {
+                    showNoResults();
+                } else {
+                    displayRecipes(recipes);
+                    updateRecipeCount(recipes.length);
+                }
+            } catch (error) {
+                console.error('Error loading random recipes:', error);
+                showError();
+            } finally {
+                hideLoading();
+            }
+        }
+        
+        function filterByMealType(recipes, mealType) {
+            const mealKeywords = {
+                'breakfast': ['breakfast', 'morning', 'eggs', 'pancake', 'waffle', 'oatmeal'],
+                'lunch': ['lunch', 'sandwich', 'salad', 'soup'],
+                'dinner': ['dinner', 'main course', 'entree', 'roast', 'grill'],
+                'dessert': ['dessert', 'cake', 'cookie', 'ice cream', 'sweet', 'chocolate']
+            };
+            
+            if (!mealKeywords[mealType]) return recipes;
+            
+            return recipes.filter(recipe => {
+                const title = recipe.title.toLowerCase();
+                const summary = (recipe.summary || '').toLowerCase();
+                const text = title + ' ' + summary;
+                
+                return mealKeywords[mealType].some(keyword => text.includes(keyword));
+            });
+        }
+        
+        async function loadSurpriseRecipe() {
+            showLoading();
+            updateSectionTitle('Surprise Recipe! 🎲');
+            
+            try {
+                // Get a completely random recipe
+                const response = await fetch(`${BASE_URL}/recipes/random?number=1&apiKey=${API_KEY}`);
+                if (!response.ok) throw new Error('Failed to fetch surprise recipe');
+                
+                const data = await response.json();
+                const recipe = data.recipes?.[0];
+                
+                if (recipe) {
+                    displayRecipes([recipe]);
+                    updateRecipeCount(1);
+                } else {
+                    showNoResults();
+                }
+            } catch (error) {
+                console.error('Error loading surprise recipe:', error);
+                showError();
+            } finally {
+                hideLoading();
+            }
         }
     </script>
 </body>
