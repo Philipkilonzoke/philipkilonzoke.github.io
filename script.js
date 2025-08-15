@@ -62,7 +62,7 @@ function setupEventListeners() {
 }
 
 function loadSavedTheme() {
-    const savedTheme = localStorage.getItem('selectedTheme') || 'default';
+    const savedTheme = localStorage.getItem('selectedTheme') || 'dark';
     const themeSelect = document.getElementById('themeSelect');
     themeSelect.value = savedTheme;
     applyTheme(savedTheme);

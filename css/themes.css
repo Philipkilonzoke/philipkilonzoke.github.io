@@ -1,16 +1,5 @@
-/* Default Theme (Light) */
+/* Default Theme (Dark) */
 :root {
-    --primary-color: #2563eb;
-    --secondary-color: #64748b;
-    --background-color: #ffffff;
-    --surface-color: #f8fafc;
-    --text-color: #1e293b;
-    --text-muted: #64748b;
-    --border-color: #e2e8f0;
-}
-
-/* Dark Theme */
-[data-theme="dark"] {
     --primary-color: #3b82f6;
     --secondary-color: #94a3b8;
     --background-color: #0f172a;
@@ -18,6 +7,17 @@
     --text-color: #f1f5f9;
     --text-muted: #94a3b8;
     --border-color: #334155;
+}
+
+/* Light Theme */
+[data-theme="light"] {
+    --primary-color: #2563eb;
+    --secondary-color: #64748b;
+    --background-color: #ffffff;
+    --surface-color: #f8fafc;
+    --text-color: #1e293b;
+    --text-muted: #64748b;
+    --border-color: #e2e8f0;
 }
 
 /* Ocean Blue Theme */

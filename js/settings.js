@@ -154,8 +154,8 @@
     if (window.themeManager?.getThemes) return window.themeManager.getThemes();
     // Fallback minimal set
     return [
-      { id: 'default', name: 'Default' },
-      { id: 'dark', name: 'Dark' },
+      { id: 'dark', name: 'Dark (Default)' },
+      { id: 'light', name: 'Light' },
       { id: 'blue', name: 'Blue' },
       { id: 'green', name: 'Green' },
       { id: 'purple', name: 'Purple' },
@@ -170,15 +170,15 @@
   }
   function getCurrentTheme() {
     if (window.themeManager?.getCurrentTheme) return window.themeManager.getCurrentTheme();
-    return document.body.getAttribute('data-theme') || 'default';
-  }
+    return document.body.getAttribute('data-theme') || 'dark';
+}
   function setTheme(themeId) {
     if (window.themeManager?.setTheme) {
       window.themeManager.setTheme(themeId);
     } else {
       // Fallback
       document.body.removeAttribute('data-theme');
-      if (themeId !== 'default') document.body.setAttribute('data-theme', themeId);
+      if (themeId !== 'dark') document.body.setAttribute('data-theme', themeId);
       localStorage.setItem('brightlens-theme', themeId);
       window.dispatchEvent(new CustomEvent('themeChanged', { detail: { theme: themeId } }));
     }

@@ -610,8 +610,8 @@
   function applySavedThemeEarly(){
     try {
       if (window.themeManager?.getCurrentTheme) {
-        const t = localStorage.getItem('brightlens-theme') || localStorage.getItem('selectedTheme') || 'default';
-        if (t && t !== 'default') document.body.setAttribute('data-theme', t);
+        const t = localStorage.getItem('brightlens-theme') || localStorage.getItem('selectedTheme') || 'dark';
+        if (t && t !== 'dark') document.body.setAttribute('data-theme', t);
       }
     } catch (_) {}
   }

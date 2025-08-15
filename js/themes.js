@@ -5,10 +5,10 @@
 
 class ThemeManager {
     constructor() {
-        this.currentTheme = 'default';
+        this.currentTheme = 'dark';
         this.themes = [
-            { id: 'default', name: 'Default', description: 'Clean and modern light theme' },
-            { id: 'dark', name: 'Dark', description: 'Easy on the eyes dark theme' },
+            { id: 'dark', name: 'Dark', description: 'Easy on the eyes dark theme (Default)' },
+            { id: 'light', name: 'Light', description: 'Clean and modern light theme' },
             { id: 'blue', name: 'Ocean Blue', description: 'Calming blue ocean theme' },
             { id: 'green', name: 'Forest Green', description: 'Natural forest green theme' },
             { id: 'purple', name: 'Royal Purple', description: 'Elegant purple theme' },
@@ -43,7 +43,7 @@ class ThemeManager {
 
     applySavedTheme() {
         // Get saved theme from localStorage (support legacy key too)
-        const savedTheme = localStorage.getItem('brightlens-theme') || localStorage.getItem('selectedTheme') || 'default';
+        const savedTheme = localStorage.getItem('brightlens-theme') || localStorage.getItem('selectedTheme') || 'dark';
         this.setTheme(savedTheme, false);
     }
 
@@ -130,7 +130,7 @@ class ThemeManager {
         document.body.removeAttribute('data-theme');
         
         // Apply new theme
-        if (themeId !== 'default') {
+        if (themeId !== 'dark') {
             document.body.setAttribute('data-theme', themeId);
         }
         
