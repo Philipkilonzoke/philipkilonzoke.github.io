@@ -823,8 +823,8 @@
                             <i class="fas fa-users"></i>
                         </div>
                         <div class="stat-content">
-                            <div class="stat-number" id="live-visitors">1.2K</div>
-                            <div class="stat-label">Live Visitors</div>
+                            <div class="stat-number">1.2K+</div>
+                            <div class="stat-label">Daily Visitors</div>
                         </div>
                     </div>
                     <div class="stat-card">
@@ -1164,7 +1164,7 @@
     <script src="js/main.js" defer></script>
     <script src="js/simple-features.js" defer></script>
     <script>
-        // Homepage specific JavaScript
+        // Homepage specific JavaScript - Safe and Simple Features
         function smoothScroll(target) {
             document.querySelector(target).scrollIntoView({
                 behavior: 'smooth'
@@ -1173,6 +1173,194 @@
         
         // Initialize news instance for homepage (same as Breaking News page)
         let newsInstance = null;
+        let tickerPaused = false;
+        
+        // Safe Homepage Features Class
+        class SafeHomepageFeatures {
+            constructor() {
+                this.init();
+            }
+            
+            init() {
+                this.setupQuickSearch();
+                this.setupTickerControls();
+                this.setupSearchSuggestions();
+                this.setupNewsletter();
+            }
+            
+            // Quick Search Functionality - Safe and Simple
+            setupQuickSearch() {
+                const searchInput = document.getElementById('quick-search-input');
+                const searchBtn = document.getElementById('quick-search-btn');
+                
+                if (searchBtn) {
+                    searchBtn.addEventListener('click', () => {
+                        this.performSearch();
+                    });
+                }
+                
+                if (searchInput) {
+                    searchInput.addEventListener('keypress', (e) => {
+                        if (e.key === 'Enter') {
+                            this.performSearch();
+                        }
+                    });
+                }
+            }
+            
+            performSearch() {
+                const query = document.getElementById('quick-search-input').value.trim();
+                if (query) {
+                    // Simple redirect to latest page with search query
+                    window.location.href = `/latest?search=${encodeURIComponent(query)}`;
+                }
+            }
+            
+            // Search Suggestions - Safe Click Handlers
+            setupSearchSuggestions() {
+                const suggestions = document.querySelectorAll('.suggestion-item');
+                suggestions.forEach(suggestion => {
+                    suggestion.addEventListener('click', () => {
+                        const query = suggestion.getAttribute('data-query');
+                        document.getElementById('quick-search-input').value = query;
+                        this.performSearch();
+                    });
+                });
+            }
+            
+            // Ticker Controls - Simple Pause/Play
+            setupTickerControls() {
+                const pauseBtn = document.getElementById('pause-ticker');
+                const shareBtn = document.getElementById('share-breaking');
+                
+                if (pauseBtn) {
+                    pauseBtn.addEventListener('click', () => {
+                        this.toggleTicker();
+                    });
+                }
+                
+                if (shareBtn) {
+                    shareBtn.addEventListener('click', () => {
+                        this.shareBreakingNews();
+                    });
+                }
+            }
+            
+            toggleTicker() {
+                const ticker = document.querySelector('.ticker-content');
+                const pauseBtn = document.getElementById('pause-ticker');
+                
+                if (tickerPaused) {
+                    ticker.style.animationPlayState = 'running';
+                    pauseBtn.innerHTML = '<i class="fas fa-pause"></i>';
+                    pauseBtn.title = 'Pause Ticker';
+                    tickerPaused = false;
+                } else {
+                    ticker.style.animationPlayState = 'paused';
+                    pauseBtn.innerHTML = '<i class="fas fa-play"></i>';
+                    pauseBtn.title = 'Play Ticker';
+                    tickerPaused = true;
+                }
+            }
+            
+            // Simple Share Function - No Complex APIs
+            shareBreakingNews() {
+                const shareText = '📰 Check out the latest breaking news on Brightlens News! Stay informed with real-time updates from trusted sources worldwide.';
+                const shareUrl = window.location.href;
+                
+                // Simple clipboard copy with fallback
+                const fullText = `${shareText}\n${shareUrl}`;
+                this.copyToClipboard(fullText);
+            }
+            
+            // Safe Clipboard Copy with Fallback
+            copyToClipboard(text) {
+                if (navigator.clipboard && window.isSecureContext) {
+                    navigator.clipboard.writeText(text).then(() => {
+                        this.showSimpleToast('Breaking news link copied!');
+                    }).catch(() => {
+                        this.fallbackCopyTextToClipboard(text);
+                    });
+                } else {
+                    this.fallbackCopyTextToClipboard(text);
+                }
+            }
+            
+            // Fallback Copy Method - Safe for All Browsers
+            fallbackCopyTextToClipboard(text) {
+                const textArea = document.createElement('textarea');
+                textArea.value = text;
+                textArea.style.position = 'fixed';
+                textArea.style.left = '-999999px';
+                textArea.style.top = '-999999px';
+                document.body.appendChild(textArea);
+                textArea.focus();
+                textArea.select();
+                
+                try {
+                    document.execCommand('copy');
+                    this.showSimpleToast('Breaking news link copied!');
+                } catch (err) {
+                    console.error('Copy failed:', err);
+                    this.showSimpleToast('Copy failed - please copy manually', 'error');
+                }
+                
+                document.body.removeChild(textArea);
+            }
+            
+            // Simple Toast - No Complex Animations
+            showSimpleToast(message, type = 'success') {
+                // Remove existing toast
+                const existingToast = document.querySelector('.simple-toast');
+                if (existingToast) {
+                    existingToast.remove();
+                }
+                
+                // Create simple toast
+                const toast = document.createElement('div');
+                toast.className = 'simple-toast';
+                toast.textContent = message;
+                toast.style.cssText = `
+                    position: fixed;
+                    top: 2rem;
+                    right: 2rem;
+                    background: ${type === 'success' ? '#10b981' : '#ef4444'};
+                    color: white;
+                    padding: 1rem 1.5rem;
+                    border-radius: 0.5rem;
+                    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+                    z-index: 10000;
+                    font-weight: 500;
+                    max-width: 300px;
+                `;
+                
+                document.body.appendChild(toast);
+                
+                // Remove after 3 seconds
+                setTimeout(() => {
+                    if (toast.parentNode) {
+                        toast.remove();
+                    }
+                }, 3000);
+            }
+            
+            // Simple Newsletter - No Complex Backend
+            setupNewsletter() {
+                const newsletterForm = document.querySelector('.newsletter-form');
+                if (newsletterForm) {
+                    newsletterForm.addEventListener('submit', (e) => {
+                        e.preventDefault();
+                        const email = newsletterForm.querySelector('input[type="email"]').value;
+                        if (email && email.includes('@')) {
+                            this.showSimpleToast('Thank you for subscribing!');
+                            newsletterForm.querySelector('input[type="email"]').value = '';
+                        } else {
+                            this.showSimpleToast('Please enter a valid email', 'error');
+                        }
+                    });
+                }
+            }
+        }
         
         // Load breaking news for ticker using exact same logic as Breaking News page
         async function loadBreakingNews() {
@@ -1416,6 +1604,9 @@
             setTimeout(() => {
                 document.getElementById('loading-screen').classList.add('hidden');
             }, 1000);
+            
+            // Initialize safe homepage features
+            new SafeHomepageFeatures();
             
             // Wait for scripts to load
             await waitForScripts();
