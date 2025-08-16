@@ -143,17 +143,30 @@ class CategoryNews {
             const articles = await this.newsAPI.fetchNews(this.category, 100);
             
             let supplementalArticles = [];
-            if ((this.category === 'kenya' || this.category === 'sports') && window.MediastackSupplement) {
+            if (window.MediastackSupplement) {
                 try {
                     const mediastackSupplement = new window.MediastackSupplement();
-                    supplementalArticles = await mediastackSupplement.getSupplementalArticles(this.category, 50);
+                    supplementalArticles = await mediastackSupplement.getSupplementalArticles(this.category, 100);
                     console.log(`Mediastack supplement: Added ${supplementalArticles.length} additional ${this.category} articles`);
                 } catch (error) {
                     console.warn('Mediastack supplement failed:', error);
                 }
             }
             
-            const allArticles = [...(articles || []), ...supplementalArticles];
+            let allArticles = [...(articles || []), ...supplementalArticles];
+
+            // RSS fallback via news-sources.js (real-time RSS feeds)
+            if (typeof window.loadNewsFromAllSources === 'function') {
+                try {
+                    const rssArticles = await window.loadNewsFromAllSources(this.category);
+                    if (Array.isArray(rssArticles) && rssArticles.length) {
+                        allArticles = allArticles.concat(rssArticles);
+                    }
+                } catch (e) {
+                    console.warn('RSS fallback failed:', e);
+                }
+            }
+
             const uniqueArticles = this.removeDuplicates(allArticles);
             
             // Sort newest first
