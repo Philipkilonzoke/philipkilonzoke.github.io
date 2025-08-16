@@ -188,6 +188,7 @@ class CategoryNews {
                 this.updateArticleCount();
                 this.updateLastUpdated();
                 this.showNewsGrid();
+                try { document.dispatchEvent(new CustomEvent('categoryNewsLoaded', { detail: { category: this.category, articlesCount: this.allArticles.length } })); } catch (e) {}
             } else {
                 const msg = this.category === 'kenya' 
                   ? 'No Kenya articles from the last 48 hours. Please check back shortly.' 

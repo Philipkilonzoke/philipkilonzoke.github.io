@@ -1368,6 +1368,7 @@
         let newsInstance = null;
         let tickerPaused = false;
         let tickerRefreshInterval = null;
+        let tickerLoaded = false;
         
         // Safe Homepage Features Class
         class SafeHomepageFeatures {
@@ -1381,6 +1382,7 @@
                 this.setupSearchSuggestions();
                 this.setupNewsletter();
                 this.initializeRealTimeTicker();
+                this.lazyLoadTickerOnView();
             }
             
             // Quick Search Functionality - Safe and Simple
@@ -1539,6 +1541,8 @@
             
             // Initialize Real-Time Breaking News Ticker
             initializeRealTimeTicker() {
+                if (tickerLoaded) return;
+                tickerLoaded = true;
                 // Show loading spinner immediately
                 const tickerLoading = document.getElementById('ticker-loading');
                 const tickerContent = document.getElementById('news-ticker');
@@ -1562,6 +1566,7 @@
             
             // Load breaking news for ticker using exact same logic as Breaking News page
             async loadBreakingNewsForTicker() {
+                if (!newsInstance) return;
                 try {
                     // Get the articles that were loaded (same as Breaking News page)
                     const articles = newsInstance.allArticles || [];
@@ -1729,6 +1734,27 @@
                 }
             }
             
+            // Lazy load ticker when it enters viewport
+            lazyLoadTickerOnView() {
+                const section = document.querySelector('.breaking-news-section');
+                if (!section) return;
+                const observer = new IntersectionObserver((entries) => {
+                    entries.forEach(entry => {
+                        if (entry.isIntersecting) {
+                            this.initializeRealTimeTicker();
+                            observer.disconnect();
+                        }
+                    });
+                }, { threshold: 0.25 });
+                observer.observe(section);
+                // Also listen for CategoryNews load completion to populate without manual click
+                document.addEventListener('categoryNewsLoaded', (ev) => {
+                    if (ev?.detail?.category === 'latest') {
+                        this.loadBreakingNewsForTicker();
+                    }
+                });
+            }
+
             // Ticker Controls - Simple Pause/Play
             setupTickerControls() {
                 const pauseBtn = document.getElementById('pause-ticker');
