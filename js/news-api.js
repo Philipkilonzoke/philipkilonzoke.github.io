@@ -770,7 +770,7 @@ class NewsAPI {
             const items = xmlDoc.querySelectorAll('item');
             const articles = [];
             
-            for (let i = 0; i < Math.min(items.length, 20); i++) {
+            for (let i = 0; i < Math.min(items.length, 40); i++) {
                 const item = items[i];
                 const title = item.querySelector('title')?.textContent || '';
                 const description = item.querySelector('description')?.textContent || '';
@@ -801,7 +801,7 @@ class NewsAPI {
      */
     async fetchFromGNews(category, limit) {
         try {
-            let url = `https://gnews.io/api/v4/top-headlines?token=${this.apiKeys.gnews}&lang=en&max=${Math.min(limit, 10)}`;
+            let url = `https://gnews.io/api/v4/top-headlines?token=${this.apiKeys.gnews}&lang=en&max=${Math.min(limit, 20)}`;
             
             if (category === 'kenya') {
                 url += '&country=ke&q=(Kenya OR Nairobi OR Mombasa OR Kisumu OR "East Africa" OR "Kenyan government" OR "President Ruto")';
@@ -833,7 +833,7 @@ class NewsAPI {
      */
     async fetchFromNewsData(category, limit) {
         try {
-            let url = `https://newsdata.io/api/1/news?apikey=${this.apiKeys.newsdata}&language=en&size=${Math.min(limit, 50)}`;
+            let url = `https://newsdata.io/api/1/news?apikey=${this.apiKeys.newsdata}&language=en&size=${Math.min(limit, 100)}`;
             
             if (category === 'kenya') {
                 url += '&country=ke&q=Kenya OR Nairobi OR Mombasa OR Kisumu OR "East Africa"';
@@ -1635,6 +1635,78 @@ class NewsAPI {
                     publishedAt: new Date(Date.now() - 4 * 60 * 60 * 1000).toISOString(),
                     source: { name: "ESPN" },
                     category: "sports"
+                },
+                {
+                    title: "Champions League: Real Madrid vs Bayern Munich Quarter-Final",
+                    description: "Epic showdown between European giants ends in dramatic penalty shootout.",
+                    url: "https://www.uefa.com/uefachampionsleague",
+                    urlToImage: "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=400",
+                    publishedAt: new Date(Date.now() - 6 * 60 * 60 * 1000).toISOString(),
+                    source: { name: "UEFA" },
+                    category: "sports"
+                },
+                {
+                    title: "Formula 1: Red Bull Dominates Practice Sessions",
+                    description: "Max Verstappen sets fastest lap times ahead of qualifying.",
+                    url: "https://www.formula1.com",
+                    urlToImage: "https://images.unsplash.com/photo-1546519638-68e109498ffc?w=400",
+                    publishedAt: new Date(Date.now() - 8 * 60 * 60 * 1000).toISOString(),
+                    source: { name: "Formula 1" },
+                    category: "sports"
+                },
+                {
+                    title: "Tennis: Wimbledon Championships Announcement",
+                    description: "Tournament organizers reveal new innovations for 2024 season.",
+                    url: "https://www.wimbledon.com",
+                    urlToImage: "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=400",
+                    publishedAt: new Date(Date.now() - 10 * 60 * 60 * 1000).toISOString(),
+                    source: { name: "Wimbledon" },
+                    category: "sports"
+                },
+                {
+                    title: "Olympics 2024: Paris Preparations Complete",
+                    description: "Host city finalizes all venues and infrastructure for summer games.",
+                    url: "https://www.olympics.com/paris-2024",
+                    urlToImage: "https://images.unsplash.com/photo-1546519638-68e109498ffc?w=400",
+                    publishedAt: new Date(Date.now() - 12 * 60 * 60 * 1000).toISOString(),
+                    source: { name: "Olympics" },
+                    category: "sports"
+                },
+                {
+                    title: "Cricket: T20 World Cup Qualifiers Begin",
+                    description: "Teams compete for remaining spots in prestigious tournament.",
+                    url: "https://www.icc-cricket.com",
+                    urlToImage: "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=400",
+                    publishedAt: new Date(Date.now() - 14 * 60 * 60 * 1000).toISOString(),
+                    source: { name: "ICC Cricket" },
+                    category: "sports"
+                },
+                {
+                    title: "Golf: Masters Tournament Preview",
+                    description: "Top players prepare for prestigious Augusta National championship.",
+                    url: "https://www.masters.com",
+                    urlToImage: "https://images.unsplash.com/photo-1546519638-68e109498ffc?w=400",
+                    publishedAt: new Date(Date.now() - 16 * 60 * 60 * 1000).toISOString(),
+                    source: { name: "The Masters" },
+                    category: "sports"
+                },
+                {
+                    title: "Boxing: Heavyweight Championship Bout Announced",
+                    description: "Tyson Fury vs Anthony Joshua confirmed for summer showdown.",
+                    url: "https://www.boxingscene.com",
+                    urlToImage: "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=400",
+                    publishedAt: new Date(Date.now() - 18 * 60 * 60 * 1000).toISOString(),
+                    source: { name: "Boxing Scene" },
+                    category: "sports"
+                },
+                {
+                    title: "Rugby: Six Nations Championship Finale",
+                    description: "Ireland secures Grand Slam with victory over England.",
+                    url: "https://www.sixnationsrugby.com",
+                    urlToImage: "https://images.unsplash.com/photo-1546519638-68e109498ffc?w=400",
+                    publishedAt: new Date(Date.now() - 20 * 60 * 60 * 1000).toISOString(),
+                    source: { name: "Six Nations Rugby" },
+                    category: "sports"
                 }
             ],
             health: [
@@ -1654,6 +1726,78 @@ class NewsAPI {
                     urlToImage: "https://images.unsplash.com/photo-1559757175-0eb30cd8c063?w=400",
                     publishedAt: new Date(Date.now() - 5 * 60 * 60 * 1000).toISOString(),
                     source: { name: "World Health Organization" },
+                    category: "health"
+                },
+                {
+                    title: "New Alzheimer's Treatment Shows Promise",
+                    description: "Clinical trial results indicate significant improvement in cognitive function.",
+                    url: "https://www.alz.org",
+                    urlToImage: "https://images.unsplash.com/photo-1576091160399-112ba8d25d1f?w=400",
+                    publishedAt: new Date(Date.now() - 7 * 60 * 60 * 1000).toISOString(),
+                    source: { name: "Alzheimer's Association" },
+                    category: "health"
+                },
+                {
+                    title: "Mental Health Awareness Month Campaign",
+                    description: "Global initiative focuses on reducing stigma and improving access to care.",
+                    url: "https://www.nami.org",
+                    urlToImage: "https://images.unsplash.com/photo-1559757175-0eb30cd8c063?w=400",
+                    publishedAt: new Date(Date.now() - 9 * 60 * 60 * 1000).toISOString(),
+                    source: { name: "NAMI" },
+                    category: "health"
+                },
+                {
+                    title: "Vaccine Development for Emerging Diseases",
+                    description: "Scientists accelerate research on new vaccine technologies.",
+                    url: "https://www.cdc.gov",
+                    urlToImage: "https://images.unsplash.com/photo-1576091160399-112ba8d25d1f?w=400",
+                    publishedAt: new Date(Date.now() - 11 * 60 * 60 * 1000).toISOString(),
+                    source: { name: "CDC" },
+                    category: "health"
+                },
+                {
+                    title: "Telemedicine Revolution in Rural Healthcare",
+                    description: "Digital health platforms bridge gaps in underserved communities.",
+                    url: "https://www.healthline.com",
+                    urlToImage: "https://images.unsplash.com/photo-1559757175-0eb30cd8c063?w=400",
+                    publishedAt: new Date(Date.now() - 13 * 60 * 60 * 1000).toISOString(),
+                    source: { name: "Healthline" },
+                    category: "health"
+                },
+                {
+                    title: "Nutrition Guidelines Updated for 2024",
+                    description: "New dietary recommendations emphasize plant-based eating patterns.",
+                    url: "https://www.nutrition.gov",
+                    urlToImage: "https://images.unsplash.com/photo-1576091160399-112ba8d25d1f?w=400",
+                    publishedAt: new Date(Date.now() - 15 * 60 * 60 * 1000).toISOString(),
+                    source: { name: "Nutrition.gov" },
+                    category: "health"
+                },
+                {
+                    title: "Exercise Science Breakthrough Study",
+                    description: "Research reveals optimal workout timing for maximum benefits.",
+                    url: "https://www.acefitness.org",
+                    urlToImage: "https://images.unsplash.com/photo-1559757175-0eb30cd8c063?w=400",
+                    publishedAt: new Date(Date.now() - 17 * 60 * 60 * 1000).toISOString(),
+                    source: { name: "ACE Fitness" },
+                    category: "health"
+                },
+                {
+                    title: "Sleep Medicine Advances",
+                    description: "New treatments for sleep disorders show improved outcomes.",
+                    url: "https://www.sleepfoundation.org",
+                    urlToImage: "https://images.unsplash.com/photo-1576091160399-112ba8d25d1f?w=400",
+                    publishedAt: new Date(Date.now() - 19 * 60 * 60 * 1000).toISOString(),
+                    source: { name: "Sleep Foundation" },
+                    category: "health"
+                },
+                {
+                    title: "Pediatric Healthcare Innovation",
+                    description: "Child-friendly medical devices improve treatment compliance.",
+                    url: "https://www.aap.org",
+                    urlToImage: "https://images.unsplash.com/photo-1559757175-0eb30cd8c063?w=400",
+                    publishedAt: new Date(Date.now() - 21 * 60 * 60 * 1000).toISOString(),
+                    source: { name: "American Academy of Pediatrics" },
                     category: "health"
                 }
             ],
@@ -1695,6 +1839,78 @@ class NewsAPI {
                     publishedAt: new Date(Date.now() - 3 * 60 * 60 * 1000).toISOString(),
                     source: { name: "Wired" },
                     category: "technology"
+                },
+                {
+                    title: "5G Network Expansion Accelerates Globally",
+                    description: "Telecom companies deploy next-generation wireless infrastructure worldwide.",
+                    url: "https://www.verge.com",
+                    urlToImage: "https://images.unsplash.com/photo-1677442136019-21780ecad995?w=400",
+                    publishedAt: new Date(Date.now() - 4 * 60 * 60 * 1000).toISOString(),
+                    source: { name: "The Verge" },
+                    category: "technology"
+                },
+                {
+                    title: "Cybersecurity: New Threat Detection System",
+                    description: "AI-powered security platform prevents advanced cyber attacks in real-time.",
+                    url: "https://www.ars-technica.com",
+                    urlToImage: "https://images.unsplash.com/photo-1635070041078-e363dbe005cb?w=400",
+                    publishedAt: new Date(Date.now() - 5 * 60 * 60 * 1000).toISOString(),
+                    source: { name: "Ars Technica" },
+                    category: "technology"
+                },
+                {
+                    title: "Electric Vehicle Market Surge",
+                    description: "Major automakers announce ambitious EV production targets for 2024.",
+                    url: "https://www.electrek.co",
+                    urlToImage: "https://images.unsplash.com/photo-1677442136019-21780ecad995?w=400",
+                    publishedAt: new Date(Date.now() - 6 * 60 * 60 * 1000).toISOString(),
+                    source: { name: "Electrek" },
+                    category: "technology"
+                },
+                {
+                    title: "SpaceX Starship Mission Success",
+                    description: "Revolutionary spacecraft completes milestone test flight.",
+                    url: "https://www.space.com",
+                    urlToImage: "https://images.unsplash.com/photo-1635070041078-e363dbe005cb?w=400",
+                    publishedAt: new Date(Date.now() - 7 * 60 * 60 * 1000).toISOString(),
+                    source: { name: "Space.com" },
+                    category: "technology"
+                },
+                {
+                    title: "Blockchain Technology in Finance",
+                    description: "Central banks explore digital currency implementation strategies.",
+                    url: "https://www.coindesk.com",
+                    urlToImage: "https://images.unsplash.com/photo-1677442136019-21780ecad995?w=400",
+                    publishedAt: new Date(Date.now() - 8 * 60 * 60 * 1000).toISOString(),
+                    source: { name: "CoinDesk" },
+                    category: "technology"
+                },
+                {
+                    title: "Virtual Reality Gaming Revolution",
+                    description: "Next-generation VR headsets redefine immersive gaming experience.",
+                    url: "https://www.uploadvr.com",
+                    urlToImage: "https://images.unsplash.com/photo-1635070041078-e363dbe005cb?w=400",
+                    publishedAt: new Date(Date.now() - 9 * 60 * 60 * 1000).toISOString(),
+                    source: { name: "UploadVR" },
+                    category: "technology"
+                },
+                {
+                    title: "Cloud Computing Market Growth",
+                    description: "Enterprise adoption of cloud services reaches new heights.",
+                    url: "https://www.techrepublic.com",
+                    urlToImage: "https://images.unsplash.com/photo-1677442136019-21780ecad995?w=400",
+                    publishedAt: new Date(Date.now() - 10 * 60 * 60 * 1000).toISOString(),
+                    source: { name: "TechRepublic" },
+                    category: "technology"
+                },
+                {
+                    title: "Internet of Things Security Standards",
+                    description: "New protocols ensure secure connectivity for smart devices.",
+                    url: "https://www.iotworldtoday.com",
+                    urlToImage: "https://images.unsplash.com/photo-1635070041078-e363dbe005cb?w=400",
+                    publishedAt: new Date(Date.now() - 11 * 60 * 60 * 1000).toISOString(),
+                    source: { name: "IoT World Today" },
+                    category: "technology"
                 }
             ],
             entertainment: [
@@ -1714,6 +1930,78 @@ class NewsAPI {
                     urlToImage: "https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=400",
                     publishedAt: new Date(Date.now() - 4 * 60 * 60 * 1000).toISOString(),
                     source: { name: "Billboard" },
+                    category: "entertainment"
+                },
+                {
+                    title: "Netflix Announces Blockbuster Movie Lineup",
+                    description: "Streaming giant reveals ambitious slate of original films for 2024.",
+                    url: "https://www.hollywoodreporter.com",
+                    urlToImage: "https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=400",
+                    publishedAt: new Date(Date.now() - 6 * 60 * 60 * 1000).toISOString(),
+                    source: { name: "Hollywood Reporter" },
+                    category: "entertainment"
+                },
+                {
+                    title: "Taylor Swift World Tour Breaks Records",
+                    description: "Pop superstar's Eras Tour becomes highest-grossing concert series ever.",
+                    url: "https://www.billboard.com",
+                    urlToImage: "https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=400",
+                    publishedAt: new Date(Date.now() - 8 * 60 * 60 * 1000).toISOString(),
+                    source: { name: "Billboard" },
+                    category: "entertainment"
+                },
+                {
+                    title: "Marvel Studios Phase 5 Announcement",
+                    description: "Comic book giant reveals upcoming superhero film and TV series slate.",
+                    url: "https://www.deadline.com",
+                    urlToImage: "https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=400",
+                    publishedAt: new Date(Date.now() - 10 * 60 * 60 * 1000).toISOString(),
+                    source: { name: "Deadline" },
+                    category: "entertainment"
+                },
+                {
+                    title: "Video Game Industry Sales Surge",
+                    description: "Gaming market reaches new heights with record-breaking releases.",
+                    url: "https://www.gamespot.com",
+                    urlToImage: "https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=400",
+                    publishedAt: new Date(Date.now() - 12 * 60 * 60 * 1000).toISOString(),
+                    source: { name: "GameSpot" },
+                    category: "entertainment"
+                },
+                {
+                    title: "Broadway Shows Return to Full Capacity",
+                    description: "Theater district celebrates revival of live performances.",
+                    url: "https://www.playbill.com",
+                    urlToImage: "https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=400",
+                    publishedAt: new Date(Date.now() - 14 * 60 * 60 * 1000).toISOString(),
+                    source: { name: "Playbill" },
+                    category: "entertainment"
+                },
+                {
+                    title: "Podcast Industry Growth Continues",
+                    description: "Audio content creators see unprecedented audience engagement.",
+                    url: "https://www.podcastinsights.com",
+                    urlToImage: "https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=400",
+                    publishedAt: new Date(Date.now() - 16 * 60 * 60 * 1000).toISOString(),
+                    source: { name: "Podcast Insights" },
+                    category: "entertainment"
+                },
+                {
+                    title: "Social Media Influencer Economy",
+                    description: "Digital creators reshape traditional entertainment industry.",
+                    url: "https://www.tubefilter.com",
+                    urlToImage: "https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=400",
+                    publishedAt: new Date(Date.now() - 18 * 60 * 60 * 1000).toISOString(),
+                    source: { name: "Tubefilter" },
+                    category: "entertainment"
+                },
+                {
+                    title: "Animation Industry Innovation",
+                    description: "New technologies revolutionize animated content creation.",
+                    url: "https://www.animationmagazine.net",
+                    urlToImage: "https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=400",
+                    publishedAt: new Date(Date.now() - 20 * 60 * 60 * 1000).toISOString(),
+                    source: { name: "Animation Magazine" },
                     category: "entertainment"
                 }
             ],

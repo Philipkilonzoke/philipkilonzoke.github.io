@@ -200,13 +200,13 @@ class CategoryNews {
     async loadNewsInternal() {
         console.log(`Loading ${this.category} news...`);
         
-        const articles = await this.newsAPI.fetchNews(this.category, 100);
+        const articles = await this.newsAPI.fetchNews(this.category, 150);
         
         let supplementalArticles = [];
         if (window.MediastackSupplement) {
             try {
                 const mediastackSupplement = new window.MediastackSupplement();
-                supplementalArticles = await mediastackSupplement.getSupplementalArticles(this.category, 100);
+                supplementalArticles = await mediastackSupplement.getSupplementalArticles(this.category, 150);
                 console.log(`Mediastack supplement: Added ${supplementalArticles.length} additional ${this.category} articles`);
             } catch (error) {
                 console.warn('Mediastack supplement failed:', error);
