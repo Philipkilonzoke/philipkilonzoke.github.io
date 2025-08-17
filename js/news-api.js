@@ -930,10 +930,12 @@ class NewsAPI {
      */
     async fetchFromNationAfrica() {
         try {
-            // TODO: Implement actual RSS feed or API integration for Nation Africa
-            // For now, return empty array to ensure only real-time news is displayed
-            console.log('Nation Africa: Real-time news integration pending');
-            return [];
+            const rssUrl = 'https://www.nation.co.ke/rss';
+            const articles = await this.fetchRSSFeed(rssUrl, 'Nation Africa');
+            return articles.filter(article => 
+                article.title.toLowerCase().includes('kenya') ||
+                article.description.toLowerCase().includes('kenya')
+            );
         } catch (error) {
             console.error('Nation Africa fetch error:', error);
             return [];
@@ -945,10 +947,12 @@ class NewsAPI {
      */
     async fetchFromStandardMedia() {
         try {
-            // TODO: Implement actual RSS feed or API integration for The Standard
-            // For now, return empty array to ensure only real-time news is displayed
-            console.log('The Standard: Real-time news integration pending');
-            return [];
+            const rssUrl = 'https://www.standardmedia.co.ke/rss';
+            const articles = await this.fetchRSSFeed(rssUrl, 'The Standard');
+            return articles.filter(article => 
+                article.title.toLowerCase().includes('kenya') ||
+                article.description.toLowerCase().includes('kenya')
+            );
         } catch (error) {
             console.error('Standard Media fetch error:', error);
             return [];
@@ -960,10 +964,12 @@ class NewsAPI {
      */
     async fetchFromCapitalFM() {
         try {
-            // TODO: Implement actual RSS feed or API integration for Capital FM
-            // For now, return empty array to ensure only real-time news is displayed
-            console.log('Capital FM: Real-time news integration pending');
-            return [];
+            const rssUrl = 'https://www.capitalfm.co.ke/rss';
+            const articles = await this.fetchRSSFeed(rssUrl, 'Capital FM');
+            return articles.filter(article => 
+                article.title.toLowerCase().includes('kenya') ||
+                article.description.toLowerCase().includes('kenya')
+            );
         } catch (error) {
             console.error('Capital FM fetch error:', error);
             return [];

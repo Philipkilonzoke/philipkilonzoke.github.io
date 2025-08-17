@@ -188,6 +188,88 @@ async function loadKenyaNews() {
     }
 }
 
+async function loadKenyaSpecificNews() {
+    const articles = [];
+    
+    // Kenya-specific news sources
+    const kenyaSources = [
+        'https://www.nation.co.ke/rss',
+        'https://www.standardmedia.co.ke/rss',
+        'https://www.capitalfm.co.ke/rss',
+        'https://citizentv.co.ke/rss',
+        'https://www.tuko.co.ke/rss',
+        'https://www.the-star.co.ke/rss',
+        'https://www.kbc.co.ke/rss'
+    ];
+    
+    for (const source of kenyaSources) {
+        try {
+            const sourceArticles = await fetchRSSFeed(source);
+            articles.push(...sourceArticles.map(article => ({
+                ...article,
+                category: 'kenya'
+            })));
+        } catch (error) {
+            console.warn(`Failed to load Kenya news from ${source}:`, error);
+        }
+    }
+    
+    // Also fetch from news APIs with Kenya focus
+    try {
+        const apiArticles = await fetchKenyaNewsFromAPIs();
+        articles.push(...apiArticles);
+    } catch (error) {
+        console.warn('Failed to load Kenya news from APIs:', error);
+    }
+    
+    return articles;
+}
+
+async function fetchKenyaNewsFromAPIs() {
+    const articles = [];
+    
+    // Try multiple news APIs with Kenya focus
+    const apiEndpoints = [
+        {
+            url: 'https://gnews.io/api/v4/search?q=kenya&lang=en&country=ke&max=20&apikey=YOUR_GNEWS_API_KEY',
+            transform: (data) => data.articles.map(article => ({
+                title: article.title,
+                description: article.description,
+                url: article.url,
+                urlToImage: article.image,
+                publishedAt: article.publishedAt,
+                source: { name: article.source.name },
+                category: 'kenya'
+            }))
+        },
+        {
+            url: 'https://newsdata.io/api/1/news?apikey=YOUR_NEWSDATA_API_KEY&q=kenya&country=ke&language=en',
+            transform: (data) => data.results.map(article => ({
+                title: article.title,
+                description: article.description,
+                url: article.link,
+                urlToImage: article.image_url,
+                publishedAt: article.pubDate,
+                source: { name: article.source_id },
+                category: 'kenya'
+            }))
+        }
+    ];
+    
+    for (const endpoint of apiEndpoints) {
+        try {
+            const response = await fetch(endpoint.url);
+            const data = await response.json();
+            const transformedArticles = endpoint.transform(data);
+            articles.push(...transformedArticles);
+        } catch (error) {
+            console.warn(`Failed to fetch from ${endpoint.url}:`, error);
+        }
+    }
+    
+    return articles;
+}
+
 async function loadNewsFromSources() {
     const articles = [];
     
