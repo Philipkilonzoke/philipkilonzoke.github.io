@@ -372,7 +372,7 @@ const CORS_PROXIES = [
     'https://api.codetabs.com/v1/proxy?quest=', // expects encoded param
     'https://cors-anywhere.herokuapp.com/',     // expects raw URL appended
     'https://thingproxy.freeboard.io/fetch/',   // expects raw URL appended
-    'https://r.jina.ai/http://'                 // expects raw URL appended to hostless path
+    'https://r.jina.ai/'                 // expects raw URL appended to hostless path
 ];
 
 // Main function to load news from all sources
@@ -434,8 +434,17 @@ async function loadRSSSource(source, retryCount = 0) {
         // Try different CORS proxies
         const proxyBase = CORS_PROXIES[retryCount % CORS_PROXIES.length];
         const needsEncoding = proxyBase.includes('allorigins') || proxyBase.includes('codetabs');
-        const appendRaw = proxyBase.endsWith('/') && !needsEncoding;
-        const proxyUrl = needsEncoding ? `${proxyBase}${encodeURIComponent(source.rss)}` : `${proxyBase}${appendRaw ? '' : '/'}${source.rss}`;
+        const isJina = proxyBase.includes('r.jina.ai');
+        let proxyUrl;
+        if (needsEncoding) {
+            proxyUrl = `${proxyBase}${encodeURIComponent(source.rss)}`;
+        } else if (isJina) {
+            // r.jina.ai expects the full URL appended after the domain
+            proxyUrl = `${proxyBase}${source.rss}`;
+        } else {
+            const appendRaw = proxyBase.endsWith('/');
+            proxyUrl = `${proxyBase}${appendRaw ? '' : '/'}${source.rss}`;
+        }
         
         const response = await fetch(proxyUrl, {
             method: 'GET',
