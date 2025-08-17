@@ -251,7 +251,7 @@
             border-radius: var(--radius-lg);
             min-width: 350px;
             max-width: 350px;
-            height: 420px; /* Optimized height for smooth scrolling */
+            min-height: 420px; /* Allow full text; min height keeps layout stable */
             border: 1px solid var(--border-color);
             box-shadow: var(--shadow-sm);
             transition: all 0.3s ease;
@@ -304,10 +304,8 @@
             line-height: 1.4;
             margin-bottom: 0.75rem;
             color: var(--text-color);
-            display: -webkit-box;
-            -webkit-line-clamp: 2;
-            -webkit-box-orient: vertical;
-            overflow: hidden;
+            white-space: normal;
+            overflow-wrap: anywhere;
         }
         
         .ticker-description {
@@ -315,13 +313,11 @@
             font-size: 0.875rem;
             line-height: 1.5;
             margin-bottom: 1rem;
-            display: -webkit-box;
-            -webkit-line-clamp: 4;
-            -webkit-box-orient: vertical;
-            overflow: hidden;
-            opacity: 0.8;
+            white-space: normal;
+            overflow-wrap: anywhere;
+            opacity: 0.9;
             flex: 1;
-            min-height: 0; /* Allow flex shrinking */
+            min-height: unset;
         }
         
         .ticker-meta {
@@ -743,7 +739,8 @@
             .ticker-item {
                 min-width: 320px;
                 max-width: 320px;
-                height: 400px;
+                height: auto;
+                min-height: 420px;
             }
             
             .ticker-image,
@@ -757,11 +754,12 @@
             
             .ticker-title {
                 font-size: 1rem;
+                white-space: normal;
+                overflow-wrap: anywhere;
             }
             
             .ticker-description {
                 font-size: 0.8rem;
-                -webkit-line-clamp: 3;
             }
             
             .ticker-text {
@@ -814,7 +812,8 @@
             .ticker-item {
                 min-width: 300px;
                 max-width: 300px;
-                height: 380px;
+                height: auto;
+                min-height: 380px;
             }
             
             .ticker-image,
@@ -828,12 +827,12 @@
             
             .ticker-title {
                 font-size: 0.95rem;
-                -webkit-line-clamp: 2;
+                white-space: normal;
+                overflow-wrap: anywhere;
             }
             
             .ticker-description {
                 font-size: 0.75rem;
-                -webkit-line-clamp: 2;
             }
         }
     </style>
@@ -1602,21 +1601,12 @@
                                 !article.urlToImage.includes('placeholder');
                             
                             // Use the exact same description as Breaking News page
-                            const truncatedDescription = article.description.length > 120 
-                                ? article.description.substring(0, 120) + '...' 
-                                : article.description;
-                            
-                            // Use the exact same title truncation as Breaking News page
-                            const truncatedTitle = article.title.length > 60 
-                                ? article.title.substring(0, 60) + '...' 
-                                : article.title;
-                            
-                            // Use the exact same source name as Breaking News page
+                                            const fullTitle = article.title;
+                            const fullDescription = article.description;
                             const sourceName = article.source?.name || 'Brightlens News';
                             
                             return `
                                 <div class="ticker-item" onclick="window.open('${article.url}', '_blank')">
-                                    <!-- Image at top -->
                                     ${hasValidImage ? 
                                         `<img src="${article.urlToImage}" alt="${article.title}" class="ticker-image" loading="eager" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">` : ''
                                     }
@@ -1628,17 +1618,13 @@
                                             <i class="fas fa-newspaper"></i>
                                         </div>`
                                     }
-                                    
-                                    <!-- Content in middle -->
                                     <div class="ticker-text">
-                                        <h3 class="ticker-title">${truncatedTitle}</h3>
-                                        <p class="ticker-description">${truncatedDescription}</p>
+                                        <h3 class="ticker-title">${fullTitle}</h3>
+                                        <p class="ticker-description">${fullDescription}</p>
                                         <div class="ticker-meta">
                                             <span class="ticker-date">${formattedDate}</span>
                                         </div>
                                     </div>
-                                    
-                                    <!-- Share buttons at bottom -->
                                     <div class="ticker-share-buttons">
                                         <button class="ticker-share-btn" onclick="event.stopPropagation(); shareArticle('${encodeURIComponent(article.title)}', '${encodeURIComponent(article.url)}', 'facebook')" title="Share on Facebook">
                                             <i class="fab fa-facebook-f"></i>
