@@ -1732,6 +1732,8 @@ class WeatherDashboard {
                 this.shareWeather();
             });
         }
+        // Prepare share UI once
+        this.ensureShareUI();
     }
 
     /**
@@ -1743,26 +1745,110 @@ class WeatherDashboard {
             return;
         }
 
+        const { text, url, title } = this.getSharePayload();
+
+        // Use native share if available
+        if (navigator.share && typeof navigator.share === 'function') {
+            navigator.share({ title, text, url }).catch(() => {
+                // Fallback to custom share UI
+                this.openShareUI(text, url);
+            });
+            return;
+        }
+
+        // Custom share UI
+        this.openShareUI(text, url);
+    }
+
+    getSharePayload() {
         const current = this.weatherData.current;
         const temp = this.currentUnit === 'celsius' ? current.temperature_2m : this.celsiusToFahrenheit(current.temperature_2m);
         const unit = this.currentUnit === 'celsius' ? '°C' : '°F';
-        const weatherInfo = this.weatherCodes[current.weather_code];
-        
-        const shareText = `🌤️ Weather in ${this.currentLocation.city}, ${this.currentLocation.country}: ${temp}${unit}, ${weatherInfo.description}. Check it out on Brightlens News!`;
-        const shareUrl = window.location.href;
+        const weatherInfo = this.weatherCodes[current.weather_code] || { description: 'Weather update' };
+        const city = this.currentLocation.name || this.currentLocation.city || 'Current Location';
+        const country = this.currentLocation.country || '';
+        const title = `Weather in ${city}${country ? ', ' + country : ''}`;
+        const text = `Weather in ${city}${country ? ', ' + country : ''}: ${Math.round(temp)}${unit}, ${weatherInfo.description}. Powered by Brightlens News.`;
+        const url = window.location.href;
+        return { text, url, title };
+    }
 
-        if (navigator.share && navigator.canShare) {
-            navigator.share({
-                title: 'Current Weather',
-                text: shareText,
-                url: shareUrl
-            }).catch(error => {
-                console.log('Share failed:', error);
-                this.copyToClipboard(shareText, shareUrl);
+    ensureShareUI() {
+        if (document.getElementById('weather-share-overlay')) return;
+        const overlay = document.createElement('div');
+        overlay.id = 'weather-share-overlay';
+        overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.5);display:none;align-items:center;justify-content:center;z-index:10000;';
+        overlay.innerHTML = `
+            <div id="weather-share-modal" style="background:#fff;width:92%;max-width:420px;border-radius:12px;overflow:hidden;box-shadow:0 10px 30px rgba(0,0,0,0.2);">
+                <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 16px;border-bottom:1px solid #e5e7eb;">
+                    <strong><i class="fas fa-share-alt"></i> Share Weather</strong>
+                    <button id="weather-share-close" style="background:transparent;border:none;font-size:18px;cursor:pointer;">✕</button>
+                </div>
+                <div id="weather-share-body" style="padding:14px 16px;">
+                    <div id="weather-share-preview" style="font-size:14px;color:#374151;margin-bottom:12px;word-break:break-word;"></div>
+                    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;">
+                        <button class="weather-share-btn" data-platform="facebook" style="display:flex;align-items:center;justify-content:center;gap:8px;border:1px solid #e5e7eb;border-radius:8px;padding:10px;background:#fff;cursor:pointer;"><i class="fab fa-facebook-f" style="color:#1877f2;"></i>Facebook</button>
+                        <button class="weather-share-btn" data-platform="twitter" style="display:flex;align-items:center;justify-content:center;gap:8px;border:1px solid #e5e7eb;border-radius:8px;padding:10px;background:#fff;cursor:pointer;"><i class="fab fa-twitter" style="color:#1da1f2;"></i>Twitter</button>
+                        <button class="weather-share-btn" data-platform="whatsapp" style="display:flex;align-items:center;justify-content:center;gap:8px;border:1px solid #e5e7eb;border-radius:8px;padding:10px;background:#fff;cursor:pointer;"><i class="fab fa-whatsapp" style="color:#25d366;"></i>WhatsApp</button>
+                        <button class="weather-share-btn" data-platform="telegram" style="display:flex;align-items:center;justify-content:center;gap:8px;border:1px solid #e5e7eb;border-radius:8px;padding:10px;background:#fff;cursor:pointer;"><i class="fab fa-telegram" style="color:#2aabee;"></i>Telegram</button>
+                        <button class="weather-share-btn" data-platform="email" style="display:flex;align-items:center;justify-content:center;gap:8px;border:1px solid #e5e7eb;border-radius:8px;padding:10px;background:#fff;cursor:pointer;"><i class="fas fa-envelope" style="color:#ef4444;"></i>Email</button>
+                        <button class="weather-share-btn" data-platform="copy" style="display:flex;align-items:center;justify-content:center;gap:8px;border:1px solid #e5e7eb;border-radius:8px;padding:10px;background:#fff;cursor:pointer;"><i class="fas fa-link" style="color:#111827;"></i>Copy</button>
+                    </div>
+                </div>
+            </div>`;
+        document.body.appendChild(overlay);
+        overlay.addEventListener('click', (e) => { if (e.target === overlay) overlay.style.display = 'none'; });
+        overlay.querySelector('#weather-share-close')?.addEventListener('click', () => overlay.style.display = 'none');
+        overlay.querySelectorAll('.weather-share-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const platform = btn.getAttribute('data-platform');
+                const preview = overlay.getAttribute('data-share-text') || '';
+                const link = overlay.getAttribute('data-share-url') || window.location.href;
+                this.openPlatformShare(platform, preview, link);
+                overlay.style.display = 'none';
             });
-        } else {
-            // Fallback: copy to clipboard
-            this.copyToClipboard(shareText, shareUrl);
+        });
+    }
+
+    openShareUI(text, url) {
+        const overlay = document.getElementById('weather-share-overlay');
+        if (!overlay) return;
+        const preview = document.getElementById('weather-share-preview');
+        if (preview) preview.textContent = text;
+        overlay.setAttribute('data-share-text', text);
+        overlay.setAttribute('data-share-url', url);
+        overlay.style.display = 'flex';
+    }
+
+    openPlatformShare(platform, text, url) {
+        try {
+            let shareUrl = '';
+            switch ((platform || '').toLowerCase()) {
+                case 'facebook':
+                    shareUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`;
+                    break;
+                case 'twitter':
+                    shareUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}`;
+                    break;
+                case 'whatsapp':
+                    shareUrl = `https://wa.me/?text=${encodeURIComponent(text + ' ' + url)}`;
+                    break;
+                case 'telegram':
+                    shareUrl = `https://t.me/share/url?url=${encodeURIComponent(url)}&text=${encodeURIComponent(text)}`;
+                    break;
+                case 'email':
+                    shareUrl = `mailto:?subject=${encodeURIComponent('Weather Update')}&body=${encodeURIComponent(text + '\n' + url)}`;
+                    break;
+                case 'copy':
+                    this.copyToClipboard(text, url);
+                    return;
+                default:
+                    this.copyToClipboard(text, url);
+                    return;
+            }
+            window.open(shareUrl, '_blank', 'width=600,height=500');
+        } catch (e) {
+            this.copyToClipboard(text, url);
         }
     }
     
