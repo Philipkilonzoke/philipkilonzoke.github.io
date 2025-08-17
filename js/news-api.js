@@ -114,8 +114,9 @@ class NewsAPI {
                 this.fetchFromCurrentsAPI(category, limit)
             ];
 
-            // Add REAL RSS feeds for breaking news (latest) - ACTUAL REAL-TIME CONTENT
-            if (category === 'latest') {
+            // Add REAL RSS feeds for ALL categories - ACTUAL REAL-TIME CONTENT
+            if (category === 'latest' || category === 'breaking') {
+                // Breaking news RSS feeds
                 promises.push(
                     this.fetchRSSFeed('https://feeds.bbci.co.uk/news/rss.xml', 'BBC News'),
                     this.fetchRSSFeed('https://rss.cnn.com/rss/edition.rss', 'CNN'),
@@ -131,6 +132,142 @@ class NewsAPI {
                     this.fetchRSSFeed('https://www.aljazeera.com/xml/rss/all.xml', 'Al Jazeera'),
                     this.fetchRSSFeed('https://www.france24.com/en/rss', 'France 24'),
                     this.fetchRSSFeed('https://rss.dw.com/xml/rss-en-all', 'Deutsche Welle')
+                );
+            } else if (category === 'health') {
+                // Health news RSS feeds
+                promises.push(
+                    this.fetchRSSFeed('https://www.medicalnewstoday.com/rss.xml', 'Medical News Today'),
+                    this.fetchRSSFeed('https://www.healthline.com/rss/all', 'Healthline'),
+                    this.fetchRSSFeed('https://www.webmd.com/news/rss/default.xml', 'WebMD'),
+                    this.fetchRSSFeed('https://www.sciencedaily.com/rss/health_medicine.xml', 'Science Daily Health'),
+                    this.fetchRSSFeed('https://www.who.int/rss-feeds/news-english.xml', 'WHO News'),
+                    this.fetchRSSFeed('https://www.cdc.gov/rss/news.xml', 'CDC Newsroom'),
+                    this.fetchRSSFeed('https://www.nature.com/subjects/health-sciences.rss', 'Nature Health'),
+                    this.fetchRSSFeed('https://www.mayoclinic.org/rss/news.xml', 'Mayo Clinic News'),
+                    this.fetchRSSFeed('https://www.hopkinsmedicine.org/news/rss.xml', 'Johns Hopkins Health'),
+                    this.fetchRSSFeed('https://www.nih.gov/news-events/rss-feeds', 'NIH News'),
+                    this.fetchRSSFeed('https://www.reuters.com/health/rss', 'Reuters Health'),
+                    this.fetchRSSFeed('https://www.bbc.com/news/health/rss.xml', 'BBC Health'),
+                    this.fetchRSSFeed('https://www.harvardhealthblog.org/feed/', 'Harvard Health Blog'),
+                    this.fetchRSSFeed('https://www.thelancet.com/rssfeed/lancet_current.xml', 'The Lancet'),
+                    this.fetchRSSFeed('https://www.medscape.com/rss/public/0_public.xml', 'Medscape'),
+                    this.fetchRSSFeed('https://www.pubmed.gov/rss/news.xml', 'PubMed News')
+                );
+            } else if (category === 'lifestyle') {
+                // Lifestyle news RSS feeds
+                promises.push(
+                    this.fetchRSSFeed('https://www.vogue.com/feed', 'Vogue'),
+                    this.fetchRSSFeed('https://www.elle.com/rss/all.xml', 'Elle'),
+                    this.fetchRSSFeed('https://www.buzzfeed.com/lifestyle.xml', 'BuzzFeed Lifestyle'),
+                    this.fetchRSSFeed('https://www.refinery29.com/rss.xml', 'Refinery29'),
+                    this.fetchRSSFeed('https://www.wellandgood.com/feed/', 'Well+Good'),
+                    this.fetchRSSFeed('https://www.travelandleisure.com/rss', 'Travel + Leisure'),
+                    this.fetchRSSFeed('https://www.foodnetwork.com/rss.xml', 'Food Network'),
+                    this.fetchRSSFeed('https://www.architecturaldigest.com/rss', 'Architectural Digest'),
+                    this.fetchRSSFeed('https://www.mindbodygreen.com/rss.xml', 'MindBodyGreen'),
+                    this.fetchRSSFeed('https://www.self.com/rss.xml', 'SELF'),
+                    this.fetchRSSFeed('https://www.cosmopolitan.com/rss/', 'Cosmopolitan'),
+                    this.fetchRSSFeed('https://www.glamour.com/rss', 'Glamour'),
+                    this.fetchRSSFeed('https://www.health.com/rss/all.xml', 'Health.com'),
+                    this.fetchRSSFeed('https://www.shape.com/rss.xml', 'Shape'),
+                    this.fetchRSSFeed('https://www.fitness.com/rss', 'Fitness'),
+                    this.fetchRSSFeed('https://www.marthastewart.com/rss', 'Martha Stewart'),
+                    this.fetchRSSFeed('https://www.realsimple.com/rss', 'Real Simple'),
+                    this.fetchRSSFeed('https://www.bhg.com/rss', 'Better Homes & Gardens'),
+                    this.fetchRSSFeed('https://www.southernliving.com/rss', 'Southern Living'),
+                    this.fetchRSSFeed('https://www.countryliving.com/rss', 'Country Living'),
+                    this.fetchRSSFeed('https://www.goodhousekeeping.com/rss', 'Good Housekeeping')
+                );
+            } else if (category === 'technology') {
+                // Technology news RSS feeds
+                promises.push(
+                    this.fetchRSSFeed('https://techcrunch.com/feed/', 'TechCrunch'),
+                    this.fetchRSSFeed('https://www.theverge.com/rss/index.xml', 'The Verge'),
+                    this.fetchRSSFeed('https://www.wired.com/feed/rss', 'Wired'),
+                    this.fetchRSSFeed('https://feeds.arstechnica.com/arstechnica/index', 'Ars Technica'),
+                    this.fetchRSSFeed('https://www.cnet.com/rss/all/', 'CNET'),
+                    this.fetchRSSFeed('https://gadgets360.com/rss.xml', 'Gadgets 360'),
+                    this.fetchRSSFeed('https://mashable.com/feed.xml', 'Mashable'),
+                    this.fetchRSSFeed('https://www.engadget.com/rss.xml', 'Engadget'),
+                    this.fetchRSSFeed('https://www.zdnet.com/news/rss.xml', 'ZDNet'),
+                    this.fetchRSSFeed('https://feeds.bbci.co.uk/news/technology/rss.xml', 'BBC Technology'),
+                    this.fetchRSSFeed('https://www.ign.com/feed.xml', 'IGN'),
+                    this.fetchRSSFeed('https://www.gamespot.com/feeds/game-news/', 'GameSpot'),
+                    this.fetchRSSFeed('https://www.polygon.com/rss/index.xml', 'Polygon'),
+                    this.fetchRSSFeed('https://www.theverge.com/rss/entertainment/index.xml', 'The Verge Entertainment'),
+                    this.fetchRSSFeed('https://www.techcrunch.com/feed/', 'TechCrunch Entertainment'),
+                    this.fetchRSSFeed('https://www.wired.com/feed/entertainment/rss', 'Wired Entertainment')
+                );
+            } else if (category === 'entertainment') {
+                // Entertainment news RSS feeds
+                promises.push(
+                    this.fetchRSSFeed('https://variety.com/feed', 'Variety'),
+                    this.fetchRSSFeed('https://www.hollywoodreporter.com/feed', 'Hollywood Reporter'),
+                    this.fetchRSSFeed('https://deadline.com/feed', 'Deadline'),
+                    this.fetchRSSFeed('https://ew.com/feed', 'Entertainment Weekly'),
+                    this.fetchRSSFeed('https://www.rollingstone.com/feed', 'Rolling Stone'),
+                    this.fetchRSSFeed('https://www.billboard.com/feed', 'Billboard'),
+                    this.fetchRSSFeed('https://pitchfork.com/feed', 'Pitchfork'),
+                    this.fetchRSSFeed('https://www.nme.com/feed', 'NME'),
+                    this.fetchRSSFeed('https://www.mtv.com/rss.xml', 'MTV'),
+                    this.fetchRSSFeed('https://www.eonline.com/rss.xml', 'E! Online'),
+                    this.fetchRSSFeed('https://www.usmagazine.com/rss.xml', 'US Weekly'),
+                    this.fetchRSSFeed('https://www.people.com/rss.xml', 'People'),
+                    this.fetchRSSFeed('https://www.tmz.com/rss.xml', 'TMZ'),
+                    this.fetchRSSFeed('https://www.etonline.com/rss.xml', 'Entertainment Tonight'),
+                    this.fetchRSSFeed('https://www.accesshollywood.com/rss.xml', 'Access Hollywood'),
+                    this.fetchRSSFeed('https://www.ign.com/feed.xml', 'IGN'),
+                    this.fetchRSSFeed('https://www.gamespot.com/feeds/game-news/', 'GameSpot'),
+                    this.fetchRSSFeed('https://www.polygon.com/rss/index.xml', 'Polygon'),
+                    this.fetchRSSFeed('https://www.theverge.com/rss/entertainment/index.xml', 'The Verge Entertainment'),
+                    this.fetchRSSFeed('https://www.techcrunch.com/feed/', 'TechCrunch Entertainment'),
+                    this.fetchRSSFeed('https://www.wired.com/feed/entertainment/rss', 'Wired Entertainment')
+                );
+            } else if (category === 'world') {
+                // World news RSS feeds
+                promises.push(
+                    this.fetchRSSFeed('https://feeds.bbci.co.uk/news/world/rss.xml', 'BBC World'),
+                    this.fetchRSSFeed('https://feeds.reuters.com/reuters/worldNews', 'Reuters World'),
+                    this.fetchRSSFeed('https://feeds.apnews.com/rss/apf-worldnews', 'Associated Press World'),
+                    this.fetchRSSFeed('https://www.aljazeera.com/xml/rss/all.xml', 'Al Jazeera'),
+                    this.fetchRSSFeed('https://www.france24.com/en/rss', 'France 24'),
+                    this.fetchRSSFeed('https://rss.dw.com/xml/rss-en-all', 'Deutsche Welle'),
+                    this.fetchRSSFeed('https://www.euronews.com/rss', 'Euronews'),
+                    this.fetchRSSFeed('https://rss.cnn.com/rss/edition_world.rss', 'CNN World'),
+                    this.fetchRSSFeed('https://feeds.npr.org/1004/rss.xml', 'NPR World'),
+                    this.fetchRSSFeed('https://www.theguardian.com/world/rss', 'Guardian World'),
+                    this.fetchRSSFeed('https://www.nytimes.com/svc/collections/v1/publish/https://www.nytimes.com/section/world/rss.xml', 'New York Times World'),
+                    this.fetchRSSFeed('https://www.washingtonpost.com/world/?outputType=rss', 'Washington Post World'),
+                    this.fetchRSSFeed('https://www.latimes.com/world/rss2.0.xml', 'Los Angeles Times World'),
+                    this.fetchRSSFeed('https://www.abc.net.au/news/world/rss.xml', 'ABC World'),
+                    this.fetchRSSFeed('https://www.cbc.ca/cmlink/rss-world', 'CBC World'),
+                    this.fetchRSSFeed('https://www.lemonde.fr/rss/en_continu.xml', 'Le Monde'),
+                    this.fetchRSSFeed('https://www.elpais.com/rss/internacional.xml', 'El País'),
+                    this.fetchRSSFeed('https://www.corriere.it/rss/esteri.xml', 'Corriere della Sera'),
+                    this.fetchRSSFeed('https://www.spiegel.de/international/index.rss', 'Der Spiegel'),
+                    this.fetchRSSFeed('https://www.lefigaro.fr/rss/figaro_international.xml', 'Le Figaro'),
+                    this.fetchRSSFeed('https://www.elmundo.es/rss/internacional.xml', 'El Mundo')
+                );
+            } else if (category === 'kenya') {
+                // Kenya news RSS feeds
+                promises.push(
+                    this.fetchRSSFeed('https://www.nation.co.ke/rss', 'Nation Africa'),
+                    this.fetchRSSFeed('https://www.standardmedia.co.ke/rss', 'The Standard'),
+                    this.fetchRSSFeed('https://www.capitalfm.co.ke/rss', 'Capital FM'),
+                    this.fetchRSSFeed('https://citizentv.co.ke/rss', 'Citizen TV'),
+                    this.fetchRSSFeed('https://www.tuko.co.ke/rss', 'Tuko News'),
+                    this.fetchRSSFeed('https://www.the-star.co.ke/rss', 'The Star Kenya'),
+                    this.fetchRSSFeed('https://www.kbc.co.ke/rss', 'KBC News'),
+                    this.fetchRSSFeed('https://www.people.co.ke/rss', 'People Daily'),
+                    this.fetchRSSFeed('https://allafrica.com/kenya/rss.xml', 'AllAfrica Kenya'),
+                    this.fetchRSSFeed('https://www.bbc.com/news/world/africa/rss.xml', 'BBC Africa'),
+                    this.fetchRSSFeed('https://www.businessdailyafrica.com/rss', 'Business Daily'),
+                    this.fetchRSSFeed('https://www.ntv.co.ke/rss', 'NTV Kenya'),
+                    this.fetchRSSFeed('https://www.ktnnews.co.ke/rss', 'KTN News'),
+                    this.fetchRSSFeed('https://www.kenyans.co.ke/rss', 'Kenyans.co.ke'),
+                    this.fetchRSSFeed('https://www.nairobinews.co.ke/rss', 'Nairobi News'),
+                    this.fetchRSSFeed('https://www.taifa.co.ke/rss', 'Taifa Leo'),
+                    this.fetchRSSFeed('https://www.kahawa.co.ke/rss', 'Kahawa Tungu')
                 );
             }
 
