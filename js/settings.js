@@ -97,6 +97,32 @@
           </div>
         </section>
 
+        <section class="settings-section" id="settings-ai-enhancement">
+          <h4><i class="fas fa-magic"></i> AI Image Enhancement</h4>
+          <div class="setting-item">
+            <label class="setting-label">
+              <span>Enable AI Image Enhancement</span>
+              <span class="setting-description">Automatically enhance images for better quality</span>
+            </label>
+            <div class="setting-control">
+              <label class="toggle-switch">
+                <input type="checkbox" id="ai-enhancement-toggle" checked>
+                <span class="toggle-slider"></span>
+              </label>
+            </div>
+          </div>
+          <div class="ai-enhancement-stats" id="ai-enhancement-stats" style="display: none;">
+            <div class="stat-item">
+              <span class="stat-label">Enhanced Images:</span>
+              <span class="stat-value" id="enhanced-count">0</span>
+            </div>
+            <div class="stat-item">
+              <span class="stat-label">Status:</span>
+              <span class="stat-value" id="enhancement-status">Idle</span>
+            </div>
+          </div>
+        </section>
+
         <section class="settings-section" id="settings-notifications">
           <h4>Notifications</h4>
           <label class="toggle"><input type="checkbox" id="notifications-toggle" /> Enable push notifications</label>
@@ -437,6 +463,66 @@
     select.addEventListener('change', () => applyLanguage(select.value));
   }
 
+  // === AI Image Enhancement ===
+  function initAIEnhancement() {
+    const aiToggle = document.getElementById('ai-enhancement-toggle');
+    const statsContainer = document.getElementById('ai-enhancement-stats');
+    
+    if (aiToggle) {
+      // Load saved preference
+      const saved = localStorage.getItem('ai_image_enhancement');
+      const isEnabled = saved === null ? true : JSON.parse(saved);
+      aiToggle.checked = isEnabled;
+      
+      // Update global AI enhancement instance
+      if (window.aiImageEnhancement) {
+        window.aiImageEnhancement.toggle(isEnabled);
+      }
+      
+      // Show/hide stats based on enabled state
+      if (statsContainer) {
+        statsContainer.style.display = isEnabled ? 'block' : 'none';
+        if (isEnabled) {
+          updateAIEnhancementStats();
+        }
+      }
+      
+      // Handle toggle changes
+      aiToggle.addEventListener('change', () => {
+        const enabled = aiToggle.checked;
+        
+        // Update global instance
+        if (window.aiImageEnhancement) {
+          window.aiImageEnhancement.toggle(enabled);
+        }
+        
+        // Update stats visibility
+        if (statsContainer) {
+          statsContainer.style.display = enabled ? 'block' : 'none';
+          if (enabled) {
+            updateAIEnhancementStats();
+          }
+        }
+      });
+    }
+  }
+  
+  function updateAIEnhancementStats() {
+    if (!window.aiImageEnhancement) return;
+    
+    const stats = window.aiImageEnhancement.getStats();
+    const enhancedCount = document.getElementById('enhanced-count');
+    const enhancementStatus = document.getElementById('enhancement-status');
+    
+    if (enhancedCount) {
+      enhancedCount.textContent = stats.enhancedCount;
+    }
+    
+    if (enhancementStatus) {
+      enhancementStatus.textContent = stats.isProcessing ? 'Processing...' : 'Idle';
+    }
+  }
+
   // === Privacy (cookies toggle only) ===
   function initPrivacy() {
     const cookiesToggle = document.getElementById('cookies-toggle');
@@ -456,9 +542,17 @@
     if (document.readyState === 'loading') {
       document.addEventListener('DOMContentLoaded', () => {
         createToggleButton();
+        // Initialize AI enhancement after DOM is ready
+        setTimeout(() => {
+          initAIEnhancement();
+        }, 1000); // Wait for AI enhancement script to load
       });
     } else {
       createToggleButton();
+      // Initialize AI enhancement after DOM is ready
+      setTimeout(() => {
+        initAIEnhancement();
+      }, 1000); // Wait for AI enhancement script to load
     }
   }
 
