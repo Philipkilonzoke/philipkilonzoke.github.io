@@ -366,11 +366,13 @@ const API_SOURCES = {
     }
 };
 
-// CORS proxy services for RSS feeds
+// CORS proxy services for RSS feeds (mixed styles)
 const CORS_PROXIES = [
-    'https://api.allorigins.win/get?url=',
-    'https://api.codetabs.com/v1/proxy?quest=',
-    'https://cors-anywhere.herokuapp.com/'
+    'https://api.allorigins.win/get?url=',      // expects encoded param
+    'https://api.codetabs.com/v1/proxy?quest=', // expects encoded param
+    'https://cors-anywhere.herokuapp.com/',     // expects raw URL appended
+    'https://thingproxy.freeboard.io/fetch/',   // expects raw URL appended
+    'https://r.jina.ai/http://'                 // expects raw URL appended to hostless path
 ];
 
 // Main function to load news from all sources
@@ -435,7 +437,10 @@ async function loadRSSSource(source, retryCount = 0) {
         });
         
         // Try different CORS proxies
-        const proxyUrl = `${CORS_PROXIES[retryCount % CORS_PROXIES.length]}${encodeURIComponent(source.rss)}`;
+        const proxyBase = CORS_PROXIES[retryCount % CORS_PROXIES.length];
+        const needsEncoding = proxyBase.includes('allorigins') || proxyBase.includes('codetabs');
+        const appendRaw = proxyBase.endsWith('/') && !needsEncoding;
+        const proxyUrl = needsEncoding ? `${proxyBase}${encodeURIComponent(source.rss)}` : `${proxyBase}${appendRaw ? '' : '/'}${source.rss}`;
         
         const response = await fetch(proxyUrl, {
             method: 'GET',
@@ -460,7 +465,21 @@ async function loadRSSSource(source, retryCount = 0) {
         if (!rssText) {
             throw new Error('Empty RSS payload from proxy');
         }
-        const feed = await parser.parseString(rssText);
+        let feed;
+        try {
+            feed = await parser.parseString(rssText);
+        } catch (parseErr) {
+            // Fallback parse using DOMParser
+            const xmlDoc = new DOMParser().parseFromString(rssText, 'text/xml');
+            const items = Array.from(xmlDoc.querySelectorAll('item'));
+            feed = { items: items.map(it => ({
+                title: it.querySelector('title')?.textContent || '',
+                contentSnippet: it.querySelector('description')?.textContent || '',
+                description: it.querySelector('description')?.textContent || '',
+                link: it.querySelector('link')?.textContent || '',
+                content: it.querySelector('content\:encoded')?.textContent || ''
+            })) };
+        }
         
         return feed.items.map(item => ({
             title: sanitizeText(item.title),

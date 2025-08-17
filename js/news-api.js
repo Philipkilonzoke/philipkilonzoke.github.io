@@ -984,9 +984,10 @@ class NewsAPI {
             // Try multiple CORS proxies as fallbacks
             const proxies = [
                 `https://api.allorigins.win/get?url=${encodeURIComponent(rssUrl)}`,
+                `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(rssUrl)}`,
                 `https://cors-anywhere.herokuapp.com/${rssUrl}`,
                 `https://thingproxy.freeboard.io/fetch/${rssUrl}`,
-                `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(rssUrl)}`
+                `https://r.jina.ai/http://${rssUrl.replace(/^https?:\/\//, '')}`
             ];
             
             let response = null;
@@ -1026,8 +1027,19 @@ class NewsAPI {
                 throw new Error('All proxies failed');
             }
             
-            const parser = new DOMParser();
-            const xmlDoc = parser.parseFromString(data, 'text/xml');
+            let xmlDoc;
+            try {
+                xmlDoc = new DOMParser().parseFromString(data, 'text/xml');
+            } catch (_) {
+                // Fallback: try to coerce JSON.contents style
+                try {
+                    const json = JSON.parse(data);
+                    xmlDoc = new DOMParser().parseFromString(json.contents || '', 'text/xml');
+                } catch (_) {
+                    xmlDoc = null;
+                }
+            }
+            if (!xmlDoc) return [];
             
             const items = xmlDoc.querySelectorAll('item');
             const articles = [];
