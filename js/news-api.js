@@ -982,8 +982,9 @@ class NewsAPI {
     async fetchRSSFeed(rssUrl, sourceName) {
         try {
             // Try multiple CORS proxies as fallbacks
+            const apiBase = (window.NEWS_CONFIG && window.NEWS_CONFIG.apiBase) || '';
             const proxies = [
-                `/api/rss?url=${encodeURIComponent(rssUrl)}`,
+                apiBase ? `${apiBase}/api/rss?url=${encodeURIComponent(rssUrl)}` : `/api/rss?url=${encodeURIComponent(rssUrl)}`,
                 `https://api.allorigins.win/get?url=${encodeURIComponent(rssUrl)}`,
                 `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(rssUrl)}`,
                 `https://cors-anywhere.herokuapp.com/${rssUrl}`,
