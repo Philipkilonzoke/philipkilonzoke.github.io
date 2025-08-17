@@ -160,15 +160,10 @@ class NewsAPI {
                 new Date(b.publishedAt) - new Date(a.publishedAt)
             );
 
-            // Ensure we always have content - if no articles found, use fallback
+            // Only return articles if we have real content
             if (sortedArticles.length === 0) {
-                console.warn(`No articles found for ${category}, using fallback`);
-                const fallbackArticles = this.getSampleArticles(category, 'Fallback Source');
-                this.cache.set(cacheKey, {
-                    data: fallbackArticles,
-                    timestamp: Date.now()
-                });
-                return fallbackArticles;
+                console.warn(`No real articles found for ${category}`);
+                return [];
             }
 
             // Cache the results
@@ -180,9 +175,7 @@ class NewsAPI {
             return sortedArticles;
         } catch (error) {
             console.error('Error fetching news:', error);
-            // Return fallback articles instead of throwing error
-            console.warn('Using fallback articles due to error');
-            return this.getSampleArticles(category, 'Error Fallback');
+            return [];
         }
     }
 
@@ -201,7 +194,7 @@ class NewsAPI {
         }
 
         try {
-            // Fetch from multiple sources including ESPN API and sports-specific endpoints
+            // Fetch from multiple sources including working APIs and RSS feeds
             const promises = [
                 // Regular news APIs with sports category - INCREASED LIMITS
                 this.fetchFromGNews('sports', Math.floor(limit * 0.3)),
@@ -222,20 +215,8 @@ class NewsAPI {
                 this.fetchRSSFeed('https://www.cbssports.com/rss', 'CBS Sports'),
                 this.fetchRSSFeed('https://sports.yahoo.com/rss', 'Yahoo Sports'),
                 
-                // Additional real sports sources
-                this.fetchFromESPN(),
-                this.fetchFromSportsAPIs(),
-                this.fetchFromSportsNewsAPI(),
-                this.fetchFromRapidSports(),
-                this.fetchFromSkySports(),
-                this.fetchFromBBCSport(),
-                this.fetchFromCBSSports(),
-                this.fetchFromYahooSports(),
-                this.fetchFromGoalDotCom(),
-                this.fetchFromBleacherReport(),
-                this.fetchFromSportingNews(),
-                this.fetchFromGuardianSport(),
-                this.fetchFromFoxSports()
+                // Working ESPN API function
+                this.fetchFromESPN()
             ];
 
             // Add timeout to prevent long loading times
@@ -258,15 +239,10 @@ class NewsAPI {
                 }
             });
 
-            // Ensure we always have content - if no articles found, use fallback
+            // Only return articles if we have real content
             if (allArticles.length === 0) {
-                console.warn('No sports articles found, using fallback');
-                const fallbackArticles = this.getSampleArticles('sports', 'Sports Fallback');
-                this.cache.set(cacheKey, {
-                    data: fallbackArticles,
-                    timestamp: Date.now()
-                });
-                return fallbackArticles;
+                console.warn('No real sports articles found');
+                return [];
             }
 
             // Remove duplicates and sort by date
@@ -284,9 +260,7 @@ class NewsAPI {
             return sortedArticles;
         } catch (error) {
             console.error('Error fetching sports news:', error);
-            // Return fallback articles instead of throwing error
-            console.warn('Using sports fallback articles due to error');
-            return this.getSampleArticles('sports', 'Sports Error Fallback');
+            return [];
         }
     }
 
@@ -393,8 +367,7 @@ class NewsAPI {
                 return await this.fetchOriginalKenyaNews(limit);
             } catch (fallbackError) {
                 console.error('Fallback also failed:', fallbackError);
-                // Final fallback to sample articles
-                return this.getSampleArticles('kenya', 'Kenya News Fallback');
+                return [];
             }
         }
     }
@@ -414,7 +387,7 @@ class NewsAPI {
         }
 
         try {
-            // Fetch from multiple sources including major tech news outlets
+            // Fetch from multiple sources including working APIs and RSS feeds
             const promises = [
                 // Original API sources with technology focus
                 this.fetchFromGNews('technology', Math.floor(limit * 0.2)),
@@ -423,24 +396,17 @@ class NewsAPI {
                 this.fetchFromMediastack('technology', Math.floor(limit * 0.2)),
                 this.fetchFromCurrentsAPI('technology', Math.floor(limit * 0.2)),
                 
-                // Major technology news sources
-                this.fetchFromTechCrunch(),
-                this.fetchFromTheVerge(),
-                this.fetchFromWired(),
-                this.fetchFromArsTechnica(),
-                this.fetchFromCNETTech(),
-                this.fetchFromGadgets360(),
-                this.fetchFromMashableTech(),
-                this.fetchFromEngadget(),
-                this.fetchFromZDNet(),
-                this.fetchFromBBCTech(),
-                
-                // Additional tech sources for comprehensive coverage
-                this.fetchFromTechRadar(),
-                this.fetchFromAnandTech(),
-                this.fetchFromGizmodo(),
-                this.fetchFromDigitalTrends(),
-                this.fetchFromVentureBeat()
+                // REAL RSS feeds for technology - ACTUAL REAL-TIME CONTENT
+                this.fetchRSSFeed('https://techcrunch.com/feed/', 'TechCrunch'),
+                this.fetchRSSFeed('https://www.theverge.com/rss/index.xml', 'The Verge'),
+                this.fetchRSSFeed('https://www.wired.com/feed/rss', 'Wired'),
+                this.fetchRSSFeed('https://feeds.arstechnica.com/arstechnica/index', 'Ars Technica'),
+                this.fetchRSSFeed('https://www.cnet.com/rss/all/', 'CNET'),
+                this.fetchRSSFeed('https://gadgets360.com/rss.xml', 'Gadgets 360'),
+                this.fetchRSSFeed('https://mashable.com/feed.xml', 'Mashable'),
+                this.fetchRSSFeed('https://www.engadget.com/rss.xml', 'Engadget'),
+                this.fetchRSSFeed('https://www.zdnet.com/news/rss.xml', 'ZDNet'),
+                this.fetchRSSFeed('https://feeds.bbci.co.uk/news/technology/rss.xml', 'BBC Technology')
             ];
 
             // Add timeout to prevent long loading times
@@ -463,15 +429,10 @@ class NewsAPI {
                 }
             });
 
-            // Ensure we always have content - if no articles found, use fallback
+            // Only return articles if we have real content
             if (allArticles.length === 0) {
-                console.warn('No technology articles found, using fallback');
-                const fallbackArticles = this.getSampleArticles('technology', 'Technology Fallback');
-                this.cache.set(cacheKey, {
-                    data: fallbackArticles,
-                    timestamp: Date.now()
-                });
-                return fallbackArticles;
+                console.warn('No real technology articles found');
+                return [];
             }
 
             // Remove duplicates, filter tech-relevant content, and sort by date
@@ -490,9 +451,7 @@ class NewsAPI {
             return sortedArticles;
         } catch (error) {
             console.error('Error fetching enhanced technology news:', error);
-            // Return fallback articles instead of throwing error
-            console.warn('Using technology fallback articles due to error');
-            return this.getSampleArticles('technology', 'Technology Error Fallback');
+            return [];
         }
     }
 
@@ -532,25 +491,13 @@ class NewsAPI {
                 this.fetchRSSFeed('https://www.hopkinsmedicine.org/news/rss.xml', 'Johns Hopkins Health'),
                 this.fetchRSSFeed('https://www.nih.gov/news-events/rss-feeds', 'NIH News'),
                 
-                // Major health news sources
-                this.fetchFromMedicalNewsToday(),
-                this.fetchFromHealthline(),
-                this.fetchFromWebMDNews(),
-                this.fetchFromScienceDailyHealth(),
-                this.fetchFromWHONews(),
-                this.fetchFromCDCNewsroom(),
-                this.fetchFromTheLancetNews(),
-                this.fetchFromBBCHealth(),
-                this.fetchFromHarvardHealthBlog(),
-                this.fetchFromReutersHealth(),
-                
-                // Additional health sources for comprehensive coverage
-                this.fetchFromMayoClinicNews(),
-                this.fetchFromJohnsHopkinsHealth(),
-                this.fetchFromNIHNews(),
-                this.fetchFromNatureHealth(),
-                this.fetchFromPubMedNews(),
-                this.fetchFromMedscapeNews()
+                // Additional health RSS feeds for comprehensive coverage
+                this.fetchRSSFeed('https://www.reuters.com/health/rss', 'Reuters Health'),
+                this.fetchRSSFeed('https://www.bbc.com/news/health/rss.xml', 'BBC Health'),
+                this.fetchRSSFeed('https://www.harvardhealthblog.org/feed/', 'Harvard Health Blog'),
+                this.fetchRSSFeed('https://www.thelancet.com/rssfeed/lancet_current.xml', 'The Lancet'),
+                this.fetchRSSFeed('https://www.medscape.com/rss/public/0_public.xml', 'Medscape'),
+                this.fetchRSSFeed('https://www.pubmed.gov/rss/news.xml', 'PubMed News')
             ];
 
             // Add timeout to prevent long loading times
@@ -573,15 +520,10 @@ class NewsAPI {
                 }
             });
 
-            // Ensure we always have content - if no articles found, use fallback
+            // Only return articles if we have real content
             if (allArticles.length === 0) {
-                console.warn('No health articles found, using fallback');
-                const fallbackArticles = this.getSampleArticles('health', 'Health Fallback');
-                this.cache.set(cacheKey, {
-                    data: fallbackArticles,
-                    timestamp: Date.now()
-                });
-                return fallbackArticles;
+                console.warn('No real health articles found');
+                return [];
             }
 
             // Remove duplicates, filter health-relevant content, and sort by date
@@ -600,9 +542,7 @@ class NewsAPI {
             return sortedArticles;
         } catch (error) {
             console.error('Error fetching enhanced health news:', error);
-            // Return fallback articles instead of throwing error
-            console.warn('Using health fallback articles due to error');
-            return this.getSampleArticles('health', 'Health Error Fallback');
+            return [];
         }
     }
 
@@ -647,15 +587,13 @@ class NewsAPI {
                 this.fetchRSSFeed('https://www.shape.com/rss.xml', 'Shape'),
                 this.fetchRSSFeed('https://www.fitness.com/rss', 'Fitness'),
                 
-                // Lifestyle-specific news sources
-                this.fetchLifestyleFromVogue(),
-                this.fetchLifestyleFromElle(),
-                this.fetchLifestyleFromBuzzFeed(),
-                this.fetchLifestyleFromRefinery29(),
-                this.fetchLifestyleFromWellAndGood(),
-                this.fetchLifestyleFromTravelLeisure(),
-                this.fetchLifestyleFromFoodNetwork(),
-                this.fetchLifestyleFromArchDigest()
+                // Additional lifestyle RSS feeds for comprehensive coverage
+                this.fetchRSSFeed('https://www.marthastewart.com/rss', 'Martha Stewart'),
+                this.fetchRSSFeed('https://www.realsimple.com/rss', 'Real Simple'),
+                this.fetchRSSFeed('https://www.bhg.com/rss', 'Better Homes & Gardens'),
+                this.fetchRSSFeed('https://www.southernliving.com/rss', 'Southern Living'),
+                this.fetchRSSFeed('https://www.countryliving.com/rss', 'Country Living'),
+                this.fetchRSSFeed('https://www.goodhousekeeping.com/rss', 'Good Housekeeping')
             ];
 
             // Add timeout to prevent long loading times
@@ -678,15 +616,10 @@ class NewsAPI {
                 }
             });
 
-            // Ensure we always have content - if no articles found, use fallback
+            // Only return articles if we have real content
             if (allArticles.length === 0) {
-                console.warn('No lifestyle articles found, using fallback');
-                const fallbackArticles = this.getSampleArticles('lifestyle', 'Lifestyle Fallback');
-                this.cache.set(cacheKey, {
-                    data: fallbackArticles,
-                    timestamp: Date.now()
-                });
-                return fallbackArticles;
+                console.warn('No real lifestyle articles found');
+                return [];
             }
 
             // Remove duplicates and sort by date
@@ -704,9 +637,7 @@ class NewsAPI {
             return sortedArticles;
         } catch (error) {
             console.error('Error fetching lifestyle news:', error);
-            // Return fallback articles instead of throwing error
-            console.warn('Using lifestyle fallback articles due to error');
-            return this.getSampleArticles('lifestyle', 'Lifestyle Error Fallback');
+            return [];
         }
     }
 
@@ -751,15 +682,13 @@ class NewsAPI {
                 this.fetchRSSFeed('https://www.etonline.com/rss.xml', 'Entertainment Tonight'),
                 this.fetchRSSFeed('https://www.accesshollywood.com/rss.xml', 'Access Hollywood'),
                 
-                // Entertainment-specific news sources
-                this.fetchEntertainmentFromVariety(),
-                this.fetchEntertainmentFromHollywoodReporter(),
-                this.fetchEntertainmentFromDeadline(),
-                this.fetchEntertainmentFromEntertainmentWeekly(),
-                this.fetchEntertainmentFromRollingStone(),
-                this.fetchEntertainmentFromBillboard(),
-                this.fetchEntertainmentFromPitchfork(),
-                this.fetchEntertainmentFromNME()
+                // Additional entertainment RSS feeds for comprehensive coverage
+                this.fetchRSSFeed('https://www.ign.com/feed.xml', 'IGN'),
+                this.fetchRSSFeed('https://www.gamespot.com/feeds/game-news/', 'GameSpot'),
+                this.fetchRSSFeed('https://www.polygon.com/rss/index.xml', 'Polygon'),
+                this.fetchRSSFeed('https://www.theverge.com/rss/entertainment/index.xml', 'The Verge Entertainment'),
+                this.fetchRSSFeed('https://www.techcrunch.com/feed/', 'TechCrunch Entertainment'),
+                this.fetchRSSFeed('https://www.wired.com/feed/entertainment/rss', 'Wired Entertainment')
             ];
 
             // Add timeout to prevent long loading times
@@ -782,15 +711,10 @@ class NewsAPI {
                 }
             });
 
-            // Ensure we always have content - if no articles found, use fallback
+            // Only return articles if we have real content
             if (allArticles.length === 0) {
-                console.warn('No entertainment articles found, using fallback');
-                const fallbackArticles = this.getSampleArticles('entertainment', 'Entertainment Fallback');
-                this.cache.set(cacheKey, {
-                    data: fallbackArticles,
-                    timestamp: Date.now()
-                });
-                return fallbackArticles;
+                console.warn('No real entertainment articles found');
+                return [];
             }
 
             // Remove duplicates and sort by date
@@ -808,9 +732,7 @@ class NewsAPI {
             return sortedArticles;
         } catch (error) {
             console.error('Error fetching entertainment news:', error);
-            // Return fallback articles instead of throwing error
-            console.warn('Using entertainment fallback articles due to error');
-            return this.getSampleArticles('entertainment', 'Entertainment Error Fallback');
+            return [];
         }
     }
 
@@ -855,16 +777,13 @@ class NewsAPI {
                 this.fetchRSSFeed('https://www.abc.net.au/news/world/rss.xml', 'ABC World'),
                 this.fetchRSSFeed('https://www.cbc.ca/cmlink/rss-world', 'CBC World'),
                 
-                // International news sources
-                this.fetchWorldFromBBC(),
-                this.fetchWorldFromReuters(),
-                this.fetchWorldFromAP(),
-                this.fetchWorldFromAlJazeera(),
-                this.fetchWorldFromFrance24(),
-                this.fetchWorldFromDW(),
-                this.fetchWorldFromEuronews(),
-                this.fetchWorldFromCNN(),
-                this.fetchWorldFromNPR()
+                // Additional world news RSS feeds for comprehensive coverage
+                this.fetchRSSFeed('https://www.lemonde.fr/rss/en_continu.xml', 'Le Monde'),
+                this.fetchRSSFeed('https://www.elpais.com/rss/internacional.xml', 'El País'),
+                this.fetchRSSFeed('https://www.corriere.it/rss/esteri.xml', 'Corriere della Sera'),
+                this.fetchRSSFeed('https://www.spiegel.de/international/index.rss', 'Der Spiegel'),
+                this.fetchRSSFeed('https://www.lefigaro.fr/rss/figaro_international.xml', 'Le Figaro'),
+                this.fetchRSSFeed('https://www.elmundo.es/rss/internacional.xml', 'El Mundo')
             ];
 
             // Add timeout to prevent long loading times
@@ -887,15 +806,10 @@ class NewsAPI {
                 }
             });
 
-            // Ensure we always have content - if no articles found, use fallback
+            // Only return articles if we have real content
             if (allArticles.length === 0) {
-                console.warn('No world articles found, using fallback');
-                const fallbackArticles = this.getSampleArticles('world', 'World Fallback');
-                this.cache.set(cacheKey, {
-                    data: fallbackArticles,
-                    timestamp: Date.now()
-                });
-                return fallbackArticles;
+                console.warn('No real world articles found');
+                return [];
             }
 
             // Remove duplicates and sort by date
@@ -913,9 +827,7 @@ class NewsAPI {
             return sortedArticles;
         } catch (error) {
             console.error('Error fetching world news:', error);
-            // Return fallback articles instead of throwing error
-            console.warn('Using world fallback articles due to error');
-            return this.getSampleArticles('world', 'World Error Fallback');
+            return [];
         }
     }
 
@@ -1001,8 +913,8 @@ class NewsAPI {
             return this.formatGNewsArticles(data.articles || []);
         } catch (error) {
             console.error('GNews fetch error:', error);
-            // Return sample data for demonstration
-            return this.getSampleArticles(category, 'GNews');
+            // Return empty array instead of fake articles
+            return [];
         }
     }
 
@@ -1028,7 +940,7 @@ class NewsAPI {
             return this.formatNewsDataArticles(data.results || []);
         } catch (error) {
             console.error('NewsData fetch error:', error);
-            return this.getSampleArticles(category, 'NewsData');
+            return [];
         }
     }
 
@@ -1056,7 +968,7 @@ class NewsAPI {
             return this.formatNewsAPIArticles(data.articles || []);
         } catch (error) {
             console.error('NewsAPI fetch error:', error);
-            return this.getSampleArticles(category, 'NewsAPI');
+            return [];
         }
     }
 
@@ -1082,7 +994,7 @@ class NewsAPI {
             return this.formatMediastackArticles(data.data || []);
         } catch (error) {
             console.error('Mediastack fetch error:', error);
-            return this.getSampleArticles(category, 'Mediastack');
+            return [];
         }
     }
 
@@ -1108,7 +1020,7 @@ class NewsAPI {
             return this.formatCurrentsAPIArticles(data.news || []);
         } catch (error) {
             console.error('CurrentsAPI fetch error:', error);
-            return this.getSampleArticles(category, 'CurrentsAPI');
+            return [];
         }
     }
 
