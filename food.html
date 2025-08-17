@@ -419,6 +419,24 @@
 
         
         /* Copy Link Button */
+        .share-recipe-btn {
+            background: linear-gradient(45deg, #ff6b35, #f7941d);
+            color: white;
+            border: none;
+            padding: 0.5rem;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .share-recipe-btn:hover {
+            background: linear-gradient(45deg, #e55a2b, #e8851a);
+            transform: translateY(-1px);
+        }
+        
         .copy-link-btn {
             background: var(--surface-color);
             color: #64748b;
@@ -799,6 +817,7 @@
     <script src="js/news-api.js"></script>
     <script src="js/themes.js"></script>
     <script src="js/category-news.js"></script>
+    <script src="js/share-utils.js"></script>
     <script>
         // Food page specific JavaScript
         const API_KEY = 'd7d83ccf68814ab7bac3d3966c88d576';
@@ -1088,6 +1107,9 @@
                             <button class="view-recipe-btn" onclick="event.stopPropagation(); openRecipe('${recipe.sourceUrl || recipe.spoonacularSourceUrl}')">
                                 <i class="fas fa-external-link-alt"></i> View Recipe
                             </button>
+                            <button class="share-recipe-btn" onclick="event.stopPropagation(); shareRecipe(${JSON.stringify(recipe).replace(/"/g, '&quot;')})" title="Share Recipe">
+                                <i class="fas fa-share-alt"></i>
+                            </button>
                             <button class="copy-link-btn" onclick="event.stopPropagation(); copyRecipeLink('${recipe.sourceUrl || recipe.spoonacularSourceUrl}', this)" title="Copy Recipe Link">
                                 <i class="fas fa-link"></i>
                             </button>
@@ -1326,6 +1348,12 @@
             } finally {
                 hideLoading();
             }
+        }
+        
+        // Function to share recipe
+        function shareRecipe(recipe) {
+            const shareContent = window.shareUtils.createShareContent('recipe', recipe);
+            window.shareUtils.quickShare(shareContent, 'recipe');
         }
         
         // Function to copy recipe link to clipboard

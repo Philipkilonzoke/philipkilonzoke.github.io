@@ -75,6 +75,9 @@
     <script src="https://unpkg.com/dayjs@1.11.10/plugin/relativeTime.js"></script>
     <script src="https://unpkg.com/dayjs@1.11.10/plugin/utc.js"></script>
     <script src="https://unpkg.com/dayjs@1.11.10/plugin/timezone.js"></script>
+    
+    <!-- Share Utilities -->
+    <script src="js/share-utils.js"></script>
 </head>
 <body>
     <!-- Loading Screen -->
@@ -419,13 +422,94 @@
             'QF': 'Qantas',
             'IB': 'Iberia',
             'SN': 'Brussels Airlines',
-            'EY': 'Etihad Airways'
+            'EY': 'Etihad Airways',
+            'AC': 'Air Canada',
+            'AS': 'Alaska Airlines',
+            'B6': 'JetBlue',
+            'F9': 'Frontier Airlines',
+            'G4': 'Allegiant Air',
+            'HA': 'Hawaiian Airlines',
+            'NK': 'Spirit Airlines',
+            'WN': 'Southwest Airlines',
+            'VY': 'Vueling',
+            'AZ': 'ITA Airways',
+            'LX': 'Swiss',
+            'OS': 'Austrian Airlines',
+            'LO': 'LOT Polish Airlines',
+            'SK': 'SAS',
+            'AY': 'Finnair',
+            'EI': 'Aer Lingus',
+            'TP': 'TAP Air Portugal',
+            'FI': 'Icelandair',
+            'DY': 'Norwegian Air',
+            'FR': 'Ryanair',
+            'U2': 'easyJet',
+            'W6': 'Wizz Air',
+            'HV': 'Transavia',
+            'CD': 'Corendon Dutch Airlines',
+            'SA': 'South African Airways',
+            'MS': 'EgyptAir',
+            'SU': 'Aeroflot',
+            'CA': 'Air China',
+            'NH': 'All Nippon Airways',
+            'JL': 'Japan Airlines',
+            'KE': 'Korean Air',
+            'TG': 'Thai Airways',
+            'SQ': 'Singapore Airlines',
+            'MH': 'Malaysia Airlines',
+            'GA': 'Garuda Indonesia',
+            'PR': 'Philippine Airlines',
+            'VN': 'Vietnam Airlines',
+            'AI': 'Air India',
+            '9W': 'Jet Airways',
+            '6E': 'IndiGo',
+            'SG': 'SpiceJet',
+            'AK': 'AirAsia',
+            'FD': 'Thai AirAsia',
+            'QZ': 'Indonesia AirAsia',
+            'D7': 'AirAsia X',
+            'TR': 'Tigerair',
+            'JQ': 'Jetstar Airways',
+            'VA': 'Virgin Australia',
+            'NZ': 'Air New Zealand',
+            'FJ': 'Fiji Airways',
+            'PG': 'Bangkok Airways',
+            'VZ': 'Vistara',
+            'UK': 'Vistara',
+            'AI': 'Air India',
+            '9W': 'Jet Airways',
+            '6E': 'IndiGo',
+            'SG': 'SpiceJet',
+            'AK': 'AirAsia',
+            'FD': 'Thai AirAsia',
+            'QZ': 'Indonesia AirAsia',
+            'D7': 'AirAsia X',
+            'TR': 'Tigerair',
+            'JQ': 'Jetstar Airways',
+            'VA': 'Virgin Australia',
+            'NZ': 'Air New Zealand',
+            'FJ': 'Fiji Airways',
+            'PG': 'Bangkok Airways',
+            'VZ': 'Vistara',
+            'UK': 'Vistara'
         };
 
         const AIRLINE_ICAO_MAP = {
             'KQA':'Kenya Airways','BAW':'British Airways','AFR':'Air France','DLH':'Lufthansa','QTR':'Qatar Airways',
             'AAL':'American Airlines','DAL':'Delta Air Lines','UAL':'United Airlines','KLM':'KLM','THY':'Turkish Airlines',
-            'ETD':'Etihad Airways','SWR':'Swiss','QFA':'Qantas','IBE':'Iberia','BEL':'Brussels Airlines','ETH':'Ethiopian Airlines'
+            'ETD':'Etihad Airways','SWR':'Swiss','QFA':'Qantas','IBE':'Iberia','BEL':'Brussels Airlines','ETH':'Ethiopian Airlines',
+            'ACA':'Air Canada','ASA':'Alaska Airlines','JBU':'JetBlue','FFT':'Frontier Airlines','AAY':'Allegiant Air',
+            'HAL':'Hawaiian Airlines','NKS':'Spirit Airlines','SWA':'Southwest Airlines','VLG':'Vueling','ITY':'ITA Airways',
+            'AUA':'Austrian Airlines','LOT':'LOT Polish Airlines','SAS':'SAS','FIN':'Finnair','EIN':'Aer Lingus',
+            'TAP':'TAP Air Portugal','ICE':'Icelandair','NAX':'Norwegian Air','RYR':'Ryanair','EZY':'easyJet',
+            'WZZ':'Wizz Air','TRA':'Transavia','CND':'Corendon Dutch Airlines','SAA':'South African Airways',
+            'MSR':'EgyptAir','AFL':'Aeroflot','CCA':'Air China','ANA':'All Nippon Airways','JAL':'Japan Airlines',
+            'KAL':'Korean Air','THA':'Thai Airways','SIA':'Singapore Airlines','MAS':'Malaysia Airlines',
+            'GIA':'Garuda Indonesia','PAL':'Philippine Airlines','HVN':'Vietnam Airlines','AIC':'Air India',
+            'JAI':'Jet Airways','IGO':'IndiGo','SEJ':'SpiceJet','AXM':'AirAsia','TAA':'Thai AirAsia',
+            'AWQ':'Indonesia AirAsia','XAX':'AirAsia X','TGR':'Tigerair','JST':'Jetstar Airways',
+            'VOZ':'Virgin Australia','ANZ':'Air New Zealand','FJI':'Fiji Airways','BKP':'Bangkok Airways',
+            'VTI':'Vistara'
         };
 
         function inferAirlineFromCodes(flight){
@@ -436,6 +520,28 @@
             if (AIRLINE_ICAO_MAP[icao3]) return AIRLINE_ICAO_MAP[icao3];
             if (AIRLINE_IATA_MAP[iata2]) return AIRLINE_IATA_MAP[iata2];
             return '';
+        }
+
+        // Function to share flight information
+        function shareFlight(flight) {
+            const departure = flight.departure || {};
+            const arrival = flight.arrival || {};
+            const airline = flight.airline || {};
+            
+            const flightData = {
+                airline: airline.name || inferAirlineFromCodes(flight) || 'Unknown Airline',
+                flightNumber: flight.flight?.number || flight.flight?.iata || 'N/A',
+                departure: departure.iata || 'N/A',
+                arrival: arrival.iata || 'N/A',
+                departureAirport: departure.airport || 'Unknown Airport',
+                arrivalAirport: arrival.airport || 'Unknown Airport',
+                status: flight.flight_status || 'unknown',
+                scheduledDeparture: departure.scheduled ? timeFormat(departure.scheduled) : 'N/A',
+                scheduledArrival: arrival.scheduled ? timeFormat(arrival.scheduled) : 'N/A'
+            };
+            
+            const shareContent = window.shareUtils.createShareContent('flight', flightData);
+            window.shareUtils.quickShare(shareContent, 'flight');
         }
 
         // Initialize Day.js plugins
@@ -857,6 +963,9 @@
                     <div style="display:flex;justify-content:space-between;align-items:center;margin:-.5rem 0 .5rem 0">
                         <button class="fav-btn" data-id="${id}" title="Favorite" style="border:1px solid var(--border-color);background:var(--surface-color);border-radius:8px;padding:.25rem .5rem;color:${isFav?'#f59e0b':'inherit'}">
                             <i class="fas fa-star"></i>
+                        </button>
+                        <button class="share-flight-btn" onclick="shareFlight(${JSON.stringify(flight).replace(/"/g, '&quot;')})" title="Share Flight" style="border:1px solid var(--border-color);background:var(--surface-color);border-radius:8px;padding:.25rem .5rem">
+                            <i class="fas fa-share-alt"></i>
                         </button>
                         <button class="copy-btn" onclick="navigator.clipboard.writeText('${flight.flight?.number||''} ${departure.iata||''}-${arrival.iata||''}')" title="Copy" style="border:1px solid var(--border-color);background:var(--surface-color);border-radius:8px;padding:.25rem .5rem">
                             <i class="fas fa-copy"></i>
