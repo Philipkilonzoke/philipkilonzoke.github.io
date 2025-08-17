@@ -60,6 +60,9 @@ class AITranslationTTS {
      * Initialize the system
      */
     init() {
+        // Clean up any existing TTS buttons first
+        this.cleanupTTSButtons();
+        
         this.setupLanguageObserver();
         this.setupTTSControls();
         this.updateLanguageDisplay();
@@ -185,23 +188,44 @@ class AITranslationTTS {
     }
 
     /**
+     * Clean up existing TTS buttons
+     */
+    cleanupTTSButtons() {
+        document.querySelectorAll('.tts-button').forEach(button => {
+            button.remove();
+        });
+    }
+
+    /**
      * Add TTS buttons to content
      */
     addTTSButtons() {
         if (!this.isTTSEnabled) return;
 
-        // Add to article titles
-        document.querySelectorAll('h1, h2, h3, .article-title, .recipe-title').forEach(element => {
-            if (!element.querySelector('.tts-button')) {
-                this.addTTSButton(element);
-            }
-        });
+        // Only add to main article titles and content areas
+        const selectors = [
+            '.news-card h3',           // News article titles
+            '.article-title',          // Article titles
+            '.recipe-title',           // Recipe titles
+            '.news-card .article-content', // News content
+            '.recipe-summary',         // Recipe summaries
+            '.flight-card h3',         // Flight card titles
+            '.article-content p:first-of-type' // First paragraph of articles
+        ];
 
-        // Add to article content
-        document.querySelectorAll('.article-content, .recipe-summary, .news-card p').forEach(element => {
-            if (!element.querySelector('.tts-button')) {
-                this.addTTSButton(element);
-            }
+        selectors.forEach(selector => {
+            document.querySelectorAll(selector).forEach(element => {
+                // Skip if already has TTS button or is too small
+                if (!element.querySelector('.tts-button') && 
+                    element.textContent.trim().length > 20 &&
+                    !element.closest('.settings-section') &&
+                    !element.closest('.modal') &&
+                    !element.closest('.header') &&
+                    !element.closest('.footer') &&
+                    !element.closest('.navigation')) {
+                    this.addTTSButton(element);
+                }
+            });
         });
     }
 
@@ -215,21 +239,23 @@ class AITranslationTTS {
         button.title = 'Listen to this text';
         button.style.cssText = `
             position: absolute;
-            top: 8px;
-            right: 8px;
-            background: rgba(37, 99, 235, 0.9);
+            top: 4px;
+            right: 4px;
+            background: rgba(37, 99, 235, 0.8);
             color: white;
             border: none;
             border-radius: 50%;
-            width: 32px;
-            height: 32px;
+            width: 28px;
+            height: 28px;
             cursor: pointer;
-            font-size: 12px;
-            z-index: 10;
+            font-size: 11px;
+            z-index: 5;
             transition: all 0.2s ease;
             display: flex;
             align-items: center;
             justify-content: center;
+            opacity: 0.7;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         `;
 
         button.addEventListener('click', (e) => {
@@ -238,10 +264,12 @@ class AITranslationTTS {
         });
 
         button.addEventListener('mouseenter', () => {
-            button.style.transform = 'scale(1.1)';
+            button.style.opacity = '1';
+            button.style.transform = 'scale(1.05)';
         });
 
         button.addEventListener('mouseleave', () => {
+            button.style.opacity = '0.7';
             button.style.transform = 'scale(1)';
         });
 
@@ -657,11 +685,18 @@ class AITranslationTTS {
      * Toggle TTS
      */
     toggleTTS(enabled) {
+        this.isTTSEnabled = enabled;
         this.saveTTSPreference(enabled);
-        if (!enabled) {
+        
+        if (enabled) {
+            this.addTTSButtons();
+        } else {
+            // Remove all TTS buttons when disabled
+            document.querySelectorAll('.tts-button').forEach(button => {
+                button.remove();
+            });
             this.stopSpeaking();
         }
-        this.addTTSButtons();
     }
 }
 
