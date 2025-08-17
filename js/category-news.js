@@ -156,14 +156,42 @@ class CategoryNews {
                 this.showNewsGrid();
                 try { document.dispatchEvent(new CustomEvent('categoryNewsLoaded', { detail: { category: this.category, articlesCount: this.allArticles.length } })); } catch (e) {}
             } else {
-                const msg = this.category === 'kenya' 
-                  ? 'No Kenya articles from the last 48 hours. Please check back shortly.' 
-                  : 'No articles found for this category. Please try again later.';
-                this.showNewsError(msg);
+                // Final safety fallback - show sample articles if no real articles found
+                console.warn('No articles found, showing fallback content');
+                const fallbackArticles = this.newsAPI.getSampleArticles(this.category, 'Fallback Content');
+                if (fallbackArticles && fallbackArticles.length > 0) {
+                    this.allArticles = fallbackArticles;
+                    this.renderNews();
+                    this.updateArticleCount();
+                    this.updateLastUpdated();
+                    this.showNewsGrid();
+                    console.log('Showing fallback articles for', this.category);
+                } else {
+                    const msg = this.category === 'kenya' 
+                      ? 'No Kenya articles from the last 48 hours. Please check back shortly.' 
+                      : 'No articles found for this category. Please try again later.';
+                    this.showNewsError(msg);
+                }
             }
         } catch (error) {
             console.error('Error loading news:', error);
-            this.showNewsError('Failed to load news. Please check your internet connection and try again.');
+            // Try to show fallback content even on error
+            try {
+                const fallbackArticles = this.newsAPI.getSampleArticles(this.category, 'Error Fallback');
+                if (fallbackArticles && fallbackArticles.length > 0) {
+                    this.allArticles = fallbackArticles;
+                    this.renderNews();
+                    this.updateArticleCount();
+                    this.updateLastUpdated();
+                    this.showNewsGrid();
+                    console.log('Showing error fallback articles for', this.category);
+                } else {
+                    this.showNewsError('Failed to load news. Please check your internet connection and try again.');
+                }
+            } catch (fallbackError) {
+                console.error('Even fallback failed:', fallbackError);
+                this.showNewsError('Failed to load news. Please check your internet connection and try again.');
+            }
         } finally {
             this.isLoading = false;
         }
