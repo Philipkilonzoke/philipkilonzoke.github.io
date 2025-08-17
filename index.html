@@ -916,7 +916,7 @@
                             <i class="fas fa-microchip"></i>
                             <span>Technology News</span>
                         </div>
-                        <div class="suggestion-item" data-category="latest" data-query="breaking news">
+                        <div class="suggestion-item" data-category="breaking" data-query="breaking news">
                             <i class="fas fa-bolt"></i>
                             <span>Breaking News</span>
                         </div>
@@ -1553,7 +1553,7 @@
                 if (tickerContent) tickerContent.style.display = 'none';
                 
                 // Initialize the same CategoryNews class used on Breaking News page
-                newsInstance = new CategoryNews('latest');
+                newsInstance = new CategoryNews('breaking');
                 
                 // Load initial breaking news immediately for faster loading
                 setTimeout(() => {
@@ -1738,7 +1738,7 @@
                 observer.observe(section);
                 // Also listen for CategoryNews load completion to populate without manual click
                 document.addEventListener('categoryNewsLoaded', (ev) => {
-                    if (ev?.detail?.category === 'latest') {
+                    if (ev?.detail?.category === 'breaking') {
                         this.loadBreakingNewsForTicker();
                     }
                 });

@@ -174,7 +174,8 @@ class CategoryNews {
     async loadNewsInternal() {
         console.log(`Loading ${this.category} news...`);
         
-        const articles = await this.newsAPI.fetchNews(this.category, 150);
+        // Fetch more aggressively for category pages to show many items
+        const articles = await this.newsAPI.fetchNews(this.category, 250);
         
         let supplementalArticles = [];
         if (window.MediastackSupplement) {

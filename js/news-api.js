@@ -7,11 +7,11 @@ class NewsAPI {
     constructor() {
         // API Keys from environment or fallback defaults
         this.apiKeys = {
-            gnews: '9db0da87512446db08b82d4f63a4ba8d',
-            newsdata: 'pub_d74b96fd4a9041d59212493d969368cd',
-            newsapi: '9fcf10b2fd0c48c7a1886330ebb04385',
-            mediastack: '4e53cf0fa35eefaac21cd9f77925b8f5',
-            currentsapi: '9tI-4kOmMlJdgcosDUBsYYZDAnkLnuuL4Hrgc5TKlHmN_AMH'
+            gnews: (window.NEWS_CONFIG && window.NEWS_CONFIG.gnews) || '9db0da87512446db08b82d4f63a4ba8d',
+            newsdata: (window.NEWS_CONFIG && window.NEWS_CONFIG.newsdata) || 'pub_d74b96fd4a9041d59212493d969368cd',
+            newsapi: (window.NEWS_CONFIG && window.NEWS_CONFIG.newsapi) || '9fcf10b2fd0c48c7a1886330ebb04385',
+            mediastack: (window.NEWS_CONFIG && window.NEWS_CONFIG.mediastack) || '4e53cf0fa35eefaac21cd9f77925b8f5',
+            currentsapi: (window.NEWS_CONFIG && window.NEWS_CONFIG.currentsapi) || '9tI-4kOmMlJdgcosDUBsYYZDAnkLnuuL4Hrgc5TKlHmN_AMH'
         };
 
         // Enhanced Kenyan news sources for comprehensive coverage
@@ -54,7 +54,7 @@ class NewsAPI {
         ];
 
         this.cache = new Map();
-        this.cacheTimeout = 5 * 60 * 1000; // 5 minutes
+        this.cacheTimeout = 2 * 60 * 1000; // 2 minutes for fresher real-time updates
     }
 
     /**
@@ -73,7 +73,8 @@ class NewsAPI {
         }
 
         // Pre-warm cache for next load
-        this.preloadCategory(category, limit);
+        // Preload next category burst to smooth subsequent navigation
+        this.preloadCategory(category, Math.min(limit, 60));
 
         try {
             // Enhanced category-specific news fetching with optimized loading
@@ -107,15 +108,15 @@ class NewsAPI {
 
             // Fetch from all APIs simultaneously with optimized timeout
             const promises = [
-                this.fetchFromGNews(category, limit),
-                this.fetchFromNewsData(category, limit),
-                this.fetchFromNewsAPI(category, limit),
-                this.fetchFromMediastack(category, limit),
-                this.fetchFromCurrentsAPI(category, limit)
+                this.fetchFromGNews(category, Math.ceil(limit * 0.25)),
+                this.fetchFromNewsData(category, Math.ceil(limit * 0.25)),
+                this.fetchFromNewsAPI(category, Math.ceil(limit * 0.25)),
+                this.fetchFromMediastack(category, Math.ceil(limit * 0.25)),
+                this.fetchFromCurrentsAPI(category, Math.ceil(limit * 0.25))
             ];
 
             // Add REAL RSS feeds for ALL categories - ACTUAL REAL-TIME CONTENT
-            if (category === 'latest' || category === 'breaking') {
+            if (category === 'breaking') {
                 // Breaking news RSS feeds
                 promises.push(
                     this.fetchRSSFeed('https://feeds.bbci.co.uk/news/rss.xml', 'BBC News'),
@@ -241,6 +242,8 @@ class NewsAPI {
                     this.fetchRSSFeed('https://www.latimes.com/world/rss2.0.xml', 'Los Angeles Times World'),
                     this.fetchRSSFeed('https://www.abc.net.au/news/world/rss.xml', 'ABC World'),
                     this.fetchRSSFeed('https://www.cbc.ca/cmlink/rss-world', 'CBC World'),
+                    
+                    // Additional world news RSS feeds for comprehensive coverage
                     this.fetchRSSFeed('https://www.lemonde.fr/rss/en_continu.xml', 'Le Monde'),
                     this.fetchRSSFeed('https://www.elpais.com/rss/internacional.xml', 'El País'),
                     this.fetchRSSFeed('https://www.corriere.it/rss/esteri.xml', 'Corriere della Sera'),
@@ -1113,13 +1116,16 @@ class NewsAPI {
      * Fetch from GNews API
      */
     async fetchFromGNews(category, limit) {
+        // Respect per-call max to manage rate limits
+        limit = Math.min(limit || 20, 40);
+
         try {
             let url = `https://gnews.io/api/v4/top-headlines?token=${this.apiKeys.gnews}&lang=en&max=${Math.min(limit, 20)}`;
             
             if (category === 'kenya') {
                 url += '&country=ke&q=(Kenya OR Nairobi OR Mombasa OR Kisumu OR "East Africa" OR "Kenyan government" OR "President Ruto")';
-            } else if (category === 'latest') {
-                // No category filter for latest news
+            } else if (category === 'breaking') {
+                // No category filter for breaking news
             } else if (category !== 'world') {
                 url += `&category=${this.mapCategoryForGNews(category)}`;
             }
@@ -1145,13 +1151,15 @@ class NewsAPI {
      * Fetch from NewsData.io API
      */
     async fetchFromNewsData(category, limit) {
+        limit = Math.min(limit || 20, 100);
+
         try {
             let url = `https://newsdata.io/api/1/news?apikey=${this.apiKeys.newsdata}&language=en&size=${Math.min(limit, 100)}`;
             
             if (category === 'kenya') {
                 url += '&country=ke&q=Kenya OR Nairobi OR Mombasa OR Kisumu OR "East Africa"';
-            } else if (category === 'latest') {
-                // No category filter for latest news
+            } else if (category === 'breaking') {
+                // No category filter for breaking news
             } else if (category !== 'world') {
                 url += `&category=${this.mapCategoryForNewsData(category)}`;
             }
@@ -1171,13 +1179,15 @@ class NewsAPI {
      * Fetch from NewsAPI.org
      */
     async fetchFromNewsAPI(category, limit) {
+        limit = Math.min(limit || 20, 100);
+
         try {
             let url = `https://newsapi.org/v2/top-headlines?apiKey=${this.apiKeys.newsapi}&pageSize=${Math.min(limit, 100)}`;
             
             if (category === 'kenya') {
                 url += '&country=ke';
-            } else if (category === 'latest') {
-                url += '&country=us'; // Use US for general latest news
+            } else if (category === 'breaking') {
+                url += '&country=us'; // Use US for general breaking news
             } else if (category === 'world') {
                 url = `https://newsapi.org/v2/everything?apiKey=${this.apiKeys.newsapi}&q=international&sortBy=publishedAt&pageSize=${Math.min(limit, 100)}`;
             } else {
@@ -1199,13 +1209,15 @@ class NewsAPI {
      * Fetch from Mediastack API
      */
     async fetchFromMediastack(category, limit) {
+        limit = Math.min(limit || 20, 100);
+
         try {
             let url = `https://api.mediastack.com/v1/news?access_key=${this.apiKeys.mediastack}&languages=en&limit=${Math.min(limit, 100)}`;
             
             if (category === 'kenya') {
                 url += '&countries=ke';
-            } else if (category === 'latest') {
-                // No category filter for latest news
+            } else if (category === 'breaking') {
+                // No category filter for breaking news
             } else if (category !== 'world') {
                 url += `&categories=${this.mapCategoryForMediastack(category)}`;
             }
@@ -1225,13 +1237,15 @@ class NewsAPI {
      * Fetch from CurrentsAPI
      */
     async fetchFromCurrentsAPI(category, limit) {
+        limit = Math.min(limit || 20, 100);
+
         try {
             let url = `https://api.currentsapi.services/v1/latest-news?apiKey=${this.apiKeys.currentsapi}&language=en&page_size=${Math.min(limit, 100)}`;
             
             if (category === 'kenya') {
                 url += '&country=ke';
-            } else if (category === 'latest') {
-                // No category filter for latest news
+            } else if (category === 'breaking') {
+                // No category filter for breaking news
             } else if (category !== 'world') {
                 url += `&category=${this.mapCategoryForCurrentsAPI(category)}`;
             }
@@ -1911,7 +1925,7 @@ class NewsAPI {
      */
     getCategoryDisplayName(category) {
         const names = {
-            'latest': 'Latest News',
+            'breaking': 'Breaking News',
             'kenya': 'Kenyan News',
             'world': 'World News',
             'entertainment': 'Entertainment',

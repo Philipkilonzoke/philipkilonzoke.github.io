@@ -16,7 +16,7 @@ const urlsToCache = [
   '/script.js',
   '/news-data.js',
   '/news-sources.js',
-  '/latest.html',
+  '/breaking.html',
   '/kenya.html',
   '/world.html',
   '/entertainment.html',
