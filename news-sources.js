@@ -259,20 +259,87 @@ const NEWS_SOURCES = {
             region: 'international'
         }
     ],
-    science: [
+    lifestyle: [
         {
-            name: 'Science Daily',
-            rss: 'https://www.sciencedaily.com/rss/all.xml',
-            category: 'science',
+            name: 'The Guardian Life & Style',
+            rss: 'https://www.theguardian.com/lifeandstyle/rss',
+            category: 'lifestyle',
             priority: 1,
             region: 'international'
         },
         {
-            name: 'Nature',
-            rss: 'https://www.nature.com/nature.rss',
-            category: 'science',
+            name: 'NYTimes Fashion & Style',
+            rss: 'https://rss.nytimes.com/services/xml/rss/nyt/FashionandStyle.xml',
+            category: 'lifestyle',
+            priority: 2,
+            region: 'international'
+        }
+    ],
+    world: [
+        {
+            name: 'BBC World',
+            rss: 'https://feeds.bbci.co.uk/news/world/rss.xml',
+            category: 'world',
             priority: 1,
             region: 'international'
+        },
+        {
+            name: 'Reuters World',
+            rss: 'https://feeds.reuters.com/Reuters/worldNews',
+            category: 'world',
+            priority: 1,
+            region: 'international'
+        },
+        {
+            name: 'Al Jazeera English',
+            rss: 'https://www.aljazeera.com/xml/rss/all.xml',
+            category: 'world',
+            priority: 2,
+            region: 'international'
+        },
+        {
+            name: 'AP International',
+            rss: 'https://feeds.apnews.com/apf-intlnews',
+            category: 'world',
+            priority: 2,
+            region: 'international'
+        }
+    ],
+    kenya: [
+        {
+            name: 'Kenya News Agency',
+            rss: 'https://www.kenyanews.go.ke/feed/',
+            category: 'kenya',
+            priority: 1,
+            region: 'kenya'
+        },
+        {
+            name: 'The Star Kenya',
+            rss: 'https://www.the-star.co.ke/feed/',
+            category: 'kenya',
+            priority: 1,
+            region: 'kenya'
+        },
+        {
+            name: 'Capital FM News',
+            rss: 'https://www.capitalfm.co.ke/news/feed/',
+            category: 'kenya',
+            priority: 2,
+            region: 'kenya'
+        },
+        {
+            name: 'KBC Kenya',
+            rss: 'https://www.kbc.co.ke/feed/',
+            category: 'kenya',
+            priority: 2,
+            region: 'kenya'
+        },
+        {
+            name: 'Citizen Digital (News)',
+            rss: 'https://citizen.digital/category/news/feed/',
+            category: 'kenya',
+            priority: 2,
+            region: 'kenya'
         }
     ]
 };
@@ -314,9 +381,10 @@ async function loadNewsFromAllSources(category = 'all') {
     const loadPromises = [];
     
     // Determine which sources to load
-    const sourcesToLoad = category === 'all' 
+    const resolvedCategory = (category === 'latest' || category === 'breaking') ? 'general' : category;
+    const sourcesToLoad = resolvedCategory === 'all'
         ? Object.values(NEWS_SOURCES).flat()
-        : NEWS_SOURCES[category] || [];
+        : (NEWS_SOURCES[resolvedCategory] || NEWS_SOURCES.general);
     
     // Load from RSS sources
     sourcesToLoad.forEach(source => {
@@ -333,9 +401,9 @@ async function loadNewsFromAllSources(category = 'all') {
     });
     
     // Load from APIs if needed
-    if (category !== 'kenya') { // Kenya has its own API handling
+    if (resolvedCategory !== 'kenya') { // Kenya has its own API handling
         loadPromises.push(
-            loadFromNewsAPI(category)
+            loadFromNewsAPI(resolvedCategory)
                 .then(articles => {
                     console.log(`Loaded ${articles.length} articles from NewsAPI`);
                     allArticles.push(...articles);
@@ -372,7 +440,7 @@ async function loadRSSSource(source, retryCount = 0) {
         const response = await fetch(proxyUrl, {
             method: 'GET',
             headers: {
-                'Accept': 'application/rss+xml, application/xml, text/xml'
+                'Accept': 'application/rss+xml, application/xml, text/xml, */*'
             }
         });
         
@@ -380,8 +448,19 @@ async function loadRSSSource(source, retryCount = 0) {
             throw new Error(`HTTP ${response.status}: ${response.statusText}`);
         }
         
-        const data = await response.json();
-        const feed = await parser.parseString(data.contents);
+        // Some proxies (allorigins) return JSON with a `contents` field; others return raw text
+        let rssText;
+        const isAllOrigins = proxyUrl.includes('allorigins.win');
+        if (isAllOrigins) {
+            const json = await response.json();
+            rssText = json && (json.contents || json.contents === '' ? json.contents : null);
+        } else {
+            rssText = await response.text();
+        }
+        if (!rssText) {
+            throw new Error('Empty RSS payload from proxy');
+        }
+        const feed = await parser.parseString(rssText);
         
         return feed.items.map(item => ({
             title: sanitizeText(item.title),
@@ -489,7 +568,8 @@ function generatePlaceholderImage(category) {
         sports: 'https://via.placeholder.com/400x200/ea580c/ffffff?text=Sports+News',
         entertainment: 'https://via.placeholder.com/400x200/e11d48/ffffff?text=Entertainment',
         health: 'https://via.placeholder.com/400x200/10b981/ffffff?text=Health+News',
-        science: 'https://via.placeholder.com/400x200/0ea5e9/ffffff?text=Science+News',
+        lifestyle: 'https://via.placeholder.com/400x200/8b5cf6/ffffff?text=Lifestyle',
+        world: 'https://via.placeholder.com/400x200/0ea5e9/ffffff?text=World+News',
         kenya: 'https://via.placeholder.com/400x200/cc0000/ffffff?text=Kenya+News'
     };
     
