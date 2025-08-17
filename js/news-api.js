@@ -58,18 +58,22 @@ class NewsAPI {
     }
 
     /**
-     * Fetch news for a specific category from all APIs
+     * Fetch news for a specific category from all APIs with optimized performance
      */
     async fetchNews(category, limit = 20) {
         const cacheKey = `${category}_${limit}`;
         
-        // Check cache first
+        // Check cache first with longer timeout for better performance
         if (this.cache.has(cacheKey)) {
             const cached = this.cache.get(cacheKey);
             if (Date.now() - cached.timestamp < this.cacheTimeout) {
+                console.log(`Using cached data for ${category}`);
                 return cached.data;
             }
         }
+
+        // Pre-warm cache for next load
+        this.preloadCategory(category, limit);
 
         try {
             // Enhanced sports coverage with specialized APIs
@@ -117,7 +121,7 @@ class NewsAPI {
                 return await this.fetchEnhancedWorldNews(limit);
             }
 
-            // Fetch from all APIs simultaneously
+            // Fetch from all APIs simultaneously with optimized timeout
             const promises = [
                 this.fetchFromGNews(category, limit),
                 this.fetchFromNewsData(category, limit),
@@ -126,7 +130,15 @@ class NewsAPI {
                 this.fetchFromCurrentsAPI(category, limit)
             ];
 
-            const results = await Promise.allSettled(promises);
+            // Add timeout to prevent long loading times
+            const timeoutPromise = new Promise((_, reject) => 
+                setTimeout(() => reject(new Error('API fetch timeout')), 5000)
+            );
+            
+            const results = await Promise.race([
+                Promise.allSettled(promises),
+                timeoutPromise
+            ]);
             
             // Combine results from all APIs
             let allArticles = [];
@@ -701,6 +713,61 @@ class NewsAPI {
             console.error('Error fetching world news:', error);
             // Return world sample articles as fallback
             return this.getWorldSampleArticles(limit);
+        }
+    }
+
+    /**
+     * Fetch RSS feed with optimized performance
+     */
+    async fetchRSSFeed(rssUrl, sourceName) {
+        try {
+            // Use a fast CORS proxy with timeout
+            const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(rssUrl)}`;
+            
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 3000); // 3 second timeout
+            
+            const response = await fetch(proxyUrl, {
+                signal: controller.signal,
+                headers: {
+                    'Accept': 'application/rss+xml, application/xml, text/xml, */*',
+                }
+            });
+            
+            clearTimeout(timeoutId);
+            
+            if (!response.ok) throw new Error(`RSS fetch failed: ${response.status}`);
+            
+            const data = await response.json();
+            const parser = new DOMParser();
+            const xmlDoc = parser.parseFromString(data.contents, 'text/xml');
+            
+            const items = xmlDoc.querySelectorAll('item');
+            const articles = [];
+            
+            for (let i = 0; i < Math.min(items.length, 20); i++) {
+                const item = items[i];
+                const title = item.querySelector('title')?.textContent || '';
+                const description = item.querySelector('description')?.textContent || '';
+                const link = item.querySelector('link')?.textContent || '';
+                const pubDate = item.querySelector('pubDate')?.textContent || '';
+                const enclosure = item.querySelector('enclosure');
+                const imageUrl = enclosure?.getAttribute('url') || '';
+                
+                articles.push({
+                    title: title.trim(),
+                    description: description.trim(),
+                    url: link.trim(),
+                    urlToImage: imageUrl,
+                    publishedAt: pubDate,
+                    source: { name: sourceName }
+                });
+            }
+            
+            return articles;
+        } catch (error) {
+            console.warn(`RSS fetch error for ${sourceName}:`, error);
+            return [];
         }
     }
 
@@ -2711,6 +2778,78 @@ class NewsAPI {
             );
         } catch (error) {
             console.error('NPR World fetch error:', error);
+            return [];
+        }
+    }
+
+    /**
+     * Preload category data for faster subsequent loads
+     */
+    preloadCategory(category, limit = 20) {
+        // Preload in background without blocking UI
+        setTimeout(async () => {
+            try {
+                const cacheKey = `${category}_${limit}`;
+                if (!this.cache.has(cacheKey)) {
+                    console.log(`Preloading ${category} for faster future loads`);
+                    const data = await this.fetchNewsInternal(category, limit);
+                    this.cache.set(cacheKey, {
+                        data: data,
+                        timestamp: Date.now()
+                    });
+                }
+            } catch (error) {
+                console.warn(`Preload failed for ${category}:`, error);
+            }
+        }, 100);
+    }
+
+    /**
+     * Internal fetch method for preloading
+     */
+    async fetchNewsInternal(category, limit = 20) {
+        // Simplified fetch without cache check for preloading
+        try {
+            if (category === 'kenya') {
+                return await this.fetchEnhancedKenyaNews(limit);
+            } else if (category === 'technology') {
+                return await this.fetchEnhancedTechnologyNews(limit);
+            } else if (category === 'health') {
+                return await this.fetchEnhancedHealthNews(limit);
+            } else if (category === 'sports') {
+                return await this.fetchEnhancedSportsNews(limit);
+            } else if (category === 'lifestyle') {
+                return await this.fetchEnhancedLifestyleNews(limit);
+            } else if (category === 'entertainment') {
+                return await this.fetchEnhancedEntertainmentNews(limit);
+            } else if (category === 'world') {
+                return await this.fetchEnhancedWorldNews(limit);
+            } else {
+                // Default API calls
+                const promises = [
+                    this.fetchFromGNews(category, limit),
+                    this.fetchFromNewsData(category, limit),
+                    this.fetchFromNewsAPI(category, limit),
+                    this.fetchFromMediastack(category, limit),
+                    this.fetchFromCurrentsAPI(category, limit)
+                ];
+
+                const results = await Promise.allSettled(promises);
+                
+                let allArticles = [];
+                results.forEach((result) => {
+                    if (result.status === 'fulfilled' && result.value) {
+                        allArticles = allArticles.concat(result.value);
+                    }
+                });
+
+                const uniqueArticles = this.removeDuplicates(allArticles);
+                return uniqueArticles.sort((a, b) => 
+                    new Date(b.publishedAt) - new Date(a.publishedAt)
+                );
+            }
+        } catch (error) {
+            console.error('Internal fetch error:', error);
             return [];
         }
     }

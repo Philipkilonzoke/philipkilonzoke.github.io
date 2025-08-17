@@ -21,7 +21,8 @@ class CategoryNews {
         this.setupEventListeners();
         this.showLoadingScreen();
         
-        this.loadNews().then(() => {
+        // Optimized loading with timeout and progressive enhancement
+        this.loadNewsOptimized().then(() => {
             this.hideLoadingScreen();
         }).catch((error) => {
             console.error('Initial load failed:', error);
@@ -131,59 +132,24 @@ class CategoryNews {
         if (newsError) newsError.style.display = 'none';
     }
 
-    async loadNews() {
+    async loadNewsOptimized() {
         if (this.isLoading) return;
         
         this.isLoading = true;
         this.showNewsLoading();
         
         try {
-            console.log(`Loading ${this.category} news...`);
+            // Add timeout to prevent long loading times
+            const timeoutPromise = new Promise((_, reject) => 
+                setTimeout(() => reject(new Error('News loading timeout')), 8000)
+            );
             
-            const articles = await this.newsAPI.fetchNews(this.category, 100);
+            const articlesPromise = this.loadNewsInternal();
             
-            let supplementalArticles = [];
-            if (window.MediastackSupplement) {
-                try {
-                    const mediastackSupplement = new window.MediastackSupplement();
-                    supplementalArticles = await mediastackSupplement.getSupplementalArticles(this.category, 100);
-                    console.log(`Mediastack supplement: Added ${supplementalArticles.length} additional ${this.category} articles`);
-                } catch (error) {
-                    console.warn('Mediastack supplement failed:', error);
-                }
-            }
+            const articles = await Promise.race([articlesPromise, timeoutPromise]);
             
-            let allArticles = [...(articles || []), ...supplementalArticles];
-
-            // RSS fallback via news-sources.js (real-time RSS feeds)
-            if (typeof window.loadNewsFromAllSources === 'function') {
-                try {
-                    const rssArticles = await window.loadNewsFromAllSources(this.category);
-                    if (Array.isArray(rssArticles) && rssArticles.length) {
-                        allArticles = allArticles.concat(rssArticles);
-                    }
-                } catch (e) {
-                    console.warn('RSS fallback failed:', e);
-                }
-            }
-
-            const uniqueArticles = this.removeDuplicates(allArticles);
-            
-            // Sort newest first
-            uniqueArticles.sort((a, b) => new Date(b.publishedAt) - new Date(a.publishedAt));
-
-            // For Kenya, strictly filter out items older than 48 hours
-            const finalArticles = (this.category === 'kenya') 
-                ? uniqueArticles.filter(a => {
-                    const t = new Date(a.publishedAt).getTime();
-                    if (!t || Number.isNaN(t)) return false;
-                    const cutoff = Date.now() - (48 * 60 * 60 * 1000);
-                    return t >= cutoff;
-                  })
-                : uniqueArticles;
-            
-            if (finalArticles && finalArticles.length > 0) {
-                this.allArticles = finalArticles;
+            if (articles && articles.length > 0) {
+                this.allArticles = articles;
                 this.renderNews();
                 this.updateArticleCount();
                 this.updateLastUpdated();
@@ -201,6 +167,58 @@ class CategoryNews {
         } finally {
             this.isLoading = false;
         }
+    }
+
+    async loadNewsInternal() {
+        console.log(`Loading ${this.category} news...`);
+        
+        const articles = await this.newsAPI.fetchNews(this.category, 100);
+        
+        let supplementalArticles = [];
+        if (window.MediastackSupplement) {
+            try {
+                const mediastackSupplement = new window.MediastackSupplement();
+                supplementalArticles = await mediastackSupplement.getSupplementalArticles(this.category, 100);
+                console.log(`Mediastack supplement: Added ${supplementalArticles.length} additional ${this.category} articles`);
+            } catch (error) {
+                console.warn('Mediastack supplement failed:', error);
+            }
+        }
+        
+        let allArticles = [...(articles || []), ...supplementalArticles];
+
+        // RSS fallback via news-sources.js (real-time RSS feeds)
+        if (typeof window.loadNewsFromAllSources === 'function') {
+            try {
+                const rssArticles = await window.loadNewsFromAllSources(this.category);
+                if (Array.isArray(rssArticles) && rssArticles.length) {
+                    allArticles = allArticles.concat(rssArticles);
+                }
+            } catch (e) {
+                console.warn('RSS fallback failed:', e);
+            }
+        }
+
+        const uniqueArticles = this.removeDuplicates(allArticles);
+        
+        // Sort newest first
+        uniqueArticles.sort((a, b) => new Date(b.publishedAt) - new Date(a.publishedAt));
+
+        // For Kenya, strictly filter out items older than 48 hours
+        const finalArticles = (this.category === 'kenya') 
+            ? uniqueArticles.filter(a => {
+                const t = new Date(a.publishedAt).getTime();
+                if (!t || Number.isNaN(t)) return false;
+                const cutoff = Date.now() - (48 * 60 * 60 * 1000);
+                return t >= cutoff;
+              })
+            : uniqueArticles;
+        
+        return finalArticles;
+    }
+
+    async loadNews() {
+        return this.loadNewsOptimized();
     }
 
     renderNews() {

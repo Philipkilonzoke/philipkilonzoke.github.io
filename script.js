@@ -132,21 +132,14 @@ async function loadNews(forceRefresh = false) {
             currentPage = 1;
         }
         
-        // Load articles from multiple sources
-        const articles = [];
-        
-        // Regular news sources
-        articles.push(...await loadNewsFromSources());
-        
-        // If Kenya category is selected or loading all, include Kenya-specific sources
-        if (currentCategory === 'kenya' || currentCategory === 'all') {
-            articles.push(...await loadKenyaSpecificNews());
-        }
-        
-        // Remove duplicates and sort by date
-        allArticles = removeDuplicates(articles).sort((a, b) => 
-            new Date(b.publishedAt) - new Date(a.publishedAt)
+        // Add timeout to prevent long loading times
+        const timeoutPromise = new Promise((_, reject) => 
+            setTimeout(() => reject(new Error('News loading timeout')), 8000)
         );
+        
+        const loadPromise = loadNewsInternal(forceRefresh);
+        
+        await Promise.race([loadPromise, timeoutPromise]);
         
         filterAndDisplayArticles();
         updateArticleCount();
@@ -160,6 +153,24 @@ async function loadNews(forceRefresh = false) {
         hideLoading();
         hideKenyaLoading();
     }
+}
+
+async function loadNewsInternal(forceRefresh = false) {
+    // Load articles from multiple sources
+    const articles = [];
+    
+    // Regular news sources
+    articles.push(...await loadNewsFromSources());
+    
+    // If Kenya category is selected or loading all, include Kenya-specific sources
+    if (currentCategory === 'kenya' || currentCategory === 'all') {
+        articles.push(...await loadKenyaSpecificNews());
+    }
+    
+    // Remove duplicates and sort by date
+    allArticles = removeDuplicates(articles).sort((a, b) => 
+        new Date(b.publishedAt) - new Date(a.publishedAt)
+    );
 }
 
 async function loadKenyaNews() {
@@ -304,11 +315,24 @@ async function fetchRSSFeed(url) {
             }
         });
         
-        // Use a CORS proxy for RSS feeds
+        // Use a CORS proxy for RSS feeds with timeout
         const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(url)}`;
-        const response = await fetch(proxyUrl);
-        const data = await response.json();
         
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 3000); // 3 second timeout
+        
+        const response = await fetch(proxyUrl, {
+            signal: controller.signal,
+            headers: {
+                'Accept': 'application/rss+xml, application/xml, text/xml, */*',
+            }
+        });
+        
+        clearTimeout(timeoutId);
+        
+        if (!response.ok) throw new Error(`RSS fetch failed: ${response.status}`);
+        
+        const data = await response.json();
         const feed = await parser.parseString(data.contents);
         
         return feed.items.map(item => ({
@@ -321,7 +345,7 @@ async function fetchRSSFeed(url) {
             category: 'general'
         }));
     } catch (error) {
-        console.error('Error fetching RSS feed:', error);
+        console.warn('Error fetching RSS feed:', error);
         return [];
     }
 }
