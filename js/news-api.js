@@ -134,8 +134,10 @@ class NewsAPI {
                     this.fetchRSSFeed('https://rss.dw.com/xml/rss-en-all', 'Deutsche Welle')
                 );
             } else if (category === 'health') {
-                // Health news RSS feeds
+                // Health news RSS feeds - using known working feeds
                 promises.push(
+                    this.fetchRSSFeed('https://feeds.bbci.co.uk/news/health/rss.xml', 'BBC Health'),
+                    this.fetchRSSFeed('https://www.reuters.com/health/rss', 'Reuters Health'),
                     this.fetchRSSFeed('https://www.medicalnewstoday.com/rss.xml', 'Medical News Today'),
                     this.fetchRSSFeed('https://www.healthline.com/rss/all', 'Healthline'),
                     this.fetchRSSFeed('https://www.webmd.com/news/rss/default.xml', 'WebMD'),
@@ -146,8 +148,6 @@ class NewsAPI {
                     this.fetchRSSFeed('https://www.mayoclinic.org/rss/news.xml', 'Mayo Clinic News'),
                     this.fetchRSSFeed('https://www.hopkinsmedicine.org/news/rss.xml', 'Johns Hopkins Health'),
                     this.fetchRSSFeed('https://www.nih.gov/news-events/rss-feeds', 'NIH News'),
-                    this.fetchRSSFeed('https://www.reuters.com/health/rss', 'Reuters Health'),
-                    this.fetchRSSFeed('https://www.bbc.com/news/health/rss.xml', 'BBC Health'),
                     this.fetchRSSFeed('https://www.harvardhealthblog.org/feed/', 'Harvard Health Blog'),
                     this.fetchRSSFeed('https://www.thelancet.com/rssfeed/lancet_current.xml', 'The Lancet'),
                     this.fetchRSSFeed('https://www.medscape.com/rss/public/0_public.xml', 'Medscape'),
@@ -299,7 +299,12 @@ class NewsAPI {
 
             // Only return articles if we have real content
             if (sortedArticles.length === 0) {
-                console.warn(`No real articles found for ${category}`);
+                console.warn(`No real articles found for ${category}, trying fallback APIs`);
+                // Try fallback APIs that are more reliable
+                const fallbackArticles = await this.fetchFallbackNews(category, limit);
+                if (fallbackArticles.length > 0) {
+                    return fallbackArticles;
+                }
                 return [];
             }
 
@@ -973,26 +978,53 @@ class NewsAPI {
      */
     async fetchRSSFeed(rssUrl, sourceName) {
         try {
-            // Use a fast CORS proxy with timeout
-            const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(rssUrl)}`;
+            // Try multiple CORS proxies as fallbacks
+            const proxies = [
+                `https://api.allorigins.win/get?url=${encodeURIComponent(rssUrl)}`,
+                `https://cors-anywhere.herokuapp.com/${rssUrl}`,
+                `https://thingproxy.freeboard.io/fetch/${rssUrl}`,
+                `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(rssUrl)}`
+            ];
             
-            const controller = new AbortController();
-            const timeoutId = setTimeout(() => controller.abort(), 3000); // 3 second timeout
+            let response = null;
+            let data = null;
             
-            const response = await fetch(proxyUrl, {
-                signal: controller.signal,
-                headers: {
-                    'Accept': 'application/rss+xml, application/xml, text/xml, */*',
+            // Try each proxy until one works
+            for (const proxyUrl of proxies) {
+                try {
+                    const controller = new AbortController();
+                    const timeoutId = setTimeout(() => controller.abort(), 5000); // 5 second timeout
+                    
+                    response = await fetch(proxyUrl, {
+                        signal: controller.signal,
+                        headers: {
+                            'Accept': 'application/rss+xml, application/xml, text/xml, */*',
+                        }
+                    });
+                    
+                    clearTimeout(timeoutId);
+                    
+                    if (response.ok) {
+                        if (proxyUrl.includes('allorigins.win')) {
+                            data = await response.json();
+                            data = data.contents;
+                        } else {
+                            data = await response.text();
+                        }
+                        break;
+                    }
+                } catch (proxyError) {
+                    console.warn(`Proxy failed for ${sourceName}:`, proxyUrl, proxyError);
+                    continue;
                 }
-            });
+            }
             
-            clearTimeout(timeoutId);
+            if (!data) {
+                throw new Error('All proxies failed');
+            }
             
-            if (!response.ok) throw new Error(`RSS fetch failed: ${response.status}`);
-            
-            const data = await response.json();
             const parser = new DOMParser();
-            const xmlDoc = parser.parseFromString(data.contents, 'text/xml');
+            const xmlDoc = parser.parseFromString(data, 'text/xml');
             
             const items = xmlDoc.querySelectorAll('item');
             const articles = [];
@@ -1032,6 +1064,47 @@ class NewsAPI {
             return articles;
         } catch (error) {
             console.warn(`RSS fetch error for ${sourceName}:`, error);
+            return [];
+        }
+    }
+
+    /**
+     * Fetch fallback news from reliable APIs
+     */
+    async fetchFallbackNews(category, limit) {
+        try {
+            console.log(`Fetching fallback news for ${category}`);
+            
+            // Use only the most reliable APIs with higher limits
+            const promises = [
+                this.fetchFromGNews(category, Math.min(limit * 2, 40)),
+                this.fetchFromNewsData(category, Math.min(limit * 2, 100)),
+                this.fetchFromNewsAPI(category, Math.min(limit * 2, 100)),
+                this.fetchFromMediastack(category, Math.min(limit * 2, 100)),
+                this.fetchFromCurrentsAPI(category, Math.min(limit * 2, 100))
+            ];
+            
+            const results = await Promise.allSettled(promises);
+            
+            let allArticles = [];
+            results.forEach((result, index) => {
+                if (result.status === 'fulfilled' && result.value && Array.isArray(result.value)) {
+                    allArticles = allArticles.concat(result.value);
+                }
+            });
+            
+            if (allArticles.length > 0) {
+                const uniqueArticles = this.removeDuplicates(allArticles);
+                const sortedArticles = uniqueArticles.sort((a, b) => 
+                    new Date(b.publishedAt) - new Date(a.publishedAt)
+                );
+                console.log(`Fallback found ${sortedArticles.length} articles for ${category}`);
+                return sortedArticles;
+            }
+            
+            return [];
+        } catch (error) {
+            console.error('Fallback news fetch error:', error);
             return [];
         }
     }
@@ -3719,7 +3792,70 @@ class NewsAPI {
             return [];
         }
     }
+
+    /**
+     * Test function to verify APIs are working
+     */
+    async testAPIs() {
+        console.log('Testing APIs...');
+        
+        const testResults = {
+            gnews: false,
+            newsdata: false,
+            newsapi: false,
+            mediastack: false,
+            currentsapi: false
+        };
+        
+        try {
+            // Test GNews
+            const gnewsTest = await this.fetchFromGNews('technology', 5);
+            testResults.gnews = gnewsTest.length > 0;
+            console.log('GNews test:', testResults.gnews, gnewsTest.length, 'articles');
+        } catch (e) {
+            console.log('GNews test failed:', e);
+        }
+        
+        try {
+            // Test NewsData
+            const newsdataTest = await this.fetchFromNewsData('technology', 5);
+            testResults.newsdata = newsdataTest.length > 0;
+            console.log('NewsData test:', testResults.newsdata, newsdataTest.length, 'articles');
+        } catch (e) {
+            console.log('NewsData test failed:', e);
+        }
+        
+        try {
+            // Test NewsAPI
+            const newsapiTest = await this.fetchFromNewsAPI('technology', 5);
+            testResults.newsapi = newsapiTest.length > 0;
+            console.log('NewsAPI test:', testResults.newsapi, newsapiTest.length, 'articles');
+        } catch (e) {
+            console.log('NewsAPI test failed:', e);
+        }
+        
+        try {
+            // Test Mediastack
+            const mediastackTest = await this.fetchFromMediastack('technology', 5);
+            testResults.mediastack = mediastackTest.length > 0;
+            console.log('Mediastack test:', testResults.mediastack, mediastackTest.length, 'articles');
+        } catch (e) {
+            console.log('Mediastack test failed:', e);
+        }
+        
+        try {
+            // Test CurrentsAPI
+            const currentsapiTest = await this.fetchFromCurrentsAPI('technology', 5);
+            testResults.currentsapi = currentsapiTest.length > 0;
+            console.log('CurrentsAPI test:', testResults.currentsapi, currentsapiTest.length, 'articles');
+        } catch (e) {
+            console.log('CurrentsAPI test failed:', e);
+        }
+        
+        console.log('API Test Results:', testResults);
+        return testResults;
+    }
 }
 
-// Export for use in other scripts
-window.NewsAPI = NewsAPI;
+// Create global instance
+window.newsAPI = new NewsAPI();
