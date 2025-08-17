@@ -123,6 +123,79 @@
           </div>
         </section>
 
+        <section class="settings-section" id="settings-ai-translation">
+          <h4><i class="fas fa-language"></i> AI Smart Translation</h4>
+          <div class="setting-item">
+            <label class="setting-label">
+              <span>Enable AI Translation</span>
+              <span class="setting-description">Real-time translation without page reloads</span>
+            </label>
+            <div class="setting-control">
+              <label class="toggle-switch">
+                <input type="checkbox" id="ai-translation-toggle" checked>
+                <span class="toggle-slider"></span>
+              </label>
+            </div>
+          </div>
+          <div class="setting-item">
+            <label class="setting-label">
+              <span>Language</span>
+              <span class="setting-description">Select your preferred language</span>
+            </label>
+            <div class="setting-control">
+              <select id="ai-language-select" class="language-select">
+                <!-- Languages will be populated by JavaScript -->
+              </select>
+            </div>
+          </div>
+          <div class="ai-translation-stats" id="ai-translation-stats" style="display: none;">
+            <div class="stat-item">
+              <span class="stat-label">Translated Elements:</span>
+              <span class="stat-value" id="translated-count">0</span>
+            </div>
+            <div class="stat-item">
+              <span class="stat-label">Cache Size:</span>
+              <span class="stat-value" id="translation-cache-size">0</span>
+            </div>
+          </div>
+        </section>
+
+        <section class="settings-section" id="settings-ai-tts">
+          <h4><i class="fas fa-volume-up"></i> AI Text-to-Speech</h4>
+          <div class="setting-item">
+            <label class="setting-label">
+              <span>Enable Text-to-Speech</span>
+              <span class="setting-description">Listen to articles and content</span>
+            </label>
+            <div class="setting-control">
+              <label class="toggle-switch">
+                <input type="checkbox" id="ai-tts-toggle" checked>
+                <span class="toggle-slider"></span>
+              </label>
+            </div>
+          </div>
+          <div class="setting-item">
+            <label class="setting-label">
+              <span>Voice Speed</span>
+              <span class="setting-description">Adjust speech rate</span>
+            </label>
+            <div class="setting-control">
+              <input type="range" id="tts-speed" min="0.5" max="2" step="0.1" value="0.9" class="speed-slider">
+              <span class="speed-value" id="tts-speed-value">0.9x</span>
+            </div>
+          </div>
+          <div class="ai-tts-stats" id="ai-tts-stats" style="display: none;">
+            <div class="stat-item">
+              <span class="stat-label">TTS Buttons:</span>
+              <span class="stat-value" id="tts-buttons-count">0</span>
+            </div>
+            <div class="stat-item">
+              <span class="stat-label">Status:</span>
+              <span class="stat-value" id="tts-status">Idle</span>
+            </div>
+          </div>
+        </section>
+
         <section class="settings-section" id="settings-notifications">
           <h4>Notifications</h4>
           <label class="toggle"><input type="checkbox" id="notifications-toggle" /> Enable push notifications</label>
@@ -506,6 +579,189 @@
       });
     }
   }
+
+  // === AI Translation ===
+  function initAITranslation() {
+    const translationToggle = document.getElementById('ai-translation-toggle');
+    const languageSelect = document.getElementById('ai-language-select');
+    const statsContainer = document.getElementById('ai-translation-stats');
+    
+    if (translationToggle) {
+      // Load saved preference
+      const saved = localStorage.getItem('ai_translation_enabled');
+      const isEnabled = saved === null ? true : JSON.parse(saved);
+      translationToggle.checked = isEnabled;
+      
+      // Update global AI translation instance
+      if (window.aiTranslationTTS) {
+        window.aiTranslationTTS.toggleTranslation(isEnabled);
+      }
+      
+      // Show/hide stats based on enabled state
+      if (statsContainer) {
+        statsContainer.style.display = isEnabled ? 'block' : 'none';
+        if (isEnabled) {
+          updateAITranslationStats();
+        }
+      }
+      
+      // Handle toggle changes
+      translationToggle.addEventListener('change', () => {
+        const enabled = translationToggle.checked;
+        
+        // Update global instance
+        if (window.aiTranslationTTS) {
+          window.aiTranslationTTS.toggleTranslation(enabled);
+        }
+        
+        // Update stats visibility
+        if (statsContainer) {
+          statsContainer.style.display = enabled ? 'block' : 'none';
+          if (enabled) {
+            updateAITranslationStats();
+          }
+        }
+      });
+    }
+    
+    if (languageSelect) {
+      // Populate language options
+      populateAILanguages();
+      
+      // Load saved language
+      const savedLanguage = localStorage.getItem('ai_translation_language') || 'en';
+      languageSelect.value = savedLanguage;
+      
+      // Handle language changes
+      languageSelect.addEventListener('change', () => {
+        const language = languageSelect.value;
+        
+        // Update global instance
+        if (window.aiTranslationTTS) {
+          window.aiTranslationTTS.setLanguage(language);
+        }
+        
+        // Update stats
+        updateAITranslationStats();
+      });
+    }
+  }
+
+  // === AI Text-to-Speech ===
+  function initAITTS() {
+    const ttsToggle = document.getElementById('ai-tts-toggle');
+    const ttsSpeed = document.getElementById('tts-speed');
+    const ttsSpeedValue = document.getElementById('tts-speed-value');
+    const statsContainer = document.getElementById('ai-tts-stats');
+    
+    if (ttsToggle) {
+      // Load saved preference
+      const saved = localStorage.getItem('ai_tts_enabled');
+      const isEnabled = saved === null ? true : JSON.parse(saved);
+      ttsToggle.checked = isEnabled;
+      
+      // Update global AI TTS instance
+      if (window.aiTranslationTTS) {
+        window.aiTranslationTTS.toggleTTS(isEnabled);
+      }
+      
+      // Show/hide stats based on enabled state
+      if (statsContainer) {
+        statsContainer.style.display = isEnabled ? 'block' : 'none';
+        if (isEnabled) {
+          updateAITTSStats();
+        }
+      }
+      
+      // Handle toggle changes
+      ttsToggle.addEventListener('change', () => {
+        const enabled = ttsToggle.checked;
+        
+        // Update global instance
+        if (window.aiTranslationTTS) {
+          window.aiTranslationTTS.toggleTTS(enabled);
+        }
+        
+        // Update stats visibility
+        if (statsContainer) {
+          statsContainer.style.display = enabled ? 'block' : 'none';
+          if (enabled) {
+            updateAITTSStats();
+          }
+        }
+      });
+    }
+    
+    if (ttsSpeed && ttsSpeedValue) {
+      // Load saved speed
+      const savedSpeed = localStorage.getItem('ai_tts_speed') || '0.9';
+      ttsSpeed.value = savedSpeed;
+      ttsSpeedValue.textContent = `${savedSpeed}x`;
+      
+      // Handle speed changes
+      ttsSpeed.addEventListener('input', () => {
+        const speed = ttsSpeed.value;
+        ttsSpeedValue.textContent = `${speed}x`;
+        localStorage.setItem('ai_tts_speed', speed);
+        
+        // Update global TTS speed
+        if (window.aiTranslationTTS) {
+          // Update TTS speed in the global instance
+          window.aiTranslationTTS.ttsSpeed = parseFloat(speed);
+        }
+      });
+    }
+  }
+
+  // === Helper Functions ===
+  function populateAILanguages() {
+    const languageSelect = document.getElementById('ai-language-select');
+    if (!languageSelect || !window.aiTranslationTTS) return;
+    
+    const languages = window.aiTranslationTTS.getSupportedLanguages();
+    languageSelect.innerHTML = '';
+    
+    Object.entries(languages).forEach(([code, lang]) => {
+      const option = document.createElement('option');
+      option.value = code;
+      option.textContent = `${lang.flag} ${lang.name} (${lang.native})`;
+      languageSelect.appendChild(option);
+    });
+  }
+
+  function updateAITranslationStats() {
+    if (!window.aiTranslationTTS) return;
+    
+    const translatedCount = document.getElementById('translated-count');
+    const cacheSize = document.getElementById('translation-cache-size');
+    
+    if (translatedCount) {
+      const translatedElements = document.querySelectorAll('[data-translated="true"]').length;
+      translatedCount.textContent = translatedElements;
+    }
+    
+    if (cacheSize) {
+      const cacheSizeValue = window.aiTranslationTTS.translationCache.size;
+      cacheSize.textContent = cacheSizeValue;
+    }
+  }
+
+  function updateAITTSStats() {
+    if (!window.aiTranslationTTS) return;
+    
+    const ttsButtonsCount = document.getElementById('tts-buttons-count');
+    const ttsStatus = document.getElementById('tts-status');
+    
+    if (ttsButtonsCount) {
+      const buttonsCount = document.querySelectorAll('.tts-button').length;
+      ttsButtonsCount.textContent = buttonsCount;
+    }
+    
+    if (ttsStatus) {
+      const status = window.aiTranslationTTS.speaking ? 'Speaking' : 'Idle';
+      ttsStatus.textContent = status;
+    }
+  }
   
   function updateAIEnhancementStats() {
     if (!window.aiImageEnhancement) return;
@@ -542,17 +798,21 @@
     if (document.readyState === 'loading') {
       document.addEventListener('DOMContentLoaded', () => {
         createToggleButton();
-        // Initialize AI enhancement after DOM is ready
+        // Initialize AI features after DOM is ready
         setTimeout(() => {
           initAIEnhancement();
-        }, 1000); // Wait for AI enhancement script to load
+          initAITranslation();
+          initAITTS();
+        }, 1000); // Wait for AI scripts to load
       });
     } else {
       createToggleButton();
-      // Initialize AI enhancement after DOM is ready
-      setTimeout(() => {
-        initAIEnhancement();
-      }, 1000); // Wait for AI enhancement script to load
+              // Initialize AI features after DOM is ready
+        setTimeout(() => {
+          initAIEnhancement();
+          initAITranslation();
+          initAITTS();
+        }, 1000); // Wait for AI scripts to load
     }
   }
 
