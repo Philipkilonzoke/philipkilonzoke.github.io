@@ -857,7 +857,7 @@
                 <nav class="nav">
                     <div class="nav-links">
                         <a href="/" class="nav-link active">Home</a>
-                        <a href="/latest" class="nav-link">Breaking</a>
+                        <a href="/breaking" class="nav-link">Breaking</a>
                         <a href="/kenya" class="nav-link">Kenya</a>
                         <a href="/world" class="nav-link">World</a>
                         <a href="/entertainment" class="nav-link">Entertainment</a>
@@ -1037,7 +1037,7 @@
                 </div>
                 
                 <div class="categories-grid">
-                    <a href="/latest" class="category-card">
+                    <a href="/breaking" class="category-card">
                         <div class="category-icon">
                             <i class="fas fa-bolt"></i>
                         </div>
@@ -1261,7 +1261,7 @@
                 <div class="footer-section">
                     <h4><i class="fas fa-list-ul"></i> News Categories</h4>
                     <div class="footer-links">
-                        <a href="/latest" data-category="latest" class="footer-link">
+                        <a href="/breaking" data-category="breaking" class="footer-link">
                             <i class="fas fa-bolt"></i> Breaking News
                         </a>
                         <a href="/kenya" data-category="kenya" class="footer-link">
@@ -1491,7 +1491,7 @@
                         window.location.href = `/${category}`;
                     } else {
                         // Fallback to latest page with search query
-                        window.location.href = `/latest?search=${encodeURIComponent(query)}`;
+                        window.location.href = `/breaking?search=${encodeURIComponent(query)}`;
                     }
                 }
             }

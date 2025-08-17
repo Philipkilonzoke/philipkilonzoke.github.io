@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Health News - Brightlens News</title>
+    <title>Breaking News - Brightlens News</title>
     
     <!-- PWA Meta Tags -->
     <link rel="manifest" href="/manifest.json" />
@@ -14,15 +14,15 @@
     <link rel="apple-touch-icon" href="/assets/icon-192.svg" />
     
     <!-- SEO Meta Tags -->
-    <meta name="description" content="Get the latest health news, medical breakthroughs, wellness tips, and healthcare updates from reliable sources worldwide.">
-    <meta name="keywords" content="health news, medical news, wellness, healthcare, medicine, fitness, nutrition, Brightlens">
+    <meta name="description" content="Get the latest breaking news from multiple reliable sources worldwide. Stay updated with recent developments and breaking stories.">
+    <meta name="keywords" content="breaking news, latest news, recent news, current events, Brightlens">
     <meta name="author" content="Philip Kilonzo">
     
     <!-- Open Graph Meta Tags -->
-    <meta property="og:title" content="Health News - Brightlens News">
-    <meta property="og:description" content="Get the latest health news and medical updates from reliable sources.">
+    <meta property="og:title" content="Breaking News - Brightlens News">
+    <meta property="og:description" content="Get the latest breaking news from multiple reliable sources worldwide.">
     <meta property="og:type" content="website">
-    <meta property="og:url" content="https://philipkilonzoke.github.io/health">
+    <meta property="og:url" content="https://philipkilonzoke.github.io/breaking">
     
     <!-- Critical CSS Inline for Faster Loading -->
     <style>
@@ -76,7 +76,7 @@
         <div class="loading-container">
             <div class="loading-spinner"></div>
             <h2>Brightlens News</h2>
-            <p>Loading health news...</p>
+            <p>Loading breaking news...</p>
         </div>
     </div>
 
@@ -90,19 +90,18 @@
                 <nav class="nav">
                     <div class="nav-links">
                         <a href="/" class="nav-link">Home</a>
-                        <a href="/breaking" class="nav-link">Breaking</a>
+                        <a href="/breaking" class="nav-link active">Breaking</a>
                         <a href="/kenya" class="nav-link">Kenya</a>
                         <a href="/world" class="nav-link">World</a>
                         <a href="/entertainment" class="nav-link">Entertainment</a>
                         <a href="/technology" class="nav-link">Technology</a>
                         <a href="/business" class="nav-link">Business</a>
                         <a href="/sports" class="nav-link">Sports</a>
-                        <a href="/health" class="nav-link active">Health</a>
-                        <a href="/lifestyle" class="nav-link">Lifestyle</a>
+                        <a href="/health" class="nav-link">Health</a>
                         <a href="/food" class="nav-link">Food</a>
                         <a href="/crypto" class="nav-link">Crypto</a>
                         <a href="/astronomy" class="nav-link">Astronomy</a>
-                        <a href="/aviation" class="nav-link">Aviation</a>
+                        <a href="/weather" class="nav-link">Weather</a>
                     </div>
                     <div class="nav-controls">
                         <button id="theme-toggle" class="theme-toggle" title="Change Theme">
@@ -123,7 +122,7 @@
         <div class="container">
             <!-- Category Title -->
             <div class="category-header">
-                <h2 id="category-title">Health News</h2>
+                <h2 id="category-title">Breaking News</h2>
                 <div class="category-meta">
                     <span id="article-count">Loading articles...</span>
                     <span id="last-updated"></span>
@@ -133,7 +132,7 @@
             <!-- News Loading -->
             <div id="news-loading" class="news-loading">
                 <div class="loading-spinner-small"></div>
-                <p>Fetching health news...</p>
+                <p>Fetching breaking news from multiple sources...</p>
             </div>
 
             <!-- News Error -->
@@ -216,26 +215,29 @@
                         <a href="/breaking" data-category="breaking" class="footer-link">
                             <i class="fas fa-bolt"></i> Breaking News
                         </a>
-                        <a href="/kenya" data-category="kenya" class="footer-link">
+                        <a href="/kenya" class="footer-link">
                             <i class="fas fa-map-marker-alt"></i> Kenya
                         </a>
-                        <a href="/world" data-category="world" class="footer-link">
+                        <a href="/world" class="footer-link">
                             <i class="fas fa-globe"></i> World
                         </a>
-                        <a href="/entertainment" data-category="entertainment" class="footer-link">
+                        <a href="/entertainment" class="footer-link">
                             <i class="fas fa-film"></i> Entertainment
                         </a>
-                        <a href="/technology" data-category="technology" class="footer-link">
+                        <a href="/technology" class="footer-link">
                             <i class="fas fa-microchip"></i> Technology
                         </a>
-                        <a href="/business" data-category="business" class="footer-link">
+                        <a href="/business" class="footer-link">
                             <i class="fas fa-chart-line"></i> Business
                         </a>
-                        <a href="/sports" data-category="sports" class="footer-link">
+                        <a href="/sports" class="footer-link">
                             <i class="fas fa-futbol"></i> Sports
                         </a>
-                        <a href="/health" data-category="health" class="footer-link">
+                        <a href="/health" class="footer-link">
                             <i class="fas fa-heartbeat"></i> Health
+                        </a>
+                        <a href="/lifestyle" class="footer-link">
+                            <i class="fas fa-spa"></i> Lifestyle
                         </a>
                     </div>
                 </div>
@@ -299,7 +301,7 @@
     <script src="js/category-news.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', () => {
-            window.categoryNews = new CategoryNews('health');
+            window.categoryNews = new CategoryNews('breaking');
         });
     </script>
 
