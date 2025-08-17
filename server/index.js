@@ -97,6 +97,48 @@ app.get('/api/live', async (req, res) => {
   }
 });
 
+// Simple RSS proxy endpoint
+app.get('/api/rss', async (req, res) => {
+  try {
+    const url = String(req.query.url || '').trim();
+    if (!url) return res.status(400).json({ error: 'url required' });
+
+    const cacheKey = `rss:${url}`;
+    const cached = getCache(cacheKey);
+    if (cached) return res.type('application/xml').send(cached);
+
+    const upstream = await fetch(url, { headers: { 'Accept': 'application/rss+xml, application/xml, text/xml, */*' } });
+    if (!upstream.ok) return res.status(upstream.status).json({ error: `Upstream ${upstream.status}` });
+    const text = await upstream.text();
+    setCache(cacheKey, text, 60 * 1000); // 60s cache
+    return res.type('application/xml').send(text);
+  } catch (e) {
+    console.error('RSS proxy error:', e.message);
+    return res.status(500).json({ error: e.message });
+  }
+});
+
+// Generic JSON proxy for APIs with limited headers
+app.get('/api/json', async (req, res) => {
+  try {
+    const url = String(req.query.url || '').trim();
+    if (!url) return res.status(400).json({ error: 'url required' });
+
+    const cacheKey = `json:${url}`;
+    const cached = getCache(cacheKey);
+    if (cached) return res.json(cached);
+
+    const upstream = await fetch(url, { headers: { 'Accept': 'application/json, */*' } });
+    if (!upstream.ok) return res.status(upstream.status).json({ error: `Upstream ${upstream.status}` });
+    const data = await upstream.json();
+    setCache(cacheKey, data, 60 * 1000);
+    return res.json(data);
+  } catch (e) {
+    console.error('JSON proxy error:', e.message);
+    return res.status(500).json({ error: e.message });
+  }
+});
+
 if (require.main === module) {
   app.listen(PORT, () => {
     console.log(`Live API running on :${PORT}`);

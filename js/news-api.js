@@ -983,6 +983,7 @@ class NewsAPI {
         try {
             // Try multiple CORS proxies as fallbacks
             const proxies = [
+                `/api/rss?url=${encodeURIComponent(rssUrl)}`,
                 `https://api.allorigins.win/get?url=${encodeURIComponent(rssUrl)}`,
                 `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(rssUrl)}`,
                 `https://cors-anywhere.herokuapp.com/${rssUrl}`,

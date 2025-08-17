@@ -432,7 +432,8 @@ async function loadRSSSource(source, retryCount = 0) {
         const parser = new RSSParser();
         
         // Try different CORS proxies
-        const proxyBase = CORS_PROXIES[retryCount % CORS_PROXIES.length];
+        const localProxy = `/api/rss?url=${encodeURIComponent(source.rss)}`;
+        const proxyBase = retryCount === 0 ? localProxy : CORS_PROXIES[(retryCount - 1) % CORS_PROXIES.length];
         const needsEncoding = proxyBase.includes('allorigins') || proxyBase.includes('codetabs');
         const isJina = proxyBase.includes('r.jina.ai');
         let proxyUrl;
