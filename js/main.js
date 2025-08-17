@@ -21,7 +21,7 @@ class BrightlensNews {
         this.showLoadingScreen();
         
         // Start loading news immediately after DOM with robust error handling
-        this.loadNews('latest').then(() => {
+        this.loadNews('breaking').then(() => {
             this.hideLoadingScreen();
         }).catch((error) => {
             console.error('Initial load failed:', error);

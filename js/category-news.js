@@ -139,14 +139,19 @@ class CategoryNews {
         this.showNewsLoading();
         
         try {
-            // Add timeout to prevent long loading times
-            const timeoutPromise = new Promise((_, reject) => 
-                setTimeout(() => reject(new Error('News loading timeout')), 8000)
-            );
-            
+            // Fetch with soft timeout: use whatever is ready by 8s, but do not fail the entire load
             const articlesPromise = this.loadNewsInternal();
-            
-            const articles = await Promise.race([articlesPromise, timeoutPromise]);
+            let articles = [];
+            try {
+                articles = await Promise.race([
+                    articlesPromise,
+                    new Promise(resolve => setTimeout(() => resolve(null), 8000))
+                ]);
+            } catch (_) {}
+            if (!Array.isArray(articles) || articles.length === 0) {
+                // If race timed out or returned empty, wait for the main promise to finish instead of erroring
+                articles = await articlesPromise;
+            }
             
             if (articles && articles.length > 0) {
                 this.allArticles = articles;
