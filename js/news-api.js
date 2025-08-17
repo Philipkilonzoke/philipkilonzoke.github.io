@@ -97,6 +97,26 @@ class NewsAPI {
                 return await this.fetchEnhancedHealthNews(limit);
             }
 
+            // Enhanced Sports news fetching with specialized sports sources
+            if (category === 'sports') {
+                return await this.fetchEnhancedSportsNews(limit);
+            }
+
+            // Enhanced Lifestyle news fetching with specialized lifestyle sources
+            if (category === 'lifestyle') {
+                return await this.fetchEnhancedLifestyleNews(limit);
+            }
+
+            // Enhanced Entertainment news fetching with specialized entertainment sources
+            if (category === 'entertainment') {
+                return await this.fetchEnhancedEntertainmentNews(limit);
+            }
+
+            // Enhanced World news fetching with comprehensive international sources
+            if (category === 'world') {
+                return await this.fetchEnhancedWorldNews(limit);
+            }
+
             // Fetch from all APIs simultaneously
             const promises = [
                 this.fetchFromGNews(category, limit),
@@ -140,7 +160,7 @@ class NewsAPI {
     /**
      * Enhanced sports news fetching with multiple specialized sources
      */
-    async fetchSportsNews(limit = 50) {
+    async fetchEnhancedSportsNews(limit = 50) {
         const cacheKey = `sports_enhanced_${limit}`;
         
         // Check cache first
@@ -458,7 +478,7 @@ class NewsAPI {
     /**
      * Enhanced lifestyle news fetching with specialized content
      */
-    async fetchLifestyleNews(limit = 50) {
+    async fetchEnhancedLifestyleNews(limit = 50) {
         const cacheKey = `lifestyle_enhanced_${limit}`;
         
         // Check cache first
@@ -528,6 +548,159 @@ class NewsAPI {
             console.error('Error fetching lifestyle news:', error);
             // Return lifestyle sample articles as fallback
             return this.getLifestyleSampleArticles(limit);
+        }
+    }
+
+    /**
+     * Enhanced entertainment news fetching with specialized content
+     */
+    async fetchEnhancedEntertainmentNews(limit = 50) {
+        const cacheKey = `entertainment_enhanced_${limit}`;
+        
+        // Check cache first
+        if (this.cache.has(cacheKey)) {
+            const cached = this.cache.get(cacheKey);
+            if (Date.now() - cached.timestamp < this.cacheTimeout) {
+                return cached.data;
+            }
+        }
+
+        try {
+            // Fetch from multiple sources including entertainment-specific endpoints
+            const promises = [
+                // Regular news APIs with entertainment category
+                this.fetchFromGNews('entertainment', limit),
+                this.fetchFromNewsData('entertainment', limit),
+                this.fetchFromNewsAPI('entertainment', limit),
+                this.fetchFromMediastack('entertainment', limit),
+                this.fetchFromCurrentsAPI('entertainment', limit),
+                
+                // Entertainment-specific news sources
+                this.fetchEntertainmentFromVariety(),
+                this.fetchEntertainmentFromHollywoodReporter(),
+                this.fetchEntertainmentFromDeadline(),
+                this.fetchEntertainmentFromEntertainmentWeekly(),
+                this.fetchEntertainmentFromRollingStone(),
+                this.fetchEntertainmentFromBillboard(),
+                this.fetchEntertainmentFromPitchfork(),
+                this.fetchEntertainmentFromNME()
+            ];
+
+            const results = await Promise.allSettled(promises);
+            
+            // Combine results from all APIs
+            let allArticles = [];
+            results.forEach((result, index) => {
+                if (result.status === 'fulfilled' && result.value) {
+                    allArticles = allArticles.concat(result.value);
+                } else {
+                    console.warn(`Entertainment source ${index + 1} failed:`, result.reason);
+                }
+            });
+
+            // Only use extended articles as absolute fallback if no real articles found
+            if (allArticles.length === 0) {
+                console.warn('No real entertainment articles found, using extended database fallback');
+                if (typeof ExtendedArticlesDB !== 'undefined') {
+                    const extendedDB = new ExtendedArticlesDB();
+                    allArticles = extendedDB.getExtendedEntertainmentNews('Entertainment News');
+                }
+            }
+
+            // Remove duplicates and sort by date
+            const uniqueArticles = this.removeDuplicates(allArticles);
+            const sortedArticles = uniqueArticles.sort((a, b) => 
+                new Date(b.publishedAt) - new Date(a.publishedAt)
+            );
+
+            // Cache the results
+            this.cache.set(cacheKey, {
+                data: sortedArticles,
+                timestamp: Date.now()
+            });
+
+            return sortedArticles;
+        } catch (error) {
+            console.error('Error fetching entertainment news:', error);
+            // Return entertainment sample articles as fallback
+            return this.getEntertainmentSampleArticles(limit);
+        }
+    }
+
+    /**
+     * Enhanced world news fetching with comprehensive international sources
+     */
+    async fetchEnhancedWorldNews(limit = 50) {
+        const cacheKey = `world_enhanced_${limit}`;
+        
+        // Check cache first
+        if (this.cache.has(cacheKey)) {
+            const cached = this.cache.get(cacheKey);
+            if (Date.now() - cached.timestamp < this.cacheTimeout) {
+                return cached.data;
+            }
+        }
+
+        try {
+            // Fetch from multiple sources including international news outlets
+            const promises = [
+                // Regular news APIs with world/international focus
+                this.fetchFromGNews('world', limit),
+                this.fetchFromNewsData('world', limit),
+                this.fetchFromNewsAPI('world', limit),
+                this.fetchFromMediastack('world', limit),
+                this.fetchFromCurrentsAPI('world', limit),
+                
+                // International news sources
+                this.fetchWorldFromBBC(),
+                this.fetchWorldFromReuters(),
+                this.fetchWorldFromAP(),
+                this.fetchWorldFromAlJazeera(),
+                this.fetchWorldFromFrance24(),
+                this.fetchWorldFromDW(),
+                this.fetchWorldFromEuronews(),
+                this.fetchWorldFromCNN(),
+                this.fetchWorldFromNPR()
+            ];
+
+            const results = await Promise.allSettled(promises);
+            
+            // Combine results from all APIs
+            let allArticles = [];
+            results.forEach((result, index) => {
+                if (result.status === 'fulfilled' && result.value) {
+                    allArticles = allArticles.concat(result.value);
+                } else {
+                    console.warn(`World news source ${index + 1} failed:`, result.reason);
+                }
+            });
+
+            // Only use extended articles as absolute fallback if no real articles found
+            if (allArticles.length === 0) {
+                console.warn('No real world articles found, using extended database fallback');
+                if (typeof ExtendedArticlesDB !== 'undefined') {
+                    const extendedDB = new ExtendedArticlesDB();
+                    allArticles = extendedDB.getExtendedWorldNews('World News');
+                }
+            }
+
+            // Remove duplicates and sort by date
+            const uniqueArticles = this.removeDuplicates(allArticles);
+            const sortedArticles = uniqueArticles.sort((a, b) => 
+                new Date(b.publishedAt) - new Date(a.publishedAt)
+            );
+
+            // Cache the results
+            this.cache.set(cacheKey, {
+                data: sortedArticles,
+                timestamp: Date.now()
+            });
+
+            return sortedArticles;
+        } catch (error) {
+            console.error('Error fetching world news:', error);
+            // Return world sample articles as fallback
+            return this.getWorldSampleArticles(limit);
         }
     }
 
@@ -2212,6 +2385,332 @@ class NewsAPI {
             return [];
         } catch (error) {
             console.error('Medscape fetch error:', error);
+            return [];
+        }
+    }
+
+    // Enhanced Entertainment News Source Methods
+
+    /**
+     * Fetch from Variety
+     */
+    async fetchEntertainmentFromVariety() {
+        try {
+            const rssUrl = 'https://variety.com/feed';
+            const articles = await this.fetchRSSFeed(rssUrl, 'Variety');
+            return articles.filter(article => 
+                article.title.toLowerCase().includes('entertainment') ||
+                article.title.toLowerCase().includes('film') ||
+                article.title.toLowerCase().includes('tv') ||
+                article.title.toLowerCase().includes('music') ||
+                article.title.toLowerCase().includes('celebrity')
+            );
+        } catch (error) {
+            console.error('Variety fetch error:', error);
+            return [];
+        }
+    }
+
+    /**
+     * Fetch from Hollywood Reporter
+     */
+    async fetchEntertainmentFromHollywoodReporter() {
+        try {
+            const rssUrl = 'https://www.hollywoodreporter.com/feed';
+            const articles = await this.fetchRSSFeed(rssUrl, 'Hollywood Reporter');
+            return articles.filter(article => 
+                article.title.toLowerCase().includes('entertainment') ||
+                article.title.toLowerCase().includes('film') ||
+                article.title.toLowerCase().includes('tv') ||
+                article.title.toLowerCase().includes('music') ||
+                article.title.toLowerCase().includes('celebrity')
+            );
+        } catch (error) {
+            console.error('Hollywood Reporter fetch error:', error);
+            return [];
+        }
+    }
+
+    /**
+     * Fetch from Deadline
+     */
+    async fetchEntertainmentFromDeadline() {
+        try {
+            const rssUrl = 'https://deadline.com/feed';
+            const articles = await this.fetchRSSFeed(rssUrl, 'Deadline');
+            return articles.filter(article => 
+                article.title.toLowerCase().includes('entertainment') ||
+                article.title.toLowerCase().includes('film') ||
+                article.title.toLowerCase().includes('tv') ||
+                article.title.toLowerCase().includes('music') ||
+                article.title.toLowerCase().includes('celebrity')
+            );
+        } catch (error) {
+            console.error('Deadline fetch error:', error);
+            return [];
+        }
+    }
+
+    /**
+     * Fetch from Entertainment Weekly
+     */
+    async fetchEntertainmentFromEntertainmentWeekly() {
+        try {
+            const rssUrl = 'https://ew.com/feed';
+            const articles = await this.fetchRSSFeed(rssUrl, 'Entertainment Weekly');
+            return articles.filter(article => 
+                article.title.toLowerCase().includes('entertainment') ||
+                article.title.toLowerCase().includes('film') ||
+                article.title.toLowerCase().includes('tv') ||
+                article.title.toLowerCase().includes('music') ||
+                article.title.toLowerCase().includes('celebrity')
+            );
+        } catch (error) {
+            console.error('Entertainment Weekly fetch error:', error);
+            return [];
+        }
+    }
+
+    /**
+     * Fetch from Rolling Stone
+     */
+    async fetchEntertainmentFromRollingStone() {
+        try {
+            const rssUrl = 'https://www.rollingstone.com/feed';
+            const articles = await this.fetchRSSFeed(rssUrl, 'Rolling Stone');
+            return articles.filter(article => 
+                article.title.toLowerCase().includes('entertainment') ||
+                article.title.toLowerCase().includes('film') ||
+                article.title.toLowerCase().includes('tv') ||
+                article.title.toLowerCase().includes('music') ||
+                article.title.toLowerCase().includes('celebrity')
+            );
+        } catch (error) {
+            console.error('Rolling Stone fetch error:', error);
+            return [];
+        }
+    }
+
+    /**
+     * Fetch from Billboard
+     */
+    async fetchEntertainmentFromBillboard() {
+        try {
+            const rssUrl = 'https://www.billboard.com/feed';
+            const articles = await this.fetchRSSFeed(rssUrl, 'Billboard');
+            return articles.filter(article => 
+                article.title.toLowerCase().includes('entertainment') ||
+                article.title.toLowerCase().includes('film') ||
+                article.title.toLowerCase().includes('tv') ||
+                article.title.toLowerCase().includes('music') ||
+                article.title.toLowerCase().includes('celebrity')
+            );
+        } catch (error) {
+            console.error('Billboard fetch error:', error);
+            return [];
+        }
+    }
+
+    /**
+     * Fetch from Pitchfork
+     */
+    async fetchEntertainmentFromPitchfork() {
+        try {
+            const rssUrl = 'https://pitchfork.com/feed';
+            const articles = await this.fetchRSSFeed(rssUrl, 'Pitchfork');
+            return articles.filter(article => 
+                article.title.toLowerCase().includes('entertainment') ||
+                article.title.toLowerCase().includes('film') ||
+                article.title.toLowerCase().includes('tv') ||
+                article.title.toLowerCase().includes('music') ||
+                article.title.toLowerCase().includes('celebrity')
+            );
+        } catch (error) {
+            console.error('Pitchfork fetch error:', error);
+            return [];
+        }
+    }
+
+    /**
+     * Fetch from NME
+     */
+    async fetchEntertainmentFromNME() {
+        try {
+            const rssUrl = 'https://www.nme.com/feed';
+            const articles = await this.fetchRSSFeed(rssUrl, 'NME');
+            return articles.filter(article => 
+                article.title.toLowerCase().includes('entertainment') ||
+                article.title.toLowerCase().includes('film') ||
+                article.title.toLowerCase().includes('tv') ||
+                article.title.toLowerCase().includes('music') ||
+                article.title.toLowerCase().includes('celebrity')
+            );
+        } catch (error) {
+            console.error('NME fetch error:', error);
+            return [];
+        }
+    }
+
+    // Enhanced World News Source Methods
+
+    /**
+     * Fetch from BBC World
+     */
+    async fetchWorldFromBBC() {
+        try {
+            const rssUrl = 'https://feeds.bbci.co.uk/news/world/rss.xml';
+            const articles = await this.fetchRSSFeed(rssUrl, 'BBC World');
+            return articles.filter(article => 
+                article.title.toLowerCase().includes('world') ||
+                article.title.toLowerCase().includes('international') ||
+                article.title.toLowerCase().includes('global')
+            );
+        } catch (error) {
+            console.error('BBC World fetch error:', error);
+            return [];
+        }
+    }
+
+    /**
+     * Fetch from Reuters World
+     */
+    async fetchWorldFromReuters() {
+        try {
+            const rssUrl = 'https://feeds.reuters.com/reuters/worldNews';
+            const articles = await this.fetchRSSFeed(rssUrl, 'Reuters World');
+            return articles.filter(article => 
+                article.title.toLowerCase().includes('world') ||
+                article.title.toLowerCase().includes('international') ||
+                article.title.toLowerCase().includes('global')
+            );
+        } catch (error) {
+            console.error('Reuters World fetch error:', error);
+            return [];
+        }
+    }
+
+    /**
+     * Fetch from Associated Press World
+     */
+    async fetchWorldFromAP() {
+        try {
+            const rssUrl = 'https://feeds.apnews.com/rss/apf-worldnews';
+            const articles = await this.fetchRSSFeed(rssUrl, 'Associated Press World');
+            return articles.filter(article => 
+                article.title.toLowerCase().includes('world') ||
+                article.title.toLowerCase().includes('international') ||
+                article.title.toLowerCase().includes('global')
+            );
+        } catch (error) {
+            console.error('Associated Press World fetch error:', error);
+            return [];
+        }
+    }
+
+    /**
+     * Fetch from Al Jazeera
+     */
+    async fetchWorldFromAlJazeera() {
+        try {
+            const rssUrl = 'https://www.aljazeera.com/xml/rss/all.xml';
+            const articles = await this.fetchRSSFeed(rssUrl, 'Al Jazeera');
+            return articles.filter(article => 
+                article.title.toLowerCase().includes('world') ||
+                article.title.toLowerCase().includes('international') ||
+                article.title.toLowerCase().includes('global')
+            );
+        } catch (error) {
+            console.error('Al Jazeera fetch error:', error);
+            return [];
+        }
+    }
+
+    /**
+     * Fetch from France 24
+     */
+    async fetchWorldFromFrance24() {
+        try {
+            const rssUrl = 'https://www.france24.com/en/rss';
+            const articles = await this.fetchRSSFeed(rssUrl, 'France 24');
+            return articles.filter(article => 
+                article.title.toLowerCase().includes('world') ||
+                article.title.toLowerCase().includes('international') ||
+                article.title.toLowerCase().includes('global')
+            );
+        } catch (error) {
+            console.error('France 24 fetch error:', error);
+            return [];
+        }
+    }
+
+    /**
+     * Fetch from Deutsche Welle
+     */
+    async fetchWorldFromDW() {
+        try {
+            const rssUrl = 'https://rss.dw.com/xml/rss-en-all';
+            const articles = await this.fetchRSSFeed(rssUrl, 'Deutsche Welle');
+            return articles.filter(article => 
+                article.title.toLowerCase().includes('world') ||
+                article.title.toLowerCase().includes('international') ||
+                article.title.toLowerCase().includes('global')
+            );
+        } catch (error) {
+            console.error('Deutsche Welle fetch error:', error);
+            return [];
+        }
+    }
+
+    /**
+     * Fetch from Euronews
+     */
+    async fetchWorldFromEuronews() {
+        try {
+            const rssUrl = 'https://www.euronews.com/rss';
+            const articles = await this.fetchRSSFeed(rssUrl, 'Euronews');
+            return articles.filter(article => 
+                article.title.toLowerCase().includes('world') ||
+                article.title.toLowerCase().includes('international') ||
+                article.title.toLowerCase().includes('global')
+            );
+        } catch (error) {
+            console.error('Euronews fetch error:', error);
+            return [];
+        }
+    }
+
+    /**
+     * Fetch from CNN World
+     */
+    async fetchWorldFromCNN() {
+        try {
+            const rssUrl = 'https://rss.cnn.com/rss/edition_world.rss';
+            const articles = await this.fetchRSSFeed(rssUrl, 'CNN World');
+            return articles.filter(article => 
+                article.title.toLowerCase().includes('world') ||
+                article.title.toLowerCase().includes('international') ||
+                article.title.toLowerCase().includes('global')
+            );
+        } catch (error) {
+            console.error('CNN World fetch error:', error);
+            return [];
+        }
+    }
+
+    /**
+     * Fetch from NPR World
+     */
+    async fetchWorldFromNPR() {
+        try {
+            const rssUrl = 'https://feeds.npr.org/1004/rss.xml';
+            const articles = await this.fetchRSSFeed(rssUrl, 'NPR World');
+            return articles.filter(article => 
+                article.title.toLowerCase().includes('world') ||
+                article.title.toLowerCase().includes('international') ||
+                article.title.toLowerCase().includes('global')
+            );
+        } catch (error) {
+            console.error('NPR World fetch error:', error);
             return [];
         }
     }
