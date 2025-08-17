@@ -130,6 +130,26 @@ class NewsAPI {
                 this.fetchFromCurrentsAPI(category, limit)
             ];
 
+            // Add REAL RSS feeds for breaking news (latest) - ACTUAL REAL-TIME CONTENT
+            if (category === 'latest') {
+                promises.push(
+                    this.fetchRSSFeed('https://feeds.bbci.co.uk/news/rss.xml', 'BBC News'),
+                    this.fetchRSSFeed('https://rss.cnn.com/rss/edition.rss', 'CNN'),
+                    this.fetchRSSFeed('https://feeds.reuters.com/reuters/topNews', 'Reuters'),
+                    this.fetchRSSFeed('https://feeds.npr.org/1001/rss.xml', 'NPR'),
+                    this.fetchRSSFeed('https://feeds.apnews.com/rss/apf-topnews', 'Associated Press'),
+                    this.fetchRSSFeed('https://www.theguardian.com/world/rss', 'The Guardian'),
+                    this.fetchRSSFeed('https://www.nytimes.com/svc/collections/v1/publish/https://www.nytimes.com/section/world/rss.xml', 'New York Times'),
+                    this.fetchRSSFeed('https://www.washingtonpost.com/world/?outputType=rss', 'Washington Post'),
+                    this.fetchRSSFeed('https://www.latimes.com/world/rss2.0.xml', 'Los Angeles Times'),
+                    this.fetchRSSFeed('https://www.abc.net.au/news/rss.xml', 'ABC News'),
+                    this.fetchRSSFeed('https://www.cbc.ca/cmlink/rss-topstories', 'CBC News'),
+                    this.fetchRSSFeed('https://www.aljazeera.com/xml/rss/all.xml', 'Al Jazeera'),
+                    this.fetchRSSFeed('https://www.france24.com/en/rss', 'France 24'),
+                    this.fetchRSSFeed('https://rss.dw.com/xml/rss-en-all', 'Deutsche Welle')
+                );
+            }
+
             // Add timeout to prevent long loading times
             const timeoutPromise = new Promise((_, reject) => 
                 setTimeout(() => reject(new Error('API fetch timeout')), 5000)
@@ -282,12 +302,31 @@ class NewsAPI {
         try {
             // Fetch from multiple sources including Kenya-specific APIs and RSS feeds
             const promises = [
-                // Original API sources with Kenya focus (increase overall volume)
-                this.fetchFromGNews('kenya', Math.floor(limit * 0.4)),
-                this.fetchFromNewsData('kenya', Math.floor(limit * 0.4)),
-                this.fetchFromNewsAPI('kenya', Math.floor(limit * 0.4)),
-                this.fetchFromMediastack('kenya', Math.floor(limit * 0.4)),
-                this.fetchFromCurrentsAPI('kenya', Math.floor(limit * 0.4)),
+                // Original API sources with Kenya focus - INCREASED LIMITS
+                this.fetchFromGNews('kenya', Math.floor(limit * 0.3)),
+                this.fetchFromNewsData('kenya', Math.floor(limit * 0.3)),
+                this.fetchFromNewsAPI('kenya', Math.floor(limit * 0.3)),
+                this.fetchFromMediastack('kenya', Math.floor(limit * 0.3)),
+                this.fetchFromCurrentsAPI('kenya', Math.floor(limit * 0.3)),
+                
+                // REAL RSS feeds for Kenya news - ACTUAL REAL-TIME CONTENT
+                this.fetchRSSFeed('https://www.nation.co.ke/rss', 'Nation Africa'),
+                this.fetchRSSFeed('https://www.standardmedia.co.ke/rss', 'The Standard'),
+                this.fetchRSSFeed('https://www.capitalfm.co.ke/rss', 'Capital FM'),
+                this.fetchRSSFeed('https://citizentv.co.ke/rss', 'Citizen TV'),
+                this.fetchRSSFeed('https://www.tuko.co.ke/rss', 'Tuko News'),
+                this.fetchRSSFeed('https://www.the-star.co.ke/rss', 'The Star Kenya'),
+                this.fetchRSSFeed('https://www.kbc.co.ke/rss', 'KBC News'),
+                this.fetchRSSFeed('https://www.people.co.ke/rss', 'People Daily'),
+                this.fetchRSSFeed('https://allafrica.com/kenya/rss.xml', 'AllAfrica Kenya'),
+                this.fetchRSSFeed('https://www.bbc.com/news/world/africa/rss.xml', 'BBC Africa'),
+                this.fetchRSSFeed('https://www.businessdailyafrica.com/rss', 'Business Daily'),
+                this.fetchRSSFeed('https://www.ntv.co.ke/rss', 'NTV Kenya'),
+                this.fetchRSSFeed('https://www.ktnnews.co.ke/rss', 'KTN News'),
+                this.fetchRSSFeed('https://www.kenyans.co.ke/rss', 'Kenyans.co.ke'),
+                this.fetchRSSFeed('https://www.nairobinews.co.ke/rss', 'Nairobi News'),
+                this.fetchRSSFeed('https://www.taifa.co.ke/rss', 'Taifa Leo'),
+                this.fetchRSSFeed('https://www.kahawa.co.ke/rss', 'Kahawa Tungu'),
                 
                 // Kenya-specific RSS feeds and APIs
                 this.fetchFromNationAfrica(),
@@ -545,12 +584,29 @@ class NewsAPI {
         try {
             // Fetch from multiple sources including lifestyle-specific endpoints
             const promises = [
-                // Regular news APIs with lifestyle/health category mapping
-                this.fetchFromGNews('lifestyle', limit),
-                this.fetchFromNewsData('lifestyle', limit),
-                this.fetchFromNewsAPI('lifestyle', limit),
-                this.fetchFromMediastack('lifestyle', limit),
-                this.fetchFromCurrentsAPI('lifestyle', limit),
+                // Regular news APIs with lifestyle/health category mapping - INCREASED LIMITS
+                this.fetchFromGNews('lifestyle', Math.floor(limit * 0.2)),
+                this.fetchFromNewsData('lifestyle', Math.floor(limit * 0.2)),
+                this.fetchFromNewsAPI('lifestyle', Math.floor(limit * 0.2)),
+                this.fetchFromMediastack('lifestyle', Math.floor(limit * 0.2)),
+                this.fetchFromCurrentsAPI('lifestyle', Math.floor(limit * 0.2)),
+                
+                // REAL RSS feeds for lifestyle - ACTUAL REAL-TIME CONTENT
+                this.fetchRSSFeed('https://www.vogue.com/feed', 'Vogue'),
+                this.fetchRSSFeed('https://www.elle.com/rss/all.xml', 'Elle'),
+                this.fetchRSSFeed('https://www.buzzfeed.com/lifestyle.xml', 'BuzzFeed Lifestyle'),
+                this.fetchRSSFeed('https://www.refinery29.com/rss.xml', 'Refinery29'),
+                this.fetchRSSFeed('https://www.wellandgood.com/feed/', 'Well+Good'),
+                this.fetchRSSFeed('https://www.travelandleisure.com/rss', 'Travel + Leisure'),
+                this.fetchRSSFeed('https://www.foodnetwork.com/rss.xml', 'Food Network'),
+                this.fetchRSSFeed('https://www.architecturaldigest.com/rss', 'Architectural Digest'),
+                this.fetchRSSFeed('https://www.mindbodygreen.com/rss.xml', 'MindBodyGreen'),
+                this.fetchRSSFeed('https://www.self.com/rss.xml', 'SELF'),
+                this.fetchRSSFeed('https://www.cosmopolitan.com/rss/', 'Cosmopolitan'),
+                this.fetchRSSFeed('https://www.glamour.com/rss', 'Glamour'),
+                this.fetchRSSFeed('https://www.health.com/rss/all.xml', 'Health.com'),
+                this.fetchRSSFeed('https://www.shape.com/rss.xml', 'Shape'),
+                this.fetchRSSFeed('https://www.fitness.com/rss', 'Fitness'),
                 
                 // Lifestyle-specific news sources
                 this.fetchLifestyleFromVogue(),
@@ -621,12 +677,29 @@ class NewsAPI {
         try {
             // Fetch from multiple sources including entertainment-specific endpoints
             const promises = [
-                // Regular news APIs with entertainment category
-                this.fetchFromGNews('entertainment', limit),
-                this.fetchFromNewsData('entertainment', limit),
-                this.fetchFromNewsAPI('entertainment', limit),
-                this.fetchFromMediastack('entertainment', limit),
-                this.fetchFromCurrentsAPI('entertainment', limit),
+                // Regular news APIs with entertainment category - INCREASED LIMITS
+                this.fetchFromGNews('entertainment', Math.floor(limit * 0.2)),
+                this.fetchFromNewsData('entertainment', Math.floor(limit * 0.2)),
+                this.fetchFromNewsAPI('entertainment', Math.floor(limit * 0.2)),
+                this.fetchFromMediastack('entertainment', Math.floor(limit * 0.2)),
+                this.fetchFromCurrentsAPI('entertainment', Math.floor(limit * 0.2)),
+                
+                // REAL RSS feeds for entertainment - ACTUAL REAL-TIME CONTENT
+                this.fetchRSSFeed('https://variety.com/feed', 'Variety'),
+                this.fetchRSSFeed('https://www.hollywoodreporter.com/feed', 'Hollywood Reporter'),
+                this.fetchRSSFeed('https://deadline.com/feed', 'Deadline'),
+                this.fetchRSSFeed('https://ew.com/feed', 'Entertainment Weekly'),
+                this.fetchRSSFeed('https://www.rollingstone.com/feed', 'Rolling Stone'),
+                this.fetchRSSFeed('https://www.billboard.com/feed', 'Billboard'),
+                this.fetchRSSFeed('https://pitchfork.com/feed', 'Pitchfork'),
+                this.fetchRSSFeed('https://www.nme.com/feed', 'NME'),
+                this.fetchRSSFeed('https://www.mtv.com/rss.xml', 'MTV'),
+                this.fetchRSSFeed('https://www.eonline.com/rss.xml', 'E! Online'),
+                this.fetchRSSFeed('https://www.usmagazine.com/rss.xml', 'US Weekly'),
+                this.fetchRSSFeed('https://www.people.com/rss.xml', 'People'),
+                this.fetchRSSFeed('https://www.tmz.com/rss.xml', 'TMZ'),
+                this.fetchRSSFeed('https://www.etonline.com/rss.xml', 'Entertainment Tonight'),
+                this.fetchRSSFeed('https://www.accesshollywood.com/rss.xml', 'Access Hollywood'),
                 
                 // Entertainment-specific news sources
                 this.fetchEntertainmentFromVariety(),
@@ -697,12 +770,29 @@ class NewsAPI {
         try {
             // Fetch from multiple sources including international news outlets
             const promises = [
-                // Regular news APIs with world/international focus
-                this.fetchFromGNews('world', limit),
-                this.fetchFromNewsData('world', limit),
+                // Regular news APIs with world/international focus - INCREASED LIMITS
+                this.fetchFromGNews('world', Math.floor(limit * 0.2)),
+                this.fetchFromNewsData('world', Math.floor(limit * 0.2)),
                 this.fetchFromNewsAPI('world', limit),
-                this.fetchFromMediastack('world', limit),
-                this.fetchFromCurrentsAPI('world', limit),
+                this.fetchFromMediastack('world', Math.floor(limit * 0.2)),
+                this.fetchFromCurrentsAPI('world', Math.floor(limit * 0.2)),
+                
+                // REAL RSS feeds for world news - ACTUAL REAL-TIME CONTENT
+                this.fetchRSSFeed('https://feeds.bbci.co.uk/news/world/rss.xml', 'BBC World'),
+                this.fetchRSSFeed('https://feeds.reuters.com/reuters/worldNews', 'Reuters World'),
+                this.fetchRSSFeed('https://feeds.apnews.com/rss/apf-worldnews', 'Associated Press World'),
+                this.fetchRSSFeed('https://www.aljazeera.com/xml/rss/all.xml', 'Al Jazeera'),
+                this.fetchRSSFeed('https://www.france24.com/en/rss', 'France 24'),
+                this.fetchRSSFeed('https://rss.dw.com/xml/rss-en-all', 'Deutsche Welle'),
+                this.fetchRSSFeed('https://www.euronews.com/rss', 'Euronews'),
+                this.fetchRSSFeed('https://rss.cnn.com/rss/edition_world.rss', 'CNN World'),
+                this.fetchRSSFeed('https://feeds.npr.org/1004/rss.xml', 'NPR World'),
+                this.fetchRSSFeed('https://www.theguardian.com/world/rss', 'Guardian World'),
+                this.fetchRSSFeed('https://www.nytimes.com/svc/collections/v1/publish/https://www.nytimes.com/section/world/rss.xml', 'New York Times World'),
+                this.fetchRSSFeed('https://www.washingtonpost.com/world/?outputType=rss', 'Washington Post World'),
+                this.fetchRSSFeed('https://www.latimes.com/world/rss2.0.xml', 'Los Angeles Times World'),
+                this.fetchRSSFeed('https://www.abc.net.au/news/world/rss.xml', 'ABC World'),
+                this.fetchRSSFeed('https://www.cbc.ca/cmlink/rss-world', 'CBC World'),
                 
                 // International news sources
                 this.fetchWorldFromBBC(),
