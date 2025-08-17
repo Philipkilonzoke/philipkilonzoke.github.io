@@ -199,26 +199,30 @@ class NewsAPI {
         try {
             // Fetch from multiple sources including ESPN API and sports-specific endpoints
             const promises = [
-                // Regular news APIs with sports category
-                this.fetchFromGNews('sports', limit),
-                this.fetchFromNewsData('sports', limit),
-                this.fetchFromNewsAPI('sports', limit),
-                this.fetchFromMediastack('sports', limit),
-                this.fetchFromCurrentsAPI('sports', limit),
+                // Regular news APIs with sports category - INCREASED LIMITS
+                this.fetchFromGNews('sports', Math.floor(limit * 0.3)),
+                this.fetchFromNewsData('sports', Math.floor(limit * 0.3)),
+                this.fetchFromNewsAPI('sports', Math.floor(limit * 0.3)),
+                this.fetchFromMediastack('sports', Math.floor(limit * 0.3)),
+                this.fetchFromCurrentsAPI('sports', Math.floor(limit * 0.3)),
                 
-                // ESPN API integration
+                // REAL RSS feeds for sports - ACTUAL REAL-TIME CONTENT
+                this.fetchRSSFeed('https://feeds.bbci.co.uk/sport/rss.xml', 'BBC Sport'),
+                this.fetchRSSFeed('https://www.espn.com/espn/rss/news', 'ESPN'),
+                this.fetchRSSFeed('https://www.skysports.com/rss/0,20514,11661,00.xml', 'Sky Sports'),
+                this.fetchRSSFeed('https://www.goal.com/en/feeds/news', 'Goal.com'),
+                this.fetchRSSFeed('https://www.bleacherreport.com/rss', 'Bleacher Report'),
+                this.fetchRSSFeed('https://www.sportingnews.com/rss', 'Sporting News'),
+                this.fetchRSSFeed('https://www.theguardian.com/sport/rss', 'Guardian Sport'),
+                this.fetchRSSFeed('https://www.foxsports.com/rss', 'Fox Sports'),
+                this.fetchRSSFeed('https://www.cbssports.com/rss', 'CBS Sports'),
+                this.fetchRSSFeed('https://sports.yahoo.com/rss', 'Yahoo Sports'),
+                
+                // Additional real sports sources
                 this.fetchFromESPN(),
-                
-                // Sports-specific news sources
                 this.fetchFromSportsAPIs(),
-                
-                // Additional sports coverage
                 this.fetchFromSportsNewsAPI(),
-                
-                // Real-time sports updates
                 this.fetchFromRapidSports(),
-                
-                // Enhanced sports sources - new additions
                 this.fetchFromSkySports(),
                 this.fetchFromBBCSport(),
                 this.fetchFromCBSSports(),
@@ -445,12 +449,24 @@ class NewsAPI {
         try {
             // Fetch from multiple sources including major health news outlets
             const promises = [
-                // Original API sources with health focus
-                this.fetchFromGNews('health', Math.floor(limit * 0.15)),
-                this.fetchFromNewsData('health', Math.floor(limit * 0.15)),
-                this.fetchFromNewsAPI('health', Math.floor(limit * 0.15)),
-                this.fetchFromMediastack('health', Math.floor(limit * 0.15)),
-                this.fetchFromCurrentsAPI('health', Math.floor(limit * 0.15)),
+                // Original API sources with health focus - INCREASED LIMITS
+                this.fetchFromGNews('health', Math.floor(limit * 0.2)),
+                this.fetchFromNewsData('health', Math.floor(limit * 0.2)),
+                this.fetchFromNewsAPI('health', Math.floor(limit * 0.2)),
+                this.fetchFromMediastack('health', Math.floor(limit * 0.2)),
+                this.fetchFromCurrentsAPI('health', Math.floor(limit * 0.2)),
+                
+                // REAL RSS feeds for health - ACTUAL REAL-TIME CONTENT
+                this.fetchRSSFeed('https://www.medicalnewstoday.com/rss.xml', 'Medical News Today'),
+                this.fetchRSSFeed('https://www.healthline.com/rss/all', 'Healthline'),
+                this.fetchRSSFeed('https://www.webmd.com/news/rss/default.xml', 'WebMD'),
+                this.fetchRSSFeed('https://www.sciencedaily.com/rss/health_medicine.xml', 'Science Daily Health'),
+                this.fetchRSSFeed('https://www.who.int/rss-feeds/news-english.xml', 'WHO News'),
+                this.fetchRSSFeed('https://www.cdc.gov/rss/news.xml', 'CDC Newsroom'),
+                this.fetchRSSFeed('https://www.nature.com/subjects/health-sciences.rss', 'Nature Health'),
+                this.fetchRSSFeed('https://www.mayoclinic.org/rss/news.xml', 'Mayo Clinic News'),
+                this.fetchRSSFeed('https://www.hopkinsmedicine.org/news/rss.xml', 'Johns Hopkins Health'),
+                this.fetchRSSFeed('https://www.nih.gov/news-events/rss-feeds', 'NIH News'),
                 
                 // Major health news sources
                 this.fetchFromMedicalNewsToday(),
@@ -1615,7 +1631,8 @@ class NewsAPI {
      * Get sample articles for fallback when APIs fail
      */
     getSampleArticles(category, source = 'News API') {
-        // Provide reliable fallback articles to ensure users always see content
+        // MINIMAL fallback articles - only used when ALL real sources fail
+        // These are NOT real-time and should rarely be used
         const fallbackArticles = {
             sports: [
                 {
