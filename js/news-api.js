@@ -869,12 +869,25 @@ class NewsAPI {
                 const enclosure = item.querySelector('enclosure');
                 const imageUrl = enclosure?.getAttribute('url') || '';
                 
+                // Convert pubDate to proper ISO format
+                let publishedAt = new Date().toISOString(); // fallback to current time
+                if (pubDate) {
+                    try {
+                        const date = new Date(pubDate);
+                        if (!isNaN(date.getTime())) {
+                            publishedAt = date.toISOString();
+                        }
+                    } catch (e) {
+                        console.warn('Invalid date format:', pubDate);
+                    }
+                }
+                
                 articles.push({
                     title: title.trim(),
                     description: description.trim(),
                     url: link.trim(),
                     urlToImage: imageUrl,
-                    publishedAt: pubDate,
+                    publishedAt: publishedAt,
                     source: { name: sourceName }
                 });
             }
