@@ -997,7 +997,7 @@ class NewsAPI {
             for (const proxyUrl of proxies) {
                 try {
                     const controller = new AbortController();
-                    const timeoutId = setTimeout(() => controller.abort(), 5000); // 5 second timeout
+                    const timeoutId = setTimeout(() => controller.abort(), 12000); // 12 second timeout
                     
                     response = await fetch(proxyUrl, {
                         signal: controller.signal,

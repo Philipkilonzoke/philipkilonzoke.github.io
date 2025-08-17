@@ -429,12 +429,7 @@ async function loadRSSSource(source, retryCount = 0) {
     const maxRetries = 2;
     
     try {
-        const parser = new RSSParser({
-            headers: {
-                'User-Agent': 'Brightlens News Reader 1.0'
-            },
-            timeout: 10000 // 10 second timeout
-        });
+        const parser = new RSSParser();
         
         // Try different CORS proxies
         const proxyBase = CORS_PROXIES[retryCount % CORS_PROXIES.length];
