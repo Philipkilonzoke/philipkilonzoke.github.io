@@ -76,47 +76,31 @@ class NewsAPI {
         this.preloadCategory(category, limit);
 
         try {
-            // Enhanced sports coverage with specialized APIs
-            if (category === 'sports') {
-                return await this.fetchSportsNews(limit);
-            }
-
-            // Enhanced lifestyle coverage with specialized content
-            if (category === 'lifestyle') {
-                return await this.fetchLifestyleNews(limit);
-            }
-
-            // Enhanced Kenya news fetching with additional sources
-            if (category === 'kenya') {
-                return await this.fetchEnhancedKenyaNews(limit);
-            }
-
-            // Enhanced Technology news fetching with additional sources
-            if (category === 'technology') {
-                return await this.fetchEnhancedTechnologyNews(limit);
-            }
-
-            // Enhanced Health news fetching with specialized health sources
-            if (category === 'health') {
-                return await this.fetchEnhancedHealthNews(limit);
-            }
-
-            // Enhanced Sports news fetching with specialized sports sources
+            // Enhanced category-specific news fetching with optimized loading
             if (category === 'sports') {
                 return await this.fetchEnhancedSportsNews(limit);
             }
 
-            // Enhanced Lifestyle news fetching with specialized lifestyle sources
             if (category === 'lifestyle') {
                 return await this.fetchEnhancedLifestyleNews(limit);
             }
 
-            // Enhanced Entertainment news fetching with specialized entertainment sources
+            if (category === 'kenya') {
+                return await this.fetchEnhancedKenyaNews(limit);
+            }
+
+            if (category === 'technology') {
+                return await this.fetchEnhancedTechnologyNews(limit);
+            }
+
+            if (category === 'health') {
+                return await this.fetchEnhancedHealthNews(limit);
+            }
+
             if (category === 'entertainment') {
                 return await this.fetchEnhancedEntertainmentNews(limit);
             }
 
-            // Enhanced World news fetching with comprehensive international sources
             if (category === 'world') {
                 return await this.fetchEnhancedWorldNews(limit);
             }
@@ -254,7 +238,15 @@ class NewsAPI {
                 this.fetchFromFoxSports()
             ];
 
-            const results = await Promise.allSettled(promises);
+            // Add timeout to prevent long loading times
+            const timeoutPromise = new Promise((_, reject) => 
+                setTimeout(() => reject(new Error('Sports news fetch timeout')), 8000)
+            );
+            
+            const results = await Promise.race([
+                Promise.allSettled(promises),
+                timeoutPromise
+            ]);
             
             // Combine results from all APIs
             let allArticles = [];
@@ -265,6 +257,17 @@ class NewsAPI {
                     console.warn(`Sports API ${index + 1} failed:`, result.reason);
                 }
             });
+
+            // Ensure we always have content - if no articles found, use fallback
+            if (allArticles.length === 0) {
+                console.warn('No sports articles found, using fallback');
+                const fallbackArticles = this.getSampleArticles('sports', 'Sports Fallback');
+                this.cache.set(cacheKey, {
+                    data: fallbackArticles,
+                    timestamp: Date.now()
+                });
+                return fallbackArticles;
+            }
 
             // Remove duplicates and sort by date
             const uniqueArticles = this.removeDuplicates(allArticles);
@@ -281,7 +284,9 @@ class NewsAPI {
             return sortedArticles;
         } catch (error) {
             console.error('Error fetching sports news:', error);
-            throw new Error('Failed to fetch sports news from all sources');
+            // Return fallback articles instead of throwing error
+            console.warn('Using sports fallback articles due to error');
+            return this.getSampleArticles('sports', 'Sports Error Fallback');
         }
     }
 
@@ -438,7 +443,15 @@ class NewsAPI {
                 this.fetchFromVentureBeat()
             ];
 
-            const results = await Promise.allSettled(promises);
+            // Add timeout to prevent long loading times
+            const timeoutPromise = new Promise((_, reject) => 
+                setTimeout(() => reject(new Error('Technology news fetch timeout')), 8000)
+            );
+            
+            const results = await Promise.race([
+                Promise.allSettled(promises),
+                timeoutPromise
+            ]);
             
             // Combine results from all sources
             let allArticles = [];
@@ -449,6 +462,17 @@ class NewsAPI {
                     console.warn(`Technology news source ${index + 1} failed:`, result.reason);
                 }
             });
+
+            // Ensure we always have content - if no articles found, use fallback
+            if (allArticles.length === 0) {
+                console.warn('No technology articles found, using fallback');
+                const fallbackArticles = this.getSampleArticles('technology', 'Technology Fallback');
+                this.cache.set(cacheKey, {
+                    data: fallbackArticles,
+                    timestamp: Date.now()
+                });
+                return fallbackArticles;
+            }
 
             // Remove duplicates, filter tech-relevant content, and sort by date
             const techRelevantArticles = this.filterTechnologyRelevantNews(allArticles);
@@ -466,8 +490,9 @@ class NewsAPI {
             return sortedArticles;
         } catch (error) {
             console.error('Error fetching enhanced technology news:', error);
-            // Fallback to original technology news method
-            return await this.fetchOriginalTechnologyNews(limit);
+            // Return fallback articles instead of throwing error
+            console.warn('Using technology fallback articles due to error');
+            return this.getSampleArticles('technology', 'Technology Error Fallback');
         }
     }
 
@@ -528,7 +553,15 @@ class NewsAPI {
                 this.fetchFromMedscapeNews()
             ];
 
-            const results = await Promise.allSettled(promises);
+            // Add timeout to prevent long loading times
+            const timeoutPromise = new Promise((_, reject) => 
+                setTimeout(() => reject(new Error('Health news fetch timeout')), 8000)
+            );
+            
+            const results = await Promise.race([
+                Promise.allSettled(promises),
+                timeoutPromise
+            ]);
             
             // Combine results from all sources
             let allArticles = [];
@@ -539,6 +572,17 @@ class NewsAPI {
                     console.warn(`Health news source ${index + 1} failed:`, result.reason);
                 }
             });
+
+            // Ensure we always have content - if no articles found, use fallback
+            if (allArticles.length === 0) {
+                console.warn('No health articles found, using fallback');
+                const fallbackArticles = this.getSampleArticles('health', 'Health Fallback');
+                this.cache.set(cacheKey, {
+                    data: fallbackArticles,
+                    timestamp: Date.now()
+                });
+                return fallbackArticles;
+            }
 
             // Remove duplicates, filter health-relevant content, and sort by date
             const healthRelevantArticles = this.filterHealthRelevantNews(allArticles);
@@ -556,14 +600,9 @@ class NewsAPI {
             return sortedArticles;
         } catch (error) {
             console.error('Error fetching enhanced health news:', error);
-            // Fallback to original health news method
-            try {
-                return await this.fetchOriginalHealthNews(limit);
-            } catch (fallbackError) {
-                console.error('Health fallback also failed:', fallbackError);
-                // Final fallback to sample articles
-                return this.getSampleArticles('health', 'Health News Fallback');
-            }
+            // Return fallback articles instead of throwing error
+            console.warn('Using health fallback articles due to error');
+            return this.getSampleArticles('health', 'Health Error Fallback');
         }
     }
 
@@ -619,7 +658,15 @@ class NewsAPI {
                 this.fetchLifestyleFromArchDigest()
             ];
 
-            const results = await Promise.allSettled(promises);
+            // Add timeout to prevent long loading times
+            const timeoutPromise = new Promise((_, reject) => 
+                setTimeout(() => reject(new Error('Lifestyle news fetch timeout')), 8000)
+            );
+            
+            const results = await Promise.race([
+                Promise.allSettled(promises),
+                timeoutPromise
+            ]);
             
             // Combine results from all APIs
             let allArticles = [];
@@ -631,13 +678,15 @@ class NewsAPI {
                 }
             });
 
-            // Only use extended articles as absolute fallback if no real articles found
+            // Ensure we always have content - if no articles found, use fallback
             if (allArticles.length === 0) {
-                console.warn('No real lifestyle articles found, using extended database fallback');
-                if (typeof ExtendedArticlesDB !== 'undefined') {
-                    const extendedDB = new ExtendedArticlesDB();
-                    allArticles = extendedDB.getExtendedLifestyleNews('Lifestyle News');
-                }
+                console.warn('No lifestyle articles found, using fallback');
+                const fallbackArticles = this.getSampleArticles('lifestyle', 'Lifestyle Fallback');
+                this.cache.set(cacheKey, {
+                    data: fallbackArticles,
+                    timestamp: Date.now()
+                });
+                return fallbackArticles;
             }
 
             // Remove duplicates and sort by date
@@ -655,8 +704,9 @@ class NewsAPI {
             return sortedArticles;
         } catch (error) {
             console.error('Error fetching lifestyle news:', error);
-            // Return lifestyle sample articles as fallback
-            return this.getLifestyleSampleArticles(limit);
+            // Return fallback articles instead of throwing error
+            console.warn('Using lifestyle fallback articles due to error');
+            return this.getSampleArticles('lifestyle', 'Lifestyle Error Fallback');
         }
     }
 
@@ -712,7 +762,15 @@ class NewsAPI {
                 this.fetchEntertainmentFromNME()
             ];
 
-            const results = await Promise.allSettled(promises);
+            // Add timeout to prevent long loading times
+            const timeoutPromise = new Promise((_, reject) => 
+                setTimeout(() => reject(new Error('Entertainment news fetch timeout')), 8000)
+            );
+            
+            const results = await Promise.race([
+                Promise.allSettled(promises),
+                timeoutPromise
+            ]);
             
             // Combine results from all APIs
             let allArticles = [];
@@ -724,13 +782,15 @@ class NewsAPI {
                 }
             });
 
-            // Only use extended articles as absolute fallback if no real articles found
+            // Ensure we always have content - if no articles found, use fallback
             if (allArticles.length === 0) {
-                console.warn('No real entertainment articles found, using extended database fallback');
-                if (typeof ExtendedArticlesDB !== 'undefined') {
-                    const extendedDB = new ExtendedArticlesDB();
-                    allArticles = extendedDB.getExtendedEntertainmentNews('Entertainment News');
-                }
+                console.warn('No entertainment articles found, using fallback');
+                const fallbackArticles = this.getSampleArticles('entertainment', 'Entertainment Fallback');
+                this.cache.set(cacheKey, {
+                    data: fallbackArticles,
+                    timestamp: Date.now()
+                });
+                return fallbackArticles;
             }
 
             // Remove duplicates and sort by date
@@ -748,8 +808,9 @@ class NewsAPI {
             return sortedArticles;
         } catch (error) {
             console.error('Error fetching entertainment news:', error);
-            // Return entertainment sample articles as fallback
-            return this.getEntertainmentSampleArticles(limit);
+            // Return fallback articles instead of throwing error
+            console.warn('Using entertainment fallback articles due to error');
+            return this.getSampleArticles('entertainment', 'Entertainment Error Fallback');
         }
     }
 
@@ -806,7 +867,15 @@ class NewsAPI {
                 this.fetchWorldFromNPR()
             ];
 
-            const results = await Promise.allSettled(promises);
+            // Add timeout to prevent long loading times
+            const timeoutPromise = new Promise((_, reject) => 
+                setTimeout(() => reject(new Error('World news fetch timeout')), 8000)
+            );
+            
+            const results = await Promise.race([
+                Promise.allSettled(promises),
+                timeoutPromise
+            ]);
             
             // Combine results from all APIs
             let allArticles = [];
@@ -818,13 +887,15 @@ class NewsAPI {
                 }
             });
 
-            // Only use extended articles as absolute fallback if no real articles found
+            // Ensure we always have content - if no articles found, use fallback
             if (allArticles.length === 0) {
-                console.warn('No real world articles found, using extended database fallback');
-                if (typeof ExtendedArticlesDB !== 'undefined') {
-                    const extendedDB = new ExtendedArticlesDB();
-                    allArticles = extendedDB.getExtendedWorldNews('World News');
-                }
+                console.warn('No world articles found, using fallback');
+                const fallbackArticles = this.getSampleArticles('world', 'World Fallback');
+                this.cache.set(cacheKey, {
+                    data: fallbackArticles,
+                    timestamp: Date.now()
+                });
+                return fallbackArticles;
             }
 
             // Remove duplicates and sort by date
@@ -842,8 +913,9 @@ class NewsAPI {
             return sortedArticles;
         } catch (error) {
             console.error('Error fetching world news:', error);
-            // Return world sample articles as fallback
-            return this.getWorldSampleArticles(limit);
+            // Return fallback articles instead of throwing error
+            console.warn('Using world fallback articles due to error');
+            return this.getSampleArticles('world', 'World Error Fallback');
         }
     }
 
