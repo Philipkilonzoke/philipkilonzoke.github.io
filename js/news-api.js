@@ -55,6 +55,78 @@ class NewsAPI {
 
         this.cache = new Map();
         this.cacheTimeout = 2 * 60 * 1000; // 2 minutes for fresher real-time updates
+
+        // Client-side quota guards for free-tier APIs (per-browser pacing)
+        this.quotaConfig = {
+            gnews: { minIntervalMs: 60000, hourlyCap: 30 },
+            newsdata: { minIntervalMs: 90000, hourlyCap: 20 },
+            newsapi: { minIntervalMs: 120000, hourlyCap: 15 },
+            mediastack: { minIntervalMs: 60000, hourlyCap: 30 },
+            currentsapi: { minIntervalMs: 60000, hourlyCap: 30 }
+        };
+        this.rateStorageKey = 'bln_api_rate_v1';
+    }
+
+    // LocalStorage helpers
+    getLocalStorageObject(key, fallback) {
+        try {
+            const raw = localStorage.getItem(key);
+            if (!raw) return fallback;
+            return JSON.parse(raw);
+        } catch (_) { return fallback; }
+    }
+
+    setLocalStorageObject(key, value) {
+        try { localStorage.setItem(key, JSON.stringify(value)); } catch (_) {}
+    }
+
+    // Category cache (cross-page) to reduce API hits
+    getCategoryCache(category) {
+        const cacheKey = `bln_cache_${category}`;
+        const payload = this.getLocalStorageObject(cacheKey, null);
+        if (!payload) return null;
+        if (Date.now() > (payload.expiry || 0)) return null;
+        return Array.isArray(payload.data) ? payload.data : null;
+    }
+
+    setCategoryCache(category, data, ttlMs = 3 * 60 * 1000) {
+        const cacheKey = `bln_cache_${category}`;
+        const payload = { data, expiry: Date.now() + ttlMs };
+        this.setLocalStorageObject(cacheKey, payload);
+    }
+
+    // Simple per-API rate limiting using LocalStorage (client-side pacing)
+    canUseAPI(apiName) {
+        const cfg = this.quotaConfig[apiName];
+        if (!cfg) return true;
+        const store = this.getLocalStorageObject(this.rateStorageKey, {});
+        const now = Date.now();
+        const info = store[apiName] || { last: 0, hourStart: now, hourCount: 0 };
+        // Reset hourly bucket if needed
+        if (now - info.hourStart >= 60 * 60 * 1000) {
+            info.hourStart = now;
+            info.hourCount = 0;
+        }
+        // Enforce spacing and hourly cap
+        if ((now - info.last) < cfg.minIntervalMs) return false;
+        if (info.hourCount >= cfg.hourlyCap) return false;
+        return true;
+    }
+
+    markAPICall(apiName) {
+        const cfg = this.quotaConfig[apiName];
+        if (!cfg) return;
+        const store = this.getLocalStorageObject(this.rateStorageKey, {});
+        const now = Date.now();
+        const info = store[apiName] || { last: 0, hourStart: now, hourCount: 0 };
+        if (now - info.hourStart >= 60 * 60 * 1000) {
+            info.hourStart = now;
+            info.hourCount = 0;
+        }
+        info.last = now;
+        info.hourCount = (info.hourCount || 0) + 1;
+        store[apiName] = info;
+        this.setLocalStorageObject(this.rateStorageKey, store);
     }
 
     /**
@@ -62,6 +134,11 @@ class NewsAPI {
      */
     async fetchNews(category, limit = 20) {
         const cacheKey = `${category}_${limit}`;
+        // Cross-page cache first to avoid repeated free-tier requests
+        const cachedCategoryData = this.getCategoryCache(category);
+        if (Array.isArray(cachedCategoryData) && cachedCategoryData.length) {
+            return cachedCategoryData;
+        }
         
         // Check cache first with longer timeout for better performance
         if (this.cache.has(cacheKey)) {
@@ -107,13 +184,15 @@ class NewsAPI {
             }
 
             // Fetch from all APIs simultaneously with optimized timeout
-            const promises = [
-                this.fetchFromGNews(category, Math.ceil(limit * 0.25)),
-                this.fetchFromNewsData(category, Math.ceil(limit * 0.25)),
-                this.fetchFromNewsAPI(category, Math.ceil(limit * 0.25)),
-                this.fetchFromMediastack(category, Math.ceil(limit * 0.25)),
-                this.fetchFromCurrentsAPI(category, Math.ceil(limit * 0.25))
-            ];
+            const promises = [];
+            // Prefer RSS first (no keys), then selectively hit APIs within quota
+            // APIs are appended below via category-specific RSS section and then gated calls
+            const perSourceLimit = Math.max(10, Math.ceil(limit * 0.2));
+            if (this.canUseAPI('gnews')) promises.push(this.fetchFromGNews(category, perSourceLimit));
+            if (this.canUseAPI('newsdata')) promises.push(this.fetchFromNewsData(category, perSourceLimit));
+            if (this.canUseAPI('newsapi')) promises.push(this.fetchFromNewsAPI(category, perSourceLimit));
+            if (this.canUseAPI('mediastack')) promises.push(this.fetchFromMediastack(category, perSourceLimit));
+            if (this.canUseAPI('currentsapi')) promises.push(this.fetchFromCurrentsAPI(category, perSourceLimit));
 
             // Add REAL RSS feeds for ALL categories - ACTUAL REAL-TIME CONTENT
             if (category === 'breaking') {
@@ -304,7 +383,7 @@ class NewsAPI {
             if (sortedArticles.length === 0) {
                 console.warn(`No real articles found for ${category}, trying fallback APIs`);
                 // Try fallback APIs that are more reliable
-                const fallbackArticles = await this.fetchFallbackNews(category, limit);
+                const fallbackArticles = await this.fetchFallbackNews(category, Math.max(limit, 40));
                 if (fallbackArticles.length > 0) {
                     return fallbackArticles;
                 }
@@ -316,6 +395,7 @@ class NewsAPI {
                 data: sortedArticles,
                 timestamp: Date.now()
             });
+            this.setCategoryCache(category, sortedArticles);
 
             return sortedArticles;
         } catch (error) {
@@ -1046,7 +1126,7 @@ class NewsAPI {
             const items = xmlDoc.querySelectorAll('item');
             const articles = [];
             
-            for (let i = 0; i < Math.min(items.length, 40); i++) {
+            for (let i = 0; i < Math.min(items.length, 60); i++) {
                 const item = items[i];
                 const title = item.querySelector('title')?.textContent || '';
                 const description = item.querySelector('description')?.textContent || '';
@@ -1072,7 +1152,7 @@ class NewsAPI {
                     title: title.trim(),
                     description: description.trim(),
                     url: link.trim(),
-                    urlToImage: imageUrl,
+                    urlToImage: imageUrl || '',
                     publishedAt: publishedAt,
                     source: { name: sourceName }
                 });
@@ -1153,6 +1233,7 @@ class NewsAPI {
             if (!response.ok) throw new Error(`GNews API error: ${response.status}`);
             
             const data = await response.json();
+            this.markAPICall('gnews');
             return this.formatGNewsArticles(data.articles || []);
         } catch (error) {
             console.error('GNews fetch error:', error);
@@ -1182,6 +1263,7 @@ class NewsAPI {
             if (!response.ok) throw new Error(`NewsData API error: ${response.status}`);
             
             const data = await response.json();
+            this.markAPICall('newsdata');
             return this.formatNewsDataArticles(data.results || []);
         } catch (error) {
             console.error('NewsData fetch error:', error);
@@ -1212,6 +1294,7 @@ class NewsAPI {
             if (!response.ok) throw new Error(`NewsAPI error: ${response.status}`);
             
             const data = await response.json();
+            this.markAPICall('newsapi');
             return this.formatNewsAPIArticles(data.articles || []);
         } catch (error) {
             console.error('NewsAPI fetch error:', error);
@@ -1240,6 +1323,7 @@ class NewsAPI {
             if (!response.ok) throw new Error(`Mediastack API error: ${response.status}`);
             
             const data = await response.json();
+            this.markAPICall('mediastack');
             return this.formatMediastackArticles(data.data || []);
         } catch (error) {
             console.error('Mediastack fetch error:', error);
@@ -1268,6 +1352,7 @@ class NewsAPI {
             if (!response.ok) throw new Error(`CurrentsAPI error: ${response.status}`);
             
             const data = await response.json();
+            this.markAPICall('currentsapi');
             return this.formatCurrentsAPIArticles(data.news || []);
         } catch (error) {
             console.error('CurrentsAPI fetch error:', error);
@@ -1405,14 +1490,30 @@ class NewsAPI {
      * Remove duplicate articles based on title and URL
      */
     removeDuplicates(articles) {
-        const seen = new Set();
+        const seenUrls = new Set();
+        const seenTitles = new Set();
+        const normalized = (s) => (s || '').toLowerCase().trim()
+            .replace(/https?:\/\//g, '')
+            .replace(/www\./g, '')
+            .replace(/[?#].*$/, '');
+        const compactTitle = (t) => (t || '')
+            .toLowerCase()
+            .replace(/[^a-z0-9 ]+/g, ' ')
+            .replace(/\s+/g, ' ')
+            .trim();
+
         return articles.filter(article => {
-            if (!article.title || !article.url) return false;
-            
-            const key = `${article.title.toLowerCase().trim()}-${article.url}`;
-            if (seen.has(key)) return false;
-            
-            seen.add(key);
+            if (!article || !article.title || !article.url) return false;
+
+            const nUrl = normalized(article.url);
+            const nTitle = compactTitle(article.title);
+            const titleKey = `t:${nTitle}`;
+
+            if (seenUrls.has(nUrl)) return false;
+            if (seenTitles.has(titleKey)) return false;
+
+            seenUrls.add(nUrl);
+            seenTitles.add(titleKey);
             return true;
         });
     }
