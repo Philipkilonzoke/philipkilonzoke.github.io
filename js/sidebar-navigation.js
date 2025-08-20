@@ -164,6 +164,16 @@ class SidebarNavigation {
                 text: 'Africa',
                 id: 'africa'
             },
+            { href: 'energy.html', icon: 'fas fa-bolt', text: 'Energy', id: 'energy' },
+            { href: 'spaceflight.html', icon: 'fas fa-space-shuttle', text: 'Spaceflight', id: 'spaceflight' },
+            { href: 'real-estate.html', icon: 'fas fa-city', text: 'Real Estate', id: 'real-estate' },
+            { href: 'agriculture.html', icon: 'fas fa-seedling', text: 'Agriculture', id: 'agriculture' },
+            { href: 'personal-finance.html', icon: 'fas fa-wallet', text: 'Personal Finance', id: 'personal-finance' },
+            { href: 'politics.html', icon: 'fas fa-landmark', text: 'Politics', id: 'politics' },
+            { href: 'education.html', icon: 'fas fa-graduation-cap', text: 'Education', id: 'education' },
+            { href: 'ai-policy.html', icon: 'fas fa-balance-scale', text: 'AI Policy', id: 'ai-policy' },
+            { href: 'humanitarian.html', icon: 'fas fa-hands-helping', text: 'Humanitarian', id: 'humanitarian' },
+            { href: 'travel.html', icon: 'fas fa-suitcase-rolling', text: 'Travel', id: 'travel' },
             // Divider
             { divider: true },
             { 
