@@ -1727,9 +1727,22 @@ class WeatherDashboard {
      */
     setupSharing() {
         const shareBtn = document.getElementById('share-btn');
+        const sharePanel = document.getElementById('share-panel');
         if (shareBtn) {
             shareBtn.addEventListener('click', () => {
-                this.shareWeather();
+                if (sharePanel) {
+                    const isOpen = sharePanel.style.display === 'block';
+                    sharePanel.style.display = isOpen ? 'none' : 'block';
+                }
+                this.shareWeather(); // prepare latest text/url
+            });
+        }
+        if (sharePanel) {
+            sharePanel.addEventListener('click', (e) => {
+                const target = e.target.closest('.share-option');
+                if (!target) return;
+                const platform = target.getAttribute('data-platform');
+                this.shareWeather(platform);
             });
         }
     }
@@ -1737,7 +1750,7 @@ class WeatherDashboard {
     /**
      * Share current weather information
      */
-    shareWeather() {
+    shareWeather(platform) {
         if (!this.weatherData || !this.currentLocation) {
             this.showToast('No weather data available to share', 'error');
             return;
@@ -1751,18 +1764,31 @@ class WeatherDashboard {
         const shareText = `🌤️ Weather in ${this.currentLocation.city}, ${this.currentLocation.country}: ${temp}${unit}, ${weatherInfo.description}. Check it out on Brightlens News!`;
         const shareUrl = window.location.href;
 
+        // If a specific platform is requested, open its URL
+        if (platform) {
+            const encodedText = encodeURIComponent(`${shareText}`);
+            const encodedUrl = encodeURIComponent(shareUrl);
+            let targetUrl = '';
+            switch(platform){
+                case 'whatsapp':
+                    targetUrl = `https://api.whatsapp.com/send?text=${encodedText}%20${encodedUrl}`; break;
+                case 'facebook':
+                    targetUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodedUrl}`; break;
+                case 'telegram':
+                    targetUrl = `https://t.me/share/url?url=${encodedUrl}&text=${encodedText}`; break;
+                case 'twitter':
+                    targetUrl = `https://twitter.com/intent/tweet?text=${encodedText}&url=${encodedUrl}`; break;
+                case 'copy':
+                    this.copyToClipboard(shareText, shareUrl); return;
+            }
+            if (targetUrl) window.open(targetUrl, '_blank');
+            return;
+        }
+
+        // Otherwise, attempt native share first
         if (navigator.share && navigator.canShare) {
-            navigator.share({
-                title: 'Current Weather',
-                text: shareText,
-                url: shareUrl
-            }).catch(error => {
-                console.log('Share failed:', error);
-                this.copyToClipboard(shareText, shareUrl);
-            });
-        } else {
-            // Fallback: copy to clipboard
-            this.copyToClipboard(shareText, shareUrl);
+            navigator.share({ title: 'Current Weather', text: shareText, url: shareUrl })
+                .catch(() => { this.copyToClipboard(shareText, shareUrl); });
         }
     }
     
