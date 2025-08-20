@@ -258,7 +258,7 @@
             const now = Date.now();
             const fresh = items.filter(it=>{
                 const t = new Date(it.pubDate||it.published||it.isoDate||Date.now()).getTime();
-                return (now - t) <= 1000*60*60*48; // last 48h
+                return (now - t) <= 1000*60*60*24; // last 24h
             });
             const limited = (fresh.length ? fresh : items).slice(0,50);
             count.textContent = `Showing ${Math.min(limited.length, (fresh.length?fresh:items).length)} of ${(fresh.length?fresh:items).length} articles`;
