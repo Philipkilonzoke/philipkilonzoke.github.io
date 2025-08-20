@@ -128,6 +128,42 @@ class SidebarNavigation {
                 text: 'Startups',
                 id: 'startups'
             },
+            { 
+                href: 'science.html', 
+                icon: 'fas fa-flask', 
+                text: 'Science',
+                id: 'science'
+            },
+            { 
+                href: 'cybersecurity.html', 
+                icon: 'fas fa-shield-alt', 
+                text: 'Cybersecurity',
+                id: 'cybersecurity'
+            },
+            { 
+                href: 'markets.html', 
+                icon: 'fas fa-chart-area', 
+                text: 'Markets',
+                id: 'markets'
+            },
+            { 
+                href: 'mobility.html', 
+                icon: 'fas fa-bus', 
+                text: 'Mobility',
+                id: 'mobility'
+            },
+            { 
+                href: 'gaming.html', 
+                icon: 'fas fa-gamepad', 
+                text: 'Gaming',
+                id: 'gaming'
+            },
+            { 
+                href: 'africa.html', 
+                icon: 'fas fa-globe-africa', 
+                text: 'Africa',
+                id: 'africa'
+            },
             // Divider
             { divider: true },
             { 
