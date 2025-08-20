@@ -102,6 +102,11 @@
 
             <!-- News Grid -->
             <div id="news-grid" class="news-grid" style="display: none;"></div>
+            <div class="load-more-container" style="display: none;">
+                <button id="load-more" class="load-more-button">
+                    <i class="fas fa-plus-circle"></i> Load More Articles
+                </button>
+            </div>
         </div>
     </main>
 
@@ -247,10 +252,16 @@
             const grid = document.getElementById('news-grid');
             const count = document.getElementById('article-count');
             const updated = document.getElementById('last-updated');
+            const loadMoreContainer = document.querySelector('.load-more-container');
             if(loading) loading.style.display = 'none';
             if(grid) grid.style.display = 'grid';
-            const limited = items.slice(0,50);
-            count.textContent = `Showing ${Math.min(limited.length, items.length)} of ${items.length} articles`;
+            const now = Date.now();
+            const fresh = items.filter(it=>{
+                const t = new Date(it.pubDate||it.published||it.isoDate||Date.now()).getTime();
+                return (now - t) <= 1000*60*60*48; // last 48h
+            });
+            const limited = (fresh.length ? fresh : items).slice(0,50);
+            count.textContent = `Showing ${Math.min(limited.length, (fresh.length?fresh:items).length)} of ${(fresh.length?fresh:items).length} articles`;
             updated.textContent = `Last updated: ${new Date().toLocaleTimeString()}`;
             grid.innerHTML = limited.map(item => {
                 const title = item.title || 'Untitled';
@@ -275,10 +286,16 @@
                         </div>
                         <div class="news-actions">
                             <a href="${url}" target="_blank" rel="noopener noreferrer" class="news-link">Read More <i class="fas fa-external-link-alt"></i></a>
+                            <div class="share-buttons">
+                                <button class="share-btn" onclick="navigator.share?navigator.share({title: '${title.replace(/'/g,"\'")}', url: '${url}'}):window.open('https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}','_blank')" title="Share">
+                                    <i class="fas fa-share-alt"></i>
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </article>`;
             }).join('');
+            if(loadMoreContainer) loadMoreContainer.style.display = (items.length>50)?'block':'none';
             lazyLoad();
             const loadingScreen = document.getElementById('loading-screen');
             if(loadingScreen){ loadingScreen.classList.add('hidden'); setTimeout(()=>loadingScreen.style.display='none',300); }

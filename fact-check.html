@@ -91,6 +91,11 @@
             </div>
 
             <div id="news-grid" class="news-grid" style="display: none;"></div>
+            <div class="load-more-container" style="display: none;">
+                <button id="load-more" class="load-more-button">
+                    <i class="fas fa-plus-circle"></i> Load More Articles
+                </button>
+            </div>
         </div>
     </main>
 
@@ -201,34 +206,20 @@
         }
 
         function render(items){
-            const loading=document.getElementById('news-loading'); const grid=document.getElementById('news-grid'); const count=document.getElementById('article-count'); const updated=document.getElementById('last-updated');
+            const loading=document.getElementById('news-loading'); const grid=document.getElementById('news-grid'); const count=document.getElementById('article-count'); const updated=document.getElementById('last-updated'); const loadMoreContainer=document.querySelector('.load-more-container');
             if(loading) loading.style.display='none'; if(grid) grid.style.display='grid';
-            const limited=items.slice(0,50);
-            count.textContent=`Showing ${Math.min(limited.length, items.length)} of ${items.length} items`;
+            const now=Date.now();
+            const fresh=items.filter(it=>{ const t=new Date(it.pubDate||it.published||it.isoDate||Date.now()).getTime(); return (now-t)<=1000*60*60*48; });
+            const base=fresh.length?fresh:items; const limited=base.slice(0,50);
+            count.textContent=`Showing ${Math.min(limited.length, base.length)} of ${base.length} items`;
             updated.textContent=`Last updated: ${new Date().toLocaleTimeString()}`;
             grid.innerHTML=limited.map(item=>{
                 const title=item.title||'Untitled'; const url=item.link||item.url||'#'; const desc=(item.description||'').replace(/<[^>]+>/g,'').slice(0,180)+'...'; const img=extractImage(item); const hasImg=img&&/^https?:\/\//.test(img);
-                const imgSection=hasImg?`
-                    <div class="news-image">
-                        <img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZjNmNGY2Ii8+PC9zdmc+" data-src="${img}" alt="${title}" loading="lazy" class="lazy-image" onerror="this.parentElement.innerHTML='&lt;div class=\"text-placeholder\"&gt;Brightlens News&lt;/div&gt;'">
-                    </div>`:`
-                    <div class="text-placeholder">Brightlens News</div>`;
-                return `
-                <article class="news-card">
-                    ${imgSection}
-                    <div class="news-content">
-                        <div class="news-meta" style="margin-bottom:.25rem"><span class="news-category">${sourceHint(url)}</span></div>
-                        <h3 class="news-title">${title}</h3>
-                        <p class="news-description">${desc}</p>
-                        <div class="news-meta">
-                            <span class="news-date">${formatDate(item.pubDate||item.published||Date.now())}</span>
-                            <span class="news-category">Fact-Check</span>
-                        </div>
-                        <div class="news-actions">
-                            <a href="${url}" target="_blank" rel="noopener noreferrer" class="news-link">Read More <i class="fas fa-external-link-alt"></i></a>
-                        </div>
-                    </div>
-                </article>`; }).join('');
+                const imgSection=hasImg?`<div class="news-image"><img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZjNmNGY2Ii8+PC9zdmc+" data-src="${img}" alt="${title}" loading="lazy" class="lazy-image" onerror="this.parentElement.innerHTML='&lt;div class=\"text-placeholder\"&gt;Brightlens News&lt;/div&gt;' "></div>`:`<div class="text-placeholder">Brightlens News</div>`;
+                const source=sourceHint(url);
+                return `<article class="news-card">${imgSection}<div class="news-content"><div class="news-meta" style="margin-bottom:.25rem"><span class="news-category">${source}</span></div><h3 class="news-title">${title}</h3><p class="news-description">${desc}</p><div class="news-meta"><span class="news-date">${formatDate(item.pubDate||item.published||Date.now())}</span><span class="news-category">Fact-Check</span></div><div class="news-actions"><a href="${url}" target="_blank" rel="noopener noreferrer" class="news-link">Read More <i class="fas fa-external-link-alt"></i></a><div class="share-buttons"><button class="share-btn" onclick="navigator.share?navigator.share({title: '${title.replace(/'/g,"\'")}', url: '${url}'}):window.open('https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}','_blank')" title="Share"><i class="fas fa-share-alt"></i></button></div></div></div></article>`;
+            }).join('');
+            if(loadMoreContainer) loadMoreContainer.style.display=(items.length>50)?'block':'none';
             lazyLoad();
             const loadingScreen=document.getElementById('loading-screen'); if(loadingScreen){ loadingScreen.classList.add('hidden'); setTimeout(()=>loadingScreen.style.display='none',300); }
         }
