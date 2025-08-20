@@ -105,6 +105,21 @@
         </div>
     </main>
 
+    <!-- Theme Selector Modal -->
+    <div id="theme-modal" class="theme-modal">
+        <div class="theme-modal-content">
+            <div class="theme-modal-header">
+                <h3>Choose Theme</h3>
+                <button class="theme-modal-close">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="theme-grid">
+                <!-- Populated by js/themes.js -->
+            </div>
+        </div>
+    </div>
+
     <!-- Footer (matching site style) -->
     <footer class="footer">
         <div class="footer-wave">
@@ -167,6 +182,8 @@
         </div>
         <div class="footer-glow"></div>
     </footer>
+
+    <script src="js/themes.js"></script>
 
     <script>
     (function(){
@@ -243,7 +260,7 @@
                 const hasImg = img && /^https?:\/\//.test(img);
                 const imgSection = hasImg ? `
                     <div class="news-image">
-                        <img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZjNmNGY2Ii8+PC9zdmc+" data-src="${img}" alt="${title}" loading="lazy" class="lazy-image" onerror="this.parentElement.innerHTML=''<div class=\\"text-placeholder\\">Brightlens News</div>''">
+                        <img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZjNmNGY2Ii8+PC9zdmc+" data-src="${img}" alt="${title}" loading="lazy" class="lazy-image" onerror="this.parentElement.innerHTML='&lt;div class=\"text-placeholder\"&gt;Brightlens News&lt;/div&gt;'">
                     </div>` : `
                     <div class="text-placeholder">Brightlens News</div>`;
                 return `
