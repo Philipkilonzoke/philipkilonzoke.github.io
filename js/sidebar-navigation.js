@@ -104,6 +104,30 @@ class SidebarNavigation {
                 text: 'Aviation ✈️',
                 id: 'aviation'
             },
+            { 
+                href: 'ai.html', 
+                icon: 'fas fa-robot', 
+                text: 'AI & ML',
+                id: 'ai'
+            },
+            { 
+                href: 'climate.html', 
+                icon: 'fas fa-leaf', 
+                text: 'Climate',
+                id: 'climate'
+            },
+            { 
+                href: 'fact-check.html', 
+                icon: 'fas fa-check-double', 
+                text: 'Fact-Check',
+                id: 'fact-check'
+            },
+            { 
+                href: 'startups.html', 
+                icon: 'fas fa-lightbulb', 
+                text: 'Startups',
+                id: 'startups'
+            },
             // Divider
             { divider: true },
             { 
