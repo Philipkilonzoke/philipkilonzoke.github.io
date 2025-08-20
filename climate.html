@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Climate & Environment - Brightlens News</title>
+    <meta name="description" content="Climate and environment hub: science, policy, extreme weather, adaptation, and conservation.">
+    <meta name="keywords" content="climate, environment, climate change, policy, adaptation, NOAA, NASA">
+
+    <link rel="manifest" href="/manifest.json" />
+    <meta name="theme-color" content="#0b3d2e" />
+
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box}
+        :root{--primary-color:#10b981;--background-color:#061a15;--text-color:#e5e7eb;--surface-color:#0b2a21;--border-color:#124e3b}
+        body{font-family:'Inter',system-ui,sans-serif;background:var(--background-color);color:var(--text-color);line-height:1.6}
+        .header{background:rgba(11,42,33,0.7);backdrop-filter:blur(10px);position:sticky;top:0;z-index:100;border-bottom:1px solid var(--border-color)}
+        .container{max-width:1200px;margin:0 auto;padding:0 1rem}
+        .page-hero{padding:4rem 0 2rem;display:flex;align-items:center;gap:1.5rem}
+        .page-hero .icon{font-size:2rem;color:var(--primary-color)}
+        .cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:1rem;padding:2rem 0}
+        .card{background:linear-gradient(180deg,rgba(16,185,129,.12),rgba(16,185,129,.04));border:1px solid var(--border-color);border-radius:12px;padding:1rem;display:flex;flex-direction:column;gap:.75rem}
+        .card h3{font-size:1.1rem}
+        .card a{color:#34d399;text-decoration:none}
+        .muted{color:#9ca3af;font-size:.9rem}
+    </style>
+    <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"></noscript>
+    <script src="js/sidebar-navigation.js" defer></script>
+</head>
+<body>
+    <header class="header">
+        <div class="container">
+            <div class="header-content" style="display:flex;align-items:center;justify-content:space-between;padding:0.75rem 0">
+                <a href="/" style="color:inherit;text-decoration:none;font-weight:700"><i class="fas fa-newspaper"></i> Brightlens</a>
+                <nav style="display:flex;gap:.75rem;font-size:.95rem">
+                    <a href="/index.html" style="color:inherit;text-decoration:none">Home</a>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <main class="container">
+        <div class="page-hero">
+            <i class="fas fa-leaf icon"></i>
+            <div>
+                <h1>Climate & Environment</h1>
+                <p class="muted">Independent hub. Does not use the site-wide news system.</p>
+            </div>
+        </div>
+
+        <section>
+            <div class="cards" id="climate-grid"></div>
+        </section>
+    </main>
+
+    <script>
+    (function(){
+        const feeds = [
+            'https://climate.nasa.gov/news/rss.xml',
+            'https://www.noaa.gov/tags/climate/rss.xml',
+            'https://www.carbonbrief.org/feed/',
+            'https://www.nature.com/subjects/climate-change.rss',
+            'https://feeds.feedburner.com/insideclimatenews'
+        ];
+
+        async function fetchFeed(url){
+            try{
+                const res = await fetch('https://api.rss2json.com/v1/api.json?rss_url='+encodeURIComponent(url));
+                if(!res.ok) throw new Error('feed error');
+                return (await res.json()).items || [];
+            }catch(e){
+                return [];
+            }
+        }
+
+        function render(items){
+            const grid = document.getElementById('climate-grid');
+            const limited = items.slice(0,24);
+            grid.innerHTML = limited.map(item => `
+                <article class="card">
+                    <h3>${item.title || 'Untitled'}</h3>
+                    <p class="muted">${new Date(item.pubDate||item.published||Date.now()).toLocaleString()}</p>
+                    <a href="${item.link || item.url}" target="_blank" rel="noopener">Read more</a>
+                </article>
+            `).join('');
+        }
+
+        Promise.all(feeds.map(fetchFeed)).then(arr=>{
+            const all = arr.flat();
+            all.sort((a,b)=>new Date(b.pubDate||b.published||0)-new Date(a.pubDate||a.published||0));
+            render(all);
+        });
+    })();
+    </script>
+</body>
+</html>
+
