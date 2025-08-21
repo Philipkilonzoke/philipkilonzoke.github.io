@@ -299,25 +299,26 @@ class SidebarNavigation {
         // Add smooth page transitions
         this.addPageTransitions();
 
-        // Normalize header nav links to HTML files to avoid 404s on static hosting
-        this.normalizeHeaderLinks();
+        // Normalize internal links to .html files to avoid 404s on static hosting
+        this.normalizeInternalLinks();
 
         this.isInitialized = true;
         console.log('✅ Sidebar navigation initialized successfully');
     }
 
-    // Ensure top header links use relative .html paths (e.g., /technology -> technology.html)
-    normalizeHeaderLinks() {
+    // Ensure internal absolute links use relative .html paths (e.g., /technology -> technology.html)
+    normalizeInternalLinks() {
         try {
             const navItems = this.getNavigationItems().filter(i => !i.divider).map(i => i.href);
             const knownPaths = new Set(navItems.concat(['index.html']));
-            const anchors = document.querySelectorAll('.nav .nav-links a');
+            // Match any internal absolute link (header, footer, or elsewhere)
+            const anchors = document.querySelectorAll('a[href^="/"]');
             anchors.forEach(a => {
                 const raw = a.getAttribute('href') || '';
                 if (!raw || raw.startsWith('http')) return;
                 if (raw === '/') { a.setAttribute('href', 'index.html'); return; }
-                if (raw.startsWith('/') && !raw.endsWith('.html')) {
-                    const candidate = raw.slice(1) + '.html';
+                if (!raw.endsWith('.html')) {
+                    const candidate = raw.replace(/^\//, '') + '.html';
                     if (knownPaths.has(candidate)) {
                         a.setAttribute('href', candidate);
                     }
