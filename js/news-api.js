@@ -1335,7 +1335,12 @@ class NewsAPI {
             'business': 'Business',
             'sports': 'Sports',
             'health': 'Health',
-            'lifestyle': 'Lifestyle'
+            'lifestyle': 'Lifestyle',
+            'education': 'Education',
+            'ai-policy': 'AI Policy',
+            'humanitarian': 'Humanitarian',
+            'travel': 'Travel',
+            'startups': 'Startups'
         };
         return names[category] || 'News';
     }
