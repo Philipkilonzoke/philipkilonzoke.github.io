@@ -299,8 +299,34 @@ class SidebarNavigation {
         // Add smooth page transitions
         this.addPageTransitions();
 
+        // Normalize header nav links to HTML files to avoid 404s on static hosting
+        this.normalizeHeaderLinks();
+
         this.isInitialized = true;
         console.log('✅ Sidebar navigation initialized successfully');
+    }
+
+    // Ensure top header links use relative .html paths (e.g., /technology -> technology.html)
+    normalizeHeaderLinks() {
+        try {
+            const navItems = this.getNavigationItems().filter(i => !i.divider).map(i => i.href);
+            const knownPaths = new Set(navItems.concat(['index.html']));
+            const anchors = document.querySelectorAll('.nav .nav-links a');
+            anchors.forEach(a => {
+                const raw = a.getAttribute('href') || '';
+                if (!raw || raw.startsWith('http')) return;
+                if (raw === '/') { a.setAttribute('href', 'index.html'); return; }
+                if (raw.startsWith('/') && !raw.endsWith('.html')) {
+                    const candidate = raw.slice(1) + '.html';
+                    if (knownPaths.has(candidate)) {
+                        a.setAttribute('href', candidate);
+                    }
+                }
+            });
+            console.log('🔗 Header links normalized (where applicable)');
+        } catch (e) {
+            console.warn('Header link normalization failed:', e);
+        }
     }
 
     bindEvents() {
