@@ -63,7 +63,7 @@
   }
 
   function fetchWithTimeout(resource, options = {}){
-    const { timeoutMs = 4000 } = options;
+    const { timeoutMs = 3000 } = options;
     return new Promise((resolve, reject) => {
       const timer = setTimeout(() => reject(new Error('timeout')), timeoutMs);
       fetch(resource, options).then(res => { clearTimeout(timer); resolve(res); }).catch(err => { clearTimeout(timer); reject(err); });
@@ -203,7 +203,7 @@
     }catch(_){ /* ignore quota errors */ }
   }
 
-  window.loadCategoryNews = async function({ category, feeds, freshnessHours = 48, maxItems = 50, cacheTtlMinutes = 60, staleCutoffHours = 336 }){
+  window.loadCategoryNews = async function({ category, feeds, freshnessHours = 48, maxItems = 50, cacheTtlMinutes = 60, staleCutoffHours = 336, priorityCount = 4, minItemsGoal = 12 }){
     const retry = document.getElementById('retry-button');
     if (retry) retry.addEventListener('click', () => window.location.reload());
 
@@ -230,24 +230,32 @@
       const minItemsToReveal = 8; // reveal as soon as a handful arrive
       const debounceMs = 250;
 
-      await Promise.allSettled(feeds.map(async (u)=>{
-        const items = await fetchFeed(u);
-        if (!Array.isArray(items) || items.length === 0) return;
-        accumulated = dedupe(accumulated.concat(items));
-        const nowTs = Date.now();
-        // Only re-render at most every debounceMs
-        if ((accumulated.length >= minItemsToReveal || !renderedOnce) && nowTs - lastRender > debounceMs){
-          const now = Date.now();
-          const fresh = accumulated.filter(it=>{
-            const t = new Date(it.pubDate || it.published || it.isoDate || Date.now()).getTime();
-            return (now - t) <= freshnessMs;
-          });
-          const base = (fresh.length ? fresh : accumulated).sort((a,b)=> new Date(b.pubDate||b.published||0) - new Date(a.pubDate||a.published||0));
-          renderItems(category, base, maxItems);
-          renderedOnce = true;
-          lastRender = nowTs;
-        }
-      }));
+      async function processBatch(batch){
+        return Promise.allSettled(batch.map(async (u)=>{
+          const items = await fetchFeed(u);
+          if (!Array.isArray(items) || items.length === 0) return;
+          accumulated = dedupe(accumulated.concat(items));
+          const nowTs = Date.now();
+          if ((accumulated.length >= minItemsToReveal || !renderedOnce) && nowTs - lastRender > debounceMs){
+            const now = Date.now();
+            const fresh = accumulated.filter(it=>{
+              const t = new Date(it.pubDate || it.published || it.isoDate || Date.now()).getTime();
+              return (now - t) <= freshnessMs;
+            });
+            const base = (fresh.length ? fresh : accumulated).sort((a,b)=> new Date(b.pubDate||b.published||0) - new Date(a.pubDate||a.published||0));
+            renderItems(category, base, maxItems);
+            renderedOnce = true;
+            lastRender = nowTs;
+          }
+        }));
+      }
+
+      const phase1 = feeds.slice(0, Math.max(0, Math.min(priorityCount, feeds.length)));
+      const phase2 = feeds.slice(phase1.length);
+      await processBatch(phase1);
+      if (accumulated.length < minItemsGoal && phase2.length){
+        await processBatch(phase2);
+      }
 
       // Final consolidation with stale fallback
       if (accumulated.length){
