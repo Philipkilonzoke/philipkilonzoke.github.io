@@ -181,7 +181,9 @@
             'https://www.noaa.gov/tags/climate/rss.xml',
             'https://www.carbonbrief.org/feed/',
             'https://www.nature.com/subjects/climate-change.rss',
-            'https://feeds.feedburner.com/insideclimatenews'
+            'https://feeds.feedburner.com/insideclimatenews',
+            'https://www.theguardian.com/environment/rss',
+            'https://www.reuters.com/finance/environment/rss'
         ];
 
         function formatDate(value){
@@ -307,8 +309,9 @@
             if(err) err.style.display='block';
         }
 
+        function dedupe(items){ const seen=new Set(); const out=[]; for(const it of items){ const key=(it.link||it.url||it.guid||it.title||'').trim(); if(!key||seen.has(key)) continue; seen.add(key); out.push(it);} return out; }
         Promise.all(feeds.map(fetchFeed)).then(arr=>{
-            const all = arr.flat();
+            const all = dedupe(arr.flat());
             all.sort((a,b)=>new Date(b.pubDate||b.published||0)-new Date(a.pubDate||a.published||0));
             render(all);
         }).catch(()=>showError());
