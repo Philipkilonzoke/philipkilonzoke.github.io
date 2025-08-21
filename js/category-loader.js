@@ -119,24 +119,14 @@
     if (scr){ scr.classList.add('hidden'); setTimeout(()=>{ scr.style.display='none'; }, 300); }
   }
 
-  function renderSkeleton(category, count){
-    const grid = document.getElementById('news-grid');
-    const load = document.getElementById('news-loading');
-    if (load) load.style.display = 'none';
-    if (grid) grid.style.display = 'grid';
-    const items = Array.from({ length: count }).map(() => {
-      return `<article class="news-card">
-        <div class="news-image"><div class="text-placeholder" style="height:200px"></div></div>
-        <div class="news-content">
-          <span class="news-category">${category}</span>
-          <h3 class="news-title">Loading...</h3>
-          <p class="news-description">Please wait while we fetch the latest.</p>
-          <div class="news-meta"><span class="news-date">Just now</span><span class="news-category">${category}</span></div>
-        </div>
-      </article>`;
-    }).join('');
-    grid.innerHTML = items;
-    hideSplash();
+  function preconnect(host){
+    try{
+      const l = document.createElement('link');
+      l.rel = 'preconnect';
+      l.href = host;
+      l.crossOrigin = '';
+      document.head.appendChild(l);
+    }catch(_){ /* noop */ }
   }
 
   function renderItems(category, items, maxItems){
@@ -203,37 +193,57 @@
     const cacheTtlMs = cacheTtlMinutes * 60 * 1000;
 
     try{
-      // Immediate UX: hide splash quickly
-      hideSplash();
+      // Preconnect to proxies
+      preconnect('https://api.allorigins.win');
+      preconnect('https://api.rss2json.com');
 
-      // Cache-first render for instant content
+      // Cache-first render for instant content (but keep splash until we render real items)
       const cachedInitial = getCache(cacheKey);
+      let renderedOnce = false;
       if (cachedInitial && Array.isArray(cachedInitial.items) && cachedInitial.items.length){
-        renderItems(category, cachedInitial.items, maxItems);
-      } else {
-        // Lightweight skeletons if no cache available
-        renderSkeleton(category, 6);
+        renderItems(category, cachedInitial.items, maxItems); // hides splash once items are drawn
+        renderedOnce = true;
       }
 
-      const results = await Promise.allSettled(feeds.map(fetchFeed));
-      let all = [];
-      results.forEach(r => { if (r.status === 'fulfilled' && Array.isArray(r.value)) all = all.concat(r.value); });
-      all = dedupe(all);
-      const now = Date.now();
-      const fresh = all.filter(it => {
-        const t = new Date(it.pubDate || it.published || it.isoDate || Date.now()).getTime();
-        return (now - t) <= freshnessMs;
-      });
-      const base = fresh.length ? fresh : all;
-      base.sort((a,b) => new Date(b.pubDate || b.published || 0) - new Date(a.pubDate || a.published || 0));
+      // Progressive fetch: render as soon as we have enough items; then finalize at the end
+      let accumulated = [];
+      let lastRender = 0;
+      const minItemsToReveal = 8; // reveal as soon as a handful arrive
+      const debounceMs = 250;
 
-      if (base.length > 0){
+      await Promise.allSettled(feeds.map(async (u)=>{
+        const items = await fetchFeed(u);
+        if (!Array.isArray(items) || items.length === 0) return;
+        accumulated = dedupe(accumulated.concat(items));
+        const nowTs = Date.now();
+        // Only re-render at most every debounceMs
+        if ((accumulated.length >= minItemsToReveal || !renderedOnce) && nowTs - lastRender > debounceMs){
+          const now = Date.now();
+          const fresh = accumulated.filter(it=>{
+            const t = new Date(it.pubDate || it.published || it.isoDate || Date.now()).getTime();
+            return (now - t) <= freshnessMs;
+          });
+          const base = (fresh.length ? fresh : accumulated).sort((a,b)=> new Date(b.pubDate||b.published||0) - new Date(a.pubDate||a.published||0));
+          renderItems(category, base, maxItems);
+          renderedOnce = true;
+          lastRender = nowTs;
+        }
+      }));
+
+      // Final consolidation
+      if (accumulated.length){
+        const now = Date.now();
+        const fresh = accumulated.filter(it=>{
+          const t = new Date(it.pubDate || it.published || it.isoDate || Date.now()).getTime();
+          return (now - t) <= freshnessMs;
+        });
+        const base = (fresh.length ? fresh : accumulated).sort((a,b)=> new Date(b.pubDate||b.published||0) - new Date(a.pubDate||a.published||0));
         renderItems(category, base, maxItems);
         setCache(cacheKey, base.slice(0, maxItems));
         return;
       }
 
-      // fallback to cache when zero items
+      // fallback to cache when zero items from network
       const cached = getCache(cacheKey);
       if (cached && (Date.now() - cached.ts) <= cacheTtlMs && Array.isArray(cached.items) && cached.items.length){
         renderItems(category, cached.items, maxItems);
