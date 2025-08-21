@@ -52,7 +52,7 @@
   }
 
   function fetchWithTimeout(resource, options = {}){
-    const { timeoutMs = 6000 } = options;
+    const { timeoutMs = 4000 } = options;
     return new Promise((resolve, reject) => {
       const timer = setTimeout(() => reject(new Error('timeout')), timeoutMs);
       fetch(resource, options).then(res => { clearTimeout(timer); resolve(res); }).catch(err => { clearTimeout(timer); reject(err); });
@@ -60,7 +60,7 @@
   }
 
   async function parseViaAllOrigins(url){
-    const res = await fetchWithTimeout(`https://api.allorigins.win/get?url=${encodeURIComponent(url)}`, { timeoutMs: 7000 });
+    const res = await fetchWithTimeout(`https://api.allorigins.win/get?url=${encodeURIComponent(url)}`, { timeoutMs: 4000 });
     if (!res.ok) throw new Error('proxy');
     const data = await res.json();
     const xml = data.contents || '';
@@ -83,7 +83,7 @@
   }
 
   async function parseViaRss2Json(url){
-    const r = await fetchWithTimeout('https://api.rss2json.com/v1/api.json?rss_url=' + encodeURIComponent(url), { timeoutMs: 7000 });
+    const r = await fetchWithTimeout('https://api.rss2json.com/v1/api.json?rss_url=' + encodeURIComponent(url), { timeoutMs: 4000 });
     if (!r.ok) throw new Error('feed');
     const j = await r.json();
     return j.items || [];
@@ -114,6 +114,31 @@
     }
   }
 
+  function hideSplash(){
+    const scr = document.getElementById('loading-screen');
+    if (scr){ scr.classList.add('hidden'); setTimeout(()=>{ scr.style.display='none'; }, 300); }
+  }
+
+  function renderSkeleton(category, count){
+    const grid = document.getElementById('news-grid');
+    const load = document.getElementById('news-loading');
+    if (load) load.style.display = 'none';
+    if (grid) grid.style.display = 'grid';
+    const items = Array.from({ length: count }).map(() => {
+      return `<article class="news-card">
+        <div class="news-image"><div class="text-placeholder" style="height:200px"></div></div>
+        <div class="news-content">
+          <span class="news-category">${category}</span>
+          <h3 class="news-title">Loading...</h3>
+          <p class="news-description">Please wait while we fetch the latest.</p>
+          <div class="news-meta"><span class="news-date">Just now</span><span class="news-category">${category}</span></div>
+        </div>
+      </article>`;
+    }).join('');
+    grid.innerHTML = items;
+    hideSplash();
+  }
+
   function renderItems(category, items, maxItems){
     const load = document.getElementById('news-loading');
     const grid = document.getElementById('news-grid');
@@ -142,8 +167,7 @@
 
     if (more) more.style.display = (items.length > maxItems) ? 'block' : 'none';
     lazyLoad();
-    const scr = document.getElementById('loading-screen');
-    if (scr){ scr.classList.add('hidden'); setTimeout(()=>{ scr.style.display='none'; }, 300); }
+    hideSplash();
   }
 
   function showError(){
@@ -179,6 +203,18 @@
     const cacheTtlMs = cacheTtlMinutes * 60 * 1000;
 
     try{
+      // Immediate UX: hide splash quickly
+      hideSplash();
+
+      // Cache-first render for instant content
+      const cachedInitial = getCache(cacheKey);
+      if (cachedInitial && Array.isArray(cachedInitial.items) && cachedInitial.items.length){
+        renderItems(category, cachedInitial.items, maxItems);
+      } else {
+        // Lightweight skeletons if no cache available
+        renderSkeleton(category, 6);
+      }
+
       const results = await Promise.allSettled(feeds.map(fetchFeed));
       let all = [];
       results.forEach(r => { if (r.status === 'fulfilled' && Array.isArray(r.value)) all = all.concat(r.value); });
