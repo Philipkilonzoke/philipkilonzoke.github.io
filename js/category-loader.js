@@ -29,13 +29,24 @@
       item.thumbnail
     ].filter(Boolean);
     for (const url of candidates){
-      if (typeof url === 'string' && /^https?:\/\//.test(url)) return url;
+      if (typeof url === 'string' && /^https?:\/\//.test(url)){
+        try{
+          const u = new URL(url);
+          const host = u.hostname.replace('www.','');
+          const pathLower = u.pathname.toLowerCase();
+          // Avoid common logo/default placeholders (e.g., bleepingcomputer logos)
+          if (pathLower.includes('logo') || pathLower.includes('default') || pathLower.endsWith('.svg')){
+            continue;
+          }
+          return url;
+        }catch(_){ return url; }
+      }
     }
     const html = item.content || item['content:encoded'] || item.content_html || item.description || '';
     const m = html.match(/<img[^>]+src=["']([^"']+)["'][^>]*>/i);
     if (m && /^https?:\/\//.test(m[1])) return m[1];
     const articleUrl = item.link || item.url;
-    if (articleUrl) return `https://s.wordpress.com/mshots/v1/${encodeURIComponent(articleUrl)}?w=800`;
+    if (articleUrl) return `https://s.wordpress.com/mshots/v1/${encodeURIComponent(articleUrl)}?w=1280`;
     return '';
   }
 
@@ -184,7 +195,7 @@
     }catch(_){ /* ignore quota errors */ }
   }
 
-  window.loadCategoryNews = async function({ category, feeds, freshnessHours = 48, maxItems = 50, cacheTtlMinutes = 60 }){
+  window.loadCategoryNews = async function({ category, feeds, freshnessHours = 48, maxItems = 50, cacheTtlMinutes = 60, staleCutoffHours = 336 }){
     const retry = document.getElementById('retry-button');
     if (retry) retry.addEventListener('click', () => window.location.reload());
 
@@ -230,14 +241,20 @@
         }
       }));
 
-      // Final consolidation
+      // Final consolidation with stale fallback
       if (accumulated.length){
         const now = Date.now();
-        const fresh = accumulated.filter(it=>{
-          const t = new Date(it.pubDate || it.published || it.isoDate || Date.now()).getTime();
-          return (now - t) <= freshnessMs;
-        });
-        const base = (fresh.length ? fresh : accumulated).sort((a,b)=> new Date(b.pubDate||b.published||0) - new Date(a.pubDate||a.published||0));
+        const ts = (it)=> new Date(it.pubDate || it.published || it.isoDate || '').getTime();
+        const fresh = accumulated.filter(it=>{ const t=ts(it); return Number.isFinite(t) && (now - t) <= freshnessMs; });
+        let base;
+        if (fresh.length){
+          base = fresh;
+        } else {
+          const staleMax = staleCutoffHours * 60 * 60 * 1000;
+          const recent = accumulated.filter(it=>{ const t=ts(it); return Number.isFinite(t) && (now - t) <= staleMax; });
+          base = recent.length ? recent : accumulated;
+        }
+        base = base.sort((a,b)=> new Date(b.pubDate||b.published||0) - new Date(a.pubDate||a.published||0));
         renderItems(category, base, maxItems);
         setCache(cacheKey, base.slice(0, maxItems));
         return;
