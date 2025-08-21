@@ -214,11 +214,22 @@
         }
 
         function extractImage(item){
-            if(item.enclosure && item.enclosure.link) return item.enclosure.link;
-            if(item.thumbnail) return item.thumbnail;
-            const html = item.content || item.description || '';
+            const tryUrls = [
+                item.image, item.image_url, item.cover, item.picture,
+                item.enclosure?.url, item.enclosure?.link,
+                Array.isArray(item.enclosures) && item.enclosures.length ? item.enclosures[0]?.url : null,
+                item.media?.content?.url,
+                item['media:content']?.url,
+                item['media:thumbnail']?.url,
+                item.thumbnail
+            ].filter(Boolean);
+            for (const u of tryUrls) { if (typeof u === 'string' && /^https?:\/\//.test(u)) return u; }
+            const html = item.content || item['content:encoded'] || item.content_html || item.description || '';
             const m = html.match(/<img[^>]+src=["']([^"']+)["'][^>]*>/i);
-            return m ? m[1] : '';
+            if (m && /^https?:\/\//.test(m[1])) return m[1];
+            const articleUrl = item.link || item.url;
+            if (articleUrl) return `https://s.wordpress.com/mshots/v1/${encodeURIComponent(articleUrl)}?w=800`;
+            return '';
         }
 
         async function fetchFeed(url){
@@ -271,7 +282,7 @@
                 const hasImg = img && /^https?:\/\//.test(img);
                 const imgSection = hasImg ? `
                     <div class="news-image">
-                        <img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZjNmNGY2Ii8+PC9zdmc+" data-src="${img}" alt="${title}" loading="lazy" class="lazy-image" onerror="this.parentElement.innerHTML='&lt;div class=\"text-placeholder\"&gt;Brightlens News&lt;/div&gt;'">
+                        <img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZjNmNGY2Ii8+PC9zdmc+" data-src="${img}" alt="${title}" loading="lazy" class="lazy-image" referrerpolicy="no-referrer" onerror="this.parentElement.innerHTML='&lt;div class=\"text-placeholder\"&gt;Brightlens News&lt;/div&gt;'">
                     </div>` : `
                     <div class="text-placeholder">Brightlens News</div>`;
                 return `
