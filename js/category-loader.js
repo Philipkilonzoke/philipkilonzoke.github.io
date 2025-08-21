@@ -101,9 +101,17 @@
   }
 
   async function fetchFeed(url){
-    try{ return await parseViaAllOrigins(url); } catch(e){
-      try{ return await parseViaRss2Json(url); } catch(_){ return []; }
-    }
+    const raceParsers = [
+      (async()=>{ try{ return await parseViaAllOrigins(url); }catch(_){ return null; } })(),
+      (async()=>{ try{ return await parseViaRss2Json(url); }catch(_){ return null; } })()
+    ];
+    try{
+      const winner = await Promise.race(raceParsers);
+      if (Array.isArray(winner)) return winner;
+      const settled = await Promise.allSettled(raceParsers);
+      for (const r of settled){ if (r.status === 'fulfilled' && Array.isArray(r.value)) return r.value; }
+    }catch(_){ /* noop */ }
+    try{ return await parseViaAllOrigins(url); }catch(_){ try{ return await parseViaRss2Json(url); }catch(_){ return []; } }
   }
 
   function lazyLoad(){
@@ -279,4 +287,3 @@
     }
   };
 })();
-
