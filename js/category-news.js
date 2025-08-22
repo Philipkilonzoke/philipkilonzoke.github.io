@@ -199,6 +199,20 @@ class CategoryNews {
             this.createArticleHTML(article)
         ).join('');
 
+        // Eagerly load a few images for perceived speed
+        try{
+            const eagerCount = 6;
+            const imgs = newsGrid.querySelectorAll('img.lazy-image');
+            for (let i = 0; i < Math.min(eagerCount, imgs.length); i++){
+                const im = imgs[i];
+                im.setAttribute('fetchpriority', 'high');
+                if (im.dataset && im.dataset.src){
+                    im.src = im.dataset.src;
+                    im.classList.remove('lazy-image');
+                }
+            }
+        }catch(_){ /* no-op */ }
+
         this.setupLazyLoading();
         this.updateLoadMoreButton();
     }
@@ -243,7 +257,7 @@ class CategoryNews {
                 <img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZjNmNGY2Ii8+PC9zdmc+"
                      data-src="${imageUrl}" 
                      alt="${article.title}" 
-                     loading="lazy" decoding="async"
+                     loading="lazy" decoding="async" width="600" height="400"
                      class="lazy-image"
                      referrerpolicy="no-referrer" crossorigin="anonymous"
                      onerror="this.parentElement.innerHTML='<div class=\\"text-placeholder\\">Brightlens News</div>'">
