@@ -243,7 +243,7 @@ class CategoryNews {
                 <img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZjNmNGY2Ii8+PC9zdmc+"
                      data-src="${imageUrl}" 
                      alt="${article.title}" 
-                     loading="lazy"
+                     loading="lazy" decoding="async"
                      class="lazy-image"
                      referrerpolicy="no-referrer" crossorigin="anonymous"
                      onerror="this.parentElement.innerHTML='<div class=\\"text-placeholder\\">Brightlens News</div>'">
