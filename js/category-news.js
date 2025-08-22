@@ -199,19 +199,30 @@ class CategoryNews {
             this.createArticleHTML(article)
         ).join('');
 
-        // Eagerly load a few images for perceived speed
-        try{
-            const eagerCount = 6;
-            const imgs = newsGrid.querySelectorAll('img.lazy-image');
-            for (let i = 0; i < Math.min(eagerCount, imgs.length); i++){
-                const im = imgs[i];
-                im.setAttribute('fetchpriority', 'high');
-                if (im.dataset && im.dataset.src){
-                    im.src = im.dataset.src;
-                    im.classList.remove('lazy-image');
+        // Boost only selected categories
+        const boostedSet = new Set([
+            'africa','energy','spaceflight','real estate','real-estate','agriculture','personal finance','personal-finance',
+            'politics','education','ai policy','ai-policy','humanitarian','ai & ml','ai and ml','climate','fact-check',
+            'cybersecurity','markets','mobility','gaming','science'
+        ]);
+        const catKey = (this.category || '').toString().toLowerCase();
+        const boosted = boostedSet.has(catKey) || boostedSet.has(catKey.replace(/\s+/g,'-'));
+
+        // Eagerly load a few images for perceived speed on boosted categories
+        if (boosted) {
+            try{
+                const eagerCount = 6;
+                const imgs = newsGrid.querySelectorAll('img.lazy-image');
+                for (let i = 0; i < Math.min(eagerCount, imgs.length); i++){
+                    const im = imgs[i];
+                    im.setAttribute('fetchpriority', 'high');
+                    if (im.dataset && im.dataset.src){
+                        im.src = im.dataset.src;
+                        im.classList.remove('lazy-image');
+                    }
                 }
-            }
-        }catch(_){ /* no-op */ }
+            }catch(_){ /* no-op */ }
+        }
 
         this.setupLazyLoading();
         this.updateLoadMoreButton();
@@ -257,7 +268,7 @@ class CategoryNews {
                 <img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZjNmNGY2Ii8+PC9zdmc+"
                      data-src="${imageUrl}" 
                      alt="${article.title}" 
-                     loading="lazy" decoding="async" width="600" height="400"
+                     loading="lazy" decoding="async" ${(['africa','energy','spaceflight','real estate','real-estate','agriculture','personal finance','personal-finance','politics','education','ai policy','ai-policy','humanitarian','ai & ml','ai and ml','climate','fact-check','cybersecurity','markets','mobility','gaming','science'].includes((this.category||'').toLowerCase()) || ['africa','energy','spaceflight','real-estate','personal-finance','ai-policy'].includes((this.category||'').toLowerCase().replace(/\s+/g,'-'))) ? 'width="600" height="400"' : ''}
                      class="lazy-image"
                      referrerpolicy="no-referrer" crossorigin="anonymous"
                      onerror="this.parentElement.innerHTML='<div class=\\"text-placeholder\\">Brightlens News</div>'">
