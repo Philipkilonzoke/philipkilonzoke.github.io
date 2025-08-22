@@ -309,6 +309,7 @@
             font-weight: 500;
             color: var(--primary-color);
         }
+        .ticker-source:empty { display: none; }
         
         .ticker-date {
             font-weight: 400;
@@ -1559,7 +1560,7 @@
                                 : article.title;
                             
                             // Use the exact same source name as Breaking News page
-                            const sourceName = article.source?.name || 'Unknown Source';
+                            const sourceName = article.source?.name || '';
                             
                             return `
                                 <div class="ticker-item" onclick="window.open('${article.url}', '_blank')">
@@ -1578,7 +1579,7 @@
                                         <h3 class="ticker-title">${truncatedTitle}</h3>
                                         <p class="ticker-description">${truncatedDescription}</p>
                                         <div class="ticker-meta">
-                                            <span class="ticker-source">${sourceName}</span>
+                                            ${sourceName ? `<span class="ticker-source">${sourceName}</span>` : `<span class="ticker-source"></span>`}
                                             <span class="ticker-date">${formattedDate}</span>
                                         </div>
                                     </div>
