@@ -245,6 +245,7 @@ class CategoryNews {
                      alt="${article.title}" 
                      loading="lazy"
                      class="lazy-image"
+                     referrerpolicy="no-referrer" crossorigin="anonymous"
                      onerror="this.parentElement.innerHTML='<div class=\\"text-placeholder\\">Brightlens News</div>'">
             </div>` : `
             <div class="text-placeholder">Brightlens News</div>`;
