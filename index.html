@@ -277,10 +277,8 @@
             line-height: 1.4;
             margin-bottom: 0.75rem;
             color: var(--text-color);
-            display: -webkit-box;
-            -webkit-line-clamp: 2;
-            -webkit-box-orient: vertical;
-            overflow: hidden;
+            display: block;
+            white-space: normal;
         }
         
         .ticker-description {
@@ -288,10 +286,8 @@
             font-size: 0.875rem;
             line-height: 1.5;
             margin-bottom: 1rem;
-            display: -webkit-box;
-            -webkit-line-clamp: 3;
-            -webkit-box-orient: vertical;
-            overflow: hidden;
+            display: block;
+            white-space: normal;
             opacity: 0.8;
             flex: 1;
         }
@@ -1550,14 +1546,10 @@
                                 !article.urlToImage.includes('placeholder');
                             
                             // Use the exact same description as Breaking News page
-                            const truncatedDescription = article.description.length > 120 
-                                ? article.description.substring(0, 120) + '...' 
-                                : article.description;
+                            const fullDescription = article.description;
                             
                             // Use the exact same title truncation as Breaking News page
-                            const truncatedTitle = article.title.length > 60 
-                                ? article.title.substring(0, 60) + '...' 
-                                : article.title;
+                            const fullTitle = article.title;
                             
                             // Use the exact same source name as Breaking News page
                             const sourceName = article.source?.name || '';
@@ -1576,8 +1568,8 @@
                                         </div>`
                                     }
                                     <div class="ticker-text">
-                                        <h3 class="ticker-title">${truncatedTitle}</h3>
-                                        <p class="ticker-description">${truncatedDescription}</p>
+                                        <h3 class="ticker-title">${fullTitle}</h3>
+                                        <p class="ticker-description">${fullDescription}</p>
                                         <div class="ticker-meta">
                                             ${sourceName ? `<span class="ticker-source">${sourceName}</span>` : `<span class="ticker-source"></span>`}
                                             <span class="ticker-date">${formattedDate}</span>
