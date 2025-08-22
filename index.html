@@ -199,7 +199,7 @@
         .ticker-content {
             display: flex;
             gap: 2rem;
-            animation: scroll-left 90s linear infinite;
+            animation: scroll-left 65s linear infinite;
             padding: 0 1rem;
             will-change: transform;
             cursor: grab;
@@ -1564,7 +1564,7 @@
                             return `
                                 <div class="ticker-item" onclick="window.open('${article.url}', '_blank')">
                                     ${hasValidImage ? 
-                                        `<img src="${article.urlToImage}" alt="${article.title}" class="ticker-image" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">` : ''
+                                        `<img src="${article.urlToImage}" alt="${article.title}" class="ticker-image" referrerpolicy="no-referrer" crossorigin="anonymous" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">` : ''
                                     }
                                     ${hasValidImage ? 
                                         `<div class="ticker-image-placeholder" style="display: none;">
@@ -1892,7 +1892,28 @@
             }, 1000);
             
             // Initialize safe homepage features
-            new SafeHomepageFeatures();
+            const features = new SafeHomepageFeatures();
+            
+            // Auto-load breaking ticker when section is visible
+            const breakingSection = document.querySelector('.breaking-news-section');
+            if ('IntersectionObserver' in window && breakingSection) {
+                const io = new IntersectionObserver((entries) => {
+                    entries.forEach(entry => {
+                        if (entry.isIntersecting) {
+                            // Load immediately when visible
+                            features.loadBreakingNewsForTicker();
+                            // Speed up initial motion slightly after content is set
+                            const tickerEl = document.querySelector('.ticker-content');
+                            if (tickerEl) tickerEl.style.animationDuration = '65s';
+                            io.disconnect();
+                        }
+                    });
+                }, { root: null, threshold: 0.15 });
+                io.observe(breakingSection);
+            } else {
+                // Fallback: load after short delay
+                setTimeout(() => features.loadBreakingNewsForTicker(), 1000);
+            }
             
             // Setup ticker interaction after content is loaded
             setTimeout(() => {
