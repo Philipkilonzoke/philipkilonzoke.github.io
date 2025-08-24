@@ -33,6 +33,18 @@ class SidebarNavigation {
                 id: 'latest'
             },
             { 
+                href: 'weather.html', 
+                icon: 'fas fa-cloud-sun', 
+                text: 'Weather',
+                id: 'weather'
+            },
+            { 
+                href: 'live-tv.html', 
+                icon: 'fas fa-tv', 
+                text: 'Live TV',
+                id: 'live-tv'
+            },
+            { 
                 href: 'kenya.html', 
                 icon: 'fas fa-flag', 
                 text: 'Kenyan News',
@@ -167,19 +179,7 @@ class SidebarNavigation {
             { href: 'politics.html', icon: 'fas fa-landmark', text: 'Politics', id: 'politics' },
             { href: 'travel.html', icon: 'fas fa-suitcase-rolling', text: 'Travel', id: 'travel' },
             // Divider
-            { divider: true },
-            { 
-                href: 'weather.html', 
-                icon: 'fas fa-cloud-sun', 
-                text: 'Weather',
-                id: 'weather'
-            },
-            { 
-                href: 'live-tv.html', 
-                icon: 'fas fa-tv', 
-                text: 'Live TV',
-                id: 'live-tv'
-            }
+            { divider: true }
         ];
     }
 
