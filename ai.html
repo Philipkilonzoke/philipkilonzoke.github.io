@@ -4,26 +4,71 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AI & Machine Learning - Brightlens News</title>
-    <meta name="description" content="AI and machine learning news hub: breakthroughs, research, tools, policy, and industry updates.">
-    <meta name="keywords" content="AI, artificial intelligence, machine learning, deep learning, LLM, research, policy">
-    <meta name="author" content="Brightlens News">
-
-    <!-- PWA -->
+    
+    <!-- PWA Meta Tags -->
     <link rel="manifest" href="/manifest.json" />
     <meta name="theme-color" content="#1e1e1e" />
-
-    <!-- Site CSS to match existing categories -->
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="Brightlens News" />
+    <link rel="apple-touch-icon" href="/assets/icon-192.svg" />
+    
+    <!-- SEO Meta Tags -->
+    <meta name="description" content="AI and machine learning news hub: breakthroughs, research, tools, policy, and industry updates.">
+    <meta name="keywords" content="AI, artificial intelligence, machine learning, deep learning, LLM, research, policy, Brightlens">
+    <meta name="author" content="Philip Kilonzo">
+    
+    <!-- Open Graph Meta Tags -->
+    <meta property="og:title" content="AI & Machine Learning - Brightlens News">
+    <meta property="og:description" content="AI and machine learning news hub: breakthroughs, research, tools, policy, and industry updates.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://philipkilonzoke.github.io/ai">
+    
+    <!-- Critical CSS Inline for Faster Loading -->
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box}
+        :root{--primary-color:#2563eb;--background-color:#ffffff;--text-color:#1e293b;--surface-color:#f8fafc;--border-color:#e2e8f0}
+        body{font-family:'Inter',system-ui,sans-serif;background:var(--background-color);color:var(--text-color);line-height:1.6}
+        .loading-screen{position:fixed;top:0;left:0;width:100%;height:100%;background:var(--primary-color);display:flex;align-items:center;justify-content:center;z-index:9999;transition:opacity 0.3s}
+        .loading-screen.hidden{opacity:0;visibility:hidden}
+        .loading-container{text-align:center;color:white}
+        .loading-spinner{width:60px;height:60px;border:4px solid rgba(255,255,255,0.3);border-top:4px solid white;border-radius:50%;animation:spin 1s linear infinite;margin:0 auto 1rem}
+        @keyframes spin{0%{transform:rotate(0deg)}100%{transform:rotate(360deg)}}
+        .header{background:var(--surface-color);border-bottom:1px solid var(--border-color);position:sticky;top:0;z-index:100}
+    </style>
+    <!-- Non-Critical CSS Files -->
     <link rel="preload" href="css/styles.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
     <link rel="preload" href="css/themes.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
     <link rel="preload" href="/css/settings.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
     <noscript><link rel="stylesheet" href="css/styles.css"><link rel="stylesheet" href="css/themes.css"><link rel="stylesheet" href="/css/settings.css"></noscript>
+    
+    <!-- OneSignal SDK -->
+    <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
+    <script src="js/push-notifications.js" defer></script>
 
+    <!-- Sidebar Navigation Script -->
+    <script src="js/sidebar-navigation.js" defer></script>
+    
+    <!-- Service Worker Registration -->
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('/service-worker.js')
+            .then(registration => {
+              console.log('SW registered: ', registration);
+            })
+            .catch(registrationError => {
+              console.log('SW registration failed: ', registrationError);
+            });
+        });
+      }
+    </script>
     <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
     <noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"></noscript>
-
-    <!-- Sidebar + Theme -->
-    <script src="js/sidebar-navigation.js" defer></script>
-    <script src="/js/settings.js" defer></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preload" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"></noscript>
 </head>
 <body>
     <!-- Loading Screen -->
@@ -53,11 +98,6 @@
                         <a href="/business" class="nav-link">Business</a>
                         <a href="/sports" class="nav-link">Sports</a>
                         <a href="/health" class="nav-link">Health</a>
-                        <a href="/lifestyle" class="nav-link">Lifestyle</a>
-                        <a href="/food" class="nav-link">Food</a>
-                        <a href="/crypto" class="nav-link">Crypto</a>
-                        <a href="/astronomy" class="nav-link">Astronomy</a>
-                        <a href="/aviation" class="nav-link">Live Flight Tracker</a>
                         <a href="/ai" class="nav-link active">AI & ML</a>
                     </div>
                     <div class="nav-controls">
@@ -65,6 +105,7 @@
                             <i class="fas fa-palette"></i>
                         </button>
                     </div>
+                    <script src="/js/settings.js" defer></script>
                 </nav>
             </div>
         </div>
@@ -73,7 +114,6 @@
     <!-- Main Content -->
     <main class="main">
         <div class="container">
-            <!-- Category Title -->
             <div class="category-header">
                 <h2 id="category-title">AI & Machine Learning</h2>
                 <div class="category-meta">
@@ -81,15 +121,13 @@
                     <span id="last-updated"></span>
                 </div>
             </div>
-
-            <!-- News Loading -->
+            
             <div id="news-loading" class="news-loading">
                 <div class="loading-spinner-small"></div>
                 <p>Fetching AI news...</p>
             </div>
-
-            <!-- News Error -->
-            <div id="news-error" class="news-error" style="display: none;">
+            
+            <div id="news-error" class="news-error" style="display:none;">
                 <div class="error-content">
                     <i class="fas fa-exclamation-triangle"></i>
                     <h3>Unable to Load News</h3>
@@ -99,10 +137,10 @@
                     </button>
                 </div>
             </div>
-
-            <!-- News Grid -->
-            <div id="news-grid" class="news-grid" style="display: none;"></div>
-            <div class="load-more-container" style="display: none;">
+            
+            <div id="news-grid" class="news-grid" style="display:none;"></div>
+            
+            <div class="load-more-container" style="display:none;">
                 <button id="load-more" class="load-more-button">
                     <i class="fas fa-plus-circle"></i> Load More Articles
                 </button>
@@ -120,12 +158,59 @@
                 </button>
             </div>
             <div class="theme-grid">
-                <!-- Populated by js/themes.js -->
+                <button class="theme-option" data-theme="default">
+                    <div class="theme-preview theme-preview-default"></div>
+                    <span>Default</span>
+                </button>
+                <button class="theme-option" data-theme="dark">
+                    <div class="theme-preview theme-preview-dark"></div>
+                    <span>Dark</span>
+                </button>
+                <button class="theme-option" data-theme="blue">
+                    <div class="theme-preview theme-preview-blue"></div>
+                    <span>Ocean Blue</span>
+                </button>
+                <button class="theme-option" data-theme="green">
+                    <div class="theme-preview theme-preview-green"></div>
+                    <span>Forest Green</span>
+                </button>
+                <button class="theme-option" data-theme="purple">
+                    <div class="theme-preview theme-preview-purple"></div>
+                    <span>Royal Purple</span>
+                </button>
+                <button class="theme-option" data-theme="orange">
+                    <div class="theme-preview theme-preview-orange"></div>
+                    <span>Sunset Orange</span>
+                </button>
+                <button class="theme-option" data-theme="rose">
+                    <div class="theme-preview theme-preview-rose"></div>
+                    <span>Rose Pink</span>
+                </button>
+                <button class="theme-option" data-theme="emerald">
+                    <div class="theme-preview theme-preview-emerald"></div>
+                    <span>Emerald</span>
+                </button>
+                <button class="theme-option" data-theme="indigo">
+                    <div class="theme-preview theme-preview-indigo"></div>
+                    <span>Indigo</span>
+                </button>
+                <button class="theme-option" data-theme="amber">
+                    <div class="theme-preview theme-preview-amber"></div>
+                    <span>Amber</span>
+                </button>
+                <button class="theme-option" data-theme="teal">
+                    <div class="theme-preview theme-preview-teal"></div>
+                    <span>Teal</span>
+                </button>
+                <button class="theme-option" data-theme="crimson">
+                    <div class="theme-preview theme-preview-crimson"></div>
+                    <span>Crimson</span>
+                </button>
             </div>
         </div>
     </div>
 
-    <!-- Footer (matching site style) -->
+    <!-- Footer -->
     <footer class="footer">
         <div class="footer-wave">
             <svg viewBox="0 0 1440 120" fill="none" xmlns="https://www.w3.org/2000/svg">
@@ -144,37 +229,103 @@
                     </div>
                     <p>Your trusted source for comprehensive news coverage from multiple reliable sources worldwide. Stay informed with real-time updates.</p>
                 </div>
+                <div class="footer-section">
+                    <h4><i class="fas fa-list-ul"></i> News Categories</h4>
+                    <div class="footer-links">
+                        <a href="/latest" data-category="latest" class="footer-link">
+                            <i class="fas fa-bolt"></i> Breaking News
+                        </a>
+                        <a href="/kenya" data-category="kenya" class="footer-link">
+                            <i class="fas fa-map-marker-alt"></i> Kenya
+                        </a>
+                        <a href="/world" data-category="world" class="footer-link">
+                            <i class="fas fa-globe"></i> World
+                        </a>
+                        <a href="/entertainment" data-category="entertainment" class="footer-link">
+                            <i class="fas fa-film"></i> Entertainment
+                        </a>
+                        <a href="/technology" data-category="technology" class="footer-link">
+                            <i class="fas fa-microchip"></i> Technology
+                        </a>
+                        <a href="/business" data-category="business" class="footer-link">
+                            <i class="fas fa-chart-line"></i> Business
+                        </a>
+                        <a href="/sports" data-category="sports" class="footer-link">
+                            <i class="fas fa-futbol"></i> Sports
+                        </a>
+                        <a href="/health" data-category="health" class="footer-link">
+                            <i class="fas fa-heartbeat"></i> Health
+                        </a>
+                    </div>
+                </div>
+                <div class="footer-section">
+                    <h4><i class="fas fa-share-alt"></i> Connect With Us</h4>
+                    <div class="social-links">
+                        <a href="https://instagram.com/philipkilonzo.ke" target="_blank" rel="noopener noreferrer" class="social-link instagram">
+                            <div class="social-icon">
+                                <i class="fab fa-instagram"></i>
+                            </div>
+                            <div class="social-info">
+                                <span class="social-platform">Instagram</span>
+                                <span class="social-handle">@philipkilonzo.ke</span>
+                            </div>
+                        </a>
+                        <a href="https://wa.me/254791943551" target="_blank" rel="noopener noreferrer" class="social-link whatsapp">
+                            <div class="social-icon">
+                                <i class="fab fa-whatsapp"></i>
+                            </div>
+                            <div class="social-info">
+                                <span class="social-platform">WhatsApp</span>
+                                <span class="social-handle">+254 791 943 551</span>
+                            </div>
+                        </a>
+                    </div>
+                    <div class="footer-newsletter">
+                        <h5>Stay Updated</h5>
+                        <p>Get the latest news delivered to your inbox</p>
+                        <div class="newsletter-form">
+                            <input type="email" placeholder="Enter your email">
+                            <button type="submit">
+                                <i class="fas fa-paper-plane"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
             </div>
             <div class="footer-bottom">
-                <div class="footeropyright">
-                    <i class="fas fa-copyright"></i> <span id="current-year"></span> Brightlens News. All rights reserved.
+                <div class="footer-bottom-content">
+                    <div class="footer-copyright">
+                        <p>&copy; 2025 Brightlens News. All rights reserved.</p>
+                    </div>
+                    <div class="footer-links-bottom">
+                        <a href="#">Privacy Policy</a>
+                        <a href="#">Terms of Service</a>
+                        <a href="#">Contact</a>
+                    </div>
                 </div>
             </div>
         </div>
         <div class="footer-glow"></div>
     </footer>
 
+    <!-- Back to Top Button -->
+    <button id="back-to-top" class="back-to-top" title="Back to Top">
+        <i class="fas fa-arrow-up"></i>
+    </button>
+
+    <!-- Reading Progress Bar -->
+    <div id="reading-progress" class="reading-progress"></div>
+
+    <!-- JavaScript -->
+    <script src="js/news-api.js"></script>
+    <script src="js/cookie-manager.js"></script>
     <script src="js/themes.js"></script>
-    <script src="/js/category-loader.js"></script>
+    <script src="js/category-news.js"></script>
+    <script src="js/simple-features.js"></script>
     <script>
-    window.loadCategoryNews({
-      category: 'AI & ML',
-      feeds: [
-        'https://openai.com/blog/rss.xml',
-        'https://ai.googleblog.com/feeds/posts/default?alt=rss',
-        'https://deepmind.com/blog/feed/basic/',
-        'https://ai.facebook.com/blog/rss/',
-        'https://www.microsoft.com/en-us/research/feed/',
-        'http://export.arxiv.org/rss/cs.LG',
-        'http://export.arxiv.org/rss/stat.ML',
-        'https://news.mit.edu/topic/artificial-intelligence2/feed',
-        'https://paperswithcode.com/news?format=rss'
-      ],
-      freshnessHours: 24,
-      staleCutoffHours: 168,
-      maxItems: 50,
-      cacheTtlMinutes: 60
-    });
+        document.addEventListener('DOMContentLoaded', () => {
+            window.categoryNews = new CategoryNews('ai');
+        });
     </script>
 </body>
 </html>
