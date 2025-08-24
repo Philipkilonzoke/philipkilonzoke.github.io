@@ -1337,7 +1337,6 @@ class NewsAPI {
             'health': 'Health',
             'lifestyle': 'Lifestyle',
             'education': 'Education',
-            'ai-policy': 'AI Policy',
             'humanitarian': 'Humanitarian',
             'travel': 'Travel',
             'startups': 'Startups'

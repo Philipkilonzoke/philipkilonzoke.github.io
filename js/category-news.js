@@ -202,7 +202,7 @@ class CategoryNews {
         // Boost only selected categories
         const boostedSet = new Set([
             'africa','energy','spaceflight','real estate','real-estate','agriculture','personal finance','personal-finance',
-            'politics','education','ai policy','ai-policy','humanitarian','ai & ml','ai and ml','climate','fact-check',
+            'politics','education','humanitarian','ai & ml','ai and ml','climate','fact-check',
             'cybersecurity','markets','mobility','gaming','science'
         ]);
         const catKey = (this.category || '').toString().toLowerCase();
@@ -268,10 +268,10 @@ class CategoryNews {
                 <img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZjNmNGY2Ii8+PC9zdmc+"
                      data-src="${imageUrl}" 
                      alt="${article.title}" 
-                     loading="lazy" decoding="async" ${(['africa','energy','spaceflight','real estate','real-estate','agriculture','personal finance','personal-finance','politics','education','ai policy','ai-policy','humanitarian','ai & ml','ai and ml','climate','fact-check','cybersecurity','markets','mobility','gaming','science'].includes((this.category||'').toLowerCase()) || ['africa','energy','spaceflight','real-estate','personal-finance','ai-policy'].includes((this.category||'').toLowerCase().replace(/\s+/g,'-'))) ? 'width="600" height="400"' : ''}
+                     loading="lazy" decoding="async" ${(['africa','energy','spaceflight','real estate','real-estate','agriculture','personal finance','personal-finance','politics','education','humanitarian','ai & ml','ai and ml','climate','fact-check','cybersecurity','markets','mobility','gaming','science'].includes((this.category||'').toLowerCase()) || ['africa','energy','spaceflight','real-estate','personal-finance'].includes((this.category||'').toLowerCase().replace(/\s+/g,'-'))) ? 'width="600" height="400"' : ''}
                      class="lazy-image"
                      referrerpolicy="no-referrer" crossorigin="anonymous"
-                     onerror="this.parentElement.innerHTML='<div class=\\"text-placeholder\\">Brightlens News</div>'">
+                     onerror="this.parentElement.innerHTML='<div class=\"text-placeholder\">Brightlens News</div>'">
             </div>` : `
             <div class="text-placeholder">Brightlens News</div>`;
         

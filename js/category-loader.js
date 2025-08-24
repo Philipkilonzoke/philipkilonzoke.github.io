@@ -231,10 +231,10 @@
     if (count) count.textContent = `Showing ${Math.min(limited.length, items.length)} of ${items.length} articles`;
     if (upd) upd.textContent = `Last updated: ${new Date().toLocaleTimeString()}`;
 
-    // Only boost these categories
-    const boostedSet = new Set([
+      // Only boost these categories
+  const boostedSet = new Set([
       'africa','energy','spaceflight','real estate','real-estate','agriculture','personal finance','personal-finance',
-      'politics','education','ai policy','ai-policy','humanitarian','ai & ml','ai and ml','climate','fact-check',
+      'politics','education','humanitarian','ai & ml','ai and ml','climate','fact-check',
       'cybersecurity','markets','mobility','gaming','science'
     ]);
     const catKey = (category || '').toString().toLowerCase();
