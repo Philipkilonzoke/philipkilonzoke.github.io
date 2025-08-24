@@ -128,7 +128,7 @@ class NewsAPI {
      * Enhanced sports news fetching with multiple specialized sources
      */
     async fetchSportsNews(limit = 50) {
-        const cacheKey = `sports_enhanced_${limit}`;
+        const cacheKey = `sports_${limit}`;
         
         // Check cache first
         if (this.cache.has(cacheKey)) {
@@ -139,37 +139,13 @@ class NewsAPI {
         }
 
         try {
-            // Fetch from multiple sources including ESPN API and sports-specific endpoints
+            // Use standard API approach like other categories
             const promises = [
-                // Regular news APIs with sports category
                 this.fetchFromGNews('sports', limit),
                 this.fetchFromNewsData('sports', limit),
                 this.fetchFromNewsAPI('sports', limit),
                 this.fetchFromMediastack('sports', limit),
-                this.fetchFromCurrentsAPI('sports', limit),
-                
-                // ESPN API integration
-                this.fetchFromESPN(),
-                
-                // Sports-specific news sources
-                this.fetchFromSportsAPIs(),
-                
-                // Additional sports coverage
-                this.fetchFromSportsNewsAPI(),
-                
-                // Real-time sports updates
-                this.fetchFromRapidSports(),
-                
-                // Enhanced sports sources - new additions
-                this.fetchFromSkySports(),
-                this.fetchFromBBCSport(),
-                this.fetchFromCBSSports(),
-                this.fetchFromYahooSports(),
-                this.fetchFromGoalDotCom(),
-                this.fetchFromBleacherReport(),
-                this.fetchFromSportingNews(),
-                this.fetchFromGuardianSport(),
-                this.fetchFromFoxSports()
+                this.fetchFromCurrentsAPI('sports', limit)
             ];
 
             const results = await Promise.allSettled(promises);
@@ -199,254 +175,21 @@ class NewsAPI {
             return sortedArticles;
         } catch (error) {
             console.error('Error fetching sports news:', error);
-            throw new Error('Failed to fetch sports news from all sources');
+            return [];
         }
     }
 
-    /**
-     * Enhanced Kenya news fetching with multiple local sources
-     */
-    async fetchEnhancedKenyaNews(limit = 100) {
-        const cacheKey = `kenya_enhanced_${limit}`;
-        
-        // Check cache first
-        if (this.cache.has(cacheKey)) {
-            const cached = this.cache.get(cacheKey);
-            if (Date.now() - cached.timestamp < this.cacheTimeout) {
-                return cached.data;
-            }
-        }
 
-        try {
-            // Fetch from multiple sources including Kenya-specific APIs and RSS feeds
-            const promises = [
-                // Original API sources with Kenya focus (increase overall volume)
-                this.fetchFromGNews('kenya', Math.floor(limit * 0.4)),
-                this.fetchFromNewsData('kenya', Math.floor(limit * 0.4)),
-                this.fetchFromNewsAPI('kenya', Math.floor(limit * 0.4)),
-                this.fetchFromMediastack('kenya', Math.floor(limit * 0.4)),
-                this.fetchFromCurrentsAPI('kenya', Math.floor(limit * 0.4)),
-                
-                // Kenya-specific RSS feeds and APIs
-                this.fetchFromNationAfrica(),
-                this.fetchFromStandardMedia(),
-                this.fetchFromCapitalFM(),
-                this.fetchFromCitizenDigital(),
-                this.fetchFromTukoNews(),
-                this.fetchFromTheStarKenya(),
-                this.fetchFromKBCNews(),
-                this.fetchFromPeopleDaily(),
-                this.fetchFromAllAfricaKenya(),
-                this.fetchFromBBCAfricaKenya(),
-                
-                // Additional Kenya news sources
-                this.fetchFromKenyaToday(),
-                this.fetchFromBusinessDaily(),
-                this.fetchFromNTV(),
-                this.fetchFromKTN()
-            ];
 
-            // Add timeout to prevent long loading times
-            const timeoutPromise = new Promise((_, reject) => 
-                setTimeout(() => reject(new Error('Kenya news fetch timeout')), 8000)
-            );
-            
-            const results = await Promise.race([
-                Promise.allSettled(promises),
-                timeoutPromise
-            ]);
-            
-            // Combine results from all sources
-            let allArticles = [];
-            results.forEach((result, index) => {
-                if (result.status === 'fulfilled' && result.value && Array.isArray(result.value)) {
-                    allArticles = allArticles.concat(result.value);
-                } else if (result.status === 'rejected') {
-                    console.warn(`Kenya news source ${index + 1} failed:`, result.reason);
-                }
-            });
 
-            // Remove duplicates, filter Kenya-relevant content, and sort by date
-            const kenyaRelevantArticles = this.filterKenyaRelevantNews(allArticles);
-            const uniqueArticles = this.removeDuplicates(kenyaRelevantArticles);
-            const sortedArticles = uniqueArticles.sort((a, b) => 
-                new Date(b.publishedAt) - new Date(a.publishedAt)
-            );
 
-            // Cache the results
-            this.cache.set(cacheKey, {
-                data: sortedArticles,
-                timestamp: Date.now()
-            });
 
-            return sortedArticles;
-        } catch (error) {
-            console.error('Error fetching enhanced Kenya news:', error);
-            // Fallback to original Kenya news method
-            return await this.fetchOriginalKenyaNews(limit);
-        }
-    }
 
     /**
-     * Enhanced Technology news fetching with multiple global tech sources
-     */
-    async fetchEnhancedTechnologyNews(limit = 50) {
-        const cacheKey = `technology_enhanced_${limit}`;
-        
-        // Check cache first
-        if (this.cache.has(cacheKey)) {
-            const cached = this.cache.get(cacheKey);
-            if (Date.now() - cached.timestamp < this.cacheTimeout) {
-                return cached.data;
-            }
-        }
-
-        try {
-            // Fetch from multiple sources including major tech news outlets
-            const promises = [
-                // Original API sources with technology focus
-                this.fetchFromGNews('technology', Math.floor(limit * 0.2)),
-                this.fetchFromNewsData('technology', Math.floor(limit * 0.2)),
-                this.fetchFromNewsAPI('technology', Math.floor(limit * 0.2)),
-                this.fetchFromMediastack('technology', Math.floor(limit * 0.2)),
-                this.fetchFromCurrentsAPI('technology', Math.floor(limit * 0.2)),
-                
-                // Major technology news sources
-                this.fetchFromTechCrunch(),
-                this.fetchFromTheVerge(),
-                this.fetchFromWired(),
-                this.fetchFromArsTechnica(),
-                this.fetchFromCNETTech(),
-                this.fetchFromGadgets360(),
-                this.fetchFromMashableTech(),
-                this.fetchFromEngadget(),
-                this.fetchFromZDNet(),
-                this.fetchFromBBCTech(),
-                
-                // Additional tech sources for comprehensive coverage
-                this.fetchFromTechRadar(),
-                this.fetchFromAnandTech(),
-                this.fetchFromGizmodo(),
-                this.fetchFromDigitalTrends(),
-                this.fetchFromVentureBeat()
-            ];
-
-            const results = await Promise.allSettled(promises);
-            
-            // Combine results from all sources
-            let allArticles = [];
-            results.forEach((result, index) => {
-                if (result.status === 'fulfilled' && result.value && Array.isArray(result.value)) {
-                    allArticles = allArticles.concat(result.value);
-                } else if (result.status === 'rejected') {
-                    console.warn(`Technology news source ${index + 1} failed:`, result.reason);
-                }
-            });
-
-            // Remove duplicates, filter tech-relevant content, and sort by date
-            const techRelevantArticles = this.filterTechnologyRelevantNews(allArticles);
-            const uniqueArticles = this.removeDuplicates(techRelevantArticles);
-            const sortedArticles = uniqueArticles.sort((a, b) => 
-                new Date(b.publishedAt) - new Date(a.publishedAt)
-            );
-
-            // Cache the results
-            this.cache.set(cacheKey, {
-                data: sortedArticles,
-                timestamp: Date.now()
-            });
-
-            return sortedArticles;
-        } catch (error) {
-            console.error('Error fetching enhanced technology news:', error);
-            // Fallback to original technology news method
-            return await this.fetchOriginalTechnologyNews(limit);
-        }
-    }
-
-    /**
-     * Enhanced Health news fetching with multiple specialized health sources
-     */
-    async fetchEnhancedHealthNews(limit = 50) {
-        const cacheKey = `health_enhanced_${limit}`;
-        
-        // Check cache first
-        if (this.cache.has(cacheKey)) {
-            const cached = this.cache.get(cacheKey);
-            if (Date.now() - cached.timestamp < this.cacheTimeout) {
-                return cached.data;
-            }
-        }
-
-        try {
-            // Fetch from multiple sources including major health news outlets
-            const promises = [
-                // Original API sources with health focus
-                this.fetchFromGNews('health', Math.floor(limit * 0.15)),
-                this.fetchFromNewsData('health', Math.floor(limit * 0.15)),
-                this.fetchFromNewsAPI('health', Math.floor(limit * 0.15)),
-                this.fetchFromMediastack('health', Math.floor(limit * 0.15)),
-                this.fetchFromCurrentsAPI('health', Math.floor(limit * 0.15)),
-                
-                // Major health news sources
-                this.fetchFromMedicalNewsToday(),
-                this.fetchFromHealthline(),
-                this.fetchFromWebMDNews(),
-                this.fetchFromScienceDailyHealth(),
-                this.fetchFromWHONews(),
-                this.fetchFromCDCNewsroom(),
-                this.fetchFromTheLancetNews(),
-                this.fetchFromBBCHealth(),
-                this.fetchFromHarvardHealthBlog(),
-                this.fetchFromReutersHealth(),
-                
-                // Additional health sources for comprehensive coverage
-                this.fetchFromMayoClinicNews(),
-                this.fetchFromJohnsHopkinsHealth(),
-                this.fetchFromNIHNews(),
-                this.fetchFromNatureHealth(),
-                this.fetchFromPubMedNews(),
-                this.fetchFromMedscapeNews()
-            ];
-
-            const results = await Promise.allSettled(promises);
-            
-            // Combine results from all sources
-            let allArticles = [];
-            results.forEach((result, index) => {
-                if (result.status === 'fulfilled' && result.value && Array.isArray(result.value)) {
-                    allArticles = allArticles.concat(result.value);
-                } else if (result.status === 'rejected') {
-                    console.warn(`Health news source ${index + 1} failed:`, result.reason);
-                }
-            });
-
-            // Remove duplicates, filter health-relevant content, and sort by date
-            const healthRelevantArticles = this.filterHealthRelevantNews(allArticles);
-            const uniqueArticles = this.removeDuplicates(healthRelevantArticles);
-            const sortedArticles = uniqueArticles.sort((a, b) => 
-                new Date(b.publishedAt) - new Date(a.publishedAt)
-            );
-
-            // Cache the results
-            this.cache.set(cacheKey, {
-                data: sortedArticles,
-                timestamp: Date.now()
-            });
-
-            return sortedArticles;
-        } catch (error) {
-            console.error('Error fetching enhanced health news:', error);
-            // Fallback to original health news method
-            return await this.fetchOriginalHealthNews(limit);
-        }
-    }
-
-    /**
-     * Enhanced lifestyle news fetching with specialized content
+     * Lifestyle news fetching - simplified to use standard approach
      */
     async fetchLifestyleNews(limit = 50) {
-        const cacheKey = `lifestyle_enhanced_${limit}`;
+        const cacheKey = `lifestyle_${limit}`;
         
         // Check cache first
         if (this.cache.has(cacheKey)) {
@@ -457,24 +200,13 @@ class NewsAPI {
         }
 
         try {
-            // Fetch from multiple sources including lifestyle-specific endpoints
+            // Use standard API approach like other categories
             const promises = [
-                // Regular news APIs with lifestyle/health category mapping
                 this.fetchFromGNews('lifestyle', limit),
                 this.fetchFromNewsData('lifestyle', limit),
                 this.fetchFromNewsAPI('lifestyle', limit),
                 this.fetchFromMediastack('lifestyle', limit),
-                this.fetchFromCurrentsAPI('lifestyle', limit),
-                
-                // Lifestyle-specific news sources
-                this.fetchLifestyleFromVogue(),
-                this.fetchLifestyleFromElle(),
-                this.fetchLifestyleFromBuzzFeed(),
-                this.fetchLifestyleFromRefinery29(),
-                this.fetchLifestyleFromWellAndGood(),
-                this.fetchLifestyleFromTravelLeisure(),
-                this.fetchLifestyleFromFoodNetwork(),
-                this.fetchLifestyleFromArchDigest()
+                this.fetchFromCurrentsAPI('lifestyle', limit)
             ];
 
             const results = await Promise.allSettled(promises);
@@ -485,18 +217,9 @@ class NewsAPI {
                 if (result.status === 'fulfilled' && result.value) {
                     allArticles = allArticles.concat(result.value);
                 } else {
-                    console.warn(`Lifestyle source ${index + 1} failed:`, result.reason);
+                    console.warn(`Lifestyle API ${index + 1} failed:`, result.reason);
                 }
             });
-
-            // Only use extended articles as absolute fallback if no real articles found
-            if (allArticles.length === 0) {
-                console.warn('No real lifestyle articles found, using extended database fallback');
-                if (typeof ExtendedArticlesDB !== 'undefined') {
-                    const extendedDB = new ExtendedArticlesDB();
-                    allArticles = extendedDB.getExtendedLifestyleNews('Lifestyle News');
-                }
-            }
 
             // Remove duplicates and sort by date
             const uniqueArticles = this.removeDuplicates(allArticles);
@@ -513,8 +236,7 @@ class NewsAPI {
             return sortedArticles;
         } catch (error) {
             console.error('Error fetching lifestyle news:', error);
-            // Return lifestyle sample articles as fallback
-            return this.getLifestyleSampleArticles(limit);
+            return [];
         }
     }
 
