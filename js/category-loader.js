@@ -14,6 +14,76 @@
     }catch(e){ return 'Unknown date'; }
   }
 
+  // Normalize and proxy image URLs for reliability and HTTPS safety
+  function normalizeImageUrl(rawUrl){
+    if (!rawUrl || typeof rawUrl !== 'string') return '';
+    let url = rawUrl.trim();
+    // Handle protocol-relative URLs
+    if (url.startsWith('//')) url = 'https:' + url;
+    // Some feeds HTML-encode ampersands
+    url = url.replace(/&amp;/g, '&');
+    // If it's clearly an image but uses http (mixed content), route via weserv proxy
+    try{
+      const u = new URL(url);
+      if (u.protocol === 'http:'){
+        return toProxiedUrl(url);
+      }
+      return url;
+    }catch(_){
+      // If it's missing scheme but looks like a domain/path, attempt https
+      if (/^[a-z0-9.-]+\//i.test(url)) return 'https://' + url;
+      return '';
+    }
+  }
+
+  function toProxiedUrl(rawUrl){
+    try{
+      const u = new URL(rawUrl);
+      // images.weserv.nl expects the URL without scheme in the url param
+      const withoutScheme = u.href.replace(/^https?:\/\//i, '');
+      return 'https://images.weserv.nl/?url=' + encodeURIComponent(withoutScheme);
+    }catch(_){
+      return rawUrl;
+    }
+  }
+
+  function mshotForArticle(articleUrl){
+    if (!articleUrl) return '';
+    return 'https://s.wordpress.com/mshots/v1/' + encodeURIComponent(articleUrl) + '?w=1280';
+  }
+
+  // Global, resilient onerror handler that attempts proxy and then page screenshot
+  window.blImgErrorHandler = function(imgEl){
+    try{
+      const step = Number(imgEl.getAttribute('data-fallback-step') || '0');
+      const original = imgEl.getAttribute('data-original') || imgEl.getAttribute('data-src') || imgEl.src;
+      const articleUrl = imgEl.getAttribute('data-article-url') || '';
+
+      if (step === 0 && original){
+        // Try weserv proxy
+        imgEl.setAttribute('data-fallback-step', '1');
+        imgEl.src = toProxiedUrl(original);
+        return;
+      }
+
+      if (step === 1 && articleUrl){
+        // Try mshots screenshot of the article page
+        imgEl.setAttribute('data-fallback-step', '2');
+        imgEl.src = mshotForArticle(articleUrl);
+        return;
+      }
+
+      // Final fallback: replace with text placeholder
+      if (imgEl.parentElement){
+        imgEl.parentElement.innerHTML = '<div class="text-placeholder">Brightlens News</div>';
+      }
+    }catch(_){
+      if (imgEl && imgEl.parentElement){
+        imgEl.parentElement.innerHTML = '<div class="text-placeholder">Brightlens News</div>';
+      }
+    }
+  };
+
   function extractImage(item){
     const candidates = [
       item.image,
@@ -174,12 +244,13 @@
       const title = item.title || 'Untitled';
       const url = item.link || item.url || '#';
       const desc = (item.description || '').replace(/<[^>]+>/g,'');
-      const img = extractImage(item);
+      const rawImg = extractImage(item);
+      const img = normalizeImageUrl(rawImg);
       const hasImg = img && /^https?:\/\//.test(img);
       const safeTitle = title.replace(/'/g, "\\'");
       const sizeAttrs = boosted ? ' width="600" height="400"' : '';
       const imgSec = hasImg
-        ? `<div class="news-image"><img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZjNmNGY2Ii8+PC9zdmc+" data-src="${img}" alt="${safeTitle}" loading="lazy" decoding="async"${sizeAttrs} class="lazy-image" referrerpolicy="no-referrer" crossorigin="anonymous" onerror="this.parentElement.innerHTML='&lt;div class=\"text-placeholder\"&gt;Brightlens News&lt;/div&gt;' "></div>`
+        ? `<div class="news-image"><img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZjNmNGY2Ii8+PC9zdmc+" data-src="${img}" data-original="${rawImg || ''}" data-article-url="${url}" alt="${safeTitle}" loading="lazy" decoding="async"${sizeAttrs} class="lazy-image" onerror="window.blImgErrorHandler(this)"></div>`
         : `<div class="text-placeholder">Brightlens News</div>`;
       return `<article class="news-card">${imgSec}<div class="news-content"><h3 class="news-title">${title}</h3><p class="news-description">${desc}</p><div class="news-meta"><span class="news-date">${formatDate(item.pubDate || item.published || Date.now())}</span><span class="news-category">${category}</span></div><div class="news-actions"><a href="${url}" target="_blank" rel="noopener noreferrer" class="news-link">Read More <i class="fas fa-external-link-alt"></i></a><div class="share-buttons"><button class="share-btn" title="WhatsApp" onclick="window.open('https://api.whatsapp.com/send?text='+encodeURIComponent('${safeTitle} '+ '${url}'),'_blank')"><i class="fab fa-whatsapp"></i></button><button class="share-btn" title="Facebook" onclick="window.open('https://www.facebook.com/sharer/sharer.php?u='+encodeURIComponent('${url}'),'_blank')"><i class="fab fa-facebook-f"></i></button><button class="share-btn" title="Telegram" onclick="window.open('https://t.me/share/url?url='+encodeURIComponent('${url}')+'&text='+encodeURIComponent('${safeTitle}'),'_blank')"><i class="fab fa-telegram"></i></button><button class="share-btn" title="Twitter" onclick="window.open('https://twitter.com/intent/tweet?text='+encodeURIComponent('${safeTitle}')+'&url='+encodeURIComponent('${url}'),'_blank')"><i class="fab fa-twitter"></i></button><button class="share-btn" title="Copy Link" onclick="(async()=>{try{await navigator.clipboard.writeText('${safeTitle} '+ '${url}'); alert('Link copied');}catch(e){prompt('Copy link:', '${url}')}})()"><i class="fas fa-link"></i></button></div></div></div></article>`;
     }).join('');
@@ -241,6 +312,9 @@
       // Preconnect to proxies
       preconnect('https://api.allorigins.win');
       preconnect('https://api.rss2json.com');
+      // Preconnect to image helpers for faster image loads
+      preconnect('https://images.weserv.nl');
+      preconnect('https://s.wordpress.com');
 
       // Cache-first render for instant content (but keep splash until we render real items)
       const cachedInitial = getCache(cacheKey);
