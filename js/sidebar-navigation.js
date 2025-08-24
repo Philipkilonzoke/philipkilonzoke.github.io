@@ -178,6 +178,23 @@ class SidebarNavigation {
             { href: 'personal-finance.html', icon: 'fas fa-wallet', text: 'Personal Finance', id: 'personal-finance' },
             { href: 'politics.html', icon: 'fas fa-landmark', text: 'Politics', id: 'politics' },
             { href: 'travel.html', icon: 'fas fa-suitcase-rolling', text: 'Travel', id: 'travel' },
+            { href: 'edtech.html', icon: 'fas fa-graduation-cap', text: 'Education & EdTech', id: 'edtech' },
+            { href: 'startups.html', icon: 'fas fa-rocket', text: 'Startups', id: 'startups' },
+            { href: 'quantum.html', icon: 'fas fa-atom', text: 'Quantum', id: 'quantum' },
+            { href: 'robotics.html', icon: 'fas fa-robot', text: 'Robotics', id: 'robotics' },
+            { href: 'ar-vr.html', icon: 'fas fa-vr-cardboard', text: 'AR/VR', id: 'ar-vr' },
+            { href: 'iot.html', icon: 'fas fa-house-signal', text: 'Smart Home & IoT', id: 'iot' },
+            { href: 'biotech.html', icon: 'fas fa-dna', text: 'Biotech', id: 'biotech' },
+            { href: 'defense.html', icon: 'fas fa-shield-halved', text: 'Defense', id: 'defense' },
+            { href: 'maritime.html', icon: 'fas fa-ship', text: 'Maritime', id: 'maritime' },
+            { href: 'logistics.html', icon: 'fas fa-truck', text: 'Logistics', id: 'logistics' },
+            { href: 'ecommerce.html', icon: 'fas fa-bag-shopping', text: 'E-commerce', id: 'ecommerce' },
+            { href: 'cloud.html', icon: 'fas fa-cloud', text: 'Cloud & SaaS', id: 'cloud' },
+            { href: 'dev-open-source.html', icon: 'fas fa-code', text: 'Dev & OSS', id: 'dev-open-source' },
+            { href: 'data-science.html', icon: 'fas fa-chart-line', text: 'Data Science', id: 'data-science' },
+            { href: 'music.html', icon: 'fas fa-music', text: 'Music', id: 'music' },
+            { href: 'film-tv.html', icon: 'fas fa-clapperboard', text: 'Film & TV', id: 'film-tv' },
+            { href: 'fashion.html', icon: 'fas fa-shirt', text: 'Fashion & Beauty', id: 'fashion' },
             // Divider
             { divider: true }
         ];
