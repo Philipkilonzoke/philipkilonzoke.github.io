@@ -101,7 +101,7 @@ class SidebarNavigation {
             { 
                 href: 'aviation.html', 
                 icon: 'fas fa-plane', 
-                text: 'Aviation ✈️',
+                text: 'Live Flight Tracker ✈️',
                 id: 'aviation'
             },
             { 
@@ -165,8 +165,6 @@ class SidebarNavigation {
             { href: 'agriculture.html', icon: 'fas fa-seedling', text: 'Agriculture', id: 'agriculture' },
             { href: 'personal-finance.html', icon: 'fas fa-wallet', text: 'Personal Finance', id: 'personal-finance' },
             { href: 'politics.html', icon: 'fas fa-landmark', text: 'Politics', id: 'politics' },
-            { href: 'education.html', icon: 'fas fa-graduation-cap', text: 'Education', id: 'education' },
-            { href: 'humanitarian.html', icon: 'fas fa-hands-helping', text: 'Humanitarian', id: 'humanitarian' },
             { href: 'travel.html', icon: 'fas fa-suitcase-rolling', text: 'Travel', id: 'travel' },
             // Divider
             { divider: true },
