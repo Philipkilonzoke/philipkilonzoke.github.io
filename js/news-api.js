@@ -82,20 +82,7 @@ class NewsAPI {
                 return await this.fetchLifestyleNews(limit);
             }
 
-            // Enhanced Kenya news fetching with additional sources
-            if (category === 'kenya') {
-                return await this.fetchEnhancedKenyaNews(limit);
-            }
 
-            // Enhanced Technology news fetching with additional sources
-            if (category === 'technology') {
-                return await this.fetchEnhancedTechnologyNews(limit);
-            }
-
-            // Enhanced Health news fetching with specialized health sources
-            if (category === 'health') {
-                return await this.fetchEnhancedHealthNews(limit);
-            }
 
             // Fetch from all APIs simultaneously
             const promises = [
