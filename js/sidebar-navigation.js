@@ -99,7 +99,7 @@ class SidebarNavigation {
                 id: 'astronomy'
             },
             { 
-                href: 'aviation.html', 
+                href: 'live-flight-tracker.html', 
                 icon: 'fas fa-plane', 
                 text: 'Live Flight Tracker ✈️',
                 id: 'aviation'
