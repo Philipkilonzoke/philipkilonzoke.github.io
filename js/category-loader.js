@@ -234,7 +234,7 @@
       // Only boost these categories
   const boostedSet = new Set([
       'africa','energy','spaceflight','real estate','real-estate','agriculture','personal finance','personal-finance',
-      'politics','education','humanitarian','ai & ml','ai and ml','climate','fact-check',
+      'politics','ai & ml','ai and ml','climate','fact-check',
       'cybersecurity','markets','mobility','gaming','science'
     ]);
     const catKey = (category || '').toString().toLowerCase();

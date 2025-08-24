@@ -1336,8 +1336,7 @@ class NewsAPI {
             'sports': 'Sports',
             'health': 'Health',
             'lifestyle': 'Lifestyle',
-            'education': 'Education',
-            'humanitarian': 'Humanitarian',
+            
             'travel': 'Travel'
         };
         return names[category] || 'News';
