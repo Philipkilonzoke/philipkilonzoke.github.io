@@ -186,11 +186,44 @@ class SidebarNavigation {
     createSidebarHTML() {
         const navItems = this.getNavigationItems();
         
+        const buildLink = (item) => {
+            if (!item) return '';
+            const isActive = this.currentPage === item.id ? 'active' : '';
+            return `
+                    <a href="${item.href}" class="sidebar-link ${isActive}" data-page="${item.id}">
+                        <i class="${item.icon}"></i> ${item.text}
+                    </a>
+                `;
+        };
+
+        // Identify top-pair items
+        const topHome = navItems.find(i => i && i.id === 'index');
+        const topWeather = navItems.find(i => i && i.id === 'weather');
+        const topBreaking = navItems.find(i => i && i.id === 'latest');
+        const topLiveTV = navItems.find(i => i && i.id === 'live-tv');
+
+        // Build two-row, two-column layout for the top section only
         let navHTML = '';
+        navHTML += `
+            <div class="sidebar-top-grid" style="display: grid; gap: 8px;">
+                <div class="sidebar-row" style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+                    ${buildLink(topHome)}
+                    ${buildLink(topWeather)}
+                </div>
+                <div class="sidebar-row" style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+                    ${buildLink(topBreaking)}
+                    ${buildLink(topLiveTV)}
+                </div>
+            </div>
+        `;
+
+        // Divider between the top grid and the rest
+        navHTML += '<div class="sidebar-divider"></div>';
+
+        // Render remaining items in original order, excluding the ones already shown
+        const excludedIds = new Set(['index','weather','latest','live-tv']);
         navItems.forEach(item => {
-            if (item.divider) {
-                navHTML += '<div class="sidebar-divider"></div>';
-            } else {
+            if (item && !item.divider && !excludedIds.has(item.id)) {
                 const isActive = this.currentPage === item.id ? 'active' : '';
                 navHTML += `
                     <a href="${item.href}" class="sidebar-link ${isActive}" data-page="${item.id}">
