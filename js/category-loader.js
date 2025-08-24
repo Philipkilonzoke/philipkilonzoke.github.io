@@ -49,7 +49,7 @@
 
   function mshotForArticle(articleUrl){
     if (!articleUrl) return '';
-    return 'https://s.wordpress.com/mshots/v1/' + encodeURIComponent(articleUrl) + '?w=1280';
+    return 'https://s.wordpress.com/mshots/v1/' + encodeURIComponent(articleUrl) + '?w=1920';
   }
 
   // Global, resilient onerror handler that attempts proxy and then page screenshot
@@ -249,8 +249,10 @@
       const hasImg = img && /^https?:\/\//.test(img);
       const safeTitle = title.replace(/'/g, "\\'");
       const sizeAttrs = boosted ? ' width="600" height="400"' : '';
+      const isHiRes = ['science','africa'].includes((category||'').toString().toLowerCase());
+      const srcset = isHiRes && hasImg ? ` srcset="${toProxiedUrl(img)}&w=400 400w, ${toProxiedUrl(img)}&w=800 800w, ${toProxiedUrl(img)}&w=1200 1200w" sizes="(max-width: 480px) 400px, (max-width: 768px) 800px, 1200px"` : '';
       const imgSec = hasImg
-        ? `<div class="news-image"><img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZjNmNGY2Ii8+PC9zdmc+" data-src="${img}" data-original="${rawImg || ''}" data-article-url="${url}" alt="${safeTitle}" loading="lazy" decoding="async"${sizeAttrs} class="lazy-image" onerror="window.blImgErrorHandler(this)"></div>`
+        ? `<div class="news-image"><img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZjNmNGY2Ii8+PC9zdmc+" data-src="${img}" data-original="${rawImg || ''}" data-article-url="${url}" alt="${safeTitle}" loading="lazy" decoding="async"${sizeAttrs}${srcset} class="lazy-image" onerror="window.blImgErrorHandler(this)"></div>`
         : `<div class="text-placeholder">Brightlens News</div>`;
       return `<article class="news-card">${imgSec}<div class="news-content"><h3 class="news-title">${title}</h3><p class="news-description">${desc}</p><div class="news-meta"><span class="news-date">${formatDate(item.pubDate || item.published || Date.now())}</span><span class="news-category">${category}</span></div><div class="news-actions"><a href="${url}" target="_blank" rel="noopener noreferrer" class="news-link">Read More <i class="fas fa-external-link-alt"></i></a><div class="share-buttons"><button class="share-btn" title="WhatsApp" onclick="window.open('https://api.whatsapp.com/send?text='+encodeURIComponent('${safeTitle} '+ '${url}'),'_blank')"><i class="fab fa-whatsapp"></i></button><button class="share-btn" title="Facebook" onclick="window.open('https://www.facebook.com/sharer/sharer.php?u='+encodeURIComponent('${url}'),'_blank')"><i class="fab fa-facebook-f"></i></button><button class="share-btn" title="Telegram" onclick="window.open('https://t.me/share/url?url='+encodeURIComponent('${url}')+'&text='+encodeURIComponent('${safeTitle}'),'_blank')"><i class="fab fa-telegram"></i></button><button class="share-btn" title="Twitter" onclick="window.open('https://twitter.com/intent/tweet?text='+encodeURIComponent('${safeTitle}')+'&url='+encodeURIComponent('${url}'),'_blank')"><i class="fab fa-twitter"></i></button><button class="share-btn" title="Copy Link" onclick="(async()=>{try{await navigator.clipboard.writeText('${safeTitle} '+ '${url}'); alert('Link copied');}catch(e){prompt('Copy link:', '${url}')}})()"><i class="fas fa-link"></i></button></div></div></div></article>`;
     }).join('');
