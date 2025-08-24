@@ -122,12 +122,7 @@ class SidebarNavigation {
                 text: 'Fact-Check',
                 id: 'fact-check'
             },
-            { 
-                href: 'startups.html', 
-                icon: 'fas fa-lightbulb', 
-                text: 'Startups',
-                id: 'startups'
-            },
+
             { 
                 href: 'science.html', 
                 icon: 'fas fa-flask', 
