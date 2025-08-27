@@ -283,6 +283,8 @@
     const err = document.getElementById('news-error');
     if (load) load.style.display = 'none';
     if (err) err.style.display = 'block';
+    // Always hide the full-screen splash overlay on error so users aren't stuck
+    hideSplash();
   }
 
   function getCache(key){
