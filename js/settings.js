@@ -452,6 +452,16 @@
   // Initialize when DOM ready
   function init() {
     ensureStylesheet();
+    // Ensure saved theme is applied even if themes.js isn't loaded on this page
+    try {
+      if (!window.themeManager) {
+        const saved = localStorage.getItem('brightlens-theme') || localStorage.getItem('selectedTheme') || 'default';
+        document.body.removeAttribute('data-theme');
+        if (saved && saved !== 'default') {
+          document.body.setAttribute('data-theme', saved);
+        }
+      }
+    } catch (_) { /* noop */ }
     // Wait for header to be present, then insert button
     if (document.readyState === 'loading') {
       document.addEventListener('DOMContentLoaded', () => {
