@@ -2,6 +2,7 @@
 (function(){
   const PANEL_ID = 'bl-ai-panel';
   const CACHE_PREFIX = 'bl_ai_summary_';
+  let lastMode = 'local'; // 'local' | 'llm'
 
   function h(type, props = {}, children = []){
     const el = document.createElement(type);
@@ -54,7 +55,8 @@
             shareBtn('Facebook', 'fab fa-facebook-f', (_t,u)=>`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(u)}`),
             shareBtn('Telegram', 'fab fa-telegram', (t,u)=>`https://t.me/share/url?url=${encodeURIComponent(u)}&text=${encodeURIComponent(t)}`),
             shareBtn('Twitter', 'fab fa-twitter', (t,u)=>`https://twitter.com/intent/tweet?text=${encodeURIComponent(t)}&url=${encodeURIComponent(u)}`)
-          ])
+          ]),
+          h('div', { class: 'ai-health' }, [ h('span', { id: 'ai-badge' }, ['AI: Local']) ])
         ])
       ])
     ]);
@@ -288,6 +290,7 @@
           if (r.ok) {
             const j = await r.json();
             if (j?.summary) summary = j.summary;
+            lastMode = 'llm';
           }
         }
       } catch(_) { /* fall back to local */ }
@@ -299,6 +302,7 @@
         else art.innerHTML = toParagraphHTML(extracted.text || '');
       }
       setCache(url, { summary: sum.textContent ? sum.textContent : summary, article: art ? art.innerHTML : '' });
+      const badge = document.getElementById('ai-badge'); if (badge) badge.textContent = `AI: ${lastMode === 'llm' ? 'LLM' : 'Local'}`;
     }catch(e){
       // Last-resort fallback: try Jina text quickly
       try{
@@ -324,6 +328,19 @@
     // Delegate on news grid
     const grid = document.getElementById('news-grid');
     if (!grid) return;
+    // Background prefetch summaries for top articles after grid first paint
+    setTimeout(()=>{
+      try{
+        const cards = Array.from(grid.querySelectorAll('article.news-card')).slice(0, 4);
+        cards.forEach(card=>{
+          const link = card.querySelector('.news-link');
+          const url = link?.getAttribute('href') || link?.href || '';
+          if (!url || getCache(url)) return;
+          // fire and forget; ignore errors
+          generateAndRender(url);
+        });
+      }catch(_){/*ignore*/}
+    }, 600);
     grid.addEventListener('click', (e)=>{
       const link = e.target.closest('a.news-link, .news-actions .news-link');
       if (!link) return;

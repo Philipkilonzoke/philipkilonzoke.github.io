@@ -35,3 +35,5 @@
 .ai-source a{color:var(--primary-color,#2563eb);text-decoration:none}
 .ai-share{display:flex;gap:.4rem}
 .ai-share .share-btn{border:1px solid var(--border-color,#334155);background:transparent;color:var(--text-color,#e5e7eb);border-radius:8px;padding:.45rem .55rem;cursor:pointer}
+.ai-health{margin-left:auto;color:var(--text-muted,#94a3b8);font-size:.85rem}
+.ai-health #ai-badge{display:inline-block;border:1px solid var(--border-color,#334155);border-radius:9999px;padding:.15rem .5rem}
