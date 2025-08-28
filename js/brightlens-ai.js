@@ -110,12 +110,27 @@
 
   function extractDomain(u){ try{ return new URL(u).hostname.replace(/^www\./,''); }catch(_){ return ''; } }
 
+  function fetchWithTimeout(resource, options = {}, timeoutMs = 5000){
+    const ctrl = new AbortController();
+    const id = setTimeout(()=>ctrl.abort(), timeoutMs);
+    return fetch(resource, { ...options, signal: ctrl.signal }).finally(()=>clearTimeout(id));
+  }
+
   async function fetchArticleHTML(url){
     const prox = `https://api.allorigins.win/get?url=${encodeURIComponent(url)}`;
-    const res = await fetch(prox, { cache: 'no-store' });
+    const res = await fetchWithTimeout(prox, { cache: 'no-store' }, 6000);
     if (!res.ok) throw new Error('proxy');
     const j = await res.json();
     return j.contents || '';
+  }
+
+  async function fetchArticleTextJina(url){
+    // r.jina.ai extracts readable text for many pages, CORS-friendly
+    const endpoint = `https://r.jina.ai/http://${url.replace(/^https?:\/\//,'')}`;
+    const res = await fetchWithTimeout(endpoint, { cache: 'no-store' }, 5000);
+    if (!res.ok) throw new Error('jina');
+    const txt = await res.text();
+    return (txt || '').trim();
   }
 
   function extractMain(doc){
@@ -204,6 +219,22 @@
     art.innerHTML = '<div class="loading"><div class="spinner"></div> Loading article…</div>';
   }
 
+  function toParagraphHTML(text){
+    const clean = (text || '').replace(/\s+/g,' ').trim();
+    if (!clean) return '';
+    const sentences = clean.split(/(?<=[.!?])\s+(?=[A-Z0-9])/);
+    const blocks = [];
+    for (let i=0; i<sentences.length; i+=3){
+      const chunk = sentences.slice(i, i+3).join(' ');
+      if (chunk.trim()) blocks.push(`<p>${escapeHTML(chunk.trim())}</p>`);
+    }
+    return blocks.join('');
+  }
+
+  function escapeHTML(s){
+    return s.replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;','\'':'&#39;'}[c]));
+  }
+
   async function generateAndRender(url){
     const sum = document.getElementById('ai-summary');
     const art = document.getElementById('ai-article');
@@ -211,13 +242,27 @@
     try{
       const cached = getCache(url);
       if (cached && cached.data && cached.ts && (Date.now() - cached.ts) < (12*60*60*1000)){
-        sum.textContent = cached.data.summary || '';
+        sum.innerHTML = toParagraphHTML(cached.data.summary || '');
         if (art) art.innerHTML = cached.data.article || '';
         return;
       }
-      const html = await fetchArticleHTML(url);
-      const doc = new DOMParser().parseFromString(html, 'text/html');
-      const extracted = extractMain(doc);
+      // Fetch article in parallel via two strategies for robustness
+      const pAllOrigins = (async()=>{
+        try{
+          const html = await fetchArticleHTML(url);
+          const doc = new DOMParser().parseFromString(html, 'text/html');
+          return { type:'html', data: extractMain(doc) };
+        }catch(_){ return { type:'html', error:true }; }
+      })();
+      const pJina = (async()=>{
+        try{ const txt = await fetchArticleTextJina(url); return { type:'text', data: txt }; }catch(_){ return { type:'text', error:true }; }
+      })();
+
+      const [r1, r2] = await Promise.all([pAllOrigins, pJina]);
+      const extracted = (r1.type==='html' && r1.data && (r1.data.text||'').length>120)
+        ? r1.data
+        : { ogTitle:'', ogImage:'', pubTime:'', html:'', text: (r2.type==='text' && !r2.error ? r2.data : '') };
+
       // Upgrade header from OG if better
       const hero = document.getElementById('ai-hero');
       if (extracted.ogImage && hero) try{ const u=new URL(extracted.ogImage, url); hero.src = `https://images.weserv.nl/?url=${encodeURIComponent(u.href.replace(/^https?:\/\//,''))}`; }catch(_){ /* ignore */ }
@@ -225,6 +270,8 @@
       if (extracted.pubTime && timeEl) timeEl.textContent = new Date(extracted.pubTime).toLocaleString();
 
       let summary = summarizeExtractive(extracted.text || '', 10);
+      // Immediate paragraph render for better readability while any LLM upgrade runs
+      sum.innerHTML = toParagraphHTML(summary || extracted.text.slice(0,800));
       // Optional LLM (free-tier HF) if configured via window.BL_LLM_ENDPOINT
       try{
         const endpoint = window.BL_LLM_ENDPOINT; // e.g., your Cloudflare Worker URL
@@ -244,14 +291,29 @@
           }
         }
       } catch(_) { /* fall back to local */ }
-
-      sum.textContent = summary || 'No summary available.';
-      if (art) art.innerHTML = sanitizeAndRewrite(extracted.html || '');
-      setCache(url, { summary, article: art ? art.innerHTML : '' });
+      // Final summary render (paragraphs)
+      sum.innerHTML = toParagraphHTML(summary || extracted.text.slice(0,1000) || '');
+      // Full article render: prefer sanitized HTML, else paragraph text
+      if (art) {
+        if (extracted.html && extracted.html.length > 60) art.innerHTML = sanitizeAndRewrite(extracted.html);
+        else art.innerHTML = toParagraphHTML(extracted.text || '');
+      }
+      setCache(url, { summary: sum.textContent ? sum.textContent : summary, article: art ? art.innerHTML : '' });
     }catch(e){
-      sum.innerHTML = '<div class="loading">Unable to summarize. <a target="_blank" rel="noopener">Open original</a></div>';
+      // Last-resort fallback: try Jina text quickly
+      try{
+        const txt = await fetchArticleTextJina(url);
+        if (txt) {
+          const quick = summarizeExtractive(txt, 10) || txt.slice(0,1200);
+          sum.innerHTML = toParagraphHTML(quick);
+          if (art) art.innerHTML = toParagraphHTML(txt);
+          setCache(url, { summary: quick, article: art ? art.innerHTML : '' });
+          return;
+        }
+      }catch(_){}
+      sum.innerHTML = '<div class="loading">We\'re showing the original while we finish processing. <a target="_blank" rel="noopener">Open original</a></div>';
       const a = sum.querySelector('a'); if (a) a.href = url;
-      if (art) art.innerHTML = '<div class="loading">Unable to load article.</div>';
+      if (art) art.innerHTML = '<div class="loading">Original content available via link above.</div>';
     }
   }
 
