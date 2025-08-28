@@ -224,7 +224,27 @@
       const timeEl = document.getElementById('ai-time');
       if (extracted.pubTime && timeEl) timeEl.textContent = new Date(extracted.pubTime).toLocaleString();
 
-      const summary = summarizeExtractive(extracted.text || '', 10);
+      let summary = summarizeExtractive(extracted.text || '', 10);
+      // Optional LLM (free-tier HF) if configured via window.BL_LLM_ENDPOINT
+      try{
+        const endpoint = window.BL_LLM_ENDPOINT; // e.g., your Cloudflare Worker URL
+        if (endpoint && extracted.text && extracted.text.length > 200) {
+          const ctrl = new AbortController();
+          const timer = setTimeout(()=>ctrl.abort(), 4000); // limit latency
+          const r = await fetch(`${endpoint.replace(/\/$/,'')}/summarize`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ text: extracted.text.slice(0, 20000), max_sentences: 10 }),
+            signal: ctrl.signal
+          });
+          clearTimeout(timer);
+          if (r.ok) {
+            const j = await r.json();
+            if (j?.summary) summary = j.summary;
+          }
+        }
+      } catch(_) { /* fall back to local */ }
+
       sum.textContent = summary || 'No summary available.';
       if (art) art.innerHTML = sanitizeAndRewrite(extracted.html || '');
       setCache(url, { summary, article: art ? art.innerHTML : '' });
