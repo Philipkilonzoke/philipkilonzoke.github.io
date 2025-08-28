@@ -30,6 +30,18 @@
 .ai-panel-summary img{max-width:100%;height:auto;border-radius:8px}
 @keyframes ai-spin{to{transform:rotate(360deg)}}
 
+/* Skeletons */
+.ai-skel{background:linear-gradient(90deg, rgba(255,255,255,.06), rgba(255,255,255,.14), rgba(255,255,255,.06));background-size:200% 100%;animation:ai-skel 1.2s linear infinite;border-radius:8px}
+@keyframes ai-skel{0%{background-position:200% 0}100%{background-position:-200% 0}}
+.ai-skel.title{height:28px;width:80%}
+.ai-skel.meta{height:16px;width:40%;margin-top:.3rem}
+.ai-skel.block{height:14px;width:100%;margin:.35rem 0}
+
+/* Font size controls */
+.ai-font{display:flex;gap:.4rem}
+.ai-font button{border:1px solid var(--border-color,#334155);background:transparent;color:var(--text-color,#e5e7eb);border-radius:8px;padding:.3rem .5rem;cursor:pointer}
+.ai-font button.active{background:var(--primary-color,#2563eb);border-color:var(--primary-color,#2563eb);color:#fff}
+
 .ai-panel-footer{padding:.8rem 1.1rem;border-top:1px solid var(--border-color,#334155);display:flex;justify-content:space-between;align-items:center;gap:.6rem;flex-wrap:wrap}
 .ai-source{font-size:.9rem;color:var(--text-muted,#94a3b8)}
 .ai-source a{color:var(--primary-color,#2563eb);text-decoration:none}

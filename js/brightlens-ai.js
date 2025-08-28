@@ -28,9 +28,24 @@
             h('span', { class: 'ai-panel-tag', id: 'ai-category' }),
             h('span', { id: 'ai-time' })
           ]),
+          // Skeletons
+          h('div', { id: 'ai-skeletons' }, [
+            h('div', { class: 'ai-skel title' }),
+            h('div', { class: 'ai-skel meta' }),
+            h('div', { class: 'ai-skel block' }),
+            h('div', { class: 'ai-skel block' }),
+            h('div', { class: 'ai-skel block' })
+          ]),
           h('div', { class: 'ai-tabs' }, [
             h('button', { class: 'ai-tab active', id: 'ai-tab-summary', 'aria-selected': 'true' }, ['Summary']),
             h('button', { class: 'ai-tab', id: 'ai-tab-article', 'aria-selected': 'false' }, ['Full Article'])
+          ]),
+          // Key takeaways + Why it matters section
+          h('div', { class: 'ai-panel-summary', id: 'ai-highlights' }, [
+            h('h3', {}, ['Key takeaways']),
+            h('ul', { id: 'ai-bullets' }),
+            h('h3', {}, ['Why it matters']),
+            h('div', { id: 'ai-why' })
           ]),
           h('div', { class: 'ai-panel-summary', id: 'ai-summary' }, [
             h('div', { class: 'loading' }, [
@@ -56,7 +71,10 @@
             shareBtn('Telegram', 'fab fa-telegram', (t,u)=>`https://t.me/share/url?url=${encodeURIComponent(u)}&text=${encodeURIComponent(t)}`),
             shareBtn('Twitter', 'fab fa-twitter', (t,u)=>`https://twitter.com/intent/tweet?text=${encodeURIComponent(t)}&url=${encodeURIComponent(u)}`)
           ]),
-          h('div', { class: 'ai-health' }, [ h('span', { id: 'ai-badge' }, ['AI: Local']) ])
+          h('div', { class: 'ai-health' }, [ h('span', { id: 'ai-badge' }, ['AI: Local']) ]),
+          h('div', { class: 'ai-font' }, [
+            fontBtn('A-', 'small'), fontBtn('A', 'medium', true), fontBtn('A+', 'large')
+          ])
         ])
       ])
     ]);
@@ -96,6 +114,23 @@
       window.open(url, '_blank');
     });
     return btn;
+  }
+
+  function fontBtn(label, size, active){
+    const b = h('button', { 'data-size': size, class: active ? 'active' : '' }, [label]);
+    b.addEventListener('click', ()=>{
+      document.querySelectorAll('.ai-font button').forEach(x=>x.classList.remove('active'));
+      b.classList.add('active');
+      const root = document.getElementById(PANEL_ID);
+      if (!root) return;
+      root.querySelectorAll('.ai-panel-summary').forEach(el=>{
+        el.style.fontSize = size === 'small' ? '0.95rem' : size === 'large' ? '1.08rem' : '1rem';
+        el.style.lineHeight = size === 'small' ? '1.6' : size === 'large' ? '1.8' : '1.7';
+      });
+      const title = root.querySelector('.ai-panel-title');
+      if (title) title.style.fontSize = size === 'small' ? '1.25rem' : size === 'large' ? '1.55rem' : '1.4rem';
+    });
+    return b;
   }
 
   function getCache(url){
@@ -267,6 +302,9 @@
       if (extracted.pubTime && timeEl) timeEl.textContent = new Date(extracted.pubTime).toLocaleString();
 
       let summary = summarizeExtractive(extracted.text || '', 10);
+      // Derive key takeaways (top 4 sentences) and why-it-matters (one short rationale)
+      const bullets = summarizeExtractive(extracted.text || '', 8).split(/(?<=[.!?])\s+(?=[A-Z0-9])/).slice(0,4);
+      const why = (summarizeExtractive(extracted.text || '', 2).split(/(?<=[.!?])\s+(?=[A-Z0-9])/)[0] || '').trim();
       // Immediate paragraph render for better readability while any LLM upgrade runs
       sum.innerHTML = toParagraphHTML(summary || extracted.text.slice(0,800));
       // Optional LLM (free-tier HF) if configured via window.BL_LLM_ENDPOINT
@@ -291,6 +329,14 @@
       } catch(_) { /* fall back to local */ }
       // Final summary render (paragraphs)
       sum.innerHTML = toParagraphHTML(summary || extracted.text.slice(0,1000) || '');
+      // Highlights render
+      try{
+        const ul = document.getElementById('ai-bullets');
+        const whyEl = document.getElementById('ai-why');
+        const skel = document.getElementById('ai-skeletons'); if (skel) skel.style.display='none';
+        if (ul){ ul.innerHTML = bullets.map(x=>`<li>${escapeHTML(x)}</li>`).join(''); }
+        if (whyEl){ whyEl.innerHTML = toParagraphHTML(why); }
+      }catch(_){ /* ignore */ }
       // Full article render: prefer sanitized HTML, else paragraph text
       if (art) {
         if (extracted.html && extracted.html.length > 60) art.innerHTML = sanitizeAndRewrite(extracted.html);
