@@ -63,13 +63,8 @@
     document.body.appendChild(root);
 
     const close = ()=> root.classList.remove('open');
-    root.querySelector('.ai-panel-backdrop').addEventListener('click', close);
+    // Only allow explicit close via the close button
     root.querySelector('.ai-panel-close').addEventListener('click', close);
-    // Escape to close
-    window.addEventListener('keydown', (e)=>{ if (e.key === 'Escape') close(); });
-    // Basic swipe close on mobile
-    let startX=null; root.querySelector('.ai-panel-content').addEventListener('touchstart', e=>{ startX=e.touches[0].clientX; });
-    root.querySelector('.ai-panel-content').addEventListener('touchend', e=>{ if(startX!=null && (startX - (e.changedTouches[0].clientX)) < -60) close(); startX=null; });
 
     // Tabs
     const tabSummary = root.querySelector('#ai-tab-summary');
