@@ -27,10 +27,20 @@
             h('span', { class: 'ai-panel-tag', id: 'ai-category' }),
             h('span', { id: 'ai-time' })
           ]),
+          h('div', { class: 'ai-tabs' }, [
+            h('button', { class: 'ai-tab active', id: 'ai-tab-summary', 'aria-selected': 'true' }, ['Summary']),
+            h('button', { class: 'ai-tab', id: 'ai-tab-article', 'aria-selected': 'false' }, ['Full Article'])
+          ]),
           h('div', { class: 'ai-panel-summary', id: 'ai-summary' }, [
             h('div', { class: 'loading' }, [
               h('div', { class: 'spinner' }),
               document.createTextNode(' Generating summary…')
+            ])
+          ]),
+          h('div', { class: 'ai-panel-summary', id: 'ai-article', style: 'display:none' }, [
+            h('div', { class: 'loading' }, [
+              h('div', { class: 'spinner' }),
+              document.createTextNode(' Loading article…')
             ])
           ])
         ]),
@@ -58,6 +68,24 @@
     // Basic swipe close on mobile
     let startX=null; root.querySelector('.ai-panel-content').addEventListener('touchstart', e=>{ startX=e.touches[0].clientX; });
     root.querySelector('.ai-panel-content').addEventListener('touchend', e=>{ if(startX!=null && (startX - (e.changedTouches[0].clientX)) < -60) close(); startX=null; });
+
+    // Tabs
+    const tabSummary = root.querySelector('#ai-tab-summary');
+    const tabArticle = root.querySelector('#ai-tab-article');
+    const viewSummary = ()=>{
+      tabSummary.classList.add('active'); tabSummary.setAttribute('aria-selected','true');
+      tabArticle.classList.remove('active'); tabArticle.setAttribute('aria-selected','false');
+      root.querySelector('#ai-summary').style.display='block';
+      root.querySelector('#ai-article').style.display='none';
+    };
+    const viewArticle = ()=>{
+      tabArticle.classList.add('active'); tabArticle.setAttribute('aria-selected','true');
+      tabSummary.classList.remove('active'); tabSummary.setAttribute('aria-selected','false');
+      root.querySelector('#ai-summary').style.display='none';
+      root.querySelector('#ai-article').style.display='block';
+    };
+    tabSummary.addEventListener('click', viewSummary);
+    tabArticle.addEventListener('click', viewArticle);
     return root;
   }
 
@@ -90,24 +118,51 @@
     return j.contents || '';
   }
 
-  function extractMainText(html){
-    // Minimal readable extraction: prefer <article>, then largest <p> cluster
-    const doc = new DOMParser().parseFromString(html, 'text/html');
-    const articleNode = doc.querySelector('article');
+  function extractMain(doc){
     const getText = (el)=> (el ? (el.innerText || el.textContent || '').trim() : '');
-    let text = getText(articleNode);
-    if (!text || text.split(/\s+/).length < 60){
-      const paragraphs = Array.from(doc.querySelectorAll('p')).map(p=>p.innerText||p.textContent||'').map(t=>t.trim()).filter(Boolean);
-      // choose the densest chunk
+    const ogTitle = doc.querySelector('meta[property="og:title"]')?.content || '';
+    const ogImage = doc.querySelector('meta[property="og:image"]')?.content || '';
+    const pubTime = doc.querySelector('meta[property="article:published_time"]')?.content || doc.querySelector('time')?.getAttribute('datetime') || '';
+    const articleNode = doc.querySelector('article, main article, .article, .post, #article, #content article');
+
+    // Prefer an article-like node's HTML; else build from largest paragraph cluster
+    let html = '';
+    if (articleNode) html = articleNode.innerHTML || '';
+    if (!html || html.replace(/<[^>]+>/g,' ').trim().split(/\s+/).length < 80){
+      const paragraphs = Array.from(doc.querySelectorAll('p')).map(p=>p.outerHTML || '').filter(Boolean);
+      // pick densest sequence of <p>
       let best = ''; let buf = [];
-      paragraphs.forEach(p=>{
-        if (p.length < 40) { if (buf.length) buf.push(p); return; }
-        buf.push(p);
-        if (buf.join(' ').length > best.length) best = buf.join(' ');
+      paragraphs.forEach(ph=>{
+        const textLen = ph.replace(/<[^>]+>/g,' ').trim().length;
+        if (textLen < 40) { if (buf.length) buf.push(ph); return; }
+        buf.push(ph);
+        const joined = buf.join('');
+        if (joined.replace(/<[^>]+>/g,' ').length > best.replace(/<[^>]+>/g,' ').length) best = joined;
       });
-      text = best || paragraphs.slice(0,10).join(' ');
+      html = best || paragraphs.slice(0, 12).join('');
     }
-    return text || '';
+    const text = (articleNode ? getText(articleNode) : html.replace(/<[^>]+>/g,' ')).trim();
+    return { ogTitle, ogImage, pubTime, html, text };
+  }
+
+  function sanitizeAndRewrite(html){
+    try{
+      const doc = new DOMParser().parseFromString(`<div>${html}</div>`, 'text/html');
+      const root = doc.body.firstElementChild;
+      // strip dangerous tags
+      root.querySelectorAll('script,style,noscript,iframe,object,embed,form,link').forEach(n=>n.remove());
+      // remove event handlers, inline JS
+      root.querySelectorAll('*').forEach(el=>{ Array.from(el.attributes).forEach(a=>{ if (/^on/i.test(a.name)) el.removeAttribute(a.name); }); });
+      // proxy images
+      root.querySelectorAll('img').forEach(img=>{
+        const src = img.getAttribute('src')||''; if (!src) return;
+        try{ const u = new URL(src, location.href); img.setAttribute('src', `https://images.weserv.nl/?url=${encodeURIComponent(u.href.replace(/^https?:\/\//,''))}`); }catch(_){ /* ignore */ }
+        img.setAttribute('loading','lazy'); img.setAttribute('decoding','async');
+        img.style.maxWidth = '100%'; img.style.height = 'auto';
+      });
+      return root.innerHTML;
+    }catch(_){ return '';
+    }
   }
 
   function summarizeExtractive(text, targetSentences = 10){
@@ -138,6 +193,7 @@
     const tim = panel.querySelector('#ai-time');
     const src = panel.querySelector('#ai-source');
     const sum = panel.querySelector('#ai-summary');
+    const art = panel.querySelector('#ai-article');
 
     hero.src = image || 'https://images.weserv.nl/?url=via.placeholder.com/1600x900&h=900&w=1600&fit=cover';
     ttl.textContent = title || 'Untitled';
@@ -145,25 +201,37 @@
     tim.textContent = time || '';
     src.href = url || '#';
     sum.innerHTML = '<div class="loading"><div class="spinner"></div> Generating summary…</div>';
+    art.innerHTML = '<div class="loading"><div class="spinner"></div> Loading article…</div>';
   }
 
   async function generateAndRender(url){
     const sum = document.getElementById('ai-summary');
+    const art = document.getElementById('ai-article');
     if (!sum) return;
     try{
       const cached = getCache(url);
       if (cached && cached.data && cached.ts && (Date.now() - cached.ts) < (12*60*60*1000)){
-        sum.textContent = cached.data;
+        sum.textContent = cached.data.summary || '';
+        if (art) art.innerHTML = cached.data.article || '';
         return;
       }
       const html = await fetchArticleHTML(url);
-      const text = extractMainText(html);
-      const summary = summarizeExtractive(text, 10);
+      const doc = new DOMParser().parseFromString(html, 'text/html');
+      const extracted = extractMain(doc);
+      // Upgrade header from OG if better
+      const hero = document.getElementById('ai-hero');
+      if (extracted.ogImage && hero) try{ const u=new URL(extracted.ogImage, url); hero.src = `https://images.weserv.nl/?url=${encodeURIComponent(u.href.replace(/^https?:\/\//,''))}`; }catch(_){ /* ignore */ }
+      const timeEl = document.getElementById('ai-time');
+      if (extracted.pubTime && timeEl) timeEl.textContent = new Date(extracted.pubTime).toLocaleString();
+
+      const summary = summarizeExtractive(extracted.text || '', 10);
       sum.textContent = summary || 'No summary available.';
-      setCache(url, summary);
+      if (art) art.innerHTML = sanitizeAndRewrite(extracted.html || '');
+      setCache(url, { summary, article: art ? art.innerHTML : '' });
     }catch(e){
       sum.innerHTML = '<div class="loading">Unable to summarize. <a target="_blank" rel="noopener">Open original</a></div>';
       const a = sum.querySelector('a'); if (a) a.href = url;
+      if (art) art.innerHTML = '<div class="loading">Unable to load article.</div>';
     }
   }
 
