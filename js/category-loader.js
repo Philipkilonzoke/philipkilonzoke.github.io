@@ -22,13 +22,12 @@
     if (url.startsWith('//')) url = 'https:' + url;
     // Some feeds HTML-encode ampersands
     url = url.replace(/&amp;/g, '&');
-    // If it's clearly an image but uses http (mixed content), route via weserv proxy
+    // Prefer proxying via weserv for speed/caching/https safety
     try{
       const u = new URL(url);
-      if (u.protocol === 'http:'){
-        return toProxiedUrl(url);
-      }
-      return url;
+      const host = u.hostname.replace('www.','');
+      if (host === 'images.weserv.nl' || host === 's.wordpress.com') return url;
+      return toProxiedUrl(url);
     }catch(_){
       // If it's missing scheme but looks like a domain/path, attempt https
       if (/^[a-z0-9.-]+\//i.test(url)) return 'https://' + url;
@@ -196,7 +195,7 @@
             io.unobserve(im);
           }
         });
-      });
+      }, { root: null, rootMargin: '250px 0px', threshold: 0.01 });
       imgs.forEach(im => io.observe(im));
     } else {
       imgs.forEach(im => { im.src = im.dataset.src; im.classList.remove('lazy-image'); });
@@ -231,11 +230,9 @@
     if (count) count.textContent = `Showing ${Math.min(limited.length, items.length)} of ${items.length} articles`;
     if (upd) upd.textContent = `Last updated: ${new Date().toLocaleTimeString()}`;
 
-      // Only boost these categories
+      // Boost eager-loading for broad set of categories
   const boostedSet = new Set([
-      'africa','energy','spaceflight','real estate','real-estate','agriculture','personal finance','personal-finance',
-      'politics','ai & ml','ai and ml','climate','fact-check',
-      'cybersecurity','markets','mobility','gaming','science'
+      'ai & ml','ai and ml','ai','climate','fact-check','science','cybersecurity','markets','mobility','gaming','africa','energy','spaceflight','real estate','real-estate','agriculture','personal finance','personal-finance','politics','travel','startups','quantum','robotics','ar/vr','ar-vr','smart home & iot','smart-home','iot','biotech','defense','maritime','logistics','e-commerce','ecommerce','cloud','cloud & saas','dev & oss','dev-open-source','data science','data-science','fashion','fashion & beauty','fashion-and-beauty'
     ]);
     const catKey = (category || '').toString().toLowerCase();
     const boosted = boostedSet.has(catKey) || boostedSet.has(catKey.replace(/\s+/g,'-'));
@@ -249,29 +246,29 @@
       const hasImg = img && /^https?:\/\//.test(img);
       const safeTitle = title.replace(/'/g, "\\'");
       const sizeAttrs = boosted ? ' width="600" height="400"' : '';
-      const isHiRes = ['science','africa'].includes((category||'').toString().toLowerCase());
-      const srcset = isHiRes && hasImg ? ` srcset="${toProxiedUrl(img)}&w=400 400w, ${toProxiedUrl(img)}&w=800 800w, ${toProxiedUrl(img)}&w=1200 1200w" sizes="(max-width: 480px) 400px, (max-width: 768px) 800px, 1200px"` : '';
+      const hiResSet = new Set(['science','africa','energy','technology','spaceflight','ai','ai & ml','quantum','robotics','ar/vr','ar-vr','iot','data science','data-science','fashion','fashion & beauty']);
+      const isHiRes = hiResSet.has((category||'').toString().toLowerCase());
+      const prox = hasImg ? toProxiedUrl(img) : '';
+      const srcset = isHiRes && hasImg ? ` srcset="${prox}&w=400 400w, ${prox}&w=800 800w, ${prox}&w=1200 1200w" sizes="(max-width: 480px) 400px, (max-width: 768px) 800px, 1200px"` : '';
       const imgSec = hasImg
         ? `<div class="news-image"><img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZjNmNGY2Ii8+PC9zdmc+" data-src="${img}" data-original="${rawImg || ''}" data-article-url="${url}" alt="${safeTitle}" loading="lazy" decoding="async"${sizeAttrs}${srcset} class="lazy-image" onerror="window.blImgErrorHandler(this)"></div>`
         : `<div class="text-placeholder">Brightlens News</div>`;
       return `<article class="news-card">${imgSec}<div class="news-content"><h3 class="news-title">${title}</h3><p class="news-description">${desc}</p><div class="news-meta"><span class="news-date">${formatDate(item.pubDate || item.published || Date.now())}</span><span class="news-category">${category}</span></div><div class="news-actions"><a href="${url}" target="_blank" rel="noopener noreferrer" class="news-link">Read More <i class="fas fa-external-link-alt"></i></a><div class="share-buttons"><button class="share-btn" title="WhatsApp" onclick="window.open('https://api.whatsapp.com/send?text='+encodeURIComponent('${safeTitle} '+ '${url}'),'_blank')"><i class="fab fa-whatsapp"></i></button><button class="share-btn" title="Facebook" onclick="window.open('https://www.facebook.com/sharer/sharer.php?u='+encodeURIComponent('${url}'),'_blank')"><i class="fab fa-facebook-f"></i></button><button class="share-btn" title="Telegram" onclick="window.open('https://t.me/share/url?url='+encodeURIComponent('${url}')+'&text='+encodeURIComponent('${safeTitle}'),'_blank')"><i class="fab fa-telegram"></i></button><button class="share-btn" title="Twitter" onclick="window.open('https://twitter.com/intent/tweet?text='+encodeURIComponent('${safeTitle}')+'&url='+encodeURIComponent('${url}'),'_blank')"><i class="fab fa-twitter"></i></button><button class="share-btn" title="Copy Link" onclick="(async()=>{try{await navigator.clipboard.writeText('${safeTitle} '+ '${url}'); alert('Link copied');}catch(e){prompt('Copy link:', '${url}')}})()"><i class="fas fa-link"></i></button></div></div></div></article>`;
     }).join('');
 
-    // Eagerly load the first few images only for boosted categories
-    if (boosted) {
-      try{
-        const eagerCount = 6;
-        const imgs = grid.querySelectorAll('img.lazy-image');
-        for (let i = 0; i < Math.min(eagerCount, imgs.length); i++){
-          const im = imgs[i];
-          im.setAttribute('fetchpriority', 'high');
-          if (im.dataset && im.dataset.src){
-            im.src = im.dataset.src;
-            im.classList.remove('lazy-image');
-          }
+    // Eagerly load the first few images for all categories (more for boosted)
+    try{
+      const eagerCount = boosted ? 8 : 4;
+      const imgs = grid.querySelectorAll('img.lazy-image');
+      for (let i = 0; i < Math.min(eagerCount, imgs.length); i++){
+        const im = imgs[i];
+        im.setAttribute('fetchpriority', i < 2 ? 'high' : 'auto');
+        if (im.dataset && im.dataset.src){
+          im.src = im.dataset.src;
+          im.classList.remove('lazy-image');
         }
-      }catch(_){ /* no-op */ }
-    }
+      }
+    }catch(_){ /* no-op */ }
 
     if (more) more.style.display = (items.length > maxItems) ? 'block' : 'none';
     lazyLoad();
@@ -331,7 +328,7 @@
       // Progressive fetch: render as soon as we have enough items; then finalize at the end
       let accumulated = [];
       let lastRender = 0;
-      const minItemsToReveal = 8; // reveal as soon as a handful arrive
+      const minItemsToReveal = 4; // reveal sooner for faster first paint
       const debounceMs = 250;
 
       async function processBatch(batch){
