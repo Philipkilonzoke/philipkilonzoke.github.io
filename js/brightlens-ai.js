@@ -362,11 +362,13 @@
     }
   }
 
-  function attachClimateInterceptors(){
-    // Only on climate page
-    const isClimate = /\bclimate(?:\.html)?$/i.test((location.pathname||'').split('/').pop() || '') || document.title.toLowerCase().includes('climate');
-    if (!isClimate) return;
-    // Delegate on news grid
+  function attachCategoryInterceptors(){
+    // Only on allowed pages
+    const page = ((location.pathname||'').split('/').pop() || '').toLowerCase();
+    const title = document.title.toLowerCase();
+    const isClimate = /\bclimate(?:\.html)?$/.test(page) || title.includes('climate');
+    const isSports  = /\bsports(?:\.html)?$/.test(page)  || title.includes('sports');
+    if (!isClimate && !isSports) return;
     const grid = document.getElementById('news-grid');
     if (!grid) return;
     // Background prefetch summaries for top articles after grid first paint
@@ -382,6 +384,20 @@
         });
       }catch(_){/*ignore*/}
     }, 600);
+    let currentToken = 0;
+    function resetPanel(){
+      const sum = document.getElementById('ai-summary');
+      const art = document.getElementById('ai-article');
+      const bullets = document.getElementById('ai-bullets');
+      const why = document.getElementById('ai-why');
+      const skel = document.getElementById('ai-skeletons');
+      if (sum) sum.innerHTML = '<div class="loading"><div class="spinner"></div> Generating summary…</div>';
+      if (art) art.innerHTML = '<div class="loading"><div class="spinner"></div> Loading article…</div>';
+      if (bullets) bullets.innerHTML = '';
+      if (why) why.innerHTML = '';
+      if (skel) skel.style.display = 'block';
+    }
+
     grid.addEventListener('click', (e)=>{
       const link = e.target.closest('a.news-link, .news-actions .news-link');
       if (!link) return;
@@ -392,19 +408,22 @@
       const img = card?.querySelector('.news-image img')?.getAttribute('data-src') || card?.querySelector('.news-image img')?.src || '';
       const url = link?.getAttribute('href') || link?.href || '';
       const time = card?.querySelector('.news-date')?.textContent || '';
+      currentToken += 1; const token = currentToken;
+      resetPanel();
       openPanel({ title, url, image: img, category, time });
-      // start generation asynchronously
-      generateAndRender(url);
+      // start generation asynchronously with request scoping
+      (async()=>{ await generateAndRender(url); if (token !== currentToken){ /* stale */ return; } })();
     });
   }
 
   // Initialize fast, defer heavy work until interaction
   function init(){
     // Only insert panel on climate page to keep others zero-cost
-    const isClimate = /\bclimate(?:\.html)?$/i.test((location.pathname||'').split('/').pop() || '') || document.title.toLowerCase().includes('climate');
-    if (!isClimate) return;
-    // Defer panel creation until first click to keep critical path minimal
-    attachClimateInterceptors();
+    const page = ((location.pathname||'').split('/').pop() || '').toLowerCase();
+    const title = document.title.toLowerCase();
+    const allowed = /\bclimate(?:\.html)?$/.test(page) || title.includes('climate') || /\bsports(?:\.html)?$/.test(page) || title.includes('sports');
+    if (!allowed) return;
+    attachCategoryInterceptors();
   }
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init); else init();

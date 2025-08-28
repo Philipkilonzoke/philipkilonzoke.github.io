@@ -40,7 +40,8 @@
     <link rel="preload" href="css/styles.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
     <link rel="preload" href="css/themes.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
     <link rel="preload" href="/css/settings.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
-    <noscript><link rel="stylesheet" href="css/styles.css"><link rel="stylesheet" href="css/themes.css"><link rel="stylesheet" href="/css/settings.css"></noscript>
+    <link rel="preload" href="/css/ai-panel.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <noscript><link rel="stylesheet" href="css/styles.css"><link rel="stylesheet" href="css/themes.css"><link rel="stylesheet" href="/css/settings.css"><link rel="stylesheet" href="/css/ai-panel.css"></noscript>
     
     <!-- OneSignal SDK -->
     <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
@@ -304,6 +305,7 @@
     <script src="js/themes.js"></script>
     <script src="js/category-news.js"></script>
     <script src="js/simple-features.js"></script>
+    <script src="/js/brightlens-ai.js" defer></script>
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             window.categoryNews = new CategoryNews('sports');
