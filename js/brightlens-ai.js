@@ -368,7 +368,8 @@
     const title = document.title.toLowerCase();
     const isClimate = /\bclimate(?:\.html)?$/.test(page) || title.includes('climate');
     const isSports  = /\bsports(?:\.html)?$/.test(page)  || title.includes('sports');
-    if (!isClimate && !isSports) return;
+    const isTravel  = /\btravel(?:\.html)?$/.test(page)  || title.includes('travel');
+    if (!isClimate && !isSports && !isTravel) return;
     const grid = document.getElementById('news-grid');
     if (!grid) return;
     // Background prefetch summaries for top articles after grid first paint
@@ -404,7 +405,7 @@
       e.preventDefault();
       const card = e.target.closest('article.news-card');
       const title = card?.querySelector('.news-title')?.textContent || link?.textContent || '';
-      const category = card?.querySelector('.news-category')?.textContent || 'Climate';
+      const category = card?.querySelector('.news-category')?.textContent || 'News';
       const img = card?.querySelector('.news-image img')?.getAttribute('data-src') || card?.querySelector('.news-image img')?.src || '';
       const url = link?.getAttribute('href') || link?.href || '';
       const time = card?.querySelector('.news-date')?.textContent || '';
@@ -418,10 +419,10 @@
 
   // Initialize fast, defer heavy work until interaction
   function init(){
-    // Only insert panel on climate page to keep others zero-cost
+    // Only insert panel on target pages
     const page = ((location.pathname||'').split('/').pop() || '').toLowerCase();
     const title = document.title.toLowerCase();
-    const allowed = /\bclimate(?:\.html)?$/.test(page) || title.includes('climate') || /\bsports(?:\.html)?$/.test(page) || title.includes('sports');
+    const allowed = /\bclimate(?:\.html)?$/.test(page) || title.includes('climate') || /\bsports(?:\.html)?$/.test(page) || title.includes('sports') || /\btravel(?:\.html)?$/.test(page) || title.includes('travel');
     if (!allowed) return;
     attachCategoryInterceptors();
   }
