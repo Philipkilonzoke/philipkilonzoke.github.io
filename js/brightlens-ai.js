@@ -363,13 +363,11 @@
   }
 
   function attachCategoryInterceptors(){
-    // Only on allowed pages
+    // Only on climate page
     const page = ((location.pathname||'').split('/').pop() || '').toLowerCase();
     const title = document.title.toLowerCase();
     const isClimate = /\bclimate(?:\.html)?$/.test(page) || title.includes('climate');
-    const isSports  = /\bsports(?:\.html)?$/.test(page)  || title.includes('sports');
-    const isTravel  = /\btravel(?:\.html)?$/.test(page)  || title.includes('travel');
-    if (!isClimate && !isSports && !isTravel) return;
+    if (!isClimate) return;
     const grid = document.getElementById('news-grid');
     if (!grid) return;
     // Background prefetch summaries for top articles after grid first paint
@@ -419,10 +417,10 @@
 
   // Initialize fast, defer heavy work until interaction
   function init(){
-    // Only insert panel on target pages
+    // Only insert panel on climate
     const page = ((location.pathname||'').split('/').pop() || '').toLowerCase();
     const title = document.title.toLowerCase();
-    const allowed = /\bclimate(?:\.html)?$/.test(page) || title.includes('climate') || /\bsports(?:\.html)?$/.test(page) || title.includes('sports') || /\btravel(?:\.html)?$/.test(page) || title.includes('travel');
+    const allowed = /\bclimate(?:\.html)?$/.test(page) || title.includes('climate');
     if (!allowed) return;
     attachCategoryInterceptors();
   }
