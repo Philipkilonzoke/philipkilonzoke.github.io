@@ -341,6 +341,26 @@ class SidebarNavigation {
 
         this.isInitialized = true;
         console.log('✅ Sidebar navigation initialized successfully');
+
+        // Conditionally load AI panel script for supported categories (AI & below)
+        this.maybeLoadAIScript();
+    }
+
+    maybeLoadAIScript() {
+        try{
+            const allowed = new Set([
+                'ai','climate','fact-check','science','cybersecurity','markets','mobility','gaming','africa','energy','spaceflight','real-estate','agriculture','personal-finance','politics','travel','startups','quantum','robotics','ar-vr','iot','biotech','defense','maritime','logistics','ecommerce','cloud','dev-open-source'
+            ]);
+            const slug = this.currentPage;
+            if (!allowed.has(slug)) return;
+            const already = document.querySelector('script[src*="/js/brightlens-ai.js"]');
+            if (already) return;
+            const s = document.createElement('script');
+            s.src = '/js/brightlens-ai.js';
+            s.defer = true;
+            document.head.appendChild(s);
+            console.log('🧠 AI panel script loaded for category:', slug);
+        }catch(e){ console.warn('AI script load skipped:', e); }
     }
 
     // Ensure internal absolute links use relative .html paths (e.g., /technology -> technology.html)

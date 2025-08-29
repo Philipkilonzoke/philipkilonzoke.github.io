@@ -1,5 +1,7 @@
-// Brightlens AI Panel (client-only) - Climate MVP
+// Brightlens AI Panel (client-only) - Multi-category
 (function(){
+  if (window.__BL_AI_LOADED) return; 
+  window.__BL_AI_LOADED = true;
   const PANEL_ID = 'bl-ai-panel';
   const CACHE_PREFIX = 'bl_ai_summary_';
   let lastMode = 'local'; // 'local' | 'llm'
@@ -363,11 +365,10 @@
   }
 
   function attachCategoryInterceptors(){
-    // Only on climate page
+    // Attach to any allowed category page
     const page = ((location.pathname||'').split('/').pop() || '').toLowerCase();
-    const title = document.title.toLowerCase();
-    const isClimate = /\bclimate(?:\.html)?$/.test(page) || title.includes('climate');
-    if (!isClimate) return;
+    const allowed = isAllowedCategoryPage(page, document.title);
+    if (!allowed) return;
     const grid = document.getElementById('news-grid');
     if (!grid) return;
     // Background prefetch summaries for top articles after grid first paint
@@ -417,12 +418,34 @@
 
   // Initialize fast, defer heavy work until interaction
   function init(){
-    // Only insert panel on climate
+    // Only insert panel on allowed category pages
     const page = ((location.pathname||'').split('/').pop() || '').toLowerCase();
     const title = document.title.toLowerCase();
-    const allowed = /\bclimate(?:\.html)?$/.test(page) || title.includes('climate');
+    const allowed = isAllowedCategoryPage(page, title);
     if (!allowed) return;
+    ensureStyles();
     attachCategoryInterceptors();
+  }
+
+  function ensureStyles(){
+    try{
+      const has = Array.from(document.styleSheets||[]).some(s=> (s.href||'').includes('/css/ai-panel.css')) || !!document.querySelector('link[href*="/css/ai-panel.css"]');
+      if (!has){
+        const l = document.createElement('link'); l.rel = 'stylesheet'; l.href = '/css/ai-panel.css'; document.head.appendChild(l);
+      }
+    }catch(_){ /* ignore */ }
+  }
+
+  function isAllowedCategoryPage(pageFilename, docTitle){
+    const title = (docTitle||'').toLowerCase();
+    const slug = (pageFilename||'').replace(/\.html$/,'');
+    const allowedSlugs = new Set([
+      'ai','climate','fact-check','science','cybersecurity','markets','mobility','gaming','africa','energy','spaceflight','real-estate','agriculture','personal-finance','politics','travel','startups','quantum','robotics','ar-vr','iot','biotech','defense','maritime','logistics','ecommerce','cloud','dev-open-source'
+    ]);
+    if (allowedSlugs.has(slug)) return true;
+    // Fallback to title heuristics
+    const keywords = ['ai','climate','fact','science','cyber','market','mobility','gaming','africa','energy','space','real estate','agriculture','personal finance','politics','travel','startup','quantum','robotics','ar','iot','biotech','defense','maritime','logistics','commerce','cloud','open source'];
+    return keywords.some(k => title.includes(k));
   }
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init); else init();
