@@ -43,7 +43,6 @@ const urlsToCache = [
   '/ecommerce.html',
   '/cloud.html',
   '/dev-open-source.html',
-  '/data-science.html',
   '/fashion.html',
   '/assets/default.svg',
   'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css',

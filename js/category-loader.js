@@ -232,7 +232,7 @@
 
       // Boost eager-loading for broad set of categories
   const boostedSet = new Set([
-      'ai & ml','ai and ml','ai','climate','fact-check','science','cybersecurity','markets','mobility','gaming','africa','energy','spaceflight','real estate','real-estate','agriculture','personal finance','personal-finance','politics','travel','startups','quantum','robotics','ar/vr','ar-vr','smart home & iot','smart-home','iot','biotech','defense','maritime','logistics','e-commerce','ecommerce','cloud','cloud & saas','dev & oss','dev-open-source','data science','data-science','fashion','fashion & beauty','fashion-and-beauty'
+      'ai & ml','ai and ml','ai','climate','fact-check','science','cybersecurity','markets','mobility','gaming','africa','energy','spaceflight','real estate','real-estate','agriculture','personal finance','personal-finance','politics','travel','startups','quantum','robotics','ar/vr','ar-vr','smart home & iot','smart-home','iot','biotech','defense','maritime','logistics','e-commerce','ecommerce','cloud','cloud & saas','dev & oss','dev-open-source','fashion','fashion & beauty','fashion-and-beauty'
     ]);
     const catKey = (category || '').toString().toLowerCase();
     const boosted = boostedSet.has(catKey) || boostedSet.has(catKey.replace(/\s+/g,'-'));
@@ -246,7 +246,7 @@
       const hasImg = img && /^https?:\/\//.test(img);
       const safeTitle = title.replace(/'/g, "\\'");
       const sizeAttrs = boosted ? ' width="600" height="400"' : '';
-      const hiResSet = new Set(['science','africa','energy','technology','spaceflight','ai','ai & ml','quantum','robotics','ar/vr','ar-vr','iot','data science','data-science','fashion','fashion & beauty']);
+      const hiResSet = new Set(['science','africa','energy','technology','spaceflight','ai','ai & ml','quantum','robotics','ar/vr','ar-vr','iot','fashion','fashion & beauty']);
       const isHiRes = hiResSet.has((category||'').toString().toLowerCase());
       const prox = hasImg ? toProxiedUrl(img) : '';
       const srcset = isHiRes && hasImg ? ` srcset="${prox}&w=400 400w, ${prox}&w=800 800w, ${prox}&w=1200 1200w" sizes="(max-width: 480px) 400px, (max-width: 768px) 800px, 1200px"` : '';

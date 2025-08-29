@@ -190,7 +190,6 @@ class SidebarNavigation {
             { href: 'ecommerce.html', icon: 'fas fa-bag-shopping', text: 'E-commerce', id: 'ecommerce' },
             { href: 'cloud.html', icon: 'fas fa-cloud', text: 'Cloud & SaaS', id: 'cloud' },
             { href: 'dev-open-source.html', icon: 'fas fa-code', text: 'Dev & OSS', id: 'dev-open-source' },
-            { href: 'data-science.html', icon: 'fas fa-chart-line', text: 'Data Science', id: 'data-science' },
             { href: 'fashion.html', icon: 'fas fa-shirt', text: 'Fashion & Beauty', id: 'fashion' },
             // Divider
             { divider: true }
