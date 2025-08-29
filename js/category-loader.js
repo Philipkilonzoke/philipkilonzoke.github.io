@@ -207,6 +207,14 @@
     if (scr){ scr.classList.add('hidden'); setTimeout(()=>{ scr.style.display='none'; }, 300); }
   }
 
+  // Ensure splash hides only once per page load
+  let __bl_splashHidden = false;
+  function maybeHideSplash(){
+    if (__bl_splashHidden) return;
+    __bl_splashHidden = true;
+    hideSplash();
+  }
+
   function preconnect(host){
     try{
       const l = document.createElement('link');
@@ -272,7 +280,8 @@
 
     if (more) more.style.display = (items.length > maxItems) ? 'block' : 'none';
     lazyLoad();
-    hideSplash();
+    // Do not hide the full-page splash here; it should hide only after the
+    // first successful NETWORK render (or on fallback/error paths).
   }
 
   function showError(){
@@ -321,7 +330,9 @@
       const cachedInitial = getCache(cacheKey);
       let renderedOnce = false;
       if (cachedInitial && Array.isArray(cachedInitial.items) && cachedInitial.items.length){
-        renderItems(category, cachedInitial.items, maxItems); // hides splash once items are drawn
+        // Render cached content quickly for perceived performance, but keep
+        // the splash visible until we perform a network render of fresh items.
+        renderItems(category, cachedInitial.items, maxItems);
         renderedOnce = true;
       }
 
@@ -347,6 +358,10 @@
             renderItems(category, base, maxItems);
             renderedOnce = true;
             lastRender = nowTs;
+            // Hide splash on first network-backed render only when we have fresh items
+            if (fresh.length) {
+              maybeHideSplash();
+            }
           }
         }));
       }
@@ -374,6 +389,8 @@
         base = base.sort((a,b)=> new Date(b.pubDate||b.published||0) - new Date(a.pubDate||a.published||0));
         renderItems(category, base, maxItems);
         setCache(cacheKey, base.slice(0, maxItems));
+        // Ensure splash is hidden after final network consolidation
+        maybeHideSplash();
         return;
       }
 
@@ -381,6 +398,8 @@
       const cached = getCache(cacheKey);
       if (cached && (Date.now() - cached.ts) <= cacheTtlMs && Array.isArray(cached.items) && cached.items.length){
         renderItems(category, cached.items, maxItems);
+        // No network items; reveal cached so users can interact
+        maybeHideSplash();
         return;
       }
 
@@ -390,6 +409,7 @@
       const cached = getCache(cacheKey);
       if (cached && Array.isArray(cached.items) && cached.items.length){
         renderItems(category, cached.items, maxItems);
+        maybeHideSplash();
         return;
       }
       showError();
