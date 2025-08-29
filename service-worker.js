@@ -1,4 +1,4 @@
-const CACHE_NAME = 'brightlens-news-v4';
+const CACHE_NAME = 'brightlens-news-v5';
 const urlsToCache = [
   '/',
   '/index.html',
@@ -9,8 +9,10 @@ const urlsToCache = [
   '/css/weather.css',
   '/css/settings.css',
   '/js/sidebar-navigation.js',
+  '/js/brightlens-ai.js',
   '/js/push-notifications.js',
   '/js/settings.js',
+  '/css/ai-panel.css',
   '/js/live-tv.js',
   '/assets/js/live-channels.js',
   '/script.js',
