@@ -348,11 +348,13 @@ class SidebarNavigation {
 
     maybeLoadAIScript() {
         try{
+            // Exclude: sports, health, lifestyle, technology, latest (breaking), world, entertainment, kenya
             const allowed = new Set([
                 'ai','climate','fact-check','science','cybersecurity','markets','mobility','gaming','africa','energy','spaceflight','real-estate','agriculture','personal-finance','politics','travel','startups','quantum','robotics','ar-vr','iot','biotech','defense','maritime','logistics','ecommerce','cloud','dev-open-source'
             ]);
+            const excluded = new Set(['sports','health','lifestyle','technology','latest','world','entertainment','kenya']);
             const slug = this.currentPage;
-            if (!allowed.has(slug)) return;
+            if (!allowed.has(slug) || excluded.has(slug)) return;
             const already = document.querySelector('script[src*="/js/brightlens-ai.js"]');
             if (already) return;
             const s = document.createElement('script');
