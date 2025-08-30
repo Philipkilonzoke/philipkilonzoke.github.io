@@ -38,10 +38,6 @@
             h('div', { class: 'ai-skel block' }),
             h('div', { class: 'ai-skel block' })
           ]),
-          h('div', { class: 'ai-tabs' }, [
-            h('button', { class: 'ai-tab active', id: 'ai-tab-summary', 'aria-selected': 'true' }, ['Summary']),
-            h('button', { class: 'ai-tab', id: 'ai-tab-article', 'aria-selected': 'false' }, ['Full Article'])
-          ]),
           // Key takeaways + Why it matters section
           h('div', { class: 'ai-panel-summary', id: 'ai-highlights' }, [
             h('h3', {}, ['Key takeaways']),
@@ -49,17 +45,9 @@
             h('h3', {}, ['Why it matters']),
             h('div', { id: 'ai-why' })
           ]),
-          h('div', { class: 'ai-panel-summary', id: 'ai-summary' }, [
-            h('div', { class: 'loading' }, [
-              h('div', { class: 'spinner' }),
-              document.createTextNode(' Generating summary…')
-            ])
-          ]),
-          h('div', { class: 'ai-panel-summary', id: 'ai-article', style: 'display:none' }, [
-            h('div', { class: 'loading' }, [
-              h('div', { class: 'spinner' }),
-              document.createTextNode(' Loading article…')
-            ])
+          // Single loader row
+          h('div', { class: 'ai-panel-summary', id: 'ai-loader' }, [
+            h('div', { class: 'loading' }, [ h('div', { class: 'spinner' }), document.createTextNode(' Processing article…') ])
           ])
         ]),
         h('div', { class: 'ai-panel-footer' }, [
@@ -86,23 +74,7 @@
     // Only allow explicit close via the close button
     root.querySelector('.ai-panel-close').addEventListener('click', close);
 
-    // Tabs
-    const tabSummary = root.querySelector('#ai-tab-summary');
-    const tabArticle = root.querySelector('#ai-tab-article');
-    const viewSummary = ()=>{
-      tabSummary.classList.add('active'); tabSummary.setAttribute('aria-selected','true');
-      tabArticle.classList.remove('active'); tabArticle.setAttribute('aria-selected','false');
-      root.querySelector('#ai-summary').style.display='block';
-      root.querySelector('#ai-article').style.display='none';
-    };
-    const viewArticle = ()=>{
-      tabArticle.classList.add('active'); tabArticle.setAttribute('aria-selected','true');
-      tabSummary.classList.remove('active'); tabSummary.setAttribute('aria-selected','false');
-      root.querySelector('#ai-summary').style.display='none';
-      root.querySelector('#ai-article').style.display='block';
-    };
-    tabSummary.addEventListener('click', viewSummary);
-    tabArticle.addEventListener('click', viewArticle);
+    // No tabs anymore
     return root;
   }
 
@@ -241,16 +213,14 @@
     const tag = panel.querySelector('#ai-category');
     const tim = panel.querySelector('#ai-time');
     const src = panel.querySelector('#ai-source');
-    const sum = panel.querySelector('#ai-summary');
-    const art = panel.querySelector('#ai-article');
 
     hero.src = image || 'https://images.weserv.nl/?url=via.placeholder.com/1600x900&h=900&w=1600&fit=cover';
     ttl.textContent = title || 'Untitled';
-    tag.textContent = category || 'Climate';
+    tag.textContent = category || 'News';
     tim.textContent = time || '';
     src.href = url || '#';
-    sum.innerHTML = '<div class="loading"><div class="spinner"></div> Generating summary…</div>';
-    art.innerHTML = '<div class="loading"><div class="spinner"></div> Loading article…</div>';
+    const skel = document.getElementById('ai-skeletons'); if (skel) skel.style.display='block';
+    const loader = document.getElementById('ai-loader'); if (loader) loader.style.display='block';
   }
 
   function toParagraphHTML(text){
@@ -270,15 +240,17 @@
   }
 
   async function generateAndRender(url, opts = { silent: false }){
-    const sum = document.getElementById('ai-summary');
-    const art = document.getElementById('ai-article');
-    if (!sum && !opts.silent) return;
+    const loader = document.getElementById('ai-loader');
     try{
       const cached = getCache(url);
       if (cached && cached.data && cached.ts && (Date.now() - cached.ts) < (12*60*60*1000)){
         if (!opts.silent) {
-          sum.innerHTML = toParagraphHTML(cached.data.summary || '');
-          if (art) art.innerHTML = cached.data.article || '';
+          const ul = document.getElementById('ai-bullets');
+          const whyEl = document.getElementById('ai-why');
+          const skel = document.getElementById('ai-skeletons'); if (skel) skel.style.display='none';
+          if (ul){ ul.innerHTML = toParagraphHTML(cached.data.summary || '').split('</p>').filter(Boolean).slice(0,4).map(p=>`<li>${p.replace(/^<p>|<\/p>$/g,'')}</li>`).join(''); }
+          if (whyEl){ whyEl.innerHTML = toParagraphHTML(cached.data.summary || ''); }
+          if (loader) loader.style.display='none';
         }
         return;
       }
@@ -299,7 +271,7 @@
         ? r1.data
         : { ogTitle:'', ogImage:'', pubTime:'', html:'', text: (r2.type==='text' && !r2.error ? r2.data : '') };
 
-      // Upgrade header from OG if better
+      // Header enrich
       if (!opts.silent) {
         const hero = document.getElementById('ai-hero');
         if (extracted.ogImage && hero) try{ const u=new URL(extracted.ogImage, url); hero.src = `https://images.weserv.nl/?url=${encodeURIComponent(u.href.replace(/^https?:\/\//,''))}`; }catch(_){ /* ignore */ }
@@ -307,79 +279,61 @@
         if (extracted.pubTime && timeEl) timeEl.textContent = new Date(extracted.pubTime).toLocaleString();
       }
 
-      let summary = summarizeExtractive(extracted.text || '', 10);
-      // Derive key takeaways (top 4 sentences) and why-it-matters (one short rationale)
-      const bullets = summarizeExtractive(extracted.text || '', 8).split(/(?<=[.!?])\s+(?=[A-Z0-9])/).slice(0,4);
-      const why = (summarizeExtractive(extracted.text || '', 2).split(/(?<=[.!?])\s+(?=[A-Z0-9])/)[0] || '').trim();
-      // Immediate paragraph render for better readability while any LLM upgrade runs
+      // Build highlights only
+      const baseText = extracted.text || '';
+      let summary = summarizeExtractive(baseText, 10) || baseText.slice(0, 1000);
+      const bullets = summarizeExtractive(baseText, 8).split(/(?<=[.!?])\s+(?=[A-Z0-9])/).slice(0,4);
+      const why = (summarizeExtractive(baseText, 2).split(/(?<=[.!?])\s+(?=[A-Z0-9])/)[0] || '').trim();
+
       if (!opts.silent) {
-        sum.innerHTML = toParagraphHTML(summary || extracted.text.slice(0,800));
+        const ul = document.getElementById('ai-bullets');
+        const whyEl = document.getElementById('ai-why');
+        const skel = document.getElementById('ai-skeletons'); if (skel) skel.style.display='none';
+        if (ul){ ul.innerHTML = bullets.map(x=>`<li>${escapeHTML(x)}</li>`).join(''); }
+        if (whyEl){ whyEl.innerHTML = toParagraphHTML(why || summary.split(/(?<=[.!?])\s+(?=[A-Z0-9])/)[0] || ''); }
+        if (loader) loader.style.display='none';
       }
-      // Optional LLM (free-tier HF) if configured via window.BL_LLM_ENDPOINT
+
+      // Optional LLM upgrade (summary only)
       try{
-        const endpoint = window.BL_LLM_ENDPOINT; // e.g., your Cloudflare Worker URL
-        if (endpoint && extracted.text && extracted.text.length > 200) {
+        const endpoint = window.BL_LLM_ENDPOINT;
+        if (endpoint && baseText && baseText.length > 200) {
           const ctrl = new AbortController();
-          const timer = setTimeout(()=>ctrl.abort(), 4000); // limit latency
+          const timer = setTimeout(()=>ctrl.abort(), 4000);
           const r = await fetch(`${endpoint.replace(/\/$/,'')}/summarize`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ text: extracted.text.slice(0, 20000), max_sentences: 10 }),
-            signal: ctrl.signal
+            method: 'POST', headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ text: baseText.slice(0, 20000), max_sentences: 10 }), signal: ctrl.signal
           });
           clearTimeout(timer);
-          if (r.ok) {
-            const j = await r.json();
-            if (j?.summary) summary = j.summary;
-            lastMode = 'llm';
-          }
+          if (r.ok) { const j = await r.json(); if (j?.summary) summary = j.summary; }
         }
-      } catch(_) { /* fall back to local */ }
-      // Final summary render (paragraphs)
-      if (!opts.silent) {
-        sum.innerHTML = toParagraphHTML(summary || extracted.text.slice(0,1000) || '');
-      }
-      // Highlights render
-      if (!opts.silent) {
-        try{
-          const ul = document.getElementById('ai-bullets');
-          const whyEl = document.getElementById('ai-why');
-          const skel = document.getElementById('ai-skeletons'); if (skel) skel.style.display='none';
-          if (ul){ ul.innerHTML = bullets.map(x=>`<li>${escapeHTML(x)}</li>`).join(''); }
-          if (whyEl){ whyEl.innerHTML = toParagraphHTML(why); }
-        }catch(_){ /* ignore */ }
-      }
-      // Full article render: prefer sanitized HTML, else paragraph text
-      if (!opts.silent) {
-        if (art) {
-          if (extracted.html && extracted.html.length > 60) art.innerHTML = sanitizeAndRewrite(extracted.html);
-          else art.innerHTML = toParagraphHTML(extracted.text || '');
-        }
-      }
-      setCache(url, { summary: sum && sum.textContent ? sum.textContent : summary, article: art ? art.innerHTML : '' });
-      if (!opts.silent) { const badge = document.getElementById('ai-badge'); if (badge) badge.textContent = `AI: ${lastMode === 'llm' ? 'LLM' : 'Local'}`; }
+      }catch(_){ /* ignore */ }
+
+      setCache(url, { summary, article: '' });
+      const badge = document.getElementById('ai-badge'); if (!opts.silent && badge) badge.textContent = `AI: ${lastMode === 'llm' ? 'LLM' : 'Local'}`;
     }catch(e){
-      // Last-resort fallback: try Jina text quickly
       try{
         const txt = await fetchArticleTextJina(url);
         if (txt) {
           const quick = summarizeExtractive(txt, 10) || txt.slice(0,1200);
           if (!opts.silent) {
-            const sumEl = document.getElementById('ai-summary');
-            const artEl = document.getElementById('ai-article');
-            if (sumEl) sumEl.innerHTML = toParagraphHTML(quick);
-            if (artEl) artEl.innerHTML = toParagraphHTML(txt);
+            const ul = document.getElementById('ai-bullets');
+            const whyEl = document.getElementById('ai-why');
+            const skel = document.getElementById('ai-skeletons'); if (skel) skel.style.display='none';
+            if (ul){ ul.innerHTML = quick.split(/(?<=[.!?])\s+(?=[A-Z0-9])/).slice(0,4).map(x=>`<li>${escapeHTML(x)}</li>`).join(''); }
+            if (whyEl){ whyEl.innerHTML = toParagraphHTML(quick.split(/(?<=[.!?])\s+(?=[A-Z0-9])/)[0] || ''); }
+            if (loader) loader.style.display='none';
           }
-          setCache(url, { summary: (document.getElementById('ai-summary')?.textContent || quick), article: document.getElementById('ai-article')?.innerHTML || '' });
+          setCache(url, { summary: quick, article: '' });
           return;
         }
       }catch(_){ }
       if (!opts.silent) {
-        const sumEl = document.getElementById('ai-summary');
-        const artEl = document.getElementById('ai-article');
-        if (sumEl) sumEl.innerHTML = '<div class="loading">We\'re showing the original while we finish processing. <a target="_blank" rel="noopener">Open original</a></div>';
-        const a = sumEl ? sumEl.querySelector('a') : null; if (a) a.href = url;
-        if (artEl) artEl.innerHTML = '<div class="loading">Original content available via link above.</div>';
+        const ul = document.getElementById('ai-bullets');
+        const whyEl = document.getElementById('ai-why');
+        if (ul) ul.innerHTML = '';
+        if (whyEl) whyEl.innerHTML = '<div class="loading">Open the original article for details.</div>';
+        if (loader) loader.style.display='none';
       }
     }
   }
