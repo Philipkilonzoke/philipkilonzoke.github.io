@@ -159,3 +159,16 @@ To add or edit channels:
 ## License
 
 All rights reserved © 2025 Brightlens News
+
+## AI Panel LLM Endpoint (optional)
+
+To upgrade summaries with an LLM and improve reliability/speed:
+
+- Cloudflare Workers:
+  - Deploy `server/brightlens-llm-worker.js` as a Worker
+  - Set secret env var `HF_TOKEN` (Hugging Face Inference API token)
+  - Note the worker URL, e.g. `https://your-worker.your-domain.workers.dev`
+- Configure the client:
+  - Set `window.BL_LLM_ENDPOINT` at runtime (e.g., in `js/ai-config.js`) to the worker base URL (no trailing slash)
+
+The AI panel will use the endpoint to upgrade highlights when available and fall back to local extractive summaries on timeout or error.
