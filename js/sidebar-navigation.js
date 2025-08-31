@@ -359,7 +359,9 @@ class SidebarNavigation {
             ]);
             const excluded = new Set(['sports','health','lifestyle','technology','latest','world','entertainment','kenya']);
             const slug = this.currentPage;
-            if (!allowed.has(slug) || excluded.has(slug)) return;
+            // Enable for new regions as well
+            const regionAllowed = new Set(['europe','north-america','latin-america','asia-pacific','mena']);
+            if (!(allowed.has(slug) || regionAllowed.has(slug)) || excluded.has(slug)) return;
             const already = document.querySelector('script[src*="/js/brightlens-ai.js"]');
             if (already) return;
             const s = document.createElement('script');

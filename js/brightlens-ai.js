@@ -437,11 +437,12 @@
     const title = (docTitle||'').toLowerCase();
     const slug = (pageFilename||'').replace(/\.html$/,'');
     const allowedSlugs = new Set([
-      'ai','climate','fact-check','science','cybersecurity','markets','mobility','gaming','africa','energy','spaceflight','real-estate','agriculture','personal-finance','politics','travel','startups','quantum','robotics','ar-vr','iot','biotech','defense','maritime','logistics','ecommerce','cloud','dev-open-source'
+      'ai','climate','fact-check','science','cybersecurity','markets','mobility','gaming','africa','energy','spaceflight','real-estate','agriculture','personal-finance','politics','travel','startups','quantum','robotics','ar-vr','iot','biotech','defense','maritime','logistics','ecommerce','cloud','dev-open-source',
+      'europe','north-america','latin-america','asia-pacific','mena'
     ]);
     if (allowedSlugs.has(slug)) return true;
     // Fallback to title heuristics
-    const keywords = ['ai','climate','fact','science','cyber','market','mobility','gaming','africa','energy','space','real estate','agriculture','personal finance','politics','travel','startup','quantum','robotics','ar','iot','biotech','defense','maritime','logistics','commerce','cloud','open source'];
+    const keywords = ['ai','climate','fact','science','cyber','market','mobility','gaming','africa','energy','space','real estate','agriculture','personal finance','politics','travel','startup','quantum','robotics','ar','iot','biotech','defense','maritime','logistics','commerce','cloud','open source','europe','north america','latin america','asia','pacific','mena','middle east','north africa'];
     return keywords.some(k => title.includes(k));
   }
 
