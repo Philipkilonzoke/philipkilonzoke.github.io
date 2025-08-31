@@ -248,42 +248,68 @@
           const ul = document.getElementById('ai-bullets');
           const whyEl = document.getElementById('ai-why');
           const skel = document.getElementById('ai-skeletons'); if (skel) skel.style.display='none';
-          if (ul){ ul.innerHTML = toParagraphHTML(cached.data.summary || '').split('</p>').filter(Boolean).slice(0,4).map(p=>`<li>${p.replace(/^<p>|<\/p>$/g,'')}</li>`).join(''); }
+          if (ul){ ul.innerHTML = toParagraphHTML(cached.data.summary || '').split(/<\/p>/).filter(Boolean).slice(0,4).map(p=>`<li>${p.replace(/^<p>|<\/p>$/g,'')}</li>`).join(''); }
           if (whyEl){ whyEl.innerHTML = toParagraphHTML(cached.data.summary || ''); }
           if (loader) loader.style.display='none';
         }
         return;
       }
-      // Fetch article in parallel via two strategies for robustness
-      const pAllOrigins = (async()=>{
-        try{
-          const html = await fetchArticleHTML(url);
-          const doc = new DOMParser().parseFromString(html, 'text/html');
-          return { type:'html', data: extractMain(doc) };
-        }catch(_){ return { type:'html', error:true }; }
-      })();
+      // Prefer Jina text first for reliability; parallelize with HTML proxy
       const pJina = (async()=>{
-        try{ const txt = await fetchArticleTextJina(url); return { type:'text', data: txt }; }catch(_){ return { type:'text', error:true }; }
+        try{ const txt = await fetchArticleTextJina(url); return { type:'text', data: txt }; }catch(_){ return { type:'text', error:true, data:'' }; }
+      })();
+      const pAllOrigins = (async()=>{
+        try{ const html = await fetchArticleHTML(url); const doc = new DOMParser().parseFromString(html, 'text/html'); return { type:'html', data: extractMain(doc) }; }catch(_){ return { type:'html', error:true, data:null }; }
       })();
 
-      const [r1, r2] = await Promise.all([pAllOrigins, pJina]);
-      const extracted = (r1.type==='html' && r1.data && (r1.data.text||'').length>120)
-        ? r1.data
-        : { ogTitle:'', ogImage:'', pubTime:'', html:'', text: (r2.type==='text' && !r2.error ? r2.data : '') };
+      const [rText, rHtml] = await Promise.all([pJina, pAllOrigins]);
+      const textCandidate = (rText.type==='text' && !rText.error && (rText.data||'').length > 120) ? rText.data : '';
+      const htmlCandidate = (rHtml.type==='html' && rHtml.data && (rHtml.data.text||'').length > 120) ? rHtml.data : null;
+      const baseText = textCandidate || (htmlCandidate?.text || '');
 
       // Header enrich
-      if (!opts.silent) {
+      if (!opts.silent && htmlCandidate) {
         const hero = document.getElementById('ai-hero');
-        if (extracted.ogImage && hero) try{ const u=new URL(extracted.ogImage, url); hero.src = `https://images.weserv.nl/?url=${encodeURIComponent(u.href.replace(/^https?:\/\//,''))}`; }catch(_){ /* ignore */ }
+        if (htmlCandidate.ogImage && hero) try{ const u=new URL(htmlCandidate.ogImage, url); hero.src = `https://images.weserv.nl/?url=${encodeURIComponent(u.href.replace(/^https?:\/\//,''))}`; }catch(_){ /* ignore */ }
         const timeEl = document.getElementById('ai-time');
-        if (extracted.pubTime && timeEl) timeEl.textContent = new Date(extracted.pubTime).toLocaleString();
+        if (htmlCandidate.pubTime && timeEl) timeEl.textContent = new Date(htmlCandidate.pubTime).toLocaleString();
       }
 
-      // Build highlights only
-      const baseText = extracted.text || '';
-      let summary = summarizeExtractive(baseText, 10) || baseText.slice(0, 1000);
-      const bullets = summarizeExtractive(baseText, 8).split(/(?<=[.!?])\s+(?=[A-Z0-9])/).slice(0,4);
-      const why = (summarizeExtractive(baseText, 2).split(/(?<=[.!?])\s+(?=[A-Z0-9])/)[0] || '').trim();
+      // Short/paywalled fallback
+      if (!baseText || baseText.replace(/\s+/g,' ').trim().length < 120) {
+        if (!opts.silent) {
+          const ul = document.getElementById('ai-bullets');
+          const whyEl = document.getElementById('ai-why');
+          if (ul) ul.innerHTML = '';
+          if (whyEl) whyEl.innerHTML = '<div class="loading">Open the original article for details.</div>';
+          if (loader) loader.style.display='none';
+        }
+        setCache(url, { summary: '', article: '' });
+        return;
+      }
+
+      // Build highlights with dedupe and caps
+      const clean = baseText.replace(/\s+/g,' ').trim();
+      const sentences = clean.split(/(?<=[.!?])\s+(?=[A-Z0-9])/).filter(s=>s && s.length > 20);
+      const unique = [];
+      const seen = new Set();
+      for (const s of sentences){
+        const k = s.toLowerCase().slice(0, 80);
+        if (seen.has(k)) continue; seen.add(k); unique.push(s);
+        if (unique.length >= 20) break;
+      }
+      const joined = unique.join(' ');
+      let summary = summarizeExtractive(joined, 10) || joined.slice(0, 1200);
+      const bulletsRaw = summarizeExtractive(joined, 8).split(/(?<=[.!?])\s+(?=[A-Z0-9])/);
+      const bullets = [];
+      const seenB = new Set();
+      for (const b of bulletsRaw){
+        const bt = b.trim(); if (!bt) continue;
+        const kb = bt.toLowerCase().slice(0, 80); if (seenB.has(kb)) continue; seenB.add(kb);
+        bullets.push(bt.length > 240 ? bt.slice(0, 237) + '…' : bt);
+        if (bullets.length >= 4) break;
+      }
+      const why = (summarizeExtractive(joined, 2).split(/(?<=[.!?])\s+(?=[A-Z0-9])/)[0] || '').trim();
 
       if (!opts.silent) {
         const ul = document.getElementById('ai-bullets');
@@ -294,20 +320,20 @@
         if (loader) loader.style.display='none';
       }
 
-      // Optional LLM upgrade (summary only)
+      // Optional LLM upgrade
       try{
         const endpoint = window.BL_LLM_ENDPOINT;
-        if (endpoint && baseText && baseText.length > 200) {
+        if (endpoint && joined && joined.length > 200) {
           const ctrl = new AbortController();
           const timer = setTimeout(()=>ctrl.abort(), 4000);
           const r = await fetch(`${endpoint.replace(/\/$/,'')}/summarize`, {
             method: 'POST', headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ text: baseText.slice(0, 20000), max_sentences: 10 }), signal: ctrl.signal
+            body: JSON.stringify({ text: joined.slice(0, 20000), max_sentences: 10 }), signal: ctrl.signal
           });
           clearTimeout(timer);
           if (r.ok) { const j = await r.json(); if (j?.summary) summary = j.summary; }
         }
-      }catch(_){ /* ignore */ }
+      }catch(_){ }
 
       setCache(url, { summary, article: '' });
       const badge = document.getElementById('ai-badge'); if (!opts.silent && badge) badge.textContent = `AI: ${lastMode === 'llm' ? 'LLM' : 'Local'}`;
@@ -320,8 +346,9 @@
             const ul = document.getElementById('ai-bullets');
             const whyEl = document.getElementById('ai-why');
             const skel = document.getElementById('ai-skeletons'); if (skel) skel.style.display='none';
-            if (ul){ ul.innerHTML = quick.split(/(?<=[.!?])\s+(?=[A-Z0-9])/).slice(0,4).map(x=>`<li>${escapeHTML(x)}</li>`).join(''); }
-            if (whyEl){ whyEl.innerHTML = toParagraphHTML(quick.split(/(?<=[.!?])\s+(?=[A-Z0-9])/)[0] || ''); }
+            const parts = quick.split(/(?<=[.!?])\s+(?=[A-Z0-9])/);
+            if (ul){ ul.innerHTML = parts.slice(0,4).map(x=>`<li>${escapeHTML(x)}</li>`).join(''); }
+            if (whyEl){ whyEl.innerHTML = toParagraphHTML(parts[0] || ''); }
             if (loader) loader.style.display='none';
           }
           setCache(url, { summary: quick, article: '' });
