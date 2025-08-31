@@ -320,18 +320,39 @@
         if (loader) loader.style.display='none';
       }
 
-      // Optional LLM upgrade
+      // Optional LLM upgrade (structured JSON)
       try{
         const endpoint = window.BL_LLM_ENDPOINT;
         if (endpoint && joined && joined.length > 200) {
           const ctrl = new AbortController();
           const timer = setTimeout(()=>ctrl.abort(), 4000);
-          const r = await fetch(`${endpoint.replace(/\/$/,'')}/summarize`, {
+          const r = await fetch(`${endpoint.replace(/\/$/,'')}/summarize_structured`, {
             method: 'POST', headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ text: joined.slice(0, 20000), max_sentences: 10 }), signal: ctrl.signal
+            body: JSON.stringify({ text: joined.slice(0, 20000), max_words: 180 }), signal: ctrl.signal
           });
           clearTimeout(timer);
-          if (r.ok) { const j = await r.json(); if (j?.summary) summary = j.summary; }
+          if (r.ok) {
+            const j = await r.json();
+            if (j && (j.what_happened || j.key_details || j.why_it_matters || j.context)){
+              if (!opts.silent){
+                const ul = document.getElementById('ai-bullets');
+                const whyEl = document.getElementById('ai-why');
+                const skel = document.getElementById('ai-skeletons'); if (skel) skel.style.display='none';
+                if (ul && Array.isArray(j.key_details)){
+                  ul.innerHTML = j.key_details.slice(0,6).map(x=>`<li>${escapeHTML(String(x))}</li>`).join('');
+                }
+                if (whyEl){
+                  const blocks = [];
+                  if (j.what_happened) blocks.push(toParagraphHTML(String(j.what_happened)));
+                  if (Array.isArray(j.why_it_matters)) blocks.push('<h4>Why it matters</h4>' + toParagraphHTML(j.why_it_matters.join(' ')));
+                  if (j.context) blocks.push('<h4>Context</h4>' + toParagraphHTML(String(j.context)));
+                  whyEl.innerHTML = blocks.join('');
+                }
+                if (loader) loader.style.display='none';
+              }
+              summary = [j.what_happened, (j.key_details||[]).join(' '), (j.why_it_matters||[]).join(' '), j.context].filter(Boolean).join(' ');
+            }
+          }
         }
       }catch(_){ }
 
