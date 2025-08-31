@@ -239,7 +239,7 @@
     return s.replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;','\'':'&#39;'}[c]));
   }
 
-  async function generateAndRender(url, opts = { silent: false }){
+  async function generateAndRender(url, opts = { silent: false, fallbackDesc: '' }){
     const loader = document.getElementById('ai-loader');
     try{
       const cached = getCache(url);
@@ -280,8 +280,19 @@
         if (!opts.silent) {
           const ul = document.getElementById('ai-bullets');
           const whyEl = document.getElementById('ai-why');
-          if (ul) ul.innerHTML = '';
-          if (whyEl) whyEl.innerHTML = '<div class="loading">Open the original article for details.</div>';
+          if (ul){
+            const desc = (opts.fallbackDesc || '').trim();
+            if (desc){
+              const parts = desc.split(/(?<=[.!?])\s+(?=[A-Z0-9])/).slice(0,4);
+              ul.innerHTML = parts.map(x=>`<li>${escapeHTML(x)}</li>`).join('');
+            } else {
+              ul.innerHTML = '';
+            }
+          }
+          if (whyEl) {
+            const desc = (opts.fallbackDesc || '').trim();
+            whyEl.innerHTML = desc ? toParagraphHTML(desc) : '<div class="loading">Open the original article for details.</div>';
+          }
           if (loader) loader.style.display='none';
         }
         setCache(url, { summary: '', article: '' });
@@ -379,8 +390,15 @@
       if (!opts.silent) {
         const ul = document.getElementById('ai-bullets');
         const whyEl = document.getElementById('ai-why');
-        if (ul) ul.innerHTML = '';
-        if (whyEl) whyEl.innerHTML = '<div class="loading">Open the original article for details.</div>';
+        if (ul){
+          const desc = (opts.fallbackDesc || '').trim();
+          if (desc){ const parts = desc.split(/(?<=[.!?])\s+(?=[A-Z0-9])/).slice(0,4); ul.innerHTML = parts.map(x=>`<li>${escapeHTML(x)}</li>`).join(''); }
+          else ul.innerHTML = '';
+        }
+        if (whyEl){
+          const desc = (opts.fallbackDesc || '').trim();
+          whyEl.innerHTML = desc ? toParagraphHTML(desc) : '<div class="loading">Open the original article for details.</div>';
+        }
         if (loader) loader.style.display='none';
       }
     }
@@ -441,11 +459,12 @@
       const img = card?.querySelector('.news-image img')?.getAttribute('data-src') || card?.querySelector('.news-image img')?.src || '';
       const url = link?.getAttribute('href') || link?.href || '';
       const time = card?.querySelector('.news-date')?.textContent || '';
+      const fallbackDesc = card?.querySelector('.news-description')?.textContent || '';
       currentToken += 1; const token = currentToken;
       resetPanel();
       openPanel({ title, url, image: img, category, time });
       // start generation asynchronously with request scoping
-      (async()=>{ await generateAndRender(url); if (token !== currentToken){ /* stale */ return; } })();
+      (async()=>{ await generateAndRender(url, { silent: false, fallbackDesc }); if (token !== currentToken){ /* stale */ return; } })();
     });
   }
 
