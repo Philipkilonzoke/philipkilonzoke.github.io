@@ -362,6 +362,13 @@ class SidebarNavigation {
             // Enable for new regions as well
             const regionAllowed = new Set(['europe','north-america','latin-america','asia-pacific','mena']);
             if (!(allowed.has(slug) || regionAllowed.has(slug)) || excluded.has(slug)) return;
+            const hasConfig = document.querySelector('script[src*="/js/ai-config.js"]');
+            if (!hasConfig){
+                const c = document.createElement('script');
+                c.src = '/js/ai-config.js';
+                c.defer = true;
+                document.head.appendChild(c);
+            }
             const already = document.querySelector('script[src*="/js/brightlens-ai.js"]');
             if (already) return;
             const s = document.createElement('script');
