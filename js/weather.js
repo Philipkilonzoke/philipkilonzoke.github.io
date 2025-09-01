@@ -1756,12 +1756,42 @@ class WeatherDashboard {
             return;
         }
 
-        const current = this.weatherData.current;
-        const temp = this.currentUnit === 'celsius' ? current.temperature_2m : this.celsiusToFahrenheit(current.temperature_2m);
+        const current = this.weatherData.current || {};
+        const daily = this.weatherData.daily || {};
+        const air = (this.weatherData.airQuality && this.weatherData.airQuality.current) ? this.weatherData.airQuality.current : null;
+
+        const toUnitTemp = (v)=> this.currentUnit === 'celsius' ? Number(v) : this.celsiusToFahrenheit(Number(v));
         const unit = this.currentUnit === 'celsius' ? '°C' : '°F';
-        const weatherInfo = this.weatherCodes[current.weather_code];
-        
-        const shareText = `🌤️ Weather in ${this.currentLocation.city}, ${this.currentLocation.country}: ${temp}${unit}, ${weatherInfo.description}. Check it out on Brightlens News!`;
+        const temp = Number.isFinite(current.temperature_2m) ? Math.round(toUnitTemp(current.temperature_2m)) : '--';
+        const feels = Number.isFinite(current.apparent_temperature) ? Math.round(toUnitTemp(current.apparent_temperature)) : null;
+        const humidity = Number.isFinite(current.relative_humidity_2m) ? `${current.relative_humidity_2m}%` : '--';
+        const windKmh = Number.isFinite(current.wind_speed_10m) ? `${Math.round(current.wind_speed_10m)} km/h` : '--';
+        const windDir = Number.isFinite(current.wind_direction_10m) ? this.getWindDirection(current.wind_direction_10m) : '--';
+        const gusts = Number.isFinite(current.wind_gusts_10m) ? `${Math.round(current.wind_gusts_10m)} km/h` : null;
+        const pressure = Number.isFinite(current.pressure_msl) ? `${Math.round(current.pressure_msl)} hPa` : '--';
+        const clouds = Number.isFinite(current.cloud_cover) ? `${current.cloud_cover}%` : '--';
+        const codeInfo = this.weatherCodes[current.weather_code] || { description: 'Current conditions' };
+
+        const uvMax = (daily.uv_index_max && Number.isFinite(daily.uv_index_max[0])) ? Math.round(daily.uv_index_max[0]) : null;
+        const uvText = uvMax !== null ? `${uvMax} (${this.getUVDescription(uvMax)})` : null;
+        const sunrise = (daily.sunrise && daily.sunrise[0]) ? new Date(daily.sunrise[0]) : null;
+        const sunset = (daily.sunset && daily.sunset[0]) ? new Date(daily.sunset[0]) : null;
+        const sunriseStr = sunrise ? sunrise.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : null;
+        const sunsetStr = sunset ? sunset.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : null;
+
+        const aqiVal = air ? (air.us_aqi || air.european_aqi) : null;
+        const aqiText = Number.isFinite(aqiVal) ? `${Math.round(aqiVal)} (${this.getAQIDescription(aqiVal)})` : null;
+
+        const lines = [];
+        lines.push(`🌤️ Weather for ${this.currentLocation.city}, ${this.currentLocation.country}`);
+        lines.push(`Temp: ${temp}${unit}${feels !== null ? ` (Feels ${feels}${unit})` : ''} — ${codeInfo.description}`);
+        lines.push(`Humidity: ${humidity} | Wind: ${windKmh} ${windDir}${gusts ? ` (gusts ${gusts})` : ''}`);
+        lines.push(`Pressure: ${pressure} | Cloud cover: ${clouds}`);
+        if (uvText) lines.push(`UV index (max): ${uvText}`);
+        if (aqiText) lines.push(`Air quality: ${aqiText}`);
+        if (sunriseStr || sunsetStr) lines.push(`Sunrise: ${sunriseStr || '--'} | Sunset: ${sunsetStr || '--'}`);
+
+        const shareText = lines.join('\n');
         const shareUrl = window.location.href;
 
         // If a specific platform is requested, open its URL
