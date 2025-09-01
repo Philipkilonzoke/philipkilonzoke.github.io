@@ -237,18 +237,24 @@ class SidebarNavigation {
         // Divider between the top grid and the rest
         navHTML += '<div class="sidebar-divider"></div>';
 
-        // Render remaining items in original order, excluding the ones already shown
+        // Render remaining items (from Kenyan News downward) in a two-column grid, excluding the top 4
         const excludedIds = new Set(['index','weather','latest','live-tv']);
-        navItems.forEach(item => {
-            if (item && !item.divider && !excludedIds.has(item.id)) {
+        const lowerLinks = navItems
+            .filter(item => item && !item.divider && !excludedIds.has(item.id))
+            .map(item => {
                 const isActive = this.currentPage === item.id ? 'active' : '';
-                navHTML += `
+                return `
                     <a href="${item.href}" class="sidebar-link ${isActive}" data-page="${item.id}">
                         <i class="${item.icon}"></i> ${item.text}
                     </a>
                 `;
-            }
-        });
+            }).join('');
+
+        navHTML += `
+            <div class="sidebar-lower-grid">
+                ${lowerLinks}
+            </div>
+        `;
 
         return `
             <!-- Sidebar -->
