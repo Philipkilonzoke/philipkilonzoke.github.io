@@ -255,6 +255,12 @@ class NewsAPI {
                 url += `&category=${this.mapCategoryForGNews(category)}`;
             }
 
+            // AI-specific query boost
+            if (['ai','ai-ml','ai & ml','ai and ml','artificial-intelligence'].includes((category||'').toString().toLowerCase())){
+                const aiQuery = '(AI OR "artificial intelligence" OR "machine learning" OR "deep learning" OR "neural network" OR "large language model" OR LLM OR ChatGPT OR OpenAI OR Anthropic OR "Google DeepMind")';
+                url += `&q=${encodeURIComponent(aiQuery)}`;
+            }
+
             const response = await fetch(url, {
                 method: 'GET',
                 headers: {
@@ -287,6 +293,12 @@ class NewsAPI {
                 url += `&category=${this.mapCategoryForNewsData(category)}`;
             }
 
+            // AI-specific query boost
+            if (['ai','ai-ml','ai & ml','ai and ml','artificial-intelligence'].includes((category||'').toString().toLowerCase())){
+                const aiQuery = '(AI OR "artificial intelligence" OR "machine learning" OR "deep learning" OR "neural network" OR LLM OR ChatGPT OR OpenAI OR Anthropic OR "Google DeepMind")';
+                url += `&q=${encodeURIComponent(aiQuery)}`;
+            }
+
             const response = await fetch(url);
             if (!response.ok) throw new Error(`NewsData API error: ${response.status}`);
             
@@ -311,6 +323,9 @@ class NewsAPI {
                 url += '&country=us'; // Use US for general latest news
             } else if (category === 'world') {
                 url = `https://newsapi.org/v2/everything?apiKey=${this.apiKeys.newsapi}&q=international&sortBy=publishedAt&pageSize=${Math.min(limit, 20)}`;
+            } else if (['ai','ai-ml','ai & ml','ai and ml','artificial-intelligence'].includes((category||'').toString().toLowerCase())){
+                const aiQuery = '(AI OR "artificial intelligence" OR "machine learning" OR "deep learning" OR "neural network" OR LLM OR ChatGPT OR OpenAI OR Anthropic OR "Google DeepMind")';
+                url = `https://newsapi.org/v2/everything?apiKey=${this.apiKeys.newsapi}&q=${encodeURIComponent(aiQuery)}&sortBy=publishedAt&pageSize=${Math.min(limit, 20)}`;
             } else {
                 url += `&category=${this.mapCategoryForNewsAPI(category)}`;
             }
@@ -341,6 +356,12 @@ class NewsAPI {
                 url += `&categories=${this.mapCategoryForMediastack(category)}`;
             }
 
+            // AI-specific keyword filter
+            if (['ai','ai-ml','ai & ml','ai and ml','artificial-intelligence'].includes((category||'').toString().toLowerCase())){
+                const aiQuery = 'AI,artificial intelligence,machine learning,deep learning,neural network,LLM,ChatGPT,OpenAI,Anthropic,Google DeepMind';
+                url += `&keywords=${encodeURIComponent(aiQuery)}`;
+            }
+
             const response = await fetch(url);
             if (!response.ok) throw new Error(`Mediastack API error: ${response.status}`);
             
@@ -367,6 +388,12 @@ class NewsAPI {
                 url += `&category=${this.mapCategoryForCurrentsAPI(category)}`;
             }
 
+            // AI-specific keyword filter
+            if (['ai','ai-ml','ai & ml','ai and ml','artificial-intelligence'].includes((category||'').toString().toLowerCase())){
+                const aiQuery = '(AI OR "artificial intelligence" OR "machine learning" OR "deep learning" OR "neural network" OR LLM OR ChatGPT OR OpenAI OR Anthropic OR "Google DeepMind")';
+                url += `&keywords=${encodeURIComponent(aiQuery)}`;
+            }
+
             const response = await fetch(url);
             if (!response.ok) throw new Error(`CurrentsAPI error: ${response.status}`);
             
@@ -385,6 +412,9 @@ class NewsAPI {
         const mapping = {
             'entertainment': 'entertainment',
             'technology': 'technology',
+            'ai': 'technology',
+            'ai & ml': 'technology',
+            'ai and ml': 'technology',
             'business': 'business',
             'sports': 'sports',
             'health': 'health',
@@ -397,6 +427,9 @@ class NewsAPI {
         const mapping = {
             'entertainment': 'entertainment',
             'technology': 'technology',
+            'ai': 'technology',
+            'ai & ml': 'technology',
+            'ai and ml': 'technology',
             'business': 'business',
             'sports': 'sports',
             'health': 'health',
@@ -409,6 +442,9 @@ class NewsAPI {
         const mapping = {
             'entertainment': 'entertainment',
             'technology': 'technology',
+            'ai': 'technology',
+            'ai & ml': 'technology',
+            'ai and ml': 'technology',
             'business': 'business',
             'sports': 'sports',
             'health': 'health',
@@ -421,6 +457,9 @@ class NewsAPI {
         const mapping = {
             'entertainment': 'entertainment',
             'technology': 'technology',
+            'ai': 'technology',
+            'ai & ml': 'technology',
+            'ai and ml': 'technology',
             'business': 'business',
             'sports': 'sports',
             'health': 'health',
@@ -433,6 +472,9 @@ class NewsAPI {
         const mapping = {
             'entertainment': 'entertainment',
             'technology': 'technology',
+            'ai': 'technology',
+            'ai & ml': 'technology',
+            'ai and ml': 'technology',
             'business': 'business',
             'sports': 'sports',
             'health': 'health',
@@ -1041,6 +1083,7 @@ class NewsAPI {
             'world': 'World News',
             'entertainment': 'Entertainment',
             'technology': 'Technology',
+            'ai': 'AI & Machine Learning',
             'business': 'Business',
             'sports': 'Sports',
             'health': 'Health',
@@ -1056,7 +1099,7 @@ class NewsAPI {
      */
     getSampleArticles(category, source = 'News API') {
         // Return empty arrays for Kenya, sports, health, and technology categories to ensure only real-time news
-        if (category === 'kenya' || category === 'sports' || category === 'health' || category === 'technology') {
+        if (category === 'kenya' || category === 'sports' || category === 'health' || category === 'technology' || category === 'ai') {
             return [];
         }
 
@@ -1071,6 +1114,8 @@ class NewsAPI {
                 case 'entertainment':
                     return extendedDB.getExtendedEntertainmentNews(source);
                 case 'technology':
+                    return extendedDB.getExtendedTechnologyNews(source);
+                case 'ai':
                     return extendedDB.getExtendedTechnologyNews(source);
                 case 'business':
                     return extendedDB.getExtendedBusinessNews(source);
