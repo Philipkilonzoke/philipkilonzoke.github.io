@@ -194,7 +194,7 @@ class SidebarNavigation {
             { href: 'north-america.html', icon: 'fas fa-flag-usa', text: 'North America', id: 'north-america' },
             { href: 'latin-america.html', icon: 'fas fa-earth-americas', text: 'Latin America', id: 'latin-america' },
             { href: 'asia-pacific.html', icon: 'fas fa-earth-asia', text: 'Asia–Pacific', id: 'asia-pacific' },
-            { href: 'mena.html', icon: 'fas fa-globe', text: 'MENA', id: 'mena' },
+            { href: 'mena.html', icon: 'fas fa-globe', text: 'Middle East & North Africa', id: 'mena' },
             // Divider
             { divider: true }
         ];
