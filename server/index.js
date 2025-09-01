@@ -1,6 +1,8 @@
 const express = require('express');
 const morgan = require('morgan');
 const fetch = require('node-fetch');
+const { JSDOM } = require('jsdom');
+const { Readability } = require('@mozilla/readability');
 const cors = require('cors');
 
 const app = express();
@@ -68,6 +70,46 @@ async function ytGetLatestVideo(channelId) {
 
 app.get('/api/health', (_req, res) => {
   res.json({ ok: true });
+});
+
+// Simple Readability proxy (fast, no headless browser) with safeguards
+app.get('/api/extract', async (req, res) => {
+  try {
+    const url = String(req.query.url || '').trim();
+    const token = String(req.headers['x-bl-token'] || '');
+    if (!url) return res.status(400).json({ error: 'url required' });
+    // Basic allowlist: only http(s)
+    if (!/^https?:\/\//i.test(url)) return res.status(400).json({ error: 'invalid url' });
+    // Optional lightweight auth
+    if (process.env.BL_PROXY_TOKEN && token !== process.env.BL_PROXY_TOKEN) {
+      return res.status(401).json({ error: 'unauthorized' });
+    }
+    const cacheKey = `extract:${url}`;
+    const cached = getCache(cacheKey);
+    if (cached) return res.json(cached);
+
+    const ctrl = new AbortController();
+    const timer = setTimeout(() => ctrl.abort(), 5000);
+    const r = await fetch(url, { headers: { 'User-Agent': 'BrightlensReader/1.0 (+https://philipkilonzoke.github.io)' }, signal: ctrl.signal });
+    clearTimeout(timer);
+    if (!r.ok) return res.status(502).json({ error: `fetch ${r.status}` });
+    const html = await r.text();
+    // Size guard
+    if (html.length > 1_500_000) return res.status(413).json({ error: 'page too large' });
+    const dom = new JSDOM(html, { url });
+    const reader = new Readability(dom.window.document);
+    const article = reader.parse();
+    const text = (article?.textContent || '').trim();
+    const title = (article?.title || dom.window.document.title || '').trim();
+    // hash-like fingerprint (length + a few char codes)
+    const sig = `${text.length}:${(text.charCodeAt(0)||0)}:${(text.charCodeAt(Math.floor(text.length/2))||0)}:${(text.charCodeAt(text.length-1)||0)}`;
+    const payload = { ok: true, title, text, length: text.length, sig };
+    setCache(cacheKey, payload, 12 * 60 * 60 * 1000);
+    res.json(payload);
+  } catch (e) {
+    console.error(e);
+    res.status(500).json({ ok: false, error: e.message });
+  }
 });
 
 app.get('/api/live', async (req, res) => {

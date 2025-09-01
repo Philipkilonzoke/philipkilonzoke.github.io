@@ -12,6 +12,7 @@ const urlsToCache = [
   '/js/brightlens-ai.js',
   '/js/ai-worker.js',
   '/js/ai-config.js',
+  '/js/ai-worker.js',
   '/js/push-notifications.js',
   '/js/settings.js',
   '/css/ai-panel.css',

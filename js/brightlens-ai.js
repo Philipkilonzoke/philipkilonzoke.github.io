@@ -276,10 +276,26 @@
         try{ const html = await fetchArticleHTML(url); const doc = new DOMParser().parseFromString(html, 'text/html'); return { type:'html', data: extractMain(doc) }; }catch(_){ return { type:'html', error:true, data:null }; }
       })();
 
-      const [rText, rHtml] = await Promise.all([pJina, pAllOrigins]);
+      // Optional server extract proxy
+      const pProxy = (async()=>{
+        try{
+          const base = (window.BL_EXTRACT_ENDPOINT||'').replace(/\/$/,'');
+          if (!base) return { type:'proxy', skip:true };
+          const ctrl = new AbortController();
+          const t = setTimeout(()=>ctrl.abort(), 4500);
+          const r = await fetch(`${base}/api/extract?url=${encodeURIComponent(url)}`, { headers: window.BL_EXTRACT_TOKEN ? { 'x-bl-token': window.BL_EXTRACT_TOKEN } : {}, signal: ctrl.signal });
+          clearTimeout(t);
+          if (!r.ok) return { type:'proxy', error:true };
+          const j = await r.json();
+          return { type:'proxy', data: j && j.text ? j.text : '' };
+        }catch(_){ return { type:'proxy', error:true }; }
+      })();
+
+      const [rText, rHtml, rProxy] = await Promise.all([pJina, pAllOrigins, pProxy]);
       const textCandidate = (rText.type==='text' && !rText.error && (rText.data||'').length > 120) ? rText.data : '';
       const htmlCandidate = (rHtml.type==='html' && rHtml.data && (rHtml.data.text||'').length > 120) ? rHtml.data : null;
-      const baseText = textCandidate || (htmlCandidate?.text || '');
+      const proxyText = (rProxy.type==='proxy' && !rProxy.error && !rProxy.skip && (rProxy.data||'').length>120) ? rProxy.data : '';
+      const baseText = textCandidate || proxyText || (htmlCandidate?.text || '');
 
       // Header enrich
       if (!opts.silent && htmlCandidate) {
