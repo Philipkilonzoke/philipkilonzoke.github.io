@@ -3,6 +3,67 @@
  * Common JavaScript for all category pages
  */
 
+// Lightweight image normalization and fallback helpers (safe, isolated)
+if (typeof window !== 'undefined' && typeof window.blImgErrorHandler !== 'function') {
+	(function(){
+		function toProxiedUrl(rawUrl){
+			try{
+				const u = new URL(rawUrl);
+				const withoutScheme = u.href.replace(/^https?:\/\//i, '');
+				return 'https://images.weserv.nl/?url=' + encodeURIComponent(withoutScheme);
+			}catch(_){ return rawUrl; }
+		}
+
+		function normalizeImageUrl(rawUrl){
+			if (!rawUrl || typeof rawUrl !== 'string') return '';
+			let url = rawUrl.trim();
+			if (url.startsWith('//')) url = 'https:' + url;
+			url = url.replace(/&amp;/g, '&');
+			try{
+				const u = new URL(url);
+				const host = u.hostname.replace('www.','');
+				if (host === 'images.weserv.nl' || host === 's.wordpress.com') return url;
+				return toProxiedUrl(url);
+			}catch(_){
+				if (/^[a-z0-9.-]+\//i.test(url)) return 'https://' + url;
+				return '';
+			}
+		}
+
+		function mshotForArticle(articleUrl){
+			if (!articleUrl) return '';
+			return 'https://s.wordpress.com/mshots/v1/' + encodeURIComponent(articleUrl) + '?w=1280';
+		}
+
+		window.blImgErrorHandler = function(imgEl){
+			try{
+				const step = Number(imgEl.getAttribute('data-fallback-step') || '0');
+				const original = imgEl.getAttribute('data-original') || imgEl.getAttribute('data-src') || imgEl.src;
+				const articleUrl = imgEl.getAttribute('data-article-url') || '';
+				if (step === 0 && original){
+					imgEl.setAttribute('data-fallback-step', '1');
+					imgEl.src = toProxiedUrl(original);
+					return;
+				}
+				if (step === 1 && articleUrl){
+					imgEl.setAttribute('data-fallback-step', '2');
+					imgEl.src = mshotForArticle(articleUrl);
+					return;
+				}
+				if (imgEl && imgEl.parentElement){
+					imgEl.parentElement.innerHTML = '<div class="text-placeholder">Brightlens News</div>';
+				}
+			}catch(_){
+				if (imgEl && imgEl.parentElement){
+					imgEl.parentElement.innerHTML = '<div class="text-placeholder">Brightlens News</div>';
+				}
+			}
+		};
+
+		window.__bl_imgHelpers = { normalizeImageUrl, toProxiedUrl, mshotForArticle };
+	})();
+}
+
 // Category-specific news loading
 class CategoryNews {
     constructor(category) {
@@ -253,25 +314,30 @@ class CategoryNews {
     }
 
     createArticleHTML(article) {
-        const imageUrl = article.urlToImage;
+        const helpers = (typeof window !== 'undefined' && window.__bl_imgHelpers) ? window.__bl_imgHelpers : null;
+        const normalizeImageUrl = helpers ? helpers.normalizeImageUrl : (u=>u||'');
+        const mshotForArticle = helpers ? helpers.mshotForArticle : (_=> '');
+
+        const articleUrl = article.url;
+        const rawImage = article.urlToImage;
+        let imgUrl = normalizeImageUrl(rawImage);
+        if (!imgUrl && articleUrl) imgUrl = mshotForArticle(articleUrl);
+
         const formattedDate = this.newsAPI.formatDate(article.publishedAt);
         const description = article.description || 'No description available.';
-        
-        const hasValidImage = imageUrl && 
-                             imageUrl !== 'null' && 
-                             imageUrl !== 'None' && 
-                             imageUrl !== 'undefined' &&
-                             imageUrl.startsWith('http');
-        
-        const imageSection = hasValidImage ? `
+        const boosted = (['africa','energy','spaceflight','real estate','real-estate','agriculture','personal finance','personal-finance','politics','education','humanitarian','ai & ml','ai and ml','climate','fact-check','cybersecurity','markets','mobility','gaming','science'].includes((this.category||'').toLowerCase()) || ['africa','energy','spaceflight','real-estate','personal-finance'].includes((this.category||'').toLowerCase().replace(/\s+/g,'-')));
+
+        const imageSection = imgUrl ? `
             <div class="news-image">
                 <img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZjNmNGY2Ii8+PC9zdmc+"
-                     data-src="${imageUrl}" 
-                     alt="${article.title}" 
-                     loading="lazy" decoding="async" ${(['africa','energy','spaceflight','real estate','real-estate','agriculture','personal finance','personal-finance','politics','education','humanitarian','ai & ml','ai and ml','climate','fact-check','cybersecurity','markets','mobility','gaming','science'].includes((this.category||'').toLowerCase()) || ['africa','energy','spaceflight','real-estate','personal-finance'].includes((this.category||'').toLowerCase().replace(/\s+/g,'-'))) ? 'width="600" height="400"' : ''}
+                     data-src="${imgUrl}"
+                     data-original="${rawImage || ''}"
+                     data-article-url="${articleUrl || ''}"
+                     alt="${article.title}"
+                     loading="lazy" decoding="async" ${boosted ? 'width="600" height="400"' : ''}
                      class="lazy-image"
                      referrerpolicy="no-referrer" crossorigin="anonymous"
-                     onerror="this.parentElement.innerHTML='<div class=\"text-placeholder\">Brightlens News</div>'">
+                     onerror="window.blImgErrorHandler(this)">
             </div>` : `
             <div class="text-placeholder">Brightlens News</div>`;
         
