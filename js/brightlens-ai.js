@@ -4,6 +4,8 @@
   window.__BL_AI_LOADED = true;
   const PANEL_ID = 'bl-ai-panel';
   const CACHE_PREFIX = 'bl_ai_summary_';
+  const MEM_CACHE = new Map(); // in-memory LRU-lite
+  const CACHE_VERSION = 'v2';
   let lastMode = 'local'; // 'local' | 'llm'
 
   function h(type, props = {}, children = []){
@@ -108,10 +110,22 @@
   }
 
   function getCache(url){
-    try{ const raw = localStorage.getItem(CACHE_PREFIX + url); return raw ? JSON.parse(raw) : null; }catch(_){ return null; }
+    try{
+      if (MEM_CACHE.has(url)) return MEM_CACHE.get(url);
+      const raw = localStorage.getItem(CACHE_PREFIX + CACHE_VERSION + '_' + url);
+      const j = raw ? JSON.parse(raw) : null;
+      if (j) MEM_CACHE.set(url, j);
+      return j;
+    }catch(_){ return null; }
   }
   function setCache(url, data){
-    try{ localStorage.setItem(CACHE_PREFIX + url, JSON.stringify({ ts: Date.now(), data })); }catch(_){ /* ignore */ }
+    try{
+      const j = { ts: Date.now(), data };
+      MEM_CACHE.set(url, j);
+      localStorage.setItem(CACHE_PREFIX + CACHE_VERSION + '_' + url, JSON.stringify(j));
+      // simple LRU cap
+      if (MEM_CACHE.size > 80){ MEM_CACHE.delete(MEM_CACHE.keys().next().value); }
+    }catch(_){ /* ignore */ }
   }
 
   function extractDomain(u){ try{ return new URL(u).hostname.replace(/^www\./,''); }catch(_){ return ''; } }
@@ -299,28 +313,47 @@
         return;
       }
 
-      // Build highlights with dedupe and caps
+      // Progressive summarization via Web Worker
       const clean = baseText.replace(/\s+/g,' ').trim();
-      const sentences = clean.split(/(?<=[.!?])\s+(?=[A-Z0-9])/).filter(s=>s && s.length > 20);
-      const unique = [];
-      const seen = new Set();
-      for (const s of sentences){
-        const k = s.toLowerCase().slice(0, 80);
-        if (seen.has(k)) continue; seen.add(k); unique.push(s);
-        if (unique.length >= 20) break;
+      const worker = new Worker('/js/ai-worker.js');
+      let summary = '';
+      const joined = clean;
+      const ul = document.getElementById('ai-bullets');
+      const whyEl = document.getElementById('ai-why');
+      const skel = document.getElementById('ai-skeletons');
+      worker.postMessage({ type: 'summarize', text: joined.slice(0, 25000) });
+      const workerResult = await new Promise((resolve) => {
+        const timer = setTimeout(()=>{ try{ worker.terminate(); }catch(_){ } resolve(null); }, 3000);
+        worker.onmessage = (ev)=>{ clearTimeout(timer); resolve(ev.data || null); };
+        worker.onerror = ()=>{ clearTimeout(timer); resolve(null); };
+      });
+      if (workerResult && workerResult.type === 'summary'){
+        const bullets = (workerResult.bullets||[]).slice(0,6);
+        const why = workerResult.why || '';
+        const context = workerResult.context || '';
+        if (!opts.silent){
+          if (skel) skel.style.display='none';
+          if (ul) ul.innerHTML = bullets.map(x=>`<li>${escapeHTML(x)}</li>`).join('');
+          if (whyEl) {
+            const blocks = [];
+            if (why) blocks.push(toParagraphHTML(why));
+            if (context) blocks.push('<h4>Context</h4>' + toParagraphHTML(context));
+            whyEl.innerHTML = blocks.join('');
+          }
+          if (loader) loader.style.display='none';
+        }
+        summary = [bullets.join(' '), why, context].filter(Boolean).join(' ');
+      } else {
+        // Fallback to built-in summarizer
+        let sum = summarizeExtractive(joined, 10) || joined.slice(0, 1200);
+        if (!opts.silent){
+          if (skel) skel.style.display='none';
+          if (ul){ const parts = summarizeExtractive(joined, 6).split(/(?<=[.!?])\s+(?=[A-Z0-9])/).slice(0,6); ul.innerHTML = parts.map(x=>`<li>${escapeHTML(x)}</li>`).join(''); }
+          if (whyEl){ const first = (summarizeExtractive(joined, 2).split(/(?<=[.!?])\s+(?=[A-Z0-9])/)[0]||''); whyEl.innerHTML = toParagraphHTML(first); }
+          if (loader) loader.style.display='none';
+        }
+        summary = sum;
       }
-      const joined = unique.join(' ');
-      let summary = summarizeExtractive(joined, 10) || joined.slice(0, 1200);
-      const bulletsRaw = summarizeExtractive(joined, 8).split(/(?<=[.!?])\s+(?=[A-Z0-9])/);
-      const bullets = [];
-      const seenB = new Set();
-      for (const b of bulletsRaw){
-        const bt = b.trim(); if (!bt) continue;
-        const kb = bt.toLowerCase().slice(0, 80); if (seenB.has(kb)) continue; seenB.add(kb);
-        bullets.push(bt.length > 240 ? bt.slice(0, 237) + '…' : bt);
-        if (bullets.length >= 4) break;
-      }
-      const why = (summarizeExtractive(joined, 2).split(/(?<=[.!?])\s+(?=[A-Z0-9])/)[0] || '').trim();
 
       if (!opts.silent) {
         const ul = document.getElementById('ai-bullets');
@@ -465,6 +498,13 @@
       openPanel({ title, url, image: img, category, time });
       // start generation asynchronously with request scoping
       (async()=>{ await generateAndRender(url, { silent: false, fallbackDesc }); if (token !== currentToken){ /* stale */ return; } })();
+    });
+
+    // Hover/focus prefetch and cancellation
+    grid.addEventListener('mouseover', (e)=>{
+      const link = e.target.closest('a.news-link'); if (!link) return;
+      const url = link.getAttribute('href') || link.href || ''; if (!url || getCache(url)) return;
+      prefetchSummary(url);
     });
   }
 
