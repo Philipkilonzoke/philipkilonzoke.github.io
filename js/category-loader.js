@@ -157,26 +157,47 @@
   }
 
   async function parseViaAllOrigins(url){
-    const res = await fetchWithTimeout(`https://api.allorigins.win/get?url=${encodeURIComponent(url)}`, { timeoutMs: 4000 });
-    if (!res.ok) throw new Error('proxy');
-    const data = await res.json();
-    const xml = data.contents || '';
-    const doc = new DOMParser().parseFromString(xml, 'text/xml');
-    const nodes = Array.from(doc.querySelectorAll('item, entry'));
-    return nodes.map(el => {
-      const txt = q => { const n = el.querySelector(q); return n ? (n.textContent || '').trim() : ''; };
-      let link = '';
-      const l = el.querySelector('link');
-      if (l) link = l.getAttribute('href') || (l.textContent || '').trim();
-      const guidNode = el.querySelector('guid');
-      const guid = guidNode ? (guidNode.textContent || '').trim() : '';
-      let enc = '';
-      const en = el.querySelector('enclosure'); if (en && en.getAttribute('url')) enc = en.getAttribute('url');
-      const mc = el.getElementsByTagName('media:content')[0] || el.getElementsByTagName('media\\:content')[0]; if (!enc && mc && mc.getAttribute('url')) enc = mc.getAttribute('url');
-      const mt = el.getElementsByTagName('media:thumbnail')[0] || el.getElementsByTagName('media\\:thumbnail')[0]; const thumb = (mt && mt.getAttribute('url')) || '';
-      const desc = txt('description') || txt('summary') || txt('content') || txt('content:encoded');
-      return { title: txt('title'), link, url: link, guid, description: desc, content: desc, pubDate: txt('pubDate') || txt('updated') || txt('published') || '', enclosure: { url: enc }, thumbnail: thumb };
-    });
+    // Try multiple public proxies sequentially for reliability
+    const endpoints = [
+      (u)=>`https://api.allorigins.win/get?url=${encodeURIComponent(u)}`,
+      (u)=>`https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(u)}`,
+      (u)=>`https://thingproxy.freeboard.io/fetch/${encodeURIComponent(u)}`
+    ];
+    let lastErr;
+    for (const build of endpoints){
+      try{
+        const res = await fetchWithTimeout(build(url), { timeoutMs: 5000 });
+        if (!res.ok) { lastErr = new Error('proxy '+res.status); continue; }
+        let xml = '';
+        const ct = (res.headers.get('content-type')||'').toLowerCase();
+        if (ct.includes('application/json')){
+          const data = await res.json();
+          xml = data.contents || data || '';
+          if (typeof xml !== 'string') xml = '';
+        } else {
+          xml = await res.text();
+        }
+        if (!xml) throw new Error('empty');
+        const doc = new DOMParser().parseFromString(xml, 'text/xml');
+        const nodes = Array.from(doc.querySelectorAll('item, entry'));
+        if (!nodes.length) throw new Error('noitems');
+        return nodes.map(el => {
+          const txt = q => { const n = el.querySelector(q); return n ? (n.textContent || '').trim() : ''; };
+          let link = '';
+          const l = el.querySelector('link');
+          if (l) link = l.getAttribute('href') || (l.textContent || '').trim();
+          const guidNode = el.querySelector('guid');
+          const guid = guidNode ? (guidNode.textContent || '').trim() : '';
+          let enc = '';
+          const en = el.querySelector('enclosure'); if (en && en.getAttribute('url')) enc = en.getAttribute('url');
+          const mc = el.getElementsByTagName('media:content')[0] || el.getElementsByTagName('media\\:content')[0]; if (!enc && mc && mc.getAttribute('url')) enc = mc.getAttribute('url');
+          const mt = el.getElementsByTagName('media:thumbnail')[0] || el.getElementsByTagName('media\\:thumbnail')[0]; const thumb = (mt && mt.getAttribute('url')) || '';
+          const desc = txt('description') || txt('summary') || txt('content') || txt('content:encoded');
+          return { title: txt('title'), link, url: link, guid, description: desc, content: desc, pubDate: txt('pubDate') || txt('updated') || txt('published') || '', enclosure: { url: enc }, thumbnail: thumb };
+        });
+      }catch(e){ lastErr = e; }
+    }
+    throw lastErr || new Error('proxy');
   }
 
   async function parseViaRss2Json(url){
