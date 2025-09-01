@@ -342,7 +342,7 @@ class CategoryNews {
 
         const formattedDate = this.newsAPI.formatDate(article.publishedAt);
         const description = article.description || 'No description available.';
-        const boosted = (['africa','energy','spaceflight','real estate','real-estate','agriculture','personal finance','personal-finance','politics','education','humanitarian','ai & ml','ai and ml','climate','fact-check','cybersecurity','markets','mobility','gaming','science'].includes((this.category||'').toLowerCase()) || ['africa','energy','spaceflight','real-estate','personal-finance'].includes((this.category||'').toLowerCase().replace(/\s+/g,'-')));
+        const boosted = (['africa','energy','spaceflight','real estate','real-estate','agriculture','personal finance','personal-finance','politics','education','humanitarian','ai & ml','ai and ml','climate','fact-check','cybersecurity','markets','mobility','gaming','science','europe','north america','latin america','asia pacific','mena'].includes((this.category||'').toLowerCase()) || ['africa','energy','spaceflight','real-estate','personal-finance','north-america','latin-america','asia-pacific'].includes((this.category||'').toLowerCase().replace(/\s+/g,'-')));
 
         const imageSection = imgUrl ? `
             <div class="news-image">

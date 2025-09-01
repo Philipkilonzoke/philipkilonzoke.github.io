@@ -271,7 +271,7 @@
       const hasImg = img && /^https?:\/\//.test(img);
       const safeTitle = title.replace(/'/g, "\\'");
       const sizeAttrs = boosted ? ' width="600" height="400"' : '';
-      const hiResSet = new Set(['science','africa','energy','technology','spaceflight','ai','ai & ml','quantum','robotics','ar/vr','ar-vr','iot']);
+      const hiResSet = new Set(['science','africa','energy','technology','spaceflight','ai','ai & ml','quantum','robotics','ar/vr','ar-vr','iot','europe','north-america','latin-america','asia-pacific','mena']);
       const isHiRes = hiResSet.has((category||'').toString().toLowerCase());
       const prox = hasImg ? toProxiedUrl(img) : '';
       const srcset = isHiRes && hasImg ? ` srcset="${prox}&w=400 400w, ${prox}&w=800 800w, ${prox}&w=1200 1200w" sizes="(max-width: 480px) 400px, (max-width: 768px) 800px, 1200px"` : '';
