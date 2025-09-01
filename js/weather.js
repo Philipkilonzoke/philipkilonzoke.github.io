@@ -1783,7 +1783,9 @@ class WeatherDashboard {
         const aqiText = Number.isFinite(aqiVal) ? `${Math.round(aqiVal)} (${this.getAQIDescription(aqiVal)})` : null;
 
         const lines = [];
-        lines.push(`🌤️ Weather for ${this.currentLocation.city}, ${this.currentLocation.country}`);
+        const locationName = this.currentLocation.name || this.currentLocation.city || 'Current Location';
+        const locationCountry = this.currentLocation.country || '';
+        lines.push(`🌤️ Weather for ${locationName}${locationCountry ? `, ${locationCountry}` : ''}`);
         lines.push(`Temp: ${temp}${unit}${feels !== null ? ` (Feels ${feels}${unit})` : ''} — ${codeInfo.description}`);
         lines.push(`Humidity: ${humidity} | Wind: ${windKmh} ${windDir}${gusts ? ` (gusts ${gusts})` : ''}`);
         lines.push(`Pressure: ${pressure} | Cloud cover: ${clouds}`);
