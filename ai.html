@@ -40,7 +40,9 @@
     <link rel="preload" href="css/styles.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
     <link rel="preload" href="css/themes.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
     <link rel="preload" href="/css/settings.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <link rel="preload" href="/css/ai-panel.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
     <noscript><link rel="stylesheet" href="css/styles.css"><link rel="stylesheet" href="css/themes.css"><link rel="stylesheet" href="/css/settings.css"></noscript>
+    <noscript><link rel="stylesheet" href="/css/ai-panel.css"></noscript>
     
     <!-- OneSignal SDK -->
     <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
@@ -317,15 +319,29 @@
     <div id="reading-progress" class="reading-progress"></div>
 
     <!-- JavaScript -->
-    <script src="js/news-api.js"></script>
-    <script src="js/cookie-manager.js"></script>
     <script src="js/themes.js"></script>
-    <script src="js/category-news.js"></script>
-    <script src="js/simple-features.js"></script>
+    <script src="/js/category-loader.js"></script>
+    <script src="/js/brightlens-ai.js" defer></script>
     <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            window.categoryNews = new CategoryNews('ai');
-        });
+    window.loadCategoryNews({
+      category: 'AI & ML',
+      feeds: [
+        'https://techcrunch.com/tag/artificial-intelligence/feed/',
+        'https://www.theverge.com/ai-artificial-intelligence/rss/index.xml',
+        'https://venturebeat.com/category/ai/feed/',
+        'https://openai.com/blog/rss.xml',
+        'https://blog.google/technology/ai/rss/',
+        'https://deepmind.google/atom.xml',
+        'https://www.theguardian.com/technology/artificial-intelligence/rss',
+        'https://www.wired.com/feed/tag/ai/latest'
+      ],
+      freshnessHours: 48,
+      staleCutoffHours: 336,
+      maxItems: 50,
+      cacheTtlMinutes: 60,
+      priorityCount: 5,
+      minItemsGoal: 12
+    });
     </script>
 </body>
 </html>
