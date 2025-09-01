@@ -60,6 +60,23 @@ if (typeof window !== 'undefined' && typeof window.blImgErrorHandler !== 'functi
 			}
 		};
 
+		// Reload mShots once to resolve "Generating preview" placeholder
+		window.blImgLoadHandler = function(imgEl){
+			try{
+				const src = imgEl && (imgEl.currentSrc || imgEl.src) || '';
+				if (!src || imgEl.getAttribute('data-mshot-reloaded') === '1') return;
+				if (/s\.wordpress\.com\/mshots\/v1\//i.test(src)){
+					imgEl.setAttribute('data-mshot-reloaded', '1');
+					setTimeout(()=>{
+						try{
+							const bust = (src.indexOf('?')>=0 ? '&' : '?') + 'r=' + Date.now();
+							imgEl.src = src + bust;
+						}catch(_){ /* noop */ }
+					}, 1500);
+				}
+			}catch(_){ /* noop */ }
+		};
+
 		window.__bl_imgHelpers = { normalizeImageUrl, toProxiedUrl, mshotForArticle };
 	})();
 }
@@ -337,7 +354,7 @@ class CategoryNews {
                      loading="lazy" decoding="async" ${boosted ? 'width="600" height="400"' : ''}
                      class="lazy-image"
                      referrerpolicy="no-referrer" crossorigin="anonymous"
-                     onerror="window.blImgErrorHandler(this)">
+                     onerror="window.blImgErrorHandler(this)" onload="window.blImgLoadHandler(this)">
             </div>` : `
             <div class="text-placeholder">Brightlens News</div>`;
         
