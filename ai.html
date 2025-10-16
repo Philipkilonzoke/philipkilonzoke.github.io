@@ -326,21 +326,63 @@
     window.loadCategoryNews({
       category: 'AI & ML',
       feeds: [
+        // High-yield news aggregators (Google News queries)
+        'https://news.google.com/rss/search?q=artificial+intelligence&hl=en-US&gl=US&ceid=US:en',
+        'https://news.google.com/rss/search?q=machine+learning&hl=en-US&gl=US&ceid=US:en',
+        'https://news.google.com/rss/search?q=generative+AI&hl=en-US&gl=US&ceid=US:en',
+        'https://news.google.com/rss/search?q=LLM+OR+"large+language+model"&hl=en-US&gl=US&ceid=US:en',
+        'https://news.google.com/rss/search?q=openai+OR+chatgpt&hl=en-US&gl=US&ceid=US:en',
+        'https://news.google.com/rss/search?q=deepmind&hl=en-US&gl=US&ceid=US:en',
+        'https://news.google.com/rss/search?q=nvidia+AI&hl=en-US&gl=US&ceid=US:en',
+        'https://news.google.com/rss/search?q=mlops&hl=en-US&gl=US&ceid=US:en',
+
+        // Major tech/AI outlets and official blogs
         'https://techcrunch.com/tag/artificial-intelligence/feed/',
         'https://www.theverge.com/ai-artificial-intelligence/rss/index.xml',
         'https://venturebeat.com/category/ai/feed/',
-        'https://openai.com/blog/rss.xml',
-        'https://blog.google/technology/ai/rss/',
-        'https://deepmind.google/atom.xml',
+        'https://www.wired.com/feed/tag/ai/latest',
         'https://www.theguardian.com/technology/artificial-intelligence/rss',
-        'https://www.wired.com/feed/tag/ai/latest'
+        'https://www.zdnet.com/topic/ai/rss.xml',
+        'https://www.ft.com/artificial-intelligence?format=rss',
+        'https://www.theregister.com/software/ai_ml/headlines.atom',
+
+        // Vendor and research org blogs
+        'https://openai.com/blog/rss.xml',
+        'https://deepmind.google/atom.xml',
+        'https://blog.google/technology/ai/rss/',
+        'https://blog.research.google/atom.xml',
+        'https://blogs.microsoft.com/ai/feed/',
+        'https://aws.amazon.com/blogs/machine-learning/feed/',
+        'https://cloud.google.com/blog/products/ai-machine-learning/rss',
+        'https://blogs.nvidia.com/blog/category/deep-learning-ai/feed/',
+        'https://huggingface.co/blog/feed.xml',
+
+        // Community and practitioner sources
+        'https://www.marktechpost.com/feed/',
+        'https://www.analyticsvidhya.com/blog/feed/',
+        'https://www.kdnuggets.com/feed',
+        'https://machinelearningmastery.com/blog/feed/',
+        'https://syncedreview.com/feed/',
+        'https://the-decoder.com/en/feed/',
+
+        // Research streams
+        'http://export.arxiv.org/rss/cs.AI',
+        'http://export.arxiv.org/rss/cs.LG',
+        'http://export.arxiv.org/rss/cs.CL',
+        'https://paperswithcode.com/feeds/latest',
+        'https://www.sciencedaily.com/rss/computers_math/artificial_intelligence.xml',
+        'https://www.nature.com/natmachintell.rss'
       ],
-      freshnessHours: 48,
+      // Favor recency but allow slightly larger window for breadth
+      freshnessHours: 72,
       staleCutoffHours: 336,
-      maxItems: 50,
+      // Show many items without relying on a client-side "load more"
+      maxItems: 120,
       cacheTtlMinutes: 60,
-      priorityCount: 5,
-      minItemsGoal: 12
+      // Fetch more feeds in the first wave for faster fill
+      priorityCount: 12,
+      // Ensure we render a dense grid before stopping
+      minItemsGoal: 24
     });
     </script>
 </body>
