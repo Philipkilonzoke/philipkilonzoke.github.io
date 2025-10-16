@@ -19,7 +19,12 @@ class SidebarNavigation {
     }
 
     getNavigationItems() {
-        return [
+        try{
+            if (typeof window !== 'undefined' && Array.isArray(window.BL_NAV_ITEMS) && window.BL_NAV_ITEMS.length){
+                return window.BL_NAV_ITEMS;
+            }
+        }catch(_){ /* noop */ }
+        const items = [
             { 
                 href: 'index.html', 
                 icon: 'fas fa-home', 
@@ -198,6 +203,8 @@ class SidebarNavigation {
             // Divider
             { divider: true }
         ];
+        try{ if (typeof window !== 'undefined') { window.BL_NAV_ITEMS = items; } }catch(_){ /* noop */ }
+        return items;
     }
 
     createSidebarHTML() {

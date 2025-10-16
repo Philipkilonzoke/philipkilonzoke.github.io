@@ -735,20 +735,8 @@
                     <h1><i class="fas fa-newspaper"></i> Brightlens News</h1>
                 </div>
                 <nav class="nav">
-                    <div class="nav-links">
-                        <a href="/" class="nav-link active">Home</a>
-                        <a href="/latest" class="nav-link">Breaking</a>
-                        <a href="/kenya" class="nav-link">Kenya</a>
-                        <a href="/world" class="nav-link">World</a>
-                        <a href="/entertainment" class="nav-link">Entertainment</a>
-                        <a href="/technology" class="nav-link">Technology</a>
-                        <a href="/business" class="nav-link">Business</a>
-                        <a href="/sports" class="nav-link">Sports</a>
-                        <a href="/health" class="nav-link">Health</a>
-                        <a href="/food" class="nav-link">Food</a>
-                        <a href="/crypto" class="nav-link">Crypto</a>
-                        <a href="/astronomy" class="nav-link">Astronomy</a>
-                        <a href="/weather" class="nav-link">Weather</a>
+                    <div class="nav-links" id="top-nav-links">
+                        <!-- Populated dynamically to ensure all categories show on desktop -->
                     </div>
                     <div class="nav-controls">
                         <button id="theme-toggle" class="theme-toggle" title="Change Theme">
@@ -1313,6 +1301,20 @@
     <script src="js/main.js" defer></script>
     <script src="js/simple-features.js" defer></script>
     <script>
+        // Populate top navigation with full category list to avoid missing items on desktop
+        document.addEventListener('DOMContentLoaded', function(){
+          try{
+            const nav = document.getElementById('top-nav-links');
+            if (!nav) return;
+            const items = (window.sidebarNav?.getNavigationItems?.() || []).filter(i=>i && !i.divider);
+            const links = items.map(i=>{
+              const href = (i.href||'').startsWith('/') ? i.href : ('/'+i.href.replace(/\.html$/,''));
+              const active = (i.id === 'index') ? ' active' : '';
+              return `<a href="${href.replace(/\.html$/, '')}" class="nav-link${active}"><i class="${i.icon}"></i> ${i.text}</a>`;
+            }).join('');
+            nav.innerHTML = links;
+          }catch(_){ /* noop */ }
+        });
         // Homepage specific JavaScript - Safe and Simple Features
         function smoothScroll(target) {
             document.querySelector(target).scrollIntoView({
