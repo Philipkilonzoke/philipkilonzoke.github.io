@@ -1315,6 +1315,78 @@
             nav.innerHTML = links;
           }catch(_){ /* noop */ }
         });
+
+        // Rebuild the categories grid below the search bar to include ALL categories
+        document.addEventListener('DOMContentLoaded', function(){
+          try{
+            const grid = document.querySelector('.categories-grid');
+            if (!grid) return;
+            const items = (window.sidebarNav?.getNavigationItems?.() || []).filter(i=>i && !i.divider && i.id !== 'index');
+            const descriptions = {
+              'latest':'Latest breaking stories and urgent updates',
+              'kenya':'Local news, politics, and developments from across Kenya',
+              'world':'International news and global events',
+              'technology':'Tech innovations, gadgets, and digital trends',
+              'business':'Markets, economy, and business developments',
+              'sports':'Scores, highlights, and sports updates',
+              'entertainment':'Movies, TV, celebrity news, and culture',
+              'health':'Medical breakthroughs and wellness tips',
+              'weather':'Forecasts, climate, and meteorological updates',
+              'live-tv':'Watch live news broadcasts',
+              'lifestyle':'Lifestyle trends and personal development',
+              'food':'Delicious recipes and cooking tips',
+              'crypto':'Live prices and blockchain news',
+              'astronomy':'Space news: planets, stars, and missions',
+              'aviation':'Live flight data and aviation news',
+              'science':'Research breakthroughs and discoveries',
+              'cybersecurity':'Threats, breaches, and advisories',
+              'markets':'Market moves and central bank updates',
+              'mobility':'EVs, transit, and autonomy trends',
+              'gaming':'Industry news, updates, and esports',
+              'africa':'Headlines and analysis from Africa',
+              'ai':'AI breakthroughs, research, and tools',
+              'climate':'Climate science, policy, and adaptation',
+              'fact-check':'Verified claims and debunks',
+              'energy':'Energy policy, power, and renewables',
+              'spaceflight':'Launches, missions, and space industry',
+              'real-estate':'Housing markets and property trends',
+              'agriculture':'Food systems and agri-tech',
+              'personal-finance':'Money, savings, and investing',
+              'politics':'Elections, policy, and governance',
+              'travel':'Destinations, tips, and advisories',
+              'startups':'Funding rounds and startup news',
+              'quantum':'Quantum computing and research',
+              'robotics':'Automation and robotics industry',
+              'ar-vr':'Augmented and virtual reality',
+              'iot':'Smart home and IoT devices',
+              'biotech':'Biotech research and industry',
+              'defense':'Defense industry and geopolitics',
+              'maritime':'Shipping and marine news',
+              'logistics':'Supply chains and logistics',
+              'ecommerce':'E‑commerce platforms and retail',
+              'cloud':'Cloud & SaaS engineering and business',
+              'dev-open-source':'Developer & open source updates',
+              'europe':'Regional news: Europe',
+              'north-america':'Regional news: North America',
+              'latin-america':'Regional news: Latin America',
+              'asia-pacific':'Regional news: Asia–Pacific',
+              'mena':'Regional news: Middle East & North Africa'
+            };
+            const cards = items.map(i=>{
+              const href = (i.href||'').replace(/\.html$/,'');
+              const url = href.startsWith('/') ? href : ('/'+href);
+              const desc = descriptions[i.id] || 'Latest updates and stories';
+              return `
+                <a href="${url}" class="category-card">
+                  <div class="category-icon"><i class="${i.icon}"></i></div>
+                  <h3 class="category-name">${i.text}</h3>
+                  <p class="category-description">${desc}</p>
+                </a>
+              `;
+            }).join('');
+            grid.innerHTML = cards;
+          }catch(_){ /* noop */ }
+        });
         // Homepage specific JavaScript - Safe and Simple Features
         function smoothScroll(target) {
             document.querySelector(target).scrollIntoView({

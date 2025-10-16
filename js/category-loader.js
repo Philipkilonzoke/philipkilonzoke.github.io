@@ -324,8 +324,67 @@
 
     if (more) more.style.display = (items.length > maxItems) ? 'block' : 'none';
     lazyLoad();
+    // For AI & ML: proactively replace mShots placeholders with real og:image when possible
+    try{
+      const cat = (category||'').toString().toLowerCase();
+      const isAiMlCat = (cat === 'ai & ml') || (cat === 'ai and ml') || (cat === 'ai');
+      if (isAiMlCat && grid) {
+        const idle = window.requestIdleCallback || function(fn){ return setTimeout(fn, 400); };
+        idle(()=> enrichAiMlImages(grid));
+      }
+    }catch(_){ /* noop */ }
     // Do not hide the full-page splash here; it should hide only after the
     // first successful NETWORK render (or on fallback/error paths).
+  }
+
+  // Replace mShots preview with page og:image/twitter:image where available (AI & ML only)
+  async function enrichAiMlImages(rootEl){
+    try{
+      const imgs = Array.from(rootEl.querySelectorAll('.news-image img'));
+      const targets = imgs.filter(img => /s\.wordpress\.com\/mshots\/v1\//i.test(img.getAttribute('data-src') || img.src || ''))
+                          .filter(img => !img.getAttribute('data-enriched'))
+                          .slice(0, 24);
+      if (!targets.length) return;
+      const concurrency = 4; let cursor = 0;
+      async function worker(){
+        while (cursor < targets.length){
+          const img = targets[cursor++];
+          try{ await tryReplaceWithOgImage(img); }catch(_){ /* ignore */ }
+        }
+      }
+      await Promise.all(Array.from({length: Math.min(concurrency, targets.length)}, ()=> worker()));
+    }catch(_){ /* noop */ }
+  }
+
+  async function tryReplaceWithOgImage(imgEl){
+    const articleUrl = imgEl.getAttribute('data-article-url') || '';
+    if (!articleUrl) return;
+    try{
+      const prox = `https://api.allorigins.win/get?url=${encodeURIComponent(articleUrl)}`;
+      const res = await fetchWithTimeout(prox, { timeoutMs: 4500 });
+      if (!res.ok) return;
+      let html = '';
+      const ct = (res.headers.get('content-type')||'').toLowerCase();
+      if (ct.includes('application/json')){
+        const j = await res.json();
+        html = (j && j.contents) || '';
+      } else {
+        html = await res.text();
+      }
+      if (!html) return;
+      const doc = new DOMParser().parseFromString(html, 'text/html');
+      const og = doc.querySelector('meta[property="og:image"][content], meta[name="twitter:image"][content]');
+      const raw = og && (og.getAttribute('content') || '').trim();
+      if (!raw) return;
+      const normalized = normalizeImageUrl(raw);
+      if (!normalized) return;
+      imgEl.setAttribute('data-enriched', '1');
+      if (imgEl.classList.contains('lazy-image')){
+        imgEl.setAttribute('data-src', normalized);
+      } else {
+        imgEl.src = normalized;
+      }
+    }catch(_){ /* noop */ }
   }
 
   function showError(){
