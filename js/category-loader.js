@@ -51,6 +51,28 @@
     return 'https://s.wordpress.com/mshots/v1/' + encodeURIComponent(articleUrl) + '?w=1920';
   }
 
+  // Lightweight fetch of og:image/twitter:image from an article page via public proxy
+  async function fetchOgImageForArticle(articleUrl){
+    try{
+      const prox = `https://api.allorigins.win/get?url=${encodeURIComponent(articleUrl)}`;
+      const res = await fetchWithTimeout(prox, { timeoutMs: 4500 });
+      if (!res.ok) return '';
+      let html = '';
+      const ct = (res.headers.get('content-type')||'').toLowerCase();
+      if (ct.includes('application/json')){
+        const j = await res.json();
+        html = (j && (j.contents || '')) || '';
+      } else {
+        html = await res.text();
+      }
+      if (!html) return '';
+      const doc = new DOMParser().parseFromString(html, 'text/html');
+      const meta = doc.querySelector('meta[property="og:image"][content], meta[name="twitter:image"][content]');
+      const raw = meta && (meta.getAttribute('content') || '').trim();
+      return normalizeImageUrl(raw || '');
+    }catch(_){ return ''; }
+  }
+
   // Global, resilient onerror handler that attempts proxy and then page screenshot
   window.blImgErrorHandler = function(imgEl){
     try{
@@ -66,8 +88,26 @@
       }
 
       if (step === 1 && articleUrl){
-        // Try mshots screenshot of the article page
+        // Try to resolve a real og:image from the article page
         imgEl.setAttribute('data-fallback-step', '2');
+        (async()=>{
+          try{
+            const og = await fetchOgImageForArticle(articleUrl);
+            if (og){ imgEl.src = og; return; }
+            // If no og image found, fallback to mShots
+            imgEl.setAttribute('data-fallback-step', '3');
+            imgEl.src = mshotForArticle(articleUrl);
+          }catch(_){
+            imgEl.setAttribute('data-fallback-step', '3');
+            imgEl.src = mshotForArticle(articleUrl);
+          }
+        })();
+        return;
+      }
+
+      if (step === 2 && articleUrl){
+        // Already tried og:image; now try mshots
+        imgEl.setAttribute('data-fallback-step', '3');
         imgEl.src = mshotForArticle(articleUrl);
         return;
       }
@@ -83,19 +123,20 @@
     }
   };
 
-  // Onload handler: if mShots placeholder likely returned, refresh once to fetch real screenshot
+  // Onload handler: if mShots placeholder likely returned, refresh a couple of times to fetch real screenshot
   window.blImgLoadHandler = function(imgEl){
     try{
       const src = imgEl && imgEl.currentSrc || imgEl && imgEl.src || '';
-      if (!src || imgEl.getAttribute('data-mshot-reloaded') === '1') return;
+      const reloads = Number(imgEl.getAttribute('data-mshot-reloaded') || '0');
+      if (!src || reloads >= 2) return;
       if (/s\.wordpress\.com\/mshots\/v1\//i.test(src)){
-        imgEl.setAttribute('data-mshot-reloaded', '1');
+        imgEl.setAttribute('data-mshot-reloaded', String(reloads + 1));
         setTimeout(()=>{
           try{
             const bust = (src.indexOf('?')>=0 ? '&' : '?') + 'r=' + Date.now();
             imgEl.src = src + bust;
           }catch(_){ /* noop */ }
-        }, 1500);
+        }, 1200 + reloads * 600);
       }
     }catch(_){ /* noop */ }
   };
